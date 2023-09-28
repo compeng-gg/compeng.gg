@@ -4,12 +4,11 @@ html, body, div#logo {
   height: 100%;
 }
 
-div#logo {
+#logo {
   display: grid;
   place-items: center;
 }
 
-img#logo {
+#logo img {
   width: 50%;
 }
-
