@@ -4,25 +4,96 @@
     <title>CompEng.gg</title>
     <meta name="description" content="A site for Computer Engineers.">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/png" href="{% static "img/icon.png" %}">
     <style>
       html, body, div#logo {
         background-color: black;
         margin: 0;
-        height: 100%;
       }
-
       #logo {
         display: grid;
         place-items: center;
       }
       #logo img {
-        width: 50%;
+        padding : 16px;
+        width: 600px;
+      }
+      body, h1, h2, h3, h4, h5, h6 {
+        font-family: Inter, sans-serif;
+        font-size: 16px;
+      }
+      li a {
+        display: block;
+        color: white;
+        text-align: center;
+        padding: 14px 16px;
+        text-decoration: none;
+      }
+      li a:hover {
+        background-color: #111;
+      }
+      nav {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        background-color: #333;
+      }
+      ul {
+        list-style-type: none;
+        margin: 0;
+        padding: 0;
+        width: 900px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      li {
+        float: left;
+      }
+      li a {
+        height: 20px;
+      }
+      #content {
+        width: 900px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      p {
+        color: white;
+        padding-left: 28px;
+        width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      li a img {
+        padding-top: 2px;
       }
     </style>
   </head>
   <body>
+    <nav>
+      <ul>
+        <li>
+          <a href="/">
+            <img src="{% static "img/icon.svg" %}" alt="CompEng.gg"
+                 width="100%" height="16px">
+          </a>
+        </li>
+      </ul>
+    </nav>
+
     <div id="logo">
       <img src="{% static "img/logo.svg" %}" alt="CompEng.gg">
+    </div>
+
+    <div id="content">
+      <p>
+Welcome to CompEng.gg! This future platform plans to offer straightforward
+learning tools for anyone diving into computer engineering. Whether you are a
+student, a working professional, or a teacher, you’ll find resources here that
+simplify complex concepts and guide you through the learning process.
+We make computer engineering approachable and understandable for
+everyone.
+      </p>
     </div>
   </body>
 </html>
