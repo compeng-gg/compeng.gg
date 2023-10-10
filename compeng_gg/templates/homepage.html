@@ -6,6 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" type="image/png" href="{% static "img/icon.png" %}">
     <style>
+       * {
+         box-sizing: border-box;
+      }
       html, body, div#logo {
         background-color: black;
         margin: 0;
@@ -16,7 +19,7 @@
       }
       #logo img {
         padding : 16px;
-        width: 600px;
+        max-width: 600px;
       }
       body, h1, h2, h3, h4, h5, h6 {
         font-family: Inter, sans-serif;
@@ -36,13 +39,14 @@
         margin: 0;
         padding: 0;
         overflow: hidden;
+        height: 48px;
         background-color: #333;
       }
-      ul {
+      nav ul {
         list-style-type: none;
         margin: 0;
         padding: 0;
-        width: 900px;
+        width: 100%;
         margin-left: auto;
         margin-right: auto;
       }
@@ -50,22 +54,30 @@
         float: left;
       }
       li a {
-        height: 20px;
+        height: 48px;
       }
       #content {
-        width: 900px;
+        width: 100%;
         margin-left: auto;
         margin-right: auto;
       }
       p {
         color: white;
-        padding-left: 28px;
-        width: 600px;
+        padding: 14px;
+        max-width: 600px;
         margin-left: auto;
         margin-right: auto;
       }
       li a img {
         padding-top: 2px;
+      }
+      @media only screen and (min-width: 900px) {
+        nav ul {
+          width: 900px;
+        }
+        #content {
+          width: 900px;
+        }
       }
     </style>
   </head>
@@ -82,7 +94,7 @@
     </nav>
 
     <div id="logo">
-      <img src="{% static "img/logo.svg" %}" alt="CompEng.gg">
+      <img src="{% static "img/logo.svg" %}" alt="CompEng.gg" width="100%">
     </div>
 
     <div id="content">
