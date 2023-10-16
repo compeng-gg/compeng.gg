@@ -1,0 +1,100 @@
+{% load static %}<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>CompEng.gg</title>
+    <meta name="description" content="A site for Computer Engineers.">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/png" href="{% static "img/icon.png" %}">
+    <style>
+       * {
+         box-sizing: border-box;
+      }
+      html, body, div#logo {
+        background-color: black;
+        margin: 0;
+        line-height: 1.5;
+      }
+      #logo {
+        display: grid;
+        place-items: center;
+      }
+      #logo img {
+        padding : 16px;
+        max-width: 600px;
+      }
+      body, h1, h2, h3, h4, h5, h6 {
+        font-family: Inter, sans-serif;
+        font-size: 16px;
+        color: white;
+      }
+      li a {
+        display: block;
+        color: white;
+        text-align: center;
+        padding: 14px 16px;
+        text-decoration: none;
+      }
+      li a:hover {
+        background-color: #111;
+      }
+      nav {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        height: 48px;
+        background-color: #333;
+      }
+      nav ul {
+        list-style-type: none;
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      li {
+        float: left;
+      }
+      li a {
+        height: 48px;
+      }
+      #content {
+        width: 100%;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      h1, h2, h3, h4, h5, h6, p {
+        padding: 14px;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      li a img {
+        padding-top: 2px;
+      }
+      @media only screen and (min-width: 900px) {
+        nav ul {
+          width: 900px;
+        }
+        #content {
+          width: 900px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <nav>
+      <ul>
+        <li>
+          <a href="/">
+            <img src="{% static "img/icon.svg" %}" alt="CompEng.gg"
+                 width="100%" height="16px">
+          </a>
+        </li>
+        <li><a href="{% url 'docs:index' %}">Docs</a></li>
+      </ul>
+    </nav>
+
+    {% block content %}{% endblock %}
+  </body>
+</html>
