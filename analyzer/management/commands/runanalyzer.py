@@ -11,17 +11,8 @@ from analyzer.socket import HOST, PORT
 
 class Command(BaseCommand):
 
-    def run(self, conn):
-        with conn:
-            data = conn.recv(8)
-            task_id = int.from_bytes(data)
-
-        task = Task.objects.get(id=task_id)
-        task.status = Task.Status.QUEUED
-        task.save()
-        self.stdout.write(f'{task} queued')
-
-        p = subprocess.run(['python', 'manage.py', 'runtask', str(task_id)],
+    def run_task(self, task):
+        p = subprocess.run(['python', 'manage.py', 'runtask', str(task.id)],
                            cwd=settings.BASE_DIR)
         if p.returncode == 0:
             task.status = Task.Status.SUCCESS
@@ -31,6 +22,17 @@ class Command(BaseCommand):
             self.stdout.write(f'{task} failure')
         task.save()
 
+    def run(self, conn):
+        with conn:
+            data = conn.recv(8)
+            task_id = int.from_bytes(data)
+
+        try:
+            task = Task.objects.get(id=task_id)
+        except Task.DoesNotExist:
+            return
+        self.run_task(task)
+
     def _socket_listen(self):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.bind((HOST, PORT))
@@ -38,6 +40,10 @@ class Command(BaseCommand):
         return s
 
     def handle(self, *args, **options):
+        for task in Task.objects.filter(status=Task.Status.QUEUED):
+            t = threading.Thread(target=Command.run_task, args=(self, task))
+            t.start()
+
         try:
             s = self._socket_listen()
             self.stdout.write(self.style.SUCCESS(f'Listening on {HOST}:{PORT}'))
@@ -48,5 +54,5 @@ class Command(BaseCommand):
             conn, addr = s.accept()
             t = threading.Thread(target=Command.run, args=(self, conn))
             t.start()
-        
+
         s.close()
