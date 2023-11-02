@@ -1,10 +1,12 @@
 from django.conf import settings
 from django.http import HttpResponse
 from django.shortcuts import render
+from django.views.decorators.csrf import csrf_exempt
 
 from . import models
 from .socket import send_task
 
+@csrf_exempt
 def webhook(request):
     if request.method != "POST":
         return HttpResponse(status=401)
