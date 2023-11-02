@@ -10,6 +10,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
+import os
+
 from pathlib import Path
 
 PROJECT_DIR = Path(__file__).resolve().parent
@@ -35,6 +37,7 @@ ALLOWED_HOSTS = []
 STATICFILES_DIRS = [str(PROJECT_DIR.joinpath("static"))]
 
 INSTALLED_APPS = [
+    'analyzer.apps.AnalyzerConfig',
     'docs.apps.DocsConfig',
 
     'django.contrib.admin',
@@ -127,3 +130,5 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+ANALYZER_SECRET_TOKEN = os.environ.setdefault('ANALYZER_SECRET_TOKEN', '')

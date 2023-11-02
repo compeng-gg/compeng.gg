@@ -1,5 +1,23 @@
 {% extends "base.html" %}
 
+{% block header %}
+<style>
+  .c-code {
+    font-family: monospace;
+  }
+  .keyword {
+    color: #007FA3;
+    font-weight: 600;
+  }
+  .void {
+    color: #AB1368;
+  }
+  .function {
+    color: #8DBF2E;
+  }
+</style>
+{% endblock %}
+
 {% block content %}
     <div id="content">
       <h1>Docs</h1>
@@ -17,5 +35,11 @@
       <h3><code>calloc</code></h3>
 
       <h3><code>free</code></h3>
+
+      <p class="c-code">
+          <span class="keyword">int</span> <span class="function">main</span>(<span class="void">void</span>) {
+            <span class="keyword">return</span> 0;
+          }
+      </p>
     </div>
 {% endblock %}

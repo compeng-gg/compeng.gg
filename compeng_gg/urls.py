@@ -23,6 +23,7 @@ urlpatterns = [
          name="homepage"),
     path("robots.txt", TemplateView.as_view(template_name="robots.txt",
                                             content_type="text/plain")),
+    path("analyzer/", include("analyzer.urls")),
     path("docs/", include("docs.urls")),
     path("admin/", admin.site.urls),
 ]
