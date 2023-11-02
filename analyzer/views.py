@@ -1,3 +1,5 @@
+import json
+
 from django.conf import settings
 from django.http import HttpResponse
 from django.shortcuts import render
@@ -17,15 +19,24 @@ def webhook(request):
     if request.headers['X-Gitlab-Token'] != settings.ANALYZER_SECRET_TOKEN:
         return HttpResponse(status=401)
 
-    print("Headers:", request.headers)
+    if request.headers['Content-Type'] != 'application/json':
+        return HttpResponse(status=400)
 
-    #task = models.Task.objects.create(
-    #    project_id=1,
-    #    status=models.Task.Status.QUEUED
-    #)
-    #try:
-    #    send_task(task)
-    #except:
-    #    pass
+    try:
+        data = json.load(request)
+    except:
+        return HttpResponse(status=400)
+
+    task = models.Task.objects.create(
+        project_id=data['project_id'],
+        ref=data['ref'],
+        before=data['before'],
+        after=data['after'],
+        status=models.Task.Status.QUEUED
+    )
+    try:
+        send_task(task)
+    except:
+        pass
 
     return HttpResponse(status=200)
