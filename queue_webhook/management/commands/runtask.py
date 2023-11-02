@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 
-from analyzer.models import Task
+from queue_webhook.models import Task
 
 class Command(BaseCommand):
 

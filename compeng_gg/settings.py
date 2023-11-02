@@ -37,8 +37,8 @@ ALLOWED_HOSTS = []
 STATICFILES_DIRS = [str(PROJECT_DIR.joinpath("static"))]
 
 INSTALLED_APPS = [
-    'analyzer.apps.AnalyzerConfig',
     'docs.apps.DocsConfig',
+    'queue_webhook.apps.QueueWebhookConfig',
 
     'django.contrib.admin',
     'django.contrib.auth',

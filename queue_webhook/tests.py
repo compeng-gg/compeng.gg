@@ -8,19 +8,19 @@ class AnalyzerTestCase(TestCase):
         pass
 
     def test_webhook_unauthorized(self):
-        response = self.client.post(reverse("analyzer:webhook"))
+        response = self.client.post(reverse("queue:webhook"))
         self.assertEqual(response.status_code, 401)
 
     def test_webhook_wrong_token(self):
         response = self.client.post(
-            reverse("analyzer:webhook"),
+            reverse("queue:webhook"),
             headers={'X-Gitlab-Token': 'invalid'}
         )
         self.assertEqual(response.status_code, 401)
 
     def test_webhook(self):
         response = self.client.post(
-            reverse("analyzer:webhook"),
+            reverse("queue:webhook"),
             {
                 'object_kind': 'push',
                 'event_name': 'push',

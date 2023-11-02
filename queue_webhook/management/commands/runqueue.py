@@ -6,8 +6,8 @@ import socket
 import subprocess
 import threading
 
-from analyzer.models import Task
-from analyzer.socket import HOST, PORT
+from queue_webhook.models import Task
+from queue_webhook.socket import HOST, PORT
 
 class Command(BaseCommand):
 
