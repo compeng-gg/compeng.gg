@@ -16,7 +16,7 @@ def webhook(request):
     if not 'X-Gitlab-Token' in request.headers:
         return HttpResponse(status=401)
 
-    if request.headers['X-Gitlab-Token'] != settings.ANALYZER_SECRET_TOKEN:
+    if request.headers['X-Gitlab-Token'] != settings.QUEUE_SECRET_TOKEN:
         return HttpResponse(status=401)
 
     if request.headers['Content-Type'] != 'application/json':
