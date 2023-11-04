@@ -71,6 +71,7 @@ class AnalyzerTestCase(TestCase):
             content_type='application/json',
             headers={
                 'X-Gitlab-Token': settings.QUEUE_SECRET_TOKEN,
+                'X-Gitlab-Event': 'Push Hook',
             },
         )
         self.assertEqual(response.status_code, 200)

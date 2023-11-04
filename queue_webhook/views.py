@@ -13,27 +13,32 @@ def webhook(request):
     if request.method != "POST":
         return HttpResponse(status=401)
 
-    if not 'X-Gitlab-Token' in request.headers:
+    if not 'X-Gitlab-Token' in request.headers \
+       or request.headers['X-Gitlab-Token'] != settings.QUEUE_SECRET_TOKEN:
         return HttpResponse(status=401)
 
-    if request.headers['X-Gitlab-Token'] != settings.QUEUE_SECRET_TOKEN:
-        return HttpResponse(status=401)
+    if not 'X-Gitlab-Event' in request.headers \
+       or request.headers['X-Gitlab-Event'] != 'Push Hook':
+        return HttpResponse(status=400)
 
     if request.headers['Content-Type'] != 'application/json':
         return HttpResponse(status=400)
 
     try:
         data = json.load(request)
+        if data['object_kind'] != 'push' or data['event_name'] != 'push':
+            return HttpResponse(status=400)
+
+        task = models.Task.objects.create(
+            project_id=data['project_id'],
+            ref=data['ref'],
+            before=data['before'],
+            after=data['after'],
+            status=models.Task.Status.QUEUED
+        )
     except:
         return HttpResponse(status=400)
 
-    task = models.Task.objects.create(
-        project_id=data['project_id'],
-        ref=data['ref'],
-        before=data['before'],
-        after=data['after'],
-        status=models.Task.Status.QUEUED
-    )
     try:
         send_task(task)
     except:
