@@ -8,13 +8,13 @@ class TaskAdmin(admin.ModelAdmin):
         (
             None,
             {
-                "fields": ["id", "status"],
+                "fields": ["id", "status", "created", "result"],
             },
         ),
         (
             "GitLab",
             {
-                "fields": ["project_id", "ref", "before", "after"],
+                "fields": ["data"],
             },
         ),
     ]

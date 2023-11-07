@@ -36,7 +36,7 @@
         font-stretch: normal;
         src: url('/static/fonts/iosevka-italic.woff2?v=27.3.4') format('woff2');
       }
-
+/*
       * {
          box-sizing: border-box;
       }
@@ -111,20 +111,45 @@
           width: 900px;
         }
       }
+  */
     </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
     {% block header %}{% endblock %}
   </head>
   <body>
-    <nav>
-      <ul>
-        <li>
-          <a href="/">
+
+    <nav class="navbar is-black">
+      <div class="container is-max-desktop">
+        <div class="navbar-brand">
+          <a class="navbar-item" href="{% url 'homepage' %}">
             <img src="{% static "img/icon.svg" %}" alt="CompEng.gg"
-                 width="100%" height="16px">
+                 width="24" height="24">
           </a>
-        </li>
-        <li><a href="{% url 'docs:index' %}">Docs</a></li>
-      </ul>
+        </div>
+
+        <div class="navbar-menu">
+          {% if request.user.is_authenticated %}
+          <div class="navbar-start">
+            <a class="navbar-item" href="{% url 'lab5' %}">
+              Lab 5
+            </a>
+          </div>
+          {% endif %}
+          <div class="navbar-end">
+            <div class="navbar-item">
+              {% if request.user.is_authenticated %}
+              <a class="button is-success is-rounded" href="{% url 'profile' request.user.username %}">
+                @{{ request.user.username }}
+              </a>
+              {% else %}
+              <a class="button is-success is-warning" href="{% url 'login' %}">
+                Log in
+              </a>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
     </nav>
 
     {% block content %}{% endblock %}

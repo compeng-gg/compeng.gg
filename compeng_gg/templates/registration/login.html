@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="section">
+  <div class="container is-max-desktop">
+    <p class="has-text-centered">
+        <a class="button is-rounded" href="{% url "auth:begin" "laforge" %}">
+            Log in with University of Toronto
+        </a>
+    </p>
+  </div>
+</section>
+{% endblock %}

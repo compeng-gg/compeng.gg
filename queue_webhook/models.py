@@ -9,10 +9,10 @@ class Task(models.Model):
         FAILURE = 4
 
     status = models.IntegerField(choices=Status.choices)
-    project_id = models.IntegerField()
-    ref = models.TextField()
-    before = models.CharField(max_length=40)
-    after = models.CharField(max_length=40)
+    created = models.DateTimeField(auto_now_add=True)
+
+    data = models.JSONField(unique=True)
+    result = models.JSONField(blank=True, null=True)
 
     def __str__(self):
         return f'Task {self.id}'

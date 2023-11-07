@@ -18,6 +18,9 @@ from django.contrib import admin
 from django.urls import include, path
 from django.views.generic import TemplateView
 
+from django.contrib.auth import views as auth_views
+from . import views
+
 urlpatterns = [
     path("", TemplateView.as_view(template_name="homepage.html"),
          name="homepage"),
@@ -25,5 +28,12 @@ urlpatterns = [
                                             content_type="text/plain")),
     path("queue/", include("queue_webhook.urls")),
     path("docs/", include("docs.urls")),
+    path("lab5/", include("lab5.urls")),
+    path('auth/', include('social_django.urls', namespace='auth')),
+
+    path('@<str:username>/', views.profile, name='profile'),
+    path("login/", auth_views.LoginView.as_view(), name='login'),
+    path("login-redirect/", views.login_redirect, name='login_redirect'),
+
     path("admin/", admin.site.urls),
 ]

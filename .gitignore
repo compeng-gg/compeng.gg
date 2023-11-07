@@ -1,5 +1,6 @@
 __pycache__/
 
+/task/
 /venv/
 /db.sqlite3
 

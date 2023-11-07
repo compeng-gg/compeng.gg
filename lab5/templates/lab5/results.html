@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="section">
+  <div class="container is-max-desktop">
+    <h1 class="title">Lab 5</h1>
+
+    {% for task in tasks %}
+    <article class="message">
+      <div class="message-header">
+        <p class="is-family-monospace">Commit {{ task.data.checkout_sha }}</p>
+      </div>
+      <div class="message-body">
+        <div class="columns">
+          <div class="column">
+            <p class="has-text-centered">
+              <strong>Base</strong>
+              <br>
+              {{ task.result.base_seconds }}
+            </p>
+          </div>
+          <div class="column">
+            <p class="has-text-centered">
+              <strong>Cores</strong>
+              <br>
+              {{ task.result.cores }}
+            </p>
+          </div>
+          <div class="column">
+            <p class="has-text-centered">
+              <strong>Valgrind</strong>
+              <br>
+              {% if task.result.valgrind %}
+              <span class="has-text-success">Passed</span>
+              {% else %}
+              <span class="has-text-danger">Failed</span>
+              {% endif %}
+            </p>
+          </div>
+        </div>
+        <div class="columns">
+          <div class="column">
+            <p class="has-text-centered">
+              <strong>V1</strong>
+              <br>
+              {{ task.result.v1_seconds }}
+            </p>
+          </div>
+          <div class="column">
+            <p class="has-text-centered">
+              <strong>V1 Performance</strong>
+              <br>
+              {% if task.result.v1_expected %}
+              <span class="has-text-success">Expected</span>
+              {% else %}
+              <span class="has-text-danger">Unexpected</span>
+              {% endif %}
+            </p>
+          </div>
+          <div class="column">
+            <p class="has-text-centered">
+              <strong>V1 Sanity Check</strong>
+              <br>
+              {% if task.result.v1_sanity %}
+              <span class="has-text-success">Passed</span>
+              {% else %}
+              <span class="has-text-danger">Failed</span>
+              {% endif %}
+            </p>
+          </div>
+        </div>
+
+        <div class="columns">
+          <div class="column">
+            <p class="has-text-centered">
+              <strong>V2</strong>
+              <br>
+              {{ task.result.v2_seconds }}
+            </p>
+          </div>
+          <div class="column">
+            <p class="has-text-centered">
+              <strong>V2 Performance</strong>
+              <br>
+              {% if task.result.v2_expected %}
+              <span class="has-text-success">Expected</span>
+              {% else %}
+              <span class="has-text-danger">Unexpected</span>
+              {% endif %}
+            </p>
+          </div>
+          <div class="column">
+            <p class="has-text-centered">
+              <strong>V2 Sanity Check</strong>
+              <br>
+              {% if task.result.v1_sanity %}
+              <span class="has-text-success">Passed</span>
+              {% else %}
+              <span class="has-text-danger">Failed</span>
+              {% endif %}
+            </p>
+          </div>
+        </div>
+      </div>
+      {% if not task.result.valgrind %}
+      <pre>{{ task.result.valgrind_log }}</pre>
+      {% endif %}
+    </article>
+    {% endfor %}
+  </div>
+</section>
+
+{% endblock %}

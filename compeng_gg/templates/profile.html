@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="section">
+  <div class="container is-max-desktop">
+    <h1 class="title">@{{ username }}</h1>
+    
+    {% if laforge_data %}
+    <article class="message">
+      <div class="message-header">
+        <p class="is-family-monospace">laforge.eecg.utoronto.ca</p>
+      </div>
+      <div class="message-body">
+        <p class="block">
+          <strong>ID</strong>
+          <br>
+          {{ laforge_data.id }}
+        </p>
+        <p class="block">
+          <strong>Username</strong>
+          <br>
+          {{ laforge_data.username }}
+        </p>
+      </div>
+    </article>
+    {% else %}
+    <p class="block has-text-centered">
+      <a class="button is-rounded" href="{% url "auth:begin" "laforge" %}">
+        Connect University of Toronto
+      </a>
+    </p>
+    {% endif %}
+
+    {% if discord_data %}
+    <article class="message">
+      <div class="message-header">
+        <p>Discord</p>
+      </div>
+      <div class="message-body">
+        <p class="block">
+          <strong>ID</strong>
+          <br>
+          {{ discord_data.id }}
+        </p>
+        <p class="block">
+          <strong>Username</strong>
+          <br>
+          {{ discord_data.username }}
+        </p>
+      </div>
+    </article>
+    {% else %}
+    <p class="block has-text-centered">
+      <a class="button is-rounded" href="{% url "auth:begin" "discord" %}">
+        Connect Discord
+      </a>
+    </p>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}
