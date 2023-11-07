@@ -3,12 +3,12 @@ from . import models
 
 @admin.register(models.Task)
 class TaskAdmin(admin.ModelAdmin):
-    readonly_fields = ('id',)
+    readonly_fields = ('id', 'created')
     fieldsets = [
         (
             None,
             {
-                "fields": ["id", "status", "created", "result"],
+                "fields": ["id", "created", "status", "result"],
             },
         ),
         (
