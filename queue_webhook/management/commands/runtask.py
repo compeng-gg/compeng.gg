@@ -112,7 +112,7 @@ class Command(BaseCommand):
             assert start == '  -' and end == 'missing'
             v2_sanity = value == '0'
         except:
-            task.result['stdout'] = p.stdout
+            task.result = {'stdout': p.stdout}
             task.save()
             exit(1)
 
