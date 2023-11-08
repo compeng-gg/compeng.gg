@@ -9,14 +9,32 @@ import threading
 from queue_webhook.models import Task
 from queue_webhook.socket import HOST, PORT
 
+current_index = 0
+current_lock = threading.Lock()
+SERVERS = [
+    ('canoe-0', threading.Lock()),
+    ('canoe-1', threading.Lock()),
+    ('canoe-2', threading.Lock()),
+    ('canoe-3', threading.Lock()),
+]
+
 class Command(BaseCommand):
 
     def run_task(self, task):
-        cmd = ['ssh', 'canoe-0', '/opt/compeng.gg/venv/bin/python', '/opt/compeng.gg/manage.py', 'runtask', str(task.id)]
-        if False:
-            cmd = ['python', 'manage.py', 'runtask', str(task.id)]
+        global current_index
+        global current_lock
+        with current_lock:
+            index = current_index
+            current_index += 1
+            if current_index >= len(SERVERS):
+                current_index = 0
 
-        p = subprocess.run(cmd, cwd=settings.BASE_DIR)
+        host, lock = SERVERS[index]
+        with lock:
+            cmd = ['ssh', host, '/opt/compeng.gg/venv/bin/python', '/opt/compeng.gg/manage.py', 'runtask', str(task.id)]
+            # cmd = ['python', 'manage.py', 'runtask', str(task.id)]
+            p = subprocess.run(cmd, cwd=settings.BASE_DIR)
+
         if p.returncode == 0:
             task.status = Task.Status.SUCCESS
             self.stdout.write(f'{task} success')
