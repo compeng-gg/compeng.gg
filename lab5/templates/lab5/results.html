@@ -11,6 +11,11 @@
         <p class="is-family-monospace">Commit {{ task.data.checkout_sha }}</p>
       </div>
       <div class="message-body">
+        {% if  task.status == task.Status.QUEUED %}
+        <p class="block">Queued.</p>
+        {% elif task.status == task.Status.IN_PROGRESS %}
+        <p class="block">In progress.</p>
+        {% elif task.status == task.Status.SUCCESS %}
         <div class="columns">
           <div class="column">
             <p class="has-text-centered">
@@ -101,10 +106,14 @@
             </p>
           </div>
         </div>
+        {% if not task.result.valgrind %}
+        <pre>{{ task.result.valgrind_log }}</pre>
+        {% endif %}
+        {% elif task.status == task.Status.FAILURE %}
+        <p class="block has-text-danger">Failure. Likely you need to remove printf. Find your stdout below.</p>
+        <pre>{{ task.result.stdout }}</pre>
+        {% endif %}
       </div>
-      {% if not task.result.valgrind %}
-      <pre>{{ task.result.valgrind_log }}</pre>
-      {% endif %}
     </article>
     {% endfor %}
   </div>

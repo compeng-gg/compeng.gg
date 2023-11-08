@@ -86,30 +86,35 @@ class Command(BaseCommand):
             'sh', '-c', 'meson setup build >/dev/null && meson compile -C build >/dev/null && build/pht-tester -t 4 -s 75000',
         ], capture_output=True, text=True, timeout=30)
 
-        lines = p.stdout.splitlines()
-        category, value, unit = lines[1].rsplit(maxsplit=2)
-        assert category == 'Hash table base:' and unit == 'usec'
-        base_value = int(value)
+        try:
+            lines = p.stdout.splitlines()
+            category, value, unit = lines[1].rsplit(maxsplit=2)
+            assert category == 'Hash table base:' and unit == 'usec'
+            base_value = int(value)
 
-        start, value, end = lines[2].rsplit(maxsplit=2)
-        assert start == '  -' and end == 'missing'
-        assert value == '0'
+            start, value, end = lines[2].rsplit(maxsplit=2)
+            assert start == '  -' and end == 'missing'
+            assert value == '0'
 
-        category, value, unit = lines[3].rsplit(maxsplit=2)
-        assert category == 'Hash table v1:' and unit == 'usec'
-        v1_value = int(value)
+            category, value, unit = lines[3].rsplit(maxsplit=2)
+            assert category == 'Hash table v1:' and unit == 'usec'
+            v1_value = int(value)
 
-        start, value, end = lines[4].rsplit(maxsplit=2)
-        assert start == '  -' and end == 'missing'
-        v1_sanity = value == '0'
+            start, value, end = lines[4].rsplit(maxsplit=2)
+            assert start == '  -' and end == 'missing'
+            v1_sanity = value == '0'
 
-        category, value, unit = lines[5].rsplit(maxsplit=2)
-        assert category == 'Hash table v2:' and unit == 'usec'
-        v2_value = int(value)
+            category, value, unit = lines[5].rsplit(maxsplit=2)
+            assert category == 'Hash table v2:' and unit == 'usec'
+            v2_value = int(value)
 
-        start, value, end = lines[6].rsplit(maxsplit=2)
-        assert start == '  -' and end == 'missing'
-        v2_sanity = value == '0'
+            start, value, end = lines[6].rsplit(maxsplit=2)
+            assert start == '  -' and end == 'missing'
+            v2_sanity = value == '0'
+        except:
+            task.result['stdout'] = p.stdout
+            task.save()
+            exit(1)
 
         p = subprocess.run([
             'docker',
