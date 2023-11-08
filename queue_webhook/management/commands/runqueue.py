@@ -12,8 +12,11 @@ from queue_webhook.socket import HOST, PORT
 class Command(BaseCommand):
 
     def run_task(self, task):
-        p = subprocess.run(['python', 'manage.py', 'runtask', str(task.id)],
-                           cwd=settings.BASE_DIR)
+        cmd = ['ssh', 'canoe-0', '/opt/compeng.gg/venv/bin/python', '/opt/compeng.gg/manage.py', 'runtask', str(task.id)]
+        if False:
+            cmd = ['python', 'manage.py', 'runtask', str(task.id)]
+
+        p = subprocess.run(cmd, cwd=settings.BASE_DIR)
         if p.returncode == 0:
             task.status = Task.Status.SUCCESS
             self.stdout.write(f'{task} success')
