@@ -35,6 +35,7 @@ class Command(BaseCommand):
             # cmd = ['python', 'manage.py', 'runtask', str(task.id)]
             p = subprocess.run(cmd, cwd=settings.BASE_DIR)
 
+        task = Task.objects.get(id=task.id)
         if p.returncode == 0:
             task.status = Task.Status.SUCCESS
             self.stdout.write(f'{task} success')
