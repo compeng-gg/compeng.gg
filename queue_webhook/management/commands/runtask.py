@@ -60,11 +60,8 @@ class Command(BaseCommand):
         api_url = backend.api_url('/api/v4/user')
 
         gitlab = GitLabAPI(backend.api_url('/api/v4'), access_token)
-        # print(gitlab.get('/user'))
         project_id = task.data['project_id']
-        project_id = 365
         checkout_sha = task.data['checkout_sha']
-        checkout_sha = '79bec042f88684421dd9a7bb62d86498c04d0c8d'
 
         v1_repo_path = pathlib.Path('pht/src/hash-table-v1.c')
         v2_repo_path = pathlib.Path('pht/src/hash-table-v2.c')
@@ -86,8 +83,8 @@ class Command(BaseCommand):
             '-w', '/workspace/pht',
             'ece344:latest',
             #'sh', '-c', 'meson setup build >/dev/null && meson compile -C build >/dev/null && build/pht-tester -t 4 -s 15000',
-            'sh', '-c', 'meson setup build >/dev/null && meson compile -C build >/dev/null && build/pht-tester -t 4 -s 150000',
-        ], capture_output=True, text=True, timeout=15)
+            'sh', '-c', 'meson setup build >/dev/null && meson compile -C build >/dev/null && build/pht-tester -t 4 -s 75000',
+        ], capture_output=True, text=True, timeout=30)
 
         lines = p.stdout.splitlines()
         category, value, unit = lines[1].rsplit(maxsplit=2)
@@ -114,10 +111,6 @@ class Command(BaseCommand):
         assert start == '  -' and end == 'missing'
         v2_sanity = value == '0'
 
-        print(p.stdout)
-        print('Got:', base_value, v1_value, v2_value)
-        print(base_value / v1_value, base_value / v2_value)
-
         p = subprocess.run([
             'docker',
             'run',
@@ -126,12 +119,15 @@ class Command(BaseCommand):
             '-w', '/workspace/pht',
             'ece344:latest',
             'sh', '-c', 'meson setup build >/dev/null && meson compile -C build >/dev/null && valgrind --error-exitcode=1 build/pht-tester -t 4 -s 10000',
-        ], capture_output=True, text=True, timeout=15)
+        ], capture_output=True, text=True, timeout=30)
 
         valgrind = p.returncode == 0
 
         v1_relative = base_value / v1_value
         v2_relative = base_value / v2_value
+
+        v1_expected = v1_relative > 0.3 and v1_relative < 0.8
+        v2_expected = v2_relative > 2 and v2_relative < 4
 
         task.result = {
             'base_value': base_value,
@@ -143,8 +139,8 @@ class Command(BaseCommand):
             'v2_seconds': f"{v2_value / 1000000:.2f} s",
             'v1_relative': v1_relative,
             'v2_relative': v2_relative,
-            'v1_expected': True,
-            'v2_expected': False,
+            'v1_expected': v1_expected,
+            'v2_expected': v2_expected,
             'v1_sanity': v1_sanity,
             'v2_sanity': v2_sanity,
             'cores': 4,
