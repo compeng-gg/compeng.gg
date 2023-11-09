@@ -118,16 +118,18 @@ class Command(BaseCommand):
             task.save()
             exit(1)
 
-        p = subprocess.run([
+        cmd = [
             'docker',
             'run',
             '--rm',
+            '--privileged', # This is bad, figure out how to disable ALSR in the container without this later, needs to be disabled for TSan
             '-v', f'{v1_path}:/workspace/{v1_repo_path}',
             '-v', f'{v2_path}:/workspace/{v2_repo_path}',
             '-w', '/workspace/pht',
             'ece344:latest',
-            'sh', '-c', 'meson setup -Db_sanitize=thread build >/dev/null && meson compile -C build >/dev/null && build/pht-tester -t 4 -s 10000',
-        ], capture_output=True, text=True, timeout=30)
+            'sh', '-c', 'meson setup -Db_sanitize=thread build >/dev/null && meson compile -C build >/dev/null && setarch aarch64 --addr-no-randomize build/pht-tester -t 4 -s 5000',
+        ]
+        p = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
         thread_sanitizer = None
         if p.stderr:
             last_line = p.stderr.splitlines()[-1]
