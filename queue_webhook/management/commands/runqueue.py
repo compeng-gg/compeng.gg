@@ -31,6 +31,7 @@ class Command(BaseCommand):
 
         host, lock = SERVERS[index]
         with lock:
+            self.stdout.write(f'{task} running on {host}')
             cmd = ['ssh', host, '/opt/compeng.gg/venv/bin/python', '/opt/compeng.gg/manage.py', 'runtask', str(task.id)]
             # cmd = ['python', 'manage.py', 'runtask', str(task.id)]
             p = subprocess.run(cmd, cwd=settings.BASE_DIR)
