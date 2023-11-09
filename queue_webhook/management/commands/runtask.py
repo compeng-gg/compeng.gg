@@ -75,16 +75,18 @@ class Command(BaseCommand):
         with open(v2_path, 'w') as f:
             f.write(gitlab.get_raw_file(project_id, v2_repo_path, checkout_sha))
 
-        p = subprocess.run([
+        cmd = [
             'docker',
             'run',
+            '--rm',
             '-v', f'{v1_path}:/workspace/{v1_repo_path}',
             '-v', f'{v2_path}:/workspace/{v2_repo_path}',
             '-w', '/workspace/pht',
             'ece344:latest',
             #'sh', '-c', 'meson setup build >/dev/null && meson compile -C build >/dev/null && build/pht-tester -t 4 -s 15000',
             'sh', '-c', 'meson setup build >/dev/null && meson compile -C build >/dev/null && build/pht-tester -t 4 -s 75000',
-        ], capture_output=True, text=True, timeout=30)
+        ]
+        p = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
 
         try:
             lines = p.stdout.splitlines()
@@ -111,7 +113,7 @@ class Command(BaseCommand):
             start, value, end = lines[6].rsplit(maxsplit=2)
             assert start == '  -' and end == 'missing'
             v2_sanity = value == '0'
-        except:
+        except Exception as e:
             task.result = {'stdout': p.stdout}
             task.save()
             exit(1)
@@ -119,6 +121,23 @@ class Command(BaseCommand):
         p = subprocess.run([
             'docker',
             'run',
+            '--rm',
+            '-v', f'{v1_path}:/workspace/{v1_repo_path}',
+            '-v', f'{v2_path}:/workspace/{v2_repo_path}',
+            '-w', '/workspace/pht',
+            'ece344:latest',
+            'sh', '-c', 'meson setup -Db_sanitize=thread build >/dev/null && meson compile -C build >/dev/null && build/pht-tester -t 4 -s 10000',
+        ], capture_output=True, text=True, timeout=30)
+        thread_sanitizer = None
+        if p.stderr:
+            last_line = p.stderr.splitlines()[-1]
+            if last_line.startswith('ThreadSanitizer'):
+                thread_sanitizer = last_line
+
+        p = subprocess.run([
+            'docker',
+            'run',
+            '--rm',
             '-v', f'{v1_path}:/workspace/{v1_repo_path}',
             '-v', f'{v2_path}:/workspace/{v2_repo_path}',
             '-w', '/workspace/pht',
@@ -149,6 +168,7 @@ class Command(BaseCommand):
             'v1_sanity': v1_sanity,
             'v2_sanity': v2_sanity,
             'cores': 4,
+            'thread_sanitizer': thread_sanitizer,
         }
         if not valgrind:
             task.result['valgrind_log'] = p.stderr
