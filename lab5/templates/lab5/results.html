@@ -16,6 +16,9 @@
         {% elif task.status == task.Status.IN_PROGRESS %}
         <p class="block">In progress.</p>
         {% elif task.status == task.Status.SUCCESS %}
+        {% if task.result.thread_sanitizer %}
+        <p class="block has-text-danger has-text-centered has-text-weight-bold is-family-monospace">{{ task.result.thread_sanitizer }}</p>
+        {% endif %}
         <div class="columns">
           <div class="column">
             <p class="has-text-centered">
