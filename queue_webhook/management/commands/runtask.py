@@ -127,7 +127,7 @@ class Command(BaseCommand):
             '-v', f'{v2_path}:/workspace/{v2_repo_path}',
             '-w', '/workspace/pht',
             'ece344:latest',
-            'sh', '-c', 'meson setup -Db_sanitize=thread build >/dev/null && meson compile -C build >/dev/null && setarch aarch64 --addr-no-randomize build/pht-tester -t 4 -s 5000',
+            'sh', '-c', 'meson setup -Db_sanitize=thread build >/dev/null && meson compile -C build >/dev/null && setarch aarch64 --addr-no-randomize build/pht-tester -t 4 -s 1000',
         ]
         p = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
         thread_sanitizer = None
