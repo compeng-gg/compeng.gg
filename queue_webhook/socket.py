@@ -6,4 +6,4 @@ PORT = 8001
 def send_task(task):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.connect((HOST, PORT))
-        s.sendall(int.to_bytes(task.id))
+        s.sendall(task.id.to_bytes(8))
