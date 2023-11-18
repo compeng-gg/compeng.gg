@@ -21,6 +21,8 @@ SERVERS = [
 class Command(BaseCommand):
 
     def run_task(self, task):
+        self.stdout.write(f'{task} received')
+
         global current_index
         global current_lock
         with current_lock:
@@ -53,7 +55,7 @@ class Command(BaseCommand):
         try:
             task = Task.objects.get(id=task_id)
         except Task.DoesNotExist:
-            return
+            raise CommandError(f'Task {task_id} does not exist')
         self.run_task(task)
 
     def _socket_listen(self):
