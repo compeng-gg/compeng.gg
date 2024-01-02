@@ -11,6 +11,7 @@ API_ENDPOINT = 'https://discord.com/api/v10'
 GUILD_ID = '919041347674066995'
 VERIFIED_ROLE_ID = '1136004776425963561'
 APS_105_STUDENT_ROLE_ID = '1191861499233320970'
+ECE_353_STUDENT_ROLE_ID = '1191867273523253278'
 
 def add_discord_guild_member(user_id, access_token, role_id):
     roles = [VERIFIED_ROLE_ID, role_id]
@@ -53,6 +54,8 @@ def join(request, role):
     role_id = None
     if role == 'aps105':
         role_id = APS_105_STUDENT_ROLE_ID
+    elif role == 'ece353':
+        role_id = ECE_353_STUDENT_ROLE_ID
     
     if role_id is not None:
         data = add_discord_guild_member(user_id, access_token, role_id)
