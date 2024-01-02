@@ -26,6 +26,9 @@ urlpatterns = [
          name="homepage"),
     path("robots.txt", TemplateView.as_view(template_name="robots.txt",
                                             content_type="text/plain")),
+    
+    path('discord/', include('discord.urls')),
+
     path("queue/", include("queue_webhook.urls")),
     path("docs/", include("docs.urls")),
     path("lab5/", include("lab5.urls")),

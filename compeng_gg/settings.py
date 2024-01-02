@@ -83,6 +83,8 @@ ALLOWED_HOSTS = []
 STATICFILES_DIRS = [str(PROJECT_DIR.joinpath("static"))]
 
 INSTALLED_APPS = [
+    'discord',
+
     'docs',
     'queue_webhook',
     'lab5',
@@ -185,3 +187,5 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 QUEUE_SECRET_TOKEN = os.environ.setdefault('QUEUE_SECRET_TOKEN', '')
+
+DISCORD_BOT_TOKEN = os.environ.setdefault('DISCORD_BOT_TOKEN', '')

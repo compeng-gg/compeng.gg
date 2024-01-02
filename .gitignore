@@ -2,6 +2,8 @@ __pycache__/
 
 /task/
 /venv/
+
+/.env
 /db.sqlite3
 
 /compeng_gg/static/fonts/
