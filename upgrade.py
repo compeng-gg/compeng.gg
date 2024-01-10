@@ -4,37 +4,39 @@ import os
 import pathlib
 import subprocess
 
-def update_requirements(base_dir):
-    subprocess.run(['rm', '-rf', 'venv'], check=True, cwd=base_dir)
-    subprocess.run(['python3', '-m', 'venv', 'venv'], check=True, cwd=base_dir)
-    venv_dir = base_dir / 'venv'
-    venv_env = os.environ.copy()
-    venv_env['VIRTUAL_ENV'] = venv_dir
-    venv_env['PATH'] = f"{venv_dir / 'bin'}:{venv_env['PATH']}"
-    subprocess.run(['pip', 'install', '-U', 'pip'],
-                   check=True, cwd=base_dir, env=venv_env)
-    subprocess.run(
-        [
-            'pip',
-            'install',
-            'django',
-            'djangorestframework',
-            'social-auth-app-django',
-        ],
-        check=True, cwd=base_dir, env=venv_env
+BASE_DIR = pathlib.Path(__file__).resolve().parent
+VENV_DIR = BASE_DIR / 'venv'
+VENV_BIN_DIR = VENV_DIR / 'bin'
+
+def run_venv(args, capture_output=False):
+    env = os.environ.copy()
+    env['VIRTUAL_ENV'] = VENV_DIR
+    env['PATH'] = f"{VENV_BIN_DIR}:{env['PATH']}"
+    p = subprocess.run(args,
+        capture_output=capture_output, check=True, cwd=BASE_DIR, env=env,
+        text=True
     )
-    p = subprocess.run(['pip', 'freeze'],
-                       capture_output=True, check=True, cwd=base_dir,
-                       env=venv_env, text=True)
-    with open(base_dir / 'requirements.txt', 'w') as f:
+    return p
+
+def update_requirements():
+    subprocess.run(['rm', '-rf', 'venv'], check=True, cwd=BASE_DIR)
+    subprocess.run(['python3', '-m', 'venv', 'venv'], check=True, cwd=BASE_DIR)
+    run_venv(['pip', 'install', '-U', 'pip'])
+    run_venv([
+        'pip', 'install',
+        'django',
+        'djangorestframework',
+        'social-auth-app-django',
+    ])
+    p = run_venv(['pip', 'freeze'], capture_output=True)
+    with open(BASE_DIR / 'requirements.txt', 'w') as f:
         f.write(p.stdout)
 
 def main():
-    base_dir = pathlib.Path(__file__).resolve().parent
-    fonts_dir = base_dir / 'compeng_gg' / 'static' / 'fonts'
+    fonts_dir = BASE_DIR / 'compeng_gg' / 'static' / 'fonts'
     os.makedirs(fonts_dir, exist_ok=True)
 
-    update_requirements(base_dir)
+    update_requirements()
 
 if __name__ == '__main__':
     main()
