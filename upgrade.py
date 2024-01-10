@@ -13,10 +13,16 @@ def update_requirements(base_dir):
     venv_env['PATH'] = f"{venv_dir / 'bin'}:{venv_env['PATH']}"
     subprocess.run(['pip', 'install', '-U', 'pip'],
                    check=True, cwd=base_dir, env=venv_env)
-    subprocess.run(['pip', 'install', 'django'],
-                   check=True, cwd=base_dir, env=venv_env)
-    subprocess.run(['pip', 'install', 'social-auth-app-django'],
-                   check=True, cwd=base_dir, env=venv_env)
+    subprocess.run(
+        [
+            'pip',
+            'install',
+            'django',
+            'djangorestframework',
+            'social-auth-app-django',
+        ],
+        check=True, cwd=base_dir, env=venv_env
+    )
     p = subprocess.run(['pip', 'freeze'],
                        capture_output=True, check=True, cwd=base_dir,
                        env=venv_env, text=True)
