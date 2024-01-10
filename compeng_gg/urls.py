@@ -21,6 +21,12 @@ from django.views.generic import TemplateView
 from django.contrib.auth import views as auth_views
 from . import views
 
+from rest_framework import routers
+from discord.views import UserSocialAuihViewSet
+
+router = routers.DefaultRouter()
+router.register(r'discord', UserSocialAuihViewSet)
+
 urlpatterns = [
     path("", TemplateView.as_view(template_name="homepage.html"),
          name="homepage"),
@@ -37,6 +43,8 @@ urlpatterns = [
     path('@<str:username>/', views.profile, name='profile'),
     path("login/", auth_views.LoginView.as_view(), name='login'),
     path("login-redirect/", views.login_redirect, name='login_redirect'),
+
+    path('api/', include(router.urls)),
 
     path("admin/", admin.site.urls),
 ]

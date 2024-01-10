@@ -63,3 +63,16 @@ def join(request, role):
             add_discord_guild_roles(user_id, [VERIFIED_ROLE_ID, role_id])
     
     return redirect('profile', request.user.username)
+
+from social_django.models import UserSocialAuth
+from .serializers import UserSocialAuthSerializer
+from rest_framework import viewsets
+from rest_framework import permissions
+
+class UserSocialAuihViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows users to be viewed or edited.
+    """
+    queryset = UserSocialAuth.objects.filter(provider='discord')
+    serializer_class = UserSocialAuthSerializer
+    permission_classes = [permissions.IsAuthenticated]
