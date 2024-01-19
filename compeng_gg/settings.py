@@ -85,6 +85,8 @@ STATICFILES_DIRS = [str(PROJECT_DIR.joinpath("static"))]
 INSTALLED_APPS = [
     'discord',
 
+    'courses',
+
     'docs',
     'queue_webhook',
     'lab5',
