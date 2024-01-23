@@ -35,7 +35,8 @@ urlpatterns = [
     
     path('discord/', include('discord.urls')),
 
-    path("queue/", include("queue_webhook.urls")),
+    path("webhook/", include("webhook.urls")),
+
     path("docs/", include("docs.urls")),
     path("lab5/", include("lab5.urls")),
     path('auth/', include('social_django.urls', namespace='auth')),

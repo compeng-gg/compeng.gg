@@ -88,7 +88,7 @@ INSTALLED_APPS = [
     'courses',
 
     'docs',
-    'queue_webhook',
+    'webhook',
     'lab5',
 
     'social_django',

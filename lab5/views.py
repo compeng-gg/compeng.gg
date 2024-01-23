@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 
-from queue_webhook.models import Task
+from webhook.models import Task
 
 @login_required
 def lab5(request):
