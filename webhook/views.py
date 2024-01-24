@@ -9,7 +9,7 @@ from . import models
 from .socket import send_task
 
 @csrf_exempt
-def webhook(request):
+def endpoint(request):
     if request.method != "POST":
         raise Http404()
 

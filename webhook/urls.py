@@ -3,6 +3,8 @@ from django.views.generic import TemplateView
 
 from . import views
 
+app_name = 'webhook'
+
 urlpatterns = [
-    path("", views.webhook, name="webhook"),
+    path('endpoint/', views.endpoint, name='endpoint'),
 ]

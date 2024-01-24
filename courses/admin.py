@@ -3,6 +3,7 @@ from .models import (
     Course,
     Institution,
     Offering,
+    Enrollment,
 )
 
 @admin.register(Course)
@@ -15,4 +16,8 @@ class InstitutionAdmin(admin.ModelAdmin):
 
 @admin.register(Offering)
 class OfferingAdmin(admin.ModelAdmin):
+    pass
+
+@admin.register(Enrollment)
+class EnrollmentAdmin(admin.ModelAdmin):
     pass

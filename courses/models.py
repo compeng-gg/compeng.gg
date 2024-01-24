@@ -1,8 +1,7 @@
-import os
-
+from django.conf import settings
 from django.db import models
 from django.urls import reverse, NoReverseMatch
-from django.utils.text import slugify
+from django.utils.translation import gettext_lazy as _
 
 class Institution(models.Model):
 
@@ -73,3 +72,27 @@ class Offering(models.Model):
 
     class Meta:
         ordering = ['-start', 'slug']
+
+class Enrollment(models.Model):
+
+    class Role(models.IntegerChoices):
+        INSTRUCTOR = 1, _('Instructor')
+        TA = 2, _('TA')
+        STUDENT = 3, _('Student')
+        AUDIT = 4, _('Audit')
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE
+    )
+    offering = models.ForeignKey(
+        Offering,
+        on_delete=models.CASCADE,
+    )
+    role = models.IntegerField(choices=Role)
+
+    def __str__(self):
+        return f'{self.offering} - {self.get_role_display()} - {self.user}'
+
+    class Meta:
+        unique_together = ['user', 'offering']
