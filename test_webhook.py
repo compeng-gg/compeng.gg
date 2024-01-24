@@ -12,7 +12,7 @@ def test_webhook():
         'event_name': 'push',
     }
     r = requests.post(
-        'http://localhost:8000/webhook/',
+        'http://localhost:8000/webhook/endpoint/',
         json=data,
         headers=headers,
     )
