@@ -2,7 +2,7 @@ from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 
 from social_django.models import UserSocialAuth
-from queue_webhook.models import Task
+from webhook.models import Task
 from social_django.utils import load_strategy
 
 import os

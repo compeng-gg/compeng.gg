@@ -6,8 +6,8 @@ import socket
 import subprocess
 import threading
 
-from queue_webhook.models import Task
-from queue_webhook.socket import HOST, PORT
+from webhook.models import Task
+from webhook.socket import HOST, PORT
 
 current_index = 0
 current_lock = threading.Lock()
@@ -49,8 +49,8 @@ class Command(BaseCommand):
 
     def run(self, conn):
         with conn:
-            data = conn.recv(8)
-            task_id = int.from_bytes(data)
+            data = conn.recv(1024)
+            task_id = int(data)
 
         try:
             task = Task.objects.get(id=task_id)
