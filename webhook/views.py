@@ -12,7 +12,7 @@ from .socket import send_task
 def endpoint(request):
     if request.method != "POST":
         raise Http404()
-
+    
     if not 'X-Gitlab-Token' in request.headers \
        or request.headers['X-Gitlab-Token'] != settings.QUEUE_SECRET_TOKEN:
         return HttpResponse(status=401)
@@ -33,7 +33,8 @@ def endpoint(request):
             status=models.Task.Status.QUEUED,
             data=data,
         )
-    except:
+    except Exception as e:
+        raise(e)
         return HttpResponse(status=400)
 
     try:

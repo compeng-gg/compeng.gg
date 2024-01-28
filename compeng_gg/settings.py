@@ -191,7 +191,6 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-QUEUE_SECRET_TOKEN = os.environ.setdefault('QUEUE_SECRET_TOKEN', '')
 
 DISCORD_BOT_TOKEN = os.environ.setdefault('DISCORD_BOT_TOKEN', '')
 
@@ -204,6 +203,7 @@ REST_FRAMEWORK = {
 
 # Webhook
 
+QUEUE_SECRET_TOKEN = os.environ.setdefault('QUEUE_SECRET_TOKEN', '')
 WEBHOOK_SERVERS = [
     'localhost',
 ]
