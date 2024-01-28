@@ -14,24 +14,24 @@ class Manager:
     def __init__(self):
         self.current_index = 0
         self.current_lock = threading.Lock()
-        self.servers = []
-        for host in settings.WEBHOOK_SERVERS:
-            self.servers.append((host, threading.Lock()))
+        self.hosts = []
+        for host in settings.WEBHOOK_HOSTS:
+            self.hosts.append((host, threading.Lock()))
 
-    def next_server(self):
+    def next_host(self):
         with self.current_lock:
             index = self.current_index
             self.current_index += 1
-            if self.current_index >= len(self.servers):
+            if self.current_index >= len(self.hosts):
                 self.current_index = 0
-        return self.servers[index]
+        return self.hosts[index]
 
 class Command(BaseCommand):
 
     def run_task(self, task):
         self.stdout.write(f'{task} received')
 
-        host, lock = self.manager.next_server()
+        host, lock = self.manager.next_host()
         with lock:
             self.stdout.write(f'{task} sent to {host}')
             if host == 'localhost':

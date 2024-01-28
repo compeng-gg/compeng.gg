@@ -204,6 +204,4 @@ REST_FRAMEWORK = {
 # Webhook
 
 QUEUE_SECRET_TOKEN = os.environ.setdefault('QUEUE_SECRET_TOKEN', '')
-WEBHOOK_SERVERS = [
-    'localhost',
-]
+WEBHOOK_HOSTS = json.loads(os.getenv("WEBHOOK_HOSTS", '["localhost"]'))
