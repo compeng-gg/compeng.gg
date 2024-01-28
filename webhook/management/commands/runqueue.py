@@ -9,33 +9,38 @@ import threading
 from webhook.models import Task
 from webhook.socket import HOST, PORT
 
-current_index = 0
-current_lock = threading.Lock()
-SERVERS = [
-    ('canoe-0', threading.Lock()),
-    ('canoe-1', threading.Lock()),
-    ('canoe-2', threading.Lock()),
-    ('canoe-3', threading.Lock()),
-]
+class Manager:
+
+    def __init__(self):
+        self.current_index = 0
+        self.current_lock = threading.Lock()
+        self.servers = []
+        for host in settings.WEBHOOK_SERVERS:
+            self.servers.append((host, threading.Lock()))
+
+    def next_server(self):
+        with self.current_lock:
+            index = self.current_index
+            self.current_index += 1
+            if self.current_index >= len(self.servers):
+                self.current_index = 0
+        return self.servers[index]
 
 class Command(BaseCommand):
 
     def run_task(self, task):
         self.stdout.write(f'{task} received')
 
-        global current_index
-        global current_lock
-        with current_lock:
-            index = current_index
-            current_index += 1
-            if current_index >= len(SERVERS):
-                current_index = 0
-
-        host, lock = SERVERS[index]
+        host, lock = self.manager.next_server()
         with lock:
             self.stdout.write(f'{task} sent to {host}')
-            cmd = ['ssh', host, '/opt/compeng.gg/venv/bin/python', '-u', '/opt/compeng.gg/manage.py', 'runtask', str(task.id)]
-            # cmd = ['python', 'manage.py', 'runtask', str(task.id)]
+            if host == 'localhost':
+                cmd = ['python', '-u', 'manage.py', 'runtask', str(task.id)]
+            else:
+                cmd = [
+                    'ssh', host, '/opt/compeng.gg/venv/bin/python', '-u',
+                    '/opt/compeng.gg/manage.py', 'runtask', str(task.id)
+                ]
             p = subprocess.run(cmd, cwd=settings.BASE_DIR)
 
         task = Task.objects.get(id=task.id)
@@ -65,6 +70,8 @@ class Command(BaseCommand):
         return s
 
     def handle(self, *args, **options):
+        self.manager = Manager()
+
         for task in Task.objects.filter(status=Task.Status.QUEUED):
             t = threading.Thread(target=Command.run_task, args=(self, task))
             t.start()

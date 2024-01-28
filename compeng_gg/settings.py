@@ -201,3 +201,9 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.TokenAuthentication',
     ]
 }
+
+# Webhook
+
+WEBHOOK_SERVERS = [
+    'localhost',
+]
