@@ -10,8 +10,6 @@ from .socket import send_task
 
 @csrf_exempt
 def endpoint(request):
-    task = models.Task.objects.get(id=2000)
-    send_task(task)
     if request.method != "POST":
         raise Http404()
 
