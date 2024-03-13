@@ -114,7 +114,9 @@ class Command(BaseCommand):
             assert start == '  -' and end == 'missing'
             v2_sanity = value == '0'
         except Exception as e:
-            task.result = {'stdout': p.stdout}
+            task.result = {
+                'stdout': p.stdout,
+            }
             task.save()
             exit(1)
 
@@ -155,6 +157,20 @@ class Command(BaseCommand):
         v1_expected = v1_relative > 0.3 and v1_relative < 0.8
         v2_expected = v2_relative > 2 and v2_relative < 4
 
+        tsan_okay = thread_sanitizer is None
+        grade = 0
+        if v1_expected:
+            grade += 8
+        if v2_expected:
+            grade += 8
+        if v1_sanity:
+            grade += 10
+        if v2_sanity:
+            grade += 10
+        if valgrind:
+            grade += 4
+        if v1_expected and v2_expected and tsan_okay:
+            grade += 60
         task.result = {
             'base_value': base_value,
             'v1_value': v1_value,
@@ -171,6 +187,7 @@ class Command(BaseCommand):
             'v2_sanity': v2_sanity,
             'cores': 4,
             'thread_sanitizer': thread_sanitizer,
+            'grade': grade,
         }
         if not valgrind:
             task.result['valgrind_log'] = p.stderr
