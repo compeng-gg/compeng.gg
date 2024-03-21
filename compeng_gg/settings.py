@@ -23,6 +23,7 @@ AUTHENTICATION_BACKENDS = [
     'compeng_gg.auth.backends.LaForgeBackend',
     'django.contrib.auth.backends.ModelBackend',
 ]
+LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'login_redirect'
 
 # Social Auth
