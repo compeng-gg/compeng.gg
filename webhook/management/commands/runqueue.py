@@ -2,12 +2,15 @@ from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
+import logging
 import socket
 import subprocess
 import threading
 
 from webhook.models import Task
 from webhook.socket import HOST, PORT
+
+logger = logging.getLogger(__name__)
 
 class Manager:
 
@@ -35,7 +38,8 @@ class Command(BaseCommand):
         with lock:
             self.stdout.write(f'{task} sent to {host}')
             if host == 'localhost':
-                cmd = ['python', '-u', 'manage.py', 'runtask', str(task.id)]
+                py = settings.BASE_DIR / 'venv' / 'bin' / 'python'
+                cmd = [py, '-u', 'manage.py', 'runtask', str(task.id)]
             else:
                 cmd = [
                     'ssh', host, '/opt/compeng.gg/venv/bin/python', '-u',
