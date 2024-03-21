@@ -8,7 +8,7 @@
     {% for task in tasks %}
     <article class="message">
       <div class="message-header">
-        <p class="is-family-monospace">Commit {{ task.data.checkout_sha }}</p>
+        <p class="is-family-monospace">Commit {{ task.data.checkout_sha }}<br>Grade: {{ task.result.grade }}</p>
       </div>
       <div class="message-body">
         {% if  task.status == task.Status.QUEUED %}
