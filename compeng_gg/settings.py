@@ -180,5 +180,5 @@ DISCORD_BOT_TOKEN = os.environ.setdefault('DISCORD_BOT_TOKEN', '')
 
 # Webhook (webhook)
 
-QUEUE_SECRET_TOKEN = os.environ.setdefault('QUEUE_SECRET_TOKEN', '')
+WEBHOOK_TOKEN = os.environ.setdefault('WEBHOOK_TOKEN', '')
 WEBHOOK_HOSTS = json.loads(os.getenv("WEBHOOK_HOSTS", '["localhost"]'))

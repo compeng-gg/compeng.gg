@@ -4,7 +4,7 @@ from compeng_gg import settings
 
 def test_webhook():
     headers = {
-        'X-Gitlab-Token': settings.QUEUE_SECRET_TOKEN,
+        'X-Gitlab-Token': settings.WEBHOOK_TOKEN,
         'X-Gitlab-Event': 'Push Hook',
     }
     data = {

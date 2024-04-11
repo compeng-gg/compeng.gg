@@ -14,7 +14,7 @@ def endpoint(request):
         raise Http404()
     
     if not 'X-Gitlab-Token' in request.headers \
-       or request.headers['X-Gitlab-Token'] != settings.QUEUE_SECRET_TOKEN:
+       or request.headers['X-Gitlab-Token'] != settings.WEBHOOK_TOKEN:
         return HttpResponse(status=401)
 
     if not 'X-Gitlab-Event' in request.headers \
