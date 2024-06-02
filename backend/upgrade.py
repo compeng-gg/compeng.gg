@@ -25,6 +25,7 @@ def update_requirements():
     run_venv([
         'pip', 'install',
         'django',
+        'django-cors-headers',
         'djangorestframework',
         'social-auth-app-django',
     ])
@@ -33,9 +34,6 @@ def update_requirements():
         f.write(p.stdout)
 
 def main():
-    fonts_dir = BASE_DIR / 'compeng_gg' / 'static' / 'fonts'
-    os.makedirs(fonts_dir, exist_ok=True)
-
     update_requirements()
 
 if __name__ == '__main__':
