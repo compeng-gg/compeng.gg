@@ -35,6 +35,7 @@ USE_TZ = True
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -59,6 +60,8 @@ INSTALLED_APPS = [
 
     'rest_framework',
     'rest_framework.authtoken',
+
+    'corsheaders',
 
     'django.contrib.admin',
     'django.contrib.auth',
@@ -129,6 +132,10 @@ STATIC_URL = 'static/'
 STATICFILES_DIRS = [
     str(PROJECT_DIR.joinpath("static")),
 ]
+
+# Django CORS Headers (corsheaders)
+
+CORS_ALLOWED_ORIGINS = json.loads(os.getenv('CORS_ALLOWED_ORIGINS', '[]'))
 
 # Social Auth (social_django)
 

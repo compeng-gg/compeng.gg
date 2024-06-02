@@ -22,10 +22,10 @@ from django.contrib.auth import views as auth_views
 from . import views
 
 from rest_framework import routers
-from discord.views import UserSocialAuihViewSet
+from discord.views import UserSocialAuthViewSet
 
 router = routers.DefaultRouter()
-router.register(r'discord', UserSocialAuihViewSet)
+router.register(r'discord', UserSocialAuthViewSet)
 
 urlpatterns = [
     path("", TemplateView.as_view(template_name="homepage.html"),
