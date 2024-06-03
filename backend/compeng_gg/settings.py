@@ -33,9 +33,9 @@ USE_TZ = True
 ## HTTP
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -135,7 +135,14 @@ STATICFILES_DIRS = [
 
 # Django CORS Headers (corsheaders)
 
+from corsheaders.defaults import default_headers
+
 CORS_ALLOWED_ORIGINS = json.loads(os.getenv('CORS_ALLOWED_ORIGINS', '[]'))
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_HEADERS = (
+    *default_headers,
+    "access-control-allow-origin",
+)
 
 # Social Auth (social_django)
 
