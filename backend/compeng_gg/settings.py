@@ -48,6 +48,8 @@ WSGI_APPLICATION = 'compeng_gg.wsgi.application'
 ## Models
 
 INSTALLED_APPS = [
+    'api',
+
     'discord',
 
     'courses',
@@ -183,6 +185,7 @@ SOCIAL_AUTH_PIPELINE = (
 # Django REST Framework (rest_framework)
 
 REST_FRAMEWORK = {
+    'DEFAULT_VERSIONING_CLASS': 'rest_framework.versioning.NamespaceVersioning',
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
     ]

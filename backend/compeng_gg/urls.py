@@ -47,5 +47,7 @@ urlpatterns = [
 
     path('api/', include(router.urls)),
 
+    path('api/v0/', include('api.urls', namespace='v0')),
+
     path("admin/", admin.site.urls),
 ]

@@ -1,0 +1,8 @@
+= CompEng.gg
+Jonathan Eyolfson <jon@eyolfson.com>
+
+A site for learning coding.
+
+== Resources
+
+- https://testdriven.io/blog/django-spa-auth/

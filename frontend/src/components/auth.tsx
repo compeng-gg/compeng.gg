@@ -18,14 +18,14 @@ function getCookie(name: string) {
     return cookieValue;
 }
 
-function Login() {
+function LoginForm() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
   function handleSubmit(event: SyntheticEvent) {
     event.preventDefault();
     var csrftoken = getCookie('csrftoken');
-    fetch("http://localhost:8000/login/",
+    fetch("http://localhost:8000/api/v0/auth/login/",
         {
             mode: "cors",
             method: "POST",
@@ -38,16 +38,18 @@ function Login() {
             body: JSON.stringify({username, password }),
         }
     )
-    .then((response) => response.body);
-    console.log("Submit");
+    .then((response) => response.json())
+    .then((data) => console.log(data));
   }
   return (
-    <form onSubmit={handleSubmit}>
-      <input name="username" type="text" value={username} onChange={({ target }) => setUsername(target.value)} />
-      <input name="password" type="password" value={password} onChange={({ target }) => setPassword(target.value)} />
+    <form className="login" onSubmit={handleSubmit}>
+      <label htmlFor="username">Username:</label>
+      <input id="username" type="text" value={username} onChange={({ target }) => setUsername(target.value)} />
+      <label htmlFor="password">Password:</label>
+      <input id="password" type="password" value={password} onChange={({ target }) => setPassword(target.value)} />
       <button type="submit">Login</button>
     </form>
   )
 }
 
-export default Login
+export default LoginForm
