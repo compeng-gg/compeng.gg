@@ -4,12 +4,14 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     clang \
     clangd \
+    direnv \
     git \
     locales \
     man-db \
     manpages-dev \
     meson \
     nano \
+    npm \
     python3-venv \
     vim \
     wget \

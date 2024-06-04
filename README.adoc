@@ -3,6 +3,14 @@ Jonathan Eyolfson <jon@eyolfson.com>
 
 A site for learning coding.
 
+== Frontend
+
+[source]
+----
+cd frontend
+npm i
+----
+
 == Resources
 
 - https://testdriven.io/blog/django-spa-auth/
