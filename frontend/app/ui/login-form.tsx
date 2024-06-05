@@ -1,6 +1,7 @@
 'use client';
 
 import { SyntheticEvent, useState } from "react";
+import { redirect } from 'next/navigation'
 
 // const API_URL = 'https://localhost:8080/api/';
 
@@ -20,14 +21,9 @@ function getCookie(name: string) {
     return cookieValue;
 }
 
-function LoginForm() {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-
-  function handleSubmit(event: SyntheticEvent) {
-    event.preventDefault();
-    var csrftoken = getCookie('csrftoken');
-    fetch("http://localhost:8000/api/v0/auth/login/",
+function fetchApi(input: string, data: any) {
+  var csrftoken = getCookie('csrftoken');
+  return fetch("http://localhost:8000/api/v0/" + input,
         {
             mode: "cors",
             method: "POST",
@@ -37,12 +33,30 @@ function LoginForm() {
                 "X-CSRFToken": csrftoken,
             },
             credentials: "include",
-            body: JSON.stringify({username, password }),
+            body: JSON.stringify(data),
         }
-    )
+  )
+}
+
+function LoginForm() {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+
+  function handleSubmit(event: SyntheticEvent) {
+    event.preventDefault();
+    var csrftoken = getCookie('csrftoken');
+
+    fetchApi("auth/login/", { username, password })
     .then((response) => response.json())
     .then((data) => console.log(data));
+  
+    fetchApi("auth/session/", { })
+    .then((response) => response.json())
+    .then((data) => console.log(data));
+
+    redirect('/test/');
   }
+
   return (
     <div className="w-full max-w-xs">
       <form className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4" onSubmit={handleSubmit}>

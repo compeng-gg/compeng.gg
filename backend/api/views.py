@@ -39,3 +39,15 @@ def logout(request):
     if request.version == 'v0':
         return logout_v0(request)
     return HttpResponseNotFound()
+
+def session_v0(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({'is_authenticated': False})
+
+    return JsonResponse({'is_authenticated': True})
+
+@api_view(['POST'])
+def session(request):
+    if request.version == 'v0':
+        return session_v0(request)
+    return HttpResponseNotFound()

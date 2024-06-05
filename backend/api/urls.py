@@ -7,4 +7,5 @@ app_name = 'api'
 urlpatterns = [
     path('auth/login/', views.login),
     path('auth/logout/', views.logout),
+    path('auth/session/', views.session),
 ]
