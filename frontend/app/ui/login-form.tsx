@@ -1,7 +1,7 @@
 'use client';
 
 import { SyntheticEvent, useState } from "react";
-import { redirect } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 
 // const API_URL = 'https://localhost:8080/api/';
 
@@ -22,8 +22,9 @@ function getCookie(name: string) {
 }
 
 function fetchApi(input: string, data: any) {
+
   var csrftoken = getCookie('csrftoken');
-  return fetch("http://localhost:8000/api/v0/" + input,
+  return fetch("http://localhost:8000/api/v0" + input,
         {
             mode: "cors",
             method: "POST",
@@ -41,20 +42,21 @@ function fetchApi(input: string, data: any) {
 function LoginForm() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const router = useRouter();
 
   function handleSubmit(event: SyntheticEvent) {
+
     event.preventDefault();
     var csrftoken = getCookie('csrftoken');
 
-    fetchApi("auth/login/", { username, password })
+    fetchApi("/auth/login", { username, password })
     .then((response) => response.json())
     .then((data) => console.log(data));
   
-    fetchApi("auth/session/", { })
+    fetchApi("/auth/session", { })
     .then((response) => response.json())
-    .then((data) => console.log(data));
-
-    redirect('/test/');
+    .then((data) => console.log(data))
+    .then(() => router.push('/test'));
   }
 
   return (

@@ -5,7 +5,10 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "CompEng.gg",
+  title: {
+    template: '%s - CompEng.gg',
+    default: 'CompEng.gg',
+  },
   description: "A site to learn coding.",
 };
 
