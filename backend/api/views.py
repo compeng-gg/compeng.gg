@@ -42,7 +42,7 @@ def logout(request):
 
 def session_v0(request):
     if not request.user.is_authenticated:
-        return JsonResponse({'is_authenticated': False})
+        return JsonResponse({'is_authenticated': False}, status=401)
 
     return JsonResponse({'is_authenticated': True})
 
