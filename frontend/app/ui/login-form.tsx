@@ -30,7 +30,7 @@ function fetchApi(input: string, data: any) {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                "Access-Control-Allow-Origin": "http://localhost:3000",
+                "Access-Control-Allow-Origin": process.env.NEXT_PUBLIC_ORIGIN || "http://localhost:3000",
                 "X-CSRFToken": csrftoken,
             },
             credentials: "include",
