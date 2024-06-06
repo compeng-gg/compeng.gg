@@ -7,6 +7,7 @@ BASE_DIR = PROJECT_DIR.parent
 
 # Core
 
+APPEND_SLASH = False
 ALLOWED_HOSTS = json.loads(os.getenv('ALLOWED_HOSTS', '[]'))
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 

@@ -22,9 +22,9 @@ function getCookie(name: string) {
 }
 
 function fetchApi(input: string, data: any) {
-
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v0';
   var csrftoken = getCookie('csrftoken');
-  return fetch("http://localhost:8000/api/v0" + input,
+  return fetch(apiUrl + input,
         {
             mode: "cors",
             method: "POST",
