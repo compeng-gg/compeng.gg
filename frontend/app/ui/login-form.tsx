@@ -45,18 +45,12 @@ function LoginForm() {
   const router = useRouter();
 
   function handleSubmit(event: SyntheticEvent) {
-
     event.preventDefault();
     var csrftoken = getCookie('csrftoken');
 
     fetchApi("/auth/login", { username, password })
     .then((response) => response.json())
     .then((data) => console.log(data));
-  
-    fetchApi("/auth/session", { })
-    .then((response) => response.json())
-    .then((data) => console.log(data))
-    .then(() => router.push('/test'));
   }
 
   return (
