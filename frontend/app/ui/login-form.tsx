@@ -50,7 +50,9 @@ function LoginForm() {
 
     fetchApi("/auth/login", { username, password })
     .then((response) => response.json())
-    .then((data) => console.log(data));
+    .then((data) => console.log(data))
+    .then(() => router.push('/'))
+    .then(() => window.location.reload());
   }
 
   return (
