@@ -4,6 +4,8 @@ import LoginForm from '@/app/ui/login-form';
 
 async function checkAuthenticated() {
   const cookieStore = cookies();
+  const allCookies = cookieStore.getAll();
+  const cookieString = allCookies.map(cookie => `${cookie.name}=${cookie.value}`).join('; ');
   const csrfToken = cookieStore.get("csrftoken");
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v0';
   const response = await fetch(apiUrl + '/auth/session',
@@ -14,6 +16,7 @@ async function checkAuthenticated() {
                 "Content-Type": "application/json",
                 "Access-Control-Allow-Origin": process.env.NEXT_PUBLIC_ORIGIN || "http://localhost:3000",
                 "X-CSRFToken": csrfToken?.value || '',
+                Cookie: cookieString,
             },
             credentials: "include",
         }
