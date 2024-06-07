@@ -44,7 +44,11 @@ def session_v0(request):
     if not request.user.is_authenticated:
         return JsonResponse({'is_authenticated': False}, status=401)
 
-    return JsonResponse({'is_authenticated': True})
+    return JsonResponse({
+        'is_authenticated': True,
+        'user_id': request.user.id,
+        'username': request.user.username,
+    })
 
 @api_view(['POST'])
 def session(request):
