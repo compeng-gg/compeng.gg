@@ -36,6 +36,7 @@ function LoginForm() {
             id="username"
             type="text"
             autoComplete="username"
+            autoCapitalize="none"
             value={username}
             onChange={({ target }) => setUsername(target.value)}
           />
