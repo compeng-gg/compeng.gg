@@ -7,7 +7,7 @@ function Page({username}: {username: string}) {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-24">
       <h1 className="mb-4 font-black text-5xl">CompEng.gg</h1>
-      <p>{"You're logged in as"} <span className="font-bold text-blue-500">{username}</span>.</p>
+      <p>You&apos;re logged in as <span className="font-bold text-blue-500">{username}</span>.</p>
     </main>
   );
 }
