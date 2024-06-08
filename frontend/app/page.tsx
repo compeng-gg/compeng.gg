@@ -1,44 +1,15 @@
 import { cookies } from "next/headers";
 import Image from "next/image";
 import LoginForm from '@/app/ui/login-form';
+import withAuth from "@/app/lib/auth";
 
-async function checkAuthenticated() {
-  const cookieStore = cookies();
-  const allCookies = cookieStore.getAll();
-  const cookieString = allCookies.map(cookie => `${cookie.name}=${cookie.value}`).join('; ');
-  const csrfToken = cookieStore.get("csrftoken");
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v0';
-  const response = await fetch(apiUrl + '/auth/session',
-        {
-            mode: "cors",
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Access-Control-Allow-Origin": process.env.NEXT_PUBLIC_ORIGIN || "http://localhost:3000",
-                "X-CSRFToken": csrfToken?.value || '',
-                Cookie: cookieString,
-            },
-            credentials: "include",
-        }
-  )
-  if (!response.ok) {
-    return false;
-  }
-  return true;
-}
-
-export default async function Page() {
-  const isAuthenticated = await checkAuthenticated();
-
+function Page({username}: {username: string}) {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div>
-        <h1 className="mb-3 font-black text-5xl">CompEng.gg</h1>
-        <div>
-          The user is <b>{isAuthenticated ? 'currently' : 'not'}</b> logged in.
-        </div>
-        <LoginForm />
-      </div>
+    <main className="flex min-h-screen flex-col items-center justify-center p-24">
+      <h1 className="mb-4 font-black text-5xl">CompEng.gg</h1>
+      <p>You're logged in as <span className="font-bold text-blue-500">{username}</span>.</p>
     </main>
   );
 }
+
+export default withAuth(Page);

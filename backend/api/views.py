@@ -46,7 +46,6 @@ def session_v0(request):
 
     return JsonResponse({
         'is_authenticated': True,
-        'user_id': request.user.id,
         'username': request.user.username,
     })
 
