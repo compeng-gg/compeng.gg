@@ -1,21 +1,41 @@
 'use client';
 
-import { SyntheticEvent, useState } from "react";
+import { useState, FormEvent } from "react";
 import { useRouter } from 'next/navigation'
 import { fetchApi } from "@/app/lib/api-client";
 
 function LoginForm() {
+  const [error, setError] = useState<string | null>(null);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+
   const router = useRouter();
 
-  function handleSubmit(event: SyntheticEvent) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-
-    fetchApi("/auth/login", { username, password })
-    .then((response) => response.json())
-    .then((data) => console.log(data))
-    .then(() => router.refresh());
+    setError(null);
+    try {
+      const response = await fetchApi("/auth/login", { username, password });
+      const data = await response.json();
+      console.log(data);
+      if (response.ok) {
+        router.refresh();
+      }
+      else {
+        if ("username" in data.errors) {
+          setError(data.errors.username);
+        }
+        else if ("password" in data.errors) {
+          setError(data.errors.password);
+        }
+        else {
+          setError("An unexpected error occurred");
+        }
+      }
+    }
+    catch (err) {
+      setError("An unexpected error occurred");
+    }
   }
 
   return (
@@ -24,6 +44,9 @@ function LoginForm() {
         className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4"
         onSubmit={handleSubmit}
       >
+        {error && (
+          <p className="text-red-500 text-xs font-bold mb-4">{error}</p>
+        )}
         <div className="mb-4">
           <label
             className="block text-gray-700 text-sm font-bold mb-2"
