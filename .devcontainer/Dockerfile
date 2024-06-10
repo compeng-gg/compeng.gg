@@ -24,7 +24,7 @@ RUN sh -c "$(wget https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools
     && sed -i 's/ZSH_THEME="robbyrussell"/ZSH_THEME="lukerandall"/g' /root/.zshrc \
     && echo '\nexport NEXT_PUBLIC_ORIGIN="https://${CODESPACE_NAME}-3000.app.github.dev"' \
             '\nexport NEXT_PUBLIC_API_URL="https://${CODESPACE_NAME}-8000.app.github.dev/api/v0"' \
-            '\nexport CSRF_TRUSTED_ORIGINS='\''["https://${CODESPACE_NAME}-3000.app.github.dev"]'\' \
-            '\nexport CORS_ALLOWED_ORIGINS='\''["https://${CODESPACE_NAME}-3000.app.github.dev"]'\' >> /root/.zshrc
+            '\nexport CSRF_TRUSTED_ORIGINS='\''["https://'\''${CODESPACE_NAME}'\''-3000.app.github.dev"]'\' \
+            '\nexport CORS_ALLOWED_ORIGINS='\''["https://'\''${CODESPACE_NAME}'\''-3000.app.github.dev"]'\' >> /root/.zshrc
 
 CMD ["zsh"]
