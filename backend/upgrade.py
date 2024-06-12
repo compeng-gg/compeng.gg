@@ -27,6 +27,7 @@ def update_requirements():
         'django',
         'django-cors-headers',
         'djangorestframework',
+        'djangorestframework-simplejwt[crypto]',
         'social-auth-app-django',
     ])
     p = run_venv(['pip', 'freeze'], capture_output=True)
