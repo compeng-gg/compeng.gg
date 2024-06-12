@@ -76,7 +76,17 @@ INSTALLED_APPS = [
 
 ## Security
 
+CSRF_COOKIE_AGE = 31449600
+CSRF_COOKIE_DOMAIN = None
+CSRF_COOKIE_HTTPONLY = False
+CSRF_COOKIE_NAME = 'csrftoken'
+CSRF_COOKIE_PATH = '/'
+CSRF_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_SECURE = False
+CSRF_FAILURE_VIEW = 'django.views.csrf.csrf_failure'
+CSRF_HEADER_NAME = 'HTTP_X_CSRFTOKEN'
 CSRF_TRUSTED_ORIGINS = json.loads(os.getenv('CSRF_TRUSTED_ORIGINS', '[]'))
+CSRF_USE_SESSIONS = False
 SECRET_KEY = os.environ.setdefault('SECRET_KEY',
     'django-insecure-i%y%&uud=jfqzakf!ee5+j12hv=q)r9v*(569c5%%gh9n2#7fg'
 )
@@ -129,6 +139,22 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# Sessions (django.contrib.sessions)
+
+SESSION_CACHE_ALIAS = 'default'
+SESSION_COOKIE_AGE = 1209600
+SESSION_COOKIE_DOMAIN = None
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_NAME = 'sessionid'
+SESSION_COOKIE_PATH = '/'
+SESSION_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_SECURE = False
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+SESSION_FILE_PATH = None
+SESSION_SAVE_EVERY_REQUEST = False
+SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
+
 # Static Files (django.contrib.staticfiles)
 
 STATIC_URL = 'static/'
@@ -138,14 +164,8 @@ STATICFILES_DIRS = [
 
 # Django CORS Headers (corsheaders)
 
-from corsheaders.defaults import default_headers
-
 CORS_ALLOWED_ORIGINS = json.loads(os.getenv('CORS_ALLOWED_ORIGINS', '[]'))
-CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOW_HEADERS = (
-    *default_headers,
-    "access-control-allow-origin",
-)
+CORS_ALLOW_CREDENTIALS = False
 
 # Social Auth (social_django)
 
