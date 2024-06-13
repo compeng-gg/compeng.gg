@@ -1,3 +1,4 @@
+import datetime
 import json
 import os
 import pathlib
@@ -63,6 +64,7 @@ INSTALLED_APPS = [
 
     'rest_framework',
     'rest_framework.authtoken',
+    'rest_framework_simplejwt',
 
     'corsheaders',
 
@@ -208,9 +210,18 @@ SOCIAL_AUTH_PIPELINE = (
 REST_FRAMEWORK = {
     'DEFAULT_VERSIONING_CLASS': 'rest_framework.versioning.NamespaceVersioning',
     'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.TokenAuthentication',
     ]
+}
+
+# Django REST Framework Simple JWT (rest_framework_simplejwt)
+
+SIMPLE_JWT = {
+    # "ACCESS_TOKEN_LIFETIME": datetime.timedelta(minutes=5),
+    "ACCESS_TOKEN_LIFETIME": datetime.timedelta(seconds=5),
+    "REFRESH_TOKEN_LIFETIME": datetime.timedelta(days=1),
 }
 
 # Discord (discord)

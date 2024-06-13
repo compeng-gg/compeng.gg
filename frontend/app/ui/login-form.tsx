@@ -1,36 +1,28 @@
 'use client';
 
-import { useState, FormEvent } from "react";
+import { useState, useContext, FormEvent } from "react";
 import { useRouter } from 'next/navigation'
-import { fetchApi } from "@/app/lib/api-client";
+import { JwtContext } from '@/app/lib/jwt-provider';
+import { fetchApiSingle } from "@/app/lib/api";
 
 function LoginForm() {
+  const [jwt, setAndStoreJwt] = useContext(JwtContext);
+
   const [error, setError] = useState<string | null>(null);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-
-  const router = useRouter();
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
     try {
-      const response = await fetchApi("/auth/login", { username, password });
+      const response = await fetchApiSingle("/jwt/obtain-pair", { username, password });
       const data = await response.json();
-      console.log(data);
       if (response.ok) {
-        router.refresh();
+        setAndStoreJwt(data);
       }
       else {
-        if ("username" in data.errors) {
-          setError(data.errors.username);
-        }
-        else if ("password" in data.errors) {
-          setError(data.errors.password);
-        }
-        else {
-          setError("An unexpected error occurred");
-        }
+        setError(data.detail);
       }
     }
     catch (err) {

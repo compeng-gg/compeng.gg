@@ -64,7 +64,7 @@ def session_v0(request):
         'username': request.user.username,
     })
 
-@api_view(['POST'])
+@api_view(['GET'])
 def session(request):
     if request.version == 'v0':
         return session_v0(request)

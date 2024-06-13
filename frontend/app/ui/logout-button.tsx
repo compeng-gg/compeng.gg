@@ -1,26 +1,40 @@
 'use client';
 
-import { SyntheticEvent } from "react";
-import { useRouter } from 'next/navigation';
-import { fetchApi } from "@/app/lib/api-client";
+import { useContext, SyntheticEvent } from "react";
+
+import { JwtContext } from '@/app/lib/jwt-provider';
+
+import { fetchApi } from "@/app/lib/api";
 
 function LogoutButton() {
-  const router = useRouter();
+  const [jwt, setAndStoreJwt] = useContext(JwtContext);
+
+  function test(event: SyntheticEvent) {
+
+    fetchApi(jwt, setAndStoreJwt, "/auth/session")
+    .then((res) => res.json())
+    .then((data) => console.log("Test: ", data));
+  }
 
   function handleClick(event: SyntheticEvent) {
-    fetchApi("/auth/logout", {})
-    .then((response) => response.json())
-    .then((data) => console.log(data))
-    .then(() => router.refresh());
+    setAndStoreJwt(undefined);
   }
 
   return (
+    <>
+    <button
+      className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+      onClick={test}
+    >
+      Test
+    </button>
     <button
       className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
       onClick={handleClick}
     >
       Logout
     </button>
+    </>
   )
 }
 
