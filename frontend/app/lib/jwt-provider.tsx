@@ -3,6 +3,7 @@
 import { createContext, useEffect, useState } from 'react';
  
 import LoginForm from '@/app/ui/login-form';
+import DiscordButton from '@/app/ui/discord-button';
  
 export const JwtContext = createContext<any>([undefined, undefined]);
 
@@ -40,18 +41,6 @@ export default function JwtProvider({
 
   if (!isInitialized) {
     return (<></>);
-  }
-  else if (jwt === undefined) {
-    return (
-      <main className="flex min-h-screen flex-col items-center justify-center p-24">
-        <div>
-          <h1 className="mb-4 font-black text-5xl">CompEng.gg</h1>
-          <JwtContext.Provider value={[jwt, setAndStoreJwt]}>
-            <LoginForm />
-          </JwtContext.Provider>
-        </div>
-      </main>
-    );
   }
   else {
     return (

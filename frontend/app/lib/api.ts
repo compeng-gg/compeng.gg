@@ -4,7 +4,7 @@ export function fetchApiSingle(endpoint: string, token?: string): Promise<Respon
 export function fetchApiSingle(endpoint: string, data: object, token?: string): Promise<Response>;
 
 export function fetchApiSingle(endpoint: string, dataOrToken?: object | string, maybeToken?: string): Promise<Response> {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v0';
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v0/';
   const url = apiUrl + endpoint
 
   let headers: HeadersInit = {
@@ -62,7 +62,7 @@ export async function fetchApi(jwt: any, setAndStoreJwt:any, endpoint: string, d
   let accessToken = undefined;
   try {
     const refreshToken: string = jwt.refresh
-    const refreshResponse: Response = await fetchApiSingle("/jwt/refresh", {'refresh': refreshToken});
+    const refreshResponse: Response = await fetchApiSingle("jwt/refresh/", {'refresh': refreshToken});
     const refreshData: any = await refreshResponse.json();
     accessToken = refreshData.access
     if (accessToken === undefined) {

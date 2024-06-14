@@ -8,7 +8,7 @@ BASE_DIR = PROJECT_DIR.parent
 
 # Core
 
-APPEND_SLASH = False
+APPEND_SLASH = True
 ALLOWED_HOSTS = json.loads(os.getenv('ALLOWED_HOSTS', '[]'))
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -172,6 +172,8 @@ CORS_ALLOW_CREDENTIALS = False
 # Social Auth (social_django)
 
 SOCIAL_AUTH_URL_NAMESPACE = 'auth'
+SOCIAL_AUTH_REQUIRE_POST = False
+
 SOCIAL_AUTH_DISCORD_KEY = os.environ.setdefault('SOCIAL_AUTH_DISCORD_KEY',
     ''
 )
@@ -219,8 +221,7 @@ REST_FRAMEWORK = {
 # Django REST Framework Simple JWT (rest_framework_simplejwt)
 
 SIMPLE_JWT = {
-    # "ACCESS_TOKEN_LIFETIME": datetime.timedelta(minutes=5),
-    "ACCESS_TOKEN_LIFETIME": datetime.timedelta(seconds=5),
+    "ACCESS_TOKEN_LIFETIME": datetime.timedelta(minutes=5),
     "REFRESH_TOKEN_LIFETIME": datetime.timedelta(days=1),
 }
 
