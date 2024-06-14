@@ -16,6 +16,7 @@ from rest_framework import serializers
 from django.views.decorators.csrf import csrf_exempt
 
 from social_core.actions import do_complete
+from social_core.exceptions import AuthForbidden
 
 from rest_framework_simplejwt.tokens import RefreshToken
 
@@ -33,9 +34,13 @@ def discord_v0(request):
     backend = load_backend(
         strategy=strategy, name='discord', redirect_uri=REDIRECT_URI
     )
-    user = backend.auth_complete(
-        request=request, strategy=strategy, redirect_name=None
-    )
+    try:
+        user = backend.auth_complete(
+            strategy=strategy
+        #    request=request, strategy=strategy, redirect_name=None
+        )
+    except AuthForbidden as e:
+        return Response({'detail': str(e)}, status=status.HTTP_401_UNAUTHORIZED)
 
     if not user:
         return Response(status=status.HTTP_401_UNAUTHORIZED)
@@ -46,7 +51,6 @@ def discord_v0(request):
         'access': str(refresh.access_token),
     })
 
-@csrf_exempt
 @api_view(['POST'])
 def discord(request):
     if request.version == 'v0':
@@ -115,4 +119,13 @@ def session_v0(request):
 def session(request):
     if request.version == 'v0':
         return session_v0(request)
-    return HttpResponseNotFound()
+    return Response(status=status.HTTP_404_NOT_FOUND)
+
+def self_v0(request):
+    return Response({'username': request.user.username})
+
+@api_view(['GET'])
+def self(request):
+    if request.version == 'v0':
+        return self_v0(request)
+    return Response(status=status.HTTP_404_NOT_FOUND)
