@@ -22,8 +22,7 @@ RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && locale-gen
 
 RUN sh -c "$(wget https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh -O -)" "" --unattended \
     && sed -i 's/ZSH_THEME="robbyrussell"/ZSH_THEME="lukerandall"/g' /root/.zshrc \
-    && echo '\nexport NEXT_PUBLIC_ORIGIN="https://${CODESPACE_NAME}-3000.app.github.dev"' \
-            '\nexport NEXT_PUBLIC_API_URL="https://${CODESPACE_NAME}-8000.app.github.dev/api/v0"' \
+    && echo '\nexport NEXT_PUBLIC_API_URL="https://${CODESPACE_NAME}-8000.app.github.dev/api/v0/"' \
             '\nexport CSRF_TRUSTED_ORIGINS='\''["https://'\''${CODESPACE_NAME}'\''-3000.app.github.dev"]'\' \
             '\nexport CORS_ALLOWED_ORIGINS='\''["https://'\''${CODESPACE_NAME}'\''-3000.app.github.dev"]'\' >> /root/.zshrc
 
