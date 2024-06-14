@@ -6,20 +6,27 @@ import { JwtContext } from '@/app/lib/jwt-provider';
 
 import { usePathname } from 'next/navigation';
 
+function generateState() {
+  return Math.random().toString(36).substring(7);
+}
+
 function DiscordButton() {
 
   const [jwt, setAndStoreJwt] = useContext(JwtContext);
   const pathname = usePathname()
 
   function handleClick(event: any) {
+    const state = generateState();
+
     sessionStorage.setItem("provider", "discord");
     sessionStorage.setItem("next", pathname);
-    window.location.href = 'https://discord.com/oauth2/authorize?client_id=963564393050832936&redirect_uri=http://localhost:3000/oauth2/&response_type=code&scope=identify+guilds.join+identify'
-    /*
-    fetchApiSingle("/auth/login/discord/")
-    .then((res) => res.json())
-    .then((data) => console.log("Test: ", data));
-    */
+    sessionStorage.setItem("state", state);
+
+    const clientId = '963564393050832936';
+    const redirectUri = encodeURIComponent('http://localhost:3000/auth/');
+    const scope = 'identify guilds.join';
+    
+    window.location.href = `https://discord.com/api/oauth2/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&state=${state}`;
   }
 
   return (

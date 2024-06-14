@@ -49,5 +49,4 @@ urlpatterns = [
     path('api/v0/', include('api.urls', namespace='v0')),
 
     path('auth/', include('social_django.urls', namespace='auth')),
-    path("admin/", admin.site.urls),
 ]

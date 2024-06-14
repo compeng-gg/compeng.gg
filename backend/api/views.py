@@ -4,7 +4,54 @@ from django.shortcuts import render
 from django.contrib import auth
 from django.contrib.auth.models import User
 
+from compeng_gg.strategy import load_strategy
+from social_django.utils import load_backend
+
+from rest_framework import status
+from rest_framework.response import Response
+
 from rest_framework.decorators import api_view
+from rest_framework import serializers
+
+from django.views.decorators.csrf import csrf_exempt
+
+from social_core.actions import do_complete
+
+from rest_framework_simplejwt.tokens import RefreshToken
+
+REDIRECT_URI = 'http://localhost:3000/auth/'
+
+class CodeSerializer(serializers.Serializer):
+    code = serializers.CharField(max_length=512)
+
+def discord_v0(request):
+    serializer = CodeSerializer(data=request.data)
+    if not serializer.is_valid():
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    strategy = load_strategy(validated_data=serializer.validated_data)
+    backend = load_backend(
+        strategy=strategy, name='discord', redirect_uri=REDIRECT_URI
+    )
+    user = backend.auth_complete(
+        request=request, strategy=strategy, redirect_name=None
+    )
+
+    if not user:
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
+
+    refresh = RefreshToken.for_user(user)
+    return Response({
+        'refresh': str(refresh),
+        'access': str(refresh.access_token),
+    })
+
+@csrf_exempt
+@api_view(['POST'])
+def discord(request):
+    if request.version == 'v0':
+        return discord_v0(request)
+    return HttpResponseNotFound()
 
 def login_v0(request):
     username = request.data["username"]

@@ -37,11 +37,11 @@ USE_TZ = True
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
+    # 'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
+    # 'django.contrib.auth.middleware.AuthenticationMiddleware',
+    # 'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'social_django.middleware.SocialAuthExceptionMiddleware',
 ]
@@ -63,32 +63,17 @@ INSTALLED_APPS = [
     'social_django',
 
     'rest_framework',
-    'rest_framework.authtoken',
     'rest_framework_simplejwt',
 
     'corsheaders',
 
-    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
+    # 'django.contrib.staticfiles',
 ]
 
 ## Security
 
-CSRF_COOKIE_AGE = 31449600
-CSRF_COOKIE_DOMAIN = None
-CSRF_COOKIE_HTTPONLY = False
-CSRF_COOKIE_NAME = 'csrftoken'
-CSRF_COOKIE_PATH = '/'
-CSRF_COOKIE_SAMESITE = 'Lax'
-CSRF_COOKIE_SECURE = False
-CSRF_FAILURE_VIEW = 'django.views.csrf.csrf_failure'
-CSRF_HEADER_NAME = 'HTTP_X_CSRFTOKEN'
-CSRF_TRUSTED_ORIGINS = json.loads(os.getenv('CSRF_TRUSTED_ORIGINS', '[]'))
-CSRF_USE_SESSIONS = False
 SECRET_KEY = os.environ.setdefault('SECRET_KEY',
     'django-insecure-i%y%&uud=jfqzakf!ee5+j12hv=q)r9v*(569c5%%gh9n2#7fg'
 )
@@ -107,7 +92,7 @@ TEMPLATES = [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+                # 'django.contrib.messages.context_processors.messages',
             ],
         },
     },
@@ -120,7 +105,8 @@ ROOT_URLCONF = 'compeng_gg.urls'
 # Auth (django.contrib.auth)
 
 AUTHENTICATION_BACKENDS = [
-    'social_core.backends.discord.DiscordOAuth2',
+    # 'social_core.backends.discord.DiscordOAuth2',
+    'compeng_gg.auth.backends.CustomDiscordOAuth2',
     'compeng_gg.auth.backends.LaForgeBackend',
     'django.contrib.auth.backends.ModelBackend',
 ]
@@ -141,29 +127,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-# Sessions (django.contrib.sessions)
-
-SESSION_CACHE_ALIAS = 'default'
-SESSION_COOKIE_AGE = 1209600
-SESSION_COOKIE_DOMAIN = None
-SESSION_COOKIE_HTTPONLY = True
-SESSION_COOKIE_NAME = 'sessionid'
-SESSION_COOKIE_PATH = '/'
-SESSION_COOKIE_SAMESITE = 'Lax'
-SESSION_COOKIE_SECURE = False
-SESSION_ENGINE = 'django.contrib.sessions.backends.db'
-SESSION_EXPIRE_AT_BROWSER_CLOSE = False
-SESSION_FILE_PATH = None
-SESSION_SAVE_EVERY_REQUEST = False
-SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
-
-# Static Files (django.contrib.staticfiles)
-
-STATIC_URL = 'static/'
-STATICFILES_DIRS = [
-    str(PROJECT_DIR.joinpath("static")),
-]
-
 # Django CORS Headers (corsheaders)
 
 CORS_ALLOWED_ORIGINS = json.loads(os.getenv('CORS_ALLOWED_ORIGINS', '[]'))
@@ -171,6 +134,7 @@ CORS_ALLOW_CREDENTIALS = False
 
 # Social Auth (social_django)
 
+SOCIAL_AUTH_STRATEGY = 'compeng_gg.strategy.StatelessDjangoStrategy'
 SOCIAL_AUTH_URL_NAMESPACE = 'auth'
 SOCIAL_AUTH_REQUIRE_POST = False
 
@@ -199,7 +163,7 @@ SOCIAL_AUTH_PIPELINE = (
     "social_core.pipeline.social_auth.social_uid",
     "social_core.pipeline.social_auth.auth_allowed",
     "social_core.pipeline.social_auth.social_user",
-    'compeng_gg.auth.pipeline.disallow_new_discord',
+    # 'compeng_gg.auth.pipeline.disallow_new_discord',
     "social_core.pipeline.user.get_username",
     "social_core.pipeline.user.create_user",
     "social_core.pipeline.social_auth.associate_user",
@@ -213,8 +177,8 @@ REST_FRAMEWORK = {
     'DEFAULT_VERSIONING_CLASS': 'rest_framework.versioning.NamespaceVersioning',
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
-        'rest_framework.authentication.TokenAuthentication',
+        # 'rest_framework.authentication.SessionAuthentication',
+        # 'rest_framework.authentication.TokenAuthentication',
     ]
 }
 

@@ -3,7 +3,7 @@
 import { useState, useContext, FormEvent } from "react";
 import { useRouter } from 'next/navigation'
 import { JwtContext } from '@/app/lib/jwt-provider';
-import { fetchApiSingle } from "@/app/lib/api";
+import { fetchApiSingle, jwtObtainPairEndpoint } from "@/app/lib/api";
 
 function LoginForm() {
   const [jwt, setAndStoreJwt] = useContext(JwtContext);
@@ -16,7 +16,7 @@ function LoginForm() {
     event.preventDefault();
     setError(null);
     try {
-      const response = await fetchApiSingle("jwt/obtain-pair/", { username, password });
+      const response = await fetchApiSingle(jwtObtainPairEndpoint, { username, password });
       const data = await response.json();
       if (response.ok) {
         setAndStoreJwt(data);

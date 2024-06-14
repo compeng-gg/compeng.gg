@@ -11,8 +11,11 @@ from django.urls import include, path
 app_name = 'api'
 
 urlpatterns = [
-    path('jwt/obtain-pair/', TokenObtainPairView.as_view(), name='jwt_obtain_pair'),
-    path('jwt/refresh/', TokenRefreshView.as_view(), name='jwt_refresh'),
-    path('jwt/verify/', TokenVerifyView.as_view(), name='jwt_verify'),
+    path('auth/login/', TokenObtainPairView.as_view(), name='jwt_obtain_pair'),
+    path('auth/refresh/', TokenRefreshView.as_view(), name='jwt_refresh'),
+    path('auth/verify/', TokenVerifyView.as_view(), name='jwt_verify'),
+
+    path('auth/discord/', views.discord),
+
     path('auth/session/', views.session),
 ]

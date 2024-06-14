@@ -2,9 +2,6 @@
  
 import { createContext, useEffect, useState } from 'react';
  
-import LoginForm from '@/app/ui/login-form';
-import DiscordButton from '@/app/ui/discord-button';
- 
 export const JwtContext = createContext<any>([undefined, undefined]);
 
 function getLocalStorage(key: string): any {
