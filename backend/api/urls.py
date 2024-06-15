@@ -15,7 +15,8 @@ urlpatterns = [
     path('auth/refresh/', TokenRefreshView.as_view(), name='jwt_refresh'),
     path('auth/verify/', TokenVerifyView.as_view(), name='jwt_verify'),
 
-    path('auth/discord/', views.discord),
+    path('auth/discord/', views.auth_discord),
+    path('connect/discord/', views.connect_discord),
 
     path('users/self/', views.self),
 ]

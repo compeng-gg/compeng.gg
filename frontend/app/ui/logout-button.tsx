@@ -4,8 +4,6 @@ import { useContext, SyntheticEvent } from "react";
 
 import { JwtContext } from '@/app/lib/jwt-provider';
 
-import { fetchApi } from "@/app/lib/api";
-
 function LogoutButton() {
   const [jwt, setAndStoreJwt] = useContext(JwtContext);
 

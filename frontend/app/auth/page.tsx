@@ -1,22 +1,28 @@
 'use client';
 
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 
-import { fetchApiSingle } from '@/app/lib/api';
+import { fetchApi, fetchApiSingle } from '@/app/lib/api';
 import { JwtContext } from '@/app/lib/jwt-provider';
 
 export default function Page() {
   const [jwt, setAndStoreJwt] = useContext(JwtContext);
+  const handleRef = useRef<Promise<void> | null>(null);
+  const hasRunRef = useRef(false);
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (hasRunRef.current) {
+      return;
+    }
     const code = searchParams.get('code');
     const state = searchParams.get('state');
+    const action = sessionStorage.getItem('action');
     const provider = sessionStorage.getItem('provider');
     const next = sessionStorage.getItem('next');
     const stored_state = sessionStorage.getItem('state');
@@ -26,7 +32,7 @@ export default function Page() {
         setError("Parameters missing");
         return;
       }
-      if (provider === null || next === null || stored_state === null) {
+      if (action === null || provider === null || next === null || stored_state === null) {
         setError("Session state missing");
         return;
       }
@@ -34,28 +40,56 @@ export default function Page() {
         setError("Cross-site request forgery detected")
         return;
       }
-      const response: Response = await fetchApiSingle(`auth/${provider}/`, {'code': code, 'state': state});
-      const data = await response.json();
-      if (response.ok) {
-        setAndStoreJwt(data);
-        if (next !== null) {
-          router.push(next);
+      try {
+        if (action === 'auth') {
+          const response: Response = await fetchApiSingle(`${action}/${provider}/`, {'code': code, 'state': state});
+          const data = await response.json();
+          if (response.ok) {
+            setAndStoreJwt(data);
+            if (next !== null) {
+              router.push(next);
+            }
+            else {
+              router.push('/');
+            }
+          }
+          else {
+            setError(data.detail);
+          }
         }
-        else {
-          router.push('/');
+        else if (action === 'connect') {
+          const response: Response = await fetchApi(jwt, setAndStoreJwt, `${action}/${provider}/`, {'code': code, 'state': state});
+          if (response.ok) {
+            if (next !== null) {
+              router.push(next);
+            }
+            else {
+              router.push('/');
+            }
+          }
+          else {
+            const data = await response.json();
+            setError(data.detail);
+          }
         }
       }
-      else {
-        setError(data.detail)
+      catch (err) {
+        setError("An unexpected error occurred");
       }
     }
 
-    handle();
+    handleRef.current = handle();
+    hasRunRef.current = true;
 
     return () => {
-      sessionStorage.removeItem('provider');
-      sessionStorage.removeItem('next');
-      sessionStorage.removeItem('state');
+      if (handleRef.current) {
+        handleRef.current.then(() => {
+          sessionStorage.removeItem('action');
+          sessionStorage.removeItem('provider');
+          sessionStorage.removeItem('next');
+          sessionStorage.removeItem('state');
+        });
+      }
     }
   }, []);
   if (error === null) {

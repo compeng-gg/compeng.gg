@@ -166,7 +166,7 @@ SOCIAL_AUTH_PIPELINE = (
     # 'compeng_gg.auth.pipeline.disallow_new_discord',
     'social_core.pipeline.user.get_username',
     'social_core.pipeline.user.create_user',
-    'social_core.pipeline.social_auth.associate_user',
+    # 'social_core.pipeline.social_auth.associate_user',
     'social_core.pipeline.social_auth.load_extra_data',
     'social_core.pipeline.user.user_details',
 )
@@ -174,12 +174,15 @@ SOCIAL_AUTH_PIPELINE = (
 # Django REST Framework (rest_framework)
 
 REST_FRAMEWORK = {
-    'DEFAULT_VERSIONING_CLASS': 'rest_framework.versioning.NamespaceVersioning',
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
         # 'rest_framework.authentication.SessionAuthentication',
         # 'rest_framework.authentication.TokenAuthentication',
-    ]
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+    'DEFAULT_VERSIONING_CLASS': 'rest_framework.versioning.NamespaceVersioning',
 }
 
 # Django REST Framework Simple JWT (rest_framework_simplejwt)

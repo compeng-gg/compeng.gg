@@ -2,6 +2,7 @@
 
 import LoginRequired from '@/app/lib/login-required';
 import LogoutButton from '@/app/ui/logout-button';
+import Link from 'next/link'
 
 import { useContext, useEffect, useState } from 'react';
 import { JwtContext } from '@/app/lib/jwt-provider';
@@ -21,6 +22,7 @@ function HomePage() {
     <main className="flex min-h-screen flex-col items-center justify-center p-24">
       <h1 className="mb-4 font-black text-5xl">CompEng.gg</h1>
       <p className="mb-2">You&apos;re logged in as <span className="font-bold text-blue-500">{username}</span>.</p>
+      <Link className="text-blue-200" href="/settings/">Settings</Link>
       <LogoutButton/>
     </main>
   );

@@ -1,22 +1,15 @@
-from django.http import HttpResponseNotFound, JsonResponse
-from django.shortcuts import render
-
 from django.contrib import auth
 from django.contrib.auth.models import User
 
-from compeng_gg.strategy import load_strategy
+from social_core.actions import do_complete
+from social_core.exceptions import AuthForbidden, AuthCanceled
+from compeng_gg.strategy import load_strategy, load_no_create_user_strategy
 from social_django.utils import load_backend
 
-from rest_framework import status
+from rest_framework import serializers, status
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
-
-from rest_framework.decorators import api_view
-from rest_framework import serializers
-
-from django.views.decorators.csrf import csrf_exempt
-
-from social_core.actions import do_complete
-from social_core.exceptions import AuthForbidden
 
 from rest_framework_simplejwt.tokens import RefreshToken
 
@@ -25,25 +18,36 @@ REDIRECT_URI = 'http://localhost:3000/auth/'
 class CodeSerializer(serializers.Serializer):
     code = serializers.CharField(max_length=512)
 
-def discord_v0(request):
+def auth_common(request, backend_name, strategy_func):
+    if request.user.is_authenticated:
+        return Response(
+            {'detail': 'Already authenticated'},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
     serializer = CodeSerializer(data=request.data)
     if not serializer.is_valid():
-        return Response(status=status.HTTP_404_NOT_FOUND)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
 
-    strategy = load_strategy(validated_data=serializer.validated_data)
+    strategy = strategy_func(validated_data=serializer.validated_data)
     backend = load_backend(
-        strategy=strategy, name='discord', redirect_uri=REDIRECT_URI
+        strategy=strategy, name=backend_name, redirect_uri=REDIRECT_URI
     )
     try:
         user = backend.auth_complete(
             strategy=strategy
         #    request=request, strategy=strategy, redirect_name=None
         )
+    except AuthCanceled as e:
+        return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
     except AuthForbidden as e:
-        return Response({'detail': str(e)}, status=status.HTTP_401_UNAUTHORIZED)
+        return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     if not user:
-        return Response(status=status.HTTP_401_UNAUTHORIZED)
+        return Response(
+            {'detail': 'No connected user found'},
+            status=status.HTTP_401_UNAUTHORIZED,
+        )
 
     refresh = RefreshToken.for_user(user)
     return Response({
@@ -51,81 +55,72 @@ def discord_v0(request):
         'access': str(refresh.access_token),
     })
 
-@api_view(['POST'])
-def discord(request):
-    if request.version == 'v0':
-        return discord_v0(request)
-    return HttpResponseNotFound()
+def auth(request, backend_name):
+    return auth_common(request, backend_name, load_strategy)
 
-def login_v0(request):
-    username = request.data["username"]
-    password = request.data["password"]
+def auth_no_create_user(request, backend_name):
+    return auth_common(request, backend_name, load_no_create_user_strategy)
 
-    if username is None or username == "":
-        return JsonResponse({
-            "errors": {"username": "Input username."},
-        }, status=400)
+def connect(request, backend_name):
+    if not request.user:
+        return Response(status=status.HTTP_400_BAD_REQUEST)
 
-    if password is None or password == "":
-        return JsonResponse({
-            "errors": {"password": "Input password."},
-        }, status=400)
+    serializer = CodeSerializer(data=request.data)
+    if not serializer.is_valid():
+        return Response(status=status.HTTP_400_BAD_REQUEST)
 
-    if not User.objects.filter(username=username).exists():
-        return JsonResponse({
-            "errors": {"username": "Username does not exist."},
-        }, status=400)
+    strategy = load_no_create_user_strategy(
+        validated_data=serializer.validated_data
+    )
+    backend = load_backend(
+        strategy=strategy, name=backend_name, redirect_uri=REDIRECT_URI
+    )
+    try:
+        user = backend.auth_complete(
+            strategy=strategy,
+            user=request.user,
+        #    request=request, strategy=strategy, redirect_name=None
+        )
+    except AuthCanceled as e:
+        return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    except AuthForbidden as e:
+        return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-    user = auth.authenticate(username=username, password=password)
-    if user is None:
-        return JsonResponse({
-            "errors": {"password": "Wrong password."},
-        }, status=400)
+    if not user:
+        return Response(
+            {'detail': 'No connected user found'},
+            status=status.HTTP_401_UNAUTHORIZED,
+        )
 
-    auth.login(request, user)
+    refresh = RefreshToken.for_user(user)
+    return Response()
 
-    return JsonResponse({})
-
-@api_view(['POST'])
-def login(request):
-    if request.version == 'v0':
-        return login_v0(request)
-    return HttpResponseNotFound()
-
-def logout_v0(request):
-    if not request.user.is_authenticated:
-        return JsonResponse({}, status=400)
-
-    auth.logout(request)
-
-    return JsonResponse({})
+def auth_discord_v0(request):
+    return auth_no_create_user(request, 'discord')
 
 @api_view(['POST'])
-def logout(request):
+@permission_classes([AllowAny])
+def auth_discord(request):
     if request.version == 'v0':
-        return logout_v0(request)
-    return HttpResponseNotFound()
-
-def session_v0(request):
-    if not request.user.is_authenticated:
-        return JsonResponse({'is_authenticated': False}, status=401)
-
-    return JsonResponse({
-        'is_authenticated': True,
-        'username': request.user.username,
-    })
-
-@api_view(['GET'])
-def session(request):
-    if request.version == 'v0':
-        return session_v0(request)
+        return auth_discord_v0(request)
     return Response(status=status.HTTP_404_NOT_FOUND)
 
 def self_v0(request):
     return Response({'username': request.user.username})
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def self(request):
     if request.version == 'v0':
         return self_v0(request)
+    return Response(status=status.HTTP_404_NOT_FOUND)
+
+def connect_discord_v0(request):
+    return connect(request, 'discord')
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def connect_discord(request):
+    if request.version == 'v0':
+        return connect_discord_v0(request)
     return Response(status=status.HTTP_404_NOT_FOUND)

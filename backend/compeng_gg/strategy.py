@@ -4,7 +4,18 @@ from social_django.strategy import DjangoStrategy
 from social_django.utils import STRATEGY, STORAGE
 
 def load_strategy(validated_data=None):
-    return get_strategy(STRATEGY, STORAGE, validated_data=validated_data)
+    return get_strategy(
+        'compeng_gg.strategy.StatelessDjangoStrategy',
+        STORAGE,
+        validated_data=validated_data,
+    )
+
+def load_no_create_user_strategy(validated_data=None):
+    return get_strategy(
+        'compeng_gg.strategy.StatelessNoCreateUserDjangoStrategy',
+        STORAGE,
+        validated_data=validated_data,
+    )
 
 class StatelessDjangoStrategy(DjangoStrategy):
 
@@ -45,3 +56,8 @@ class StatelessDjangoStrategy(DjangoStrategy):
 
     def render_html(self, tpl=None, html=None, context=None):
         raise NotImplementedError("'render_html' not implemented")
+
+class StatelessNoCreateUserDjangoStrategy(StatelessDjangoStrategy):
+
+    def create_user(self, *args, **kwargs):
+        return None
