@@ -41,8 +41,8 @@ export function fetchApiSingle(endpoint: string, dataOrToken?: object | string, 
   }
 }
 
-export function fetchApi(jwt: any, setAndStoreJwt:any, url: string): Promise<Response>;
-export function fetchApi(jwt: any, setAndStoreJwt:any, url: string, data: object): Promise<Response>;
+export function fetchApi(jwt: any, setAndStoreJwt:any, endpoint: string): Promise<Response>;
+export function fetchApi(jwt: any, setAndStoreJwt:any, endpoint: string, data: object): Promise<Response>;
 
 export async function fetchApi(jwt: any, setAndStoreJwt:any, endpoint: string, data?: object): Promise<any> {
   let response: Response;

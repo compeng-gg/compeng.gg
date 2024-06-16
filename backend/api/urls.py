@@ -19,4 +19,6 @@ urlpatterns = [
     path('connect/discord/', views.connect_discord),
 
     path('users/self/', views.self),
+
+    path('settings/', views.settings),
 ]

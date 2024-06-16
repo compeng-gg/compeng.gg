@@ -5,6 +5,7 @@ from social_core.actions import do_complete
 from social_core.exceptions import AuthForbidden, AuthCanceled
 from compeng_gg.strategy import load_strategy, load_no_create_user_strategy
 from social_django.utils import load_backend
+from social_django.models import UserSocialAuth
 
 from rest_framework import serializers, status
 from rest_framework.decorators import api_view, permission_classes
@@ -123,4 +124,18 @@ def connect_discord_v0(request):
 def connect_discord(request):
     if request.version == 'v0':
         return connect_discord_v0(request)
+    return Response(status=status.HTTP_404_NOT_FOUND)
+
+def settings_v0(request):
+    user = request.user
+    data = {}
+    for social_auth in user.social_auth.all():
+        data[social_auth.provider] = social_auth.uid
+    return Response(data)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def settings(request):
+    if request.version == 'v0':
+        return settings_v0(request)
     return Response(status=status.HTTP_404_NOT_FOUND)
