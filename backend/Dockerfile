@@ -19,4 +19,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 EXPOSE 8000
-CMD ["daphne", "-b", "0.0.0.0", "www.asgi:application"]
+CMD ["daphne", "-b", "0.0.0.0", "compeng_gg.asgi:application"]
