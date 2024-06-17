@@ -5,6 +5,9 @@ on:
     branches:
       - 'main'
 
+env:
+  BUILDX_NO_DEFAULT_ATTESTATIONS: 1
+
 jobs:
   docker:
     runs-on: ubuntu-latest
