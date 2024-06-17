@@ -1,4 +1,4 @@
-name: docker-backend
+name: docker-frontend
 
 on:
   push:
@@ -28,9 +28,9 @@ jobs:
         name: Build and push
         uses: docker/build-push-action@v6
         with:
-          context: backend
-          file: backend/Dockerfile
+          context: frontend
+          file: frontend/Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
           tags: |
-            ghcr.io/compeng-gg/backend:latest
+            ghcr.io/compeng-gg/frontend:latest
