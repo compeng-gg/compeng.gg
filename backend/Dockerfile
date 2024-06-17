@@ -14,7 +14,7 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 ENV PYTHONPATH="/opt/compeng.gg"
 
 COPY requirements.txt requirements.txt
-RUN pip install daphne psycopg
+RUN pip install daphne "psycopg[binary]"
 RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
