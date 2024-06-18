@@ -14,7 +14,7 @@ from rest_framework.response import Response
 
 from rest_framework_simplejwt.tokens import RefreshToken
 
-REDIRECT_URI = 'http://localhost:3000/auth/'
+from django.conf import settings
 
 class CodeSerializer(serializers.Serializer):
     code = serializers.CharField(max_length=512)
@@ -32,7 +32,7 @@ def auth_common(request, backend_name, strategy_func):
 
     strategy = strategy_func(validated_data=serializer.validated_data)
     backend = load_backend(
-        strategy=strategy, name=backend_name, redirect_uri=REDIRECT_URI
+        strategy=strategy, name=backend_name, redirect_uri=settings.AUTH_REDIRECT_URI
     )
     try:
         user = backend.auth_complete(
@@ -74,7 +74,7 @@ def connect(request, backend_name):
         validated_data=serializer.validated_data
     )
     backend = load_backend(
-        strategy=strategy, name=backend_name, redirect_uri=REDIRECT_URI
+        strategy=strategy, name=backend_name, redirect_uri=settings.AUTH_REDIRECT_URI
     )
     try:
         user = backend.auth_complete(

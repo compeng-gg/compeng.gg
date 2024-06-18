@@ -200,3 +200,9 @@ DISCORD_BOT_TOKEN = os.environ.setdefault('DISCORD_BOT_TOKEN', '')
 
 WEBHOOK_TOKEN = os.environ.setdefault('WEBHOOK_TOKEN', '')
 WEBHOOK_HOSTS = json.loads(os.getenv("WEBHOOK_HOSTS", '["localhost"]'))
+
+# Custom
+
+AUTH_REDIRECT_URI = os.environ.setdefault(
+    'AUTH_REDIRECT_URI', 'http://localhost:3000/auth/'
+)
