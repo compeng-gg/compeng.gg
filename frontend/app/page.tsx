@@ -22,9 +22,9 @@ function HomePage() {
   return (
     <>
       <Navbar />
-      <main className="flex min-h-screen flex-col items-center justify-center p-24">
+      <main className="container mx-auto mt-4">
         <h1 className="mb-4 font-black text-5xl">Dashboard</h1>
-        <p className="mb-2">You&apos;re logged in as <span className="font-bold text-blue-500">{username}</span>.</p>
+        <p className="mb-2">You&apos;re logged in as <span className="font-bold text-blue-500">{username}</span></p>
       </main>
     </>
   );

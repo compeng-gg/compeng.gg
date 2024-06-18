@@ -33,7 +33,7 @@ function LoginForm() {
   return (
     <div className="w-full max-w-xs">
       <form
-        className="bg-gray-900 shadow-md rounded px-8 pt-6 pb-6 mb-4"
+        className="bg-zinc-900 shadow-md rounded px-8 pt-6 pb-6 mb-4"
         onSubmit={handleSubmit}
       >
         {error && (
@@ -41,13 +41,13 @@ function LoginForm() {
         )}
         <div className="mb-4">
           <label
-            className="block text-gray-100 text-sm font-bold mb-2"
+            className="block text-zinc-100 text-sm font-bold mb-2"
             htmlFor="username"
           >
             Username
           </label>
           <input
-            className="shadow appearance-none border border-gray-800 rounded w-full py-2 px-3 text-gray-100 bg-black leading-tight focus:outline-none focus:shadow-outline"
+            className="shadow appearance-none border border-zinc-800 rounded w-full py-2 px-3 text-zinc-100 bg-black leading-tight focus:outline-none focus:shadow-outline"
             id="username"
             type="text"
             autoComplete="username"
@@ -58,13 +58,13 @@ function LoginForm() {
         </div>
         <div className="mb-4">
           <label
-            className="block text-gray-100 text-sm font-bold mb-2"
+            className="block text-zinc-100 text-sm font-bold mb-2"
             htmlFor="password"
           >
             Password
           </label>
           <input
-            className="shadow appearance-none border border-gray-800 rounded w-full py-2 px-3 text-gray-100 bg-black mb-3 leading-tight focus:outline-none focus:shadow-outline"
+            className="shadow appearance-none border border-zinc-800 rounded w-full py-2 px-3 text-zinc-100 bg-black mb-3 leading-tight focus:outline-none focus:shadow-outline"
             id="password"
             type="password"
             autoComplete="current-password"
