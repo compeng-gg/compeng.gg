@@ -13,6 +13,8 @@ interface DiscordButtonProps {
     action: 'auth' | 'connect';
 }
 
+const authRedirectUri = process.env.NEXT_PUBLIC_AUTH_REDIRECT_URI || 'http://localhost:3000/auth/';
+
 function DiscordButton({ action }: DiscordButtonProps) {
   const [jwt, setAndStoreJwt] = useContext(JwtContext);
   const pathname = usePathname()
@@ -26,7 +28,7 @@ function DiscordButton({ action }: DiscordButtonProps) {
     sessionStorage.setItem('state', state);
 
     const clientId = '963564393050832936';
-    const redirectUri = encodeURIComponent('http://localhost:3000/auth/');
+    const redirectUri = encodeURIComponent(authRedirectUri);
     const scope = 'identify guilds.join';
     
     window.location.href = `https://discord.com/api/oauth2/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&state=${state}`;
