@@ -14,6 +14,7 @@ interface GitHubButtonProps {
 }
 
 const authRedirectUri = process.env.NEXT_PUBLIC_AUTH_REDIRECT_URI || 'http://localhost:3000/auth/';
+const clientId = process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID || 'Iv23lilBO4UQqz4hOmpL';
 
 function GitHubButton({ action }: GitHubButtonProps) {
   const [jwt, setAndStoreJwt] = useContext(JwtContext);
@@ -27,7 +28,6 @@ function GitHubButton({ action }: GitHubButtonProps) {
     sessionStorage.setItem('next', pathname);
     sessionStorage.setItem('state', state);
 
-    const clientId = 'Iv23lilBO4UQqz4hOmpL';
     const redirectUri = encodeURIComponent(authRedirectUri);
     
     window.location.href = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&state=${state}`;
