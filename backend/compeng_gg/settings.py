@@ -107,6 +107,7 @@ ROOT_URLCONF = 'compeng_gg.urls'
 AUTHENTICATION_BACKENDS = [
     # 'social_core.backends.discord.DiscordOAuth2',
     'compeng_gg.auth.backends.CustomDiscordOAuth2',
+    'compeng_gg.auth.backends.CustomGithubOAuth2',
     'compeng_gg.auth.backends.LaForgeBackend',
     'django.contrib.auth.backends.ModelBackend',
 ]
@@ -148,6 +149,12 @@ SOCIAL_AUTH_DISCORD_SCOPE = [
     'identify',
     'guilds.join',
 ]
+SOCIAL_AUTH_GITHUB_KEY = os.environ.setdefault('SOCIAL_AUTH_GITHUB_KEY',
+    ''
+)
+SOCIAL_AUTH_GITHUB_SECRET = os.environ.setdefault('SOCIAL_AUTH_GITHUB_SECRET',
+    ''
+)
 SOCIAL_AUTH_LAFORGE_KEY = os.environ.setdefault('SOCIAL_AUTH_LAFORGE_KEY',
     ''
 )

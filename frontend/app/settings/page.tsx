@@ -8,6 +8,7 @@ import { JwtContext } from '@/app/lib/jwt-provider';
 import LoginRequired from '@/app/lib/login-required';
 import DiscordButton from '@/app/ui/discord-button';
 import DiscordDisconnectButton from '@/app/ui/discord-disconnect-button';
+import GitHubButton from '@/app/ui/github-button';
 import Navbar from '@/app/ui/navbar';
 
 function SettingsPage() {
@@ -34,15 +35,28 @@ function SettingsPage() {
       <DiscordDisconnectButton />
     </>
   ) : (
-    <DiscordButton action='connect' />
+    <div>
+      <DiscordButton action='connect' />
+    </div>
+  );
+
+  const githubElement = settings.github ? (
+    <>
+      <p>GitHub: {settings.github}</p>
+    </>
+  ) : (
+    <div className="mt-4">
+      <GitHubButton action='connect' />
+    </div>
   );
 
   return (
     <>
       <Navbar />
-      <main className="container mx-auto mt-4">
+      <main className="container mx-auto mt-4 p-4">
         <h1 className="mb-4 font-black text-5xl">Settings</h1>
         {discordElement}
+        {githubElement}
       </main>
     </>
   );

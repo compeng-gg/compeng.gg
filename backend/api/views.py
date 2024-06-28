@@ -123,6 +123,16 @@ def auth_discord(request):
         return auth_discord_v0(request)
     return Response(status=status.HTTP_404_NOT_FOUND)
 
+def auth_github_v0(request):
+    return auth_no_create_user(request, 'github')
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def auth_github(request):
+    if request.version == 'v0':
+        return auth_github_v0(request)
+    return Response(status=status.HTTP_404_NOT_FOUND)
+
 def self_v0(request):
     return Response({'username': request.user.username})
 
@@ -151,6 +161,16 @@ def disconnect_discord_v0(request):
 def disconnect_discord(request):
     if request.version == 'v0':
         return disconnect_discord_v0(request)
+    return Response(status=status.HTTP_404_NOT_FOUND)
+
+def connect_github_v0(request):
+    return connect(request, 'github')
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def connect_github(request):
+    if request.version == 'v0':
+        return connect_github_v0(request)
     return Response(status=status.HTTP_404_NOT_FOUND)
 
 def settings_v0(request):

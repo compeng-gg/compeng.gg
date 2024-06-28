@@ -19,6 +19,9 @@ urlpatterns = [
     path('connect/discord/', views.connect_discord),
     path('disconnect/discord/', views.disconnect_discord),
 
+    path('auth/github/', views.auth_github),
+    path('connect/github/', views.connect_github),
+
     path('users/self/', views.self),
 
     path('settings/', views.settings),
