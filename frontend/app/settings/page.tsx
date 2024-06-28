@@ -7,6 +7,7 @@ import { JwtContext } from '@/app/lib/jwt-provider';
 
 import LoginRequired from '@/app/lib/login-required';
 import DiscordButton from '@/app/ui/discord-button';
+import DiscordDisconnectButton from '@/app/ui/discord-disconnect-button';
 import Navbar from '@/app/ui/navbar';
 
 function SettingsPage() {
@@ -28,7 +29,10 @@ function SettingsPage() {
   }, []);
 
   const discordElement = settings.discord ? (
-    <p>Discord: {settings.discord}</p>
+    <>
+      <p>Discord: {settings.discord}</p>
+      <DiscordDisconnectButton />
+    </>
   ) : (
     <DiscordButton action='connect' />
   );

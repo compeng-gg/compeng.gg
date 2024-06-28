@@ -17,6 +17,7 @@ urlpatterns = [
 
     path('auth/discord/', views.auth_discord),
     path('connect/discord/', views.connect_discord),
+    path('disconnect/discord/', views.disconnect_discord),
 
     path('users/self/', views.self),
 
