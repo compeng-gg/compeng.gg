@@ -15,15 +15,25 @@ from social_django.models import UserSocialAuth
 
 from compeng_gg.strategy import load_strategy, load_no_create_user_strategy
 
-from rest_framework import serializers, status
+from rest_framework import serializers, status, viewsets
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from .serializers import UserSerializer
+
 class CodeSerializer(serializers.Serializer):
     code = serializers.CharField(max_length=512)
+
+class UserViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows users to be viewed or edited.
+    """
+    queryset = User.objects.all().order_by('-date_joined')
+    serializer_class = UserSerializer
+    permission_classes = [IsAdminUser]
 
 def psa_common(request, backend_name, strategy_func, user=None):
     serializer = CodeSerializer(data=request.data)
