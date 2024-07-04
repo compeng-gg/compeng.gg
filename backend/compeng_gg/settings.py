@@ -5,11 +5,12 @@ import pathlib
 
 PROJECT_DIR = pathlib.Path(__file__).resolve().parent
 BASE_DIR = PROJECT_DIR.parent
+BUILTIN_FRONTEND = json.loads(os.environ.setdefault('BUILTIN_FRONTEND', 'true'))
 
 # Core
 
 APPEND_SLASH = True
-ALLOWED_HOSTS = json.loads(os.getenv('ALLOWED_HOSTS', '[]'))
+ALLOWED_HOSTS = json.loads(os.environ.setdefault('ALLOWED_HOSTS', '[]'))
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 ## Database
@@ -69,7 +70,6 @@ INSTALLED_APPS = [
 
     'django.contrib.auth',
     'django.contrib.contenttypes',
-    # 'django.contrib.staticfiles',
 ]
 
 ## Security
@@ -130,7 +130,9 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Django CORS Headers (corsheaders)
 
-CORS_ALLOWED_ORIGINS = json.loads(os.getenv('CORS_ALLOWED_ORIGINS', '[]'))
+CORS_ALLOWED_ORIGINS = json.loads(os.environ.setdefault('CORS_ALLOWED_ORIGINS',
+    '[]'
+))
 CORS_ALLOW_CREDENTIALS = False
 
 # Social Auth (social_django)
@@ -212,3 +214,22 @@ WEBHOOK_HOSTS = json.loads(os.getenv("WEBHOOK_HOSTS", '["localhost"]'))
 AUTH_REDIRECT_URI = os.environ.setdefault(
     'AUTH_REDIRECT_URI', 'http://localhost:3000/auth/'
 )
+
+# Builtin Frontend
+
+if BUILTIN_FRONTEND:
+    INSTALLED_APPS += [
+        'django.contrib.sessions',
+        'django.contrib.messages',
+        'django.contrib.staticfiles',
+        'django.contrib.admin',
+    ]
+    TEMPLATES[0]['OPTIONS']['context_processors'] += [
+        'django.contrib.messages.context_processors.messages',
+    ]
+    MIDDLEWARE += [
+        'django.contrib.sessions.middleware.SessionMiddleware',
+        'django.contrib.auth.middleware.AuthenticationMiddleware',
+        'django.contrib.messages.middleware.MessageMiddleware',
+    ]
+    STATIC_URL = '/static/'

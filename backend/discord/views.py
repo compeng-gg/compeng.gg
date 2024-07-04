@@ -61,7 +61,7 @@ def join(request, role):
         data = add_discord_guild_member(user_id, access_token, role_id)
         if not data:
             add_discord_guild_roles(user_id, [VERIFIED_ROLE_ID, role_id])
-    
+
     return redirect('profile', request.user.username)
 
 from social_django.models import UserSocialAuth
