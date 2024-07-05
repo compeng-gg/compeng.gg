@@ -46,14 +46,10 @@ def psa_common(request, backend_name, strategy_func, user=None):
         redirect_uri=conf.settings.AUTH_REDIRECT_URI,
     )
     try:
-        print('auth complete start', user)
         user_result = backend.auth_complete(
             strategy=strategy,
             user=user,
         )
-        print('auth complete end', user_result)
-        if user_result:
-            print('user social auth:', user_result.social_auth.all())
     except AuthAlreadyAssociated as e:
         return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
     except AuthCanceled as e:
