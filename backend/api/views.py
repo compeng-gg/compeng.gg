@@ -19,6 +19,7 @@ from rest_framework import serializers, status, viewsets
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.reverse import reverse
 
 from rest_framework_simplejwt.tokens import RefreshToken
 
@@ -192,3 +193,10 @@ def settings(request):
     if request.version == 'v0':
         return settings_v0(request)
     return Response(status=status.HTTP_404_NOT_FOUND)
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def api_root(request, format=None):
+    return Response({
+        'jwt-obtain-pair': reverse('jwt-obtain-pair', request=request, format=format),
+    })

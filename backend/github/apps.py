@@ -1,6 +1,5 @@
 from django.apps import AppConfig
 
-
-class Lab5Config(AppConfig):
+class GitHubConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'lab5'
+    name = 'github'

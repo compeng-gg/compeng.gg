@@ -14,7 +14,7 @@ interface GitHubButtonProps {
 }
 
 const authRedirectUri = process.env.NEXT_PUBLIC_AUTH_REDIRECT_URI || 'http://localhost:3000/auth/';
-const clientId = process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID || 'Iv23lilBO4UQqz4hOmpL';
+const clientId = process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID || '';
 
 function GitHubButton({ action }: GitHubButtonProps) {
   const [jwt, setAndStoreJwt] = useContext(JwtContext);

@@ -53,20 +53,18 @@ WSGI_APPLICATION = 'compeng_gg.wsgi.application'
 INSTALLED_APPS = [
     'api',
 
-    'discord',
-
     'courses',
 
-    'docs',
-    'webhook',
-    'lab5',
+    'discord',
+    'github',
 
-    'social_django',
-
-    'rest_framework',
-    'rest_framework_simplejwt',
+    # 'webhook',
+    #'lab5',
 
     'corsheaders',
+    'social_django',
+    'rest_framework',
+    'rest_framework_simplejwt',
 
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -203,6 +201,11 @@ SIMPLE_JWT = {
 # Discord (discord)
 
 DISCORD_BOT_TOKEN = os.environ.setdefault('DISCORD_BOT_TOKEN', '')
+
+# GitHub (github)
+
+GITHUB_ORGANIZATION = os.environ.setdefault('GITHUB_ORGANIZATION', '')
+GITHUB_PRIVATE_KEY_PEM = os.environ.setdefault('GITHUB_PRIVATE_KEY_PEM', '')
 
 # Webhook (webhook)
 

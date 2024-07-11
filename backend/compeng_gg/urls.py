@@ -18,37 +18,8 @@ from django.conf import settings
 from django.urls import include, path
 from django.views.generic import TemplateView
 
-from django.contrib.auth import views as auth_views
-from . import views
-
-from rest_framework import routers
-from discord.views import UserSocialAuthViewSet
-
-router = routers.DefaultRouter()
-router.register(r'discord', UserSocialAuthViewSet)
-
 urlpatterns = [
-    path("", TemplateView.as_view(template_name="homepage.html"),
-         name="homepage"),
-    path("robots.txt", TemplateView.as_view(template_name="robots.txt",
-                                            content_type="text/plain")),
-    
-    path('discord/', include('discord.urls')),
-
-    path("webhook/", include("webhook.urls")),
-
-    path("docs/", include("docs.urls")),
-    path("lab5/", include("lab5.urls")),
-
-    path('@<str:username>/', views.profile, name='profile'),
-    path("login/", auth_views.LoginView.as_view(), name='login'),
-    path("login-redirect/", views.login_redirect, name='login_redirect'),
-
-    path('api/', include(router.urls)),
-
     path('api/v0/', include('api.urls', namespace='v0')),
-
-    path('auth/', include('social_django.urls', namespace='auth')),
 ]
 
 if settings.BUILTIN_FRONTEND:

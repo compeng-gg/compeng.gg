@@ -73,26 +73,39 @@ class Offering(models.Model):
     class Meta:
         ordering = ['-start', 'slug']
 
-class Enrollment(models.Model):
 
-    class Role(models.IntegerChoices):
+class Role(models.Model):
+
+    class Kind(models.IntegerChoices):
         INSTRUCTOR = 1, _('Instructor')
         TA = 2, _('TA')
         STUDENT = 3, _('Student')
         AUDIT = 4, _('Audit')
 
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE
-    )
+    kind = models.IntegerField(choices=Kind)
     offering = models.ForeignKey(
         Offering,
         on_delete=models.CASCADE,
     )
-    role = models.IntegerField(choices=Role)
+    discord_role_id = models.IntegerField(blank=True, null=True)
+    github_team_id = models.IntegerField(blank=True, null=True)
 
     def __str__(self):
-        return f'{self.offering} - {self.get_role_display()} - {self.user}'
+        return f'{self.offering} {self.get_role_display()}'
 
     class Meta:
-        unique_together = ['user', 'offering']
+        unique_together = ['kind', 'offering']
+
+class Enrollment(models.Model):
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE
+    )
+    role = models.ForeignKey(
+        Role,
+        on_delete=models.CASCADE,
+    )
+
+    def __str__(self):
+        return f'{self.user} - {self.role}'

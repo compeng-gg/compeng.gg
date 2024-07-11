@@ -14,7 +14,7 @@ interface DiscordButtonProps {
 }
 
 const authRedirectUri = process.env.NEXT_PUBLIC_AUTH_REDIRECT_URI || 'http://localhost:3000/auth/';
-const clientId = process.env.NEXT_PUBLIC_DISCORD_CLIENT_ID || '1247897890806829086';
+const clientId = process.env.NEXT_PUBLIC_DISCORD_CLIENT_ID || '';
 
 function DiscordButton({ action }: DiscordButtonProps) {
   const [jwt, setAndStoreJwt] = useContext(JwtContext);
