@@ -27,6 +27,8 @@ urlpatterns = [
 
     path('settings/', views.settings),
 
+    path('courses/offerings/', views.offerings),
+
     path('users/', views.UserViewSet.as_view({'get': 'list'})),
 ]
 

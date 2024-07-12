@@ -7,6 +7,8 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { fetchApi, fetchApiSingle } from '@/app/lib/api';
 import { JwtContext } from '@/app/lib/jwt-provider';
 
+import H1 from '@/app/ui/h1';
+
 export default function Page() {
   const [jwt, setAndStoreJwt] = useContext(JwtContext);
   const handleRef = useRef<Promise<void> | null>(null);
@@ -99,7 +101,7 @@ export default function Page() {
   }
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-24">
-      <h1 className="mb-4 font-black text-5xl">Auth</h1>
+      <H1>Auth</H1>
       <p className="text-red-500">{error}</p>
     </main>
   );

@@ -200,6 +200,7 @@ SIMPLE_JWT = {
 # Discord (discord)
 
 DISCORD_BOT_TOKEN = os.environ.setdefault('DISCORD_BOT_TOKEN', '')
+DISCORD_GUILD_ID = os.environ.setdefault('DISCORD_GUILD_ID', '')
 
 # GitHub (github)
 

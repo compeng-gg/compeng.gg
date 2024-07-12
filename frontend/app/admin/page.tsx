@@ -8,6 +8,8 @@ import { JwtContext } from '@/app/lib/jwt-provider';
 import LoginRequired from '@/app/lib/login-required';
 import Navbar from '@/app/ui/navbar';
 
+import H1 from '@/app/ui/h1';
+
 function AdminPage() {
   const [jwt, setAndStoreJwt] = useContext(JwtContext);
   const [users, setUsers] = useState<any[]>([]);
@@ -30,7 +32,7 @@ function AdminPage() {
     <>
       <Navbar />
       <main className="container mx-auto mt-4 p-4">
-        <h1 className="mb-4 font-black text-5xl">Admin</h1>
+        <H1>Admin</H1>
         <table>
           <thead>
             <tr>

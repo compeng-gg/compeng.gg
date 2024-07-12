@@ -4,6 +4,7 @@ from django.utils.text import slugify
 
 from .models import Offering, Role
 
+from discord.rest_api import DiscordRestAPI
 from github.rest_api import GitHubRestAPI
 
 @receiver(post_save, sender=Offering)
@@ -30,8 +31,12 @@ def role_post_save(sender, instance=None, **kwargs):
         return
 
     if instance.discord_role_id is None:
-        # TODO: Add Discord role
-        pass
+        api = DiscordRestAPI()
+        response = api.create_guild_role_for_guild(
+            str(instance), DiscordRestAPI.COLOR_RED
+        )
+        instance.discord_role_id = response['id']
+        instance.save()
     
     if instance.github_team_slug == '':
         api = GitHubRestAPI()

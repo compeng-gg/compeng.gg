@@ -11,6 +11,8 @@ import DiscordDisconnectButton from '@/app/ui/discord-disconnect-button';
 import GitHubButton from '@/app/ui/github-button';
 import Navbar from '@/app/ui/navbar';
 
+import H1 from '@/app/ui/h1';
+
 function SettingsPage() {
   const [jwt, setAndStoreJwt] = useContext(JwtContext);
   const [settings, setSettings] = useState<any>({});
@@ -54,7 +56,7 @@ function SettingsPage() {
     <>
       <Navbar />
       <main className="container mx-auto mt-4 p-4">
-        <h1 className="mb-4 font-black text-5xl">Settings</h1>
+        <H1>Settings</H1>
         {discordElement}
         {githubElement}
       </main>

@@ -87,7 +87,7 @@ class Role(models.Model):
         Offering,
         on_delete=models.CASCADE,
     )
-    discord_role_id = models.IntegerField(blank=True, null=True)
+    discord_role_id = models.BigIntegerField(blank=True, null=True)
     github_team_slug = models.CharField(max_length=128, blank=True, null=False)
 
     def __str__(self):
@@ -100,7 +100,7 @@ class Enrollment(models.Model):
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
     )
     role = models.ForeignKey(
         Role,

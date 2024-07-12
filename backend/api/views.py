@@ -198,6 +198,15 @@ def settings(request):
     return Response(status=status.HTTP_404_NOT_FOUND)
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def offerings(request):
+    user = request.user
+    offerings = []
+    for enrollment in user.enrollment_set.all():
+        offerings.append(str(enrollment.role.offering))
+    return Response(offerings)
+
+@api_view(['GET'])
 @permission_classes([AllowAny])
 def api_root(request, format=None):
     return Response({

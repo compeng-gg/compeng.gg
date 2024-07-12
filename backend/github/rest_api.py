@@ -23,6 +23,7 @@ class GitHubRestAPI(RestAPI):
     )
 
     def __init__(self):
+        super().__init__()
         self.ghs_token = None
 
     def generate_jwt_token(self):
@@ -158,7 +159,7 @@ class GitHubRestAPI(RestAPI):
             "private": False,
             "has_issues": True,
             "has_projects": True,
-            "has_wiki": True,
+            "has_wiki": False,
         }
         return self.post_with_ghs(f'/orgs/{org}/repos', data)
 
