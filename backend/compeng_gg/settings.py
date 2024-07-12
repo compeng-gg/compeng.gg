@@ -103,7 +103,6 @@ ROOT_URLCONF = 'compeng_gg.urls'
 # Auth (django.contrib.auth)
 
 AUTHENTICATION_BACKENDS = [
-    # 'social_core.backends.discord.DiscordOAuth2',
     'compeng_gg.auth.backends.CustomDiscordOAuth2',
     'compeng_gg.auth.backends.CustomGithubOAuth2',
     'compeng_gg.auth.backends.LaForgeBackend',
@@ -129,7 +128,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Django CORS Headers (corsheaders)
 
 CORS_ALLOWED_ORIGINS = json.loads(os.environ.setdefault('CORS_ALLOWED_ORIGINS',
-    '[]'
+    '["http://localhost:3000"]'
 ))
 CORS_ALLOW_CREDENTIALS = False
 
