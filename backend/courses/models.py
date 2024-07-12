@@ -33,7 +33,7 @@ class Course(models.Model):
     title = models.CharField(max_length=80)
 
     def __str__(self):
-        return f'{self.title} ({self.name})'
+        return self.name
 
     def get_absolute_url(self):
         if Offering.objects.filter(course=self, active=False).exists():
@@ -55,6 +55,7 @@ class Offering(models.Model):
     slug = models.SlugField(max_length=50)
     name = models.CharField(max_length=50)
     start = models.DateField()
+    end = models.DateField()
     active = models.BooleanField()
 
     def __str__(self):
@@ -73,7 +74,6 @@ class Offering(models.Model):
     class Meta:
         ordering = ['-start', 'slug']
 
-
 class Role(models.Model):
 
     class Kind(models.IntegerChoices):
@@ -88,10 +88,10 @@ class Role(models.Model):
         on_delete=models.CASCADE,
     )
     discord_role_id = models.IntegerField(blank=True, null=True)
-    github_team_id = models.IntegerField(blank=True, null=True)
+    github_team_slug = models.CharField(max_length=128, blank=True, null=False)
 
     def __str__(self):
-        return f'{self.offering} {self.get_role_display()}'
+        return f'{self.offering} {self.get_kind_display()}'
 
     class Meta:
         unique_together = ['kind', 'offering']

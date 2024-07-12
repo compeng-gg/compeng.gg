@@ -4,14 +4,17 @@ from django.conf import settings
 
 from cryptography.hazmat.primitives.serialization import load_pem_private_key
 
+import logging
 import json
 import jwt
 import requests
 import time
 
+logger = logging.getLogger(__name__)
+
 class GitHubRestAPI(RestAPI):
 
-    URL = 'https://api.github.com'
+    API_URL = 'https://api.github.com'
     CLIENT_ID = settings.SOCIAL_AUTH_GITHUB_KEY
     CLIENT_SECRET = settings.SOCIAL_AUTH_GITHUB_SECRET
     ORGANIZATION = settings.GITHUB_ORGANIZATION
@@ -32,63 +35,109 @@ class GitHubRestAPI(RestAPI):
 
     def generate_ghs_token(self):
         if not self.ghs_token:
-            url = self.access_tokens_url()
-            data = self.access_tokens(url)
+            installation_id = self.get_installation_id_for_org()
+            data = self.access_tokens(installation_id)
             self.ghs_token = data['token']
         return self.ghs_token
 
-    def app_installations(self):
+    def get_with_jwt(self, endpoint):
         token = self.generate_jwt_token()
         headers = {
             'Accept': 'application/vnd.github+json',
             'Authorization': f'Bearer {token}',
         }
         r = requests.get(
-            f'{self.URL}/app/installations',
+            f'{self.API_URL}{endpoint}',
             headers=headers,
         )
         r.raise_for_status()
         return r.json()
 
-    def access_tokens(self, url):
+    def get_with_ghs(self, endpoint):
+        token = self.generate_ghs_token()
+        headers = {
+            'Accept': 'application/vnd.github+json',
+            'Authorization': f'Bearer {token}',
+        }
+        r = requests.get(
+            f'{self.API_URL}{endpoint}',
+            headers=headers,
+        )
+        r.raise_for_status()
+        return r.json()
+
+    def post_with_jwt(self, endpoint, data=None):
         token = self.generate_jwt_token()
         headers = {
             'Accept': 'application/vnd.github+json',
             'Authorization': f'Bearer {token}',
         }
-        r = requests.post(
-            "https://api.github.com/app/installations/52683225/access_tokens",
-            headers=headers,
-        )
+        if data is not None:
+            r = requests.post(
+                f'{self.API_URL}{endpoint}',
+                headers=headers,
+                json=data,
+            )
+        else:
+            r = requests.post(
+                f'{self.API_URL}{endpoint}',
+                headers=headers,
+            )
         r.raise_for_status()
         return r.json()
-    
-    def access_tokens_url(self):
+
+    def post_with_ghs(self, endpoint, data=None):
+        token = self.generate_ghs_token()
+        headers = {
+            'Accept': 'application/vnd.github+json',
+            'Authorization': f'Bearer {token}',
+        }
+        if data is not None:
+            r = requests.post(
+                f'{self.API_URL}{endpoint}',
+                headers=headers,
+                json=data,
+            )
+        else:
+            r = requests.post(
+                f'{self.API_URL}{endpoint}',
+                headers=headers,
+            )
+        try:
+            r.raise_for_status()
+        except requests.exceptions.HTTPError as err:
+            logger.error(f'{err.response.url}: {err.response.text}')
+            return None
+        return r.json()
+
+    def app_installations(self):
+        return self.get_with_jwt('/app/installations')
+
+    def access_tokens(self, installation_id):
+        return self.post_with_jwt(
+            f'/app/installations/{installation_id}/access_tokens'
+        )
+
+    def list_teams(self, org):
+        return self.get_with_ghs(f'/orgs/{org}/teams')
+
+    def list_teams_for_org(self):
+        return self.list_teams(self.ORGANIZATION)
+
+    def get_team(self, org, team_slug):
+        return self.get_with_ghs(f'/orgs/{org}/teams/{team_slug}')
+
+    def get_team_for_org(self, team_slug):
+        return self.get_team(self.ORGANIZATION, team_slug)
+
+    def get_installation_id_for_org(self):
         installations = self.app_installations()
         for installation in installations:
             if installation['account']['login'] == self.ORGANIZATION:
-                return installation['access_tokens_url']
-        raise Exception('access_tokens_url not found')
+                return installation['id']
+        raise Exception(f'Installation not found for {self.ORGANIZATION}')
 
-    def list_teams(self):
-        token = self.generate_ghs_token()
-        headers = {
-            'Accept': 'application/vnd.github+json',
-            'Authorization': f'Bearer {token}',
-        }
-        r = requests.get(
-            f'{self.URL}/orgs/{self.ORGANIZATION}/teams',
-            headers=headers,
-        )
-        r.raise_for_status()
-        return r.json()
-
-    def create_team(self, name):
-        token = self.generate_ghs_token()
-        headers = {
-            'Accept': 'application/vnd.github+json',
-            'Authorization': f'Bearer {token}',
-        }
+    def create_team(self, org, name):
         data  = {
             "name": name,
             "description": "",
@@ -96,19 +145,12 @@ class GitHubRestAPI(RestAPI):
             "notification_setting": "notifications_enabled",
             "privacy": "secret",
         }
-        r = requests.post(
-            f'{self.URL}/orgs/{self.ORGANIZATION}/teams',
-            headers=headers,
-            json=data,
-        )
-        print(r.json())
+        return self.post_with_ghs(f'/orgs/{org}/teams', data)
 
-    def create_repoistory(self, name):
-        token = self.generate_ghs_token()
-        headers = {
-            'Accept': 'application/vnd.github+json',
-            'Authorization': f'Bearer {token}',
-        }
+    def create_team_for_org(self, name):
+        return self.create_team(self.ORGANIZATION, name)
+
+    def create_org_repo(self, org, name):
         data = {
             "name": name,
             "description": "This is your first repository",
@@ -118,16 +160,13 @@ class GitHubRestAPI(RestAPI):
             "has_projects": True,
             "has_wiki": True,
         }
-        r = requests.post(
-            f'{self.URL}/orgs/{self.ORGANIZATION}/repos',
-            headers=headers,
-            json=data,
-        )
-        # r.raise_for_status()
-        print('Response:', json.dumps(r.json(), indent=4))
+        return self.post_with_ghs(f'/orgs/{org}/repos', data)
+
+    def create_org_repo_for_org(self, name):
+        return self.create_org_repo(self.ORGANIZATION, name)
 
     def test(self):
-        print(self.list_teams())
-        self.create_team(name='2024 Fall ECE344 Instructor')
-        self.create_team(name='2024 Fall ECE344 TA')
-        self.create_team(name='2024 Fall ECE344 Student')
+        print(json.dumps(self.list_teams_for_org(), indent=4))
+        self.create_team_for_org('2024 Fall ECE344 Instructor')
+        self.create_team_for_org('2024 Fall ECE344 TA')
+        self.create_team_for_org('2024 Fall ECE344 Student')

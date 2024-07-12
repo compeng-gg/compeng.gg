@@ -5,8 +5,9 @@ from django.contrib.auth.models import User
 from social_core.actions import do_complete
 from social_core.exceptions import (
     AuthAlreadyAssociated,
-    AuthForbidden,
     AuthCanceled,
+    AuthFailed,
+    AuthForbidden,
     NotAllowedToDisconnect,
 )
 
@@ -54,6 +55,8 @@ def psa_common(request, backend_name, strategy_func, user=None):
     except AuthAlreadyAssociated as e:
         return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
     except AuthCanceled as e:
+        return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    except AuthFailed as e:
         return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
     except AuthForbidden as e:
         return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
