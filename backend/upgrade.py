@@ -28,6 +28,7 @@ def update_requirements():
         'django-cors-headers',
         'djangorestframework',
         'djangorestframework-simplejwt[crypto]',
+        'discord',
         'social-auth-app-django',
     ])
     p = run_venv(['pip', 'freeze'], capture_output=True)
