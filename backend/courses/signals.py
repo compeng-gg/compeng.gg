@@ -4,8 +4,8 @@ from django.utils.text import slugify
 
 from .models import Offering, Role
 
-from discord.rest_api import DiscordRestAPI
-from github.rest_api import GitHubRestAPI
+from discord_app.rest_api import DiscordRestAPI
+from github_app.rest_api import GitHubRestAPI
 
 @receiver(post_save, sender=Offering)
 def offering_post_save(sender, instance=None, **kwargs):

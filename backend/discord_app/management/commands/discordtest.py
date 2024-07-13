@@ -1,14 +1,14 @@
 from django.core.management.base import BaseCommand, CommandError
 
-from github.rest_api import GitHubRestAPI
+from discord_app.rest_api import DiscordRestAPI
 
 class Command(BaseCommand):
-    help = "GitHub Test"
+    help = "Discord Test"
 
     def add_arguments(self, parser):
         pass
 
     def handle(self, *args, **options):
-        api = GitHubRestAPI()
-        self.stdout.write(self.style.SUCCESS('Test'))
+        self.stdout.write(self.style.SUCCESS('Discord Test'))
+        api = DiscordRestAPI()
         api.test()
