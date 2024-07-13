@@ -16,12 +16,15 @@ class Client(discord.Client):
             options = interaction.data['options']
             assert len(options) == 1
             assert options[0]['name'] == 'message'
-            message = options[0]['value']
+            content = options[0]['value']
+            message = await interaction.channel.send(content)
             discord_user_id = interaction.user.id
             model = AnonymousMessage(
                 discord_user_id=discord_user_id,
                 channel_id=interaction.channel_id,
-                message=message,
+                guild_id=interaction.guild_id,
+                message_id=message.id,
+                content=content,
             )
             try:
                 social_auth = await UserSocialAuth.objects \
@@ -34,9 +37,8 @@ class Client(discord.Client):
             except UserSocialAuth.DoesNotExist:
                 pass
             await model.asave()
-            await interaction.channel.send(message)
             await interaction.response.send_message(
-                f'You sent: "{message}"', ephemeral=True
+                f'You sent: "{content}"', ephemeral=True
             )
         except Exception as e:
             print(e)
