@@ -40,6 +40,10 @@ class Client(discord.Client):
             await interaction.response.send_message(
                 f'You sent: "{content}"', ephemeral=True
             )
+        except KeyError as e:
+            await interaction.response.send_message(
+                'You need to type a message', ephemeral=True
+            )
         except Exception as e:
             print(e)
             await interaction.response.send_message(

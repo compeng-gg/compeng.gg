@@ -105,7 +105,6 @@ class DiscordRestAPI(RestAPI):
 
     # Requires `MANAGE_ROLES` permission
     def create_guild_role(self, guild_id, name, color):
-        print(guild_id, 'wtf')
         data = {
             'name': name,
             'color': color,

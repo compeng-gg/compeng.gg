@@ -15,6 +15,7 @@ class Command(BaseCommand):
                 'name': 'message',
                 'type': DiscordRestAPI.COMMAND_OPTION_TYPE_STRING,
                 'description': 'Send message anonymously',
+                'required': True,
             }]
         }
         api = DiscordRestAPI()
