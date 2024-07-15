@@ -29,6 +29,8 @@ urlpatterns = [
 
     path('courses/offerings/', views.offerings),
 
+    path('github/webhook/', views.github_webhook),
+
     path('users/', views.UserViewSet.as_view({'get': 'list'})),
 ]
 

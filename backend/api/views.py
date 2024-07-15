@@ -212,3 +212,11 @@ def api_root(request, format=None):
     return Response({
         'jwt-obtain-pair': reverse('jwt-obtain-pair', request=request, format=format),
     })
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def github_webhook(request):
+    print('webhook:', request.data)
+    return Response({
+        'test': '1, 2, 3',
+    })
