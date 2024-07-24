@@ -134,7 +134,7 @@ CORS_ALLOW_CREDENTIALS = False
 
 # Social Auth (social_django)
 
-SOCIAL_AUTH_STRATEGY = 'compeng_gg.strategy.StatelessDjangoStrategy'
+SOCIAL_AUTH_STRATEGY = 'compeng_gg.auth.strategy.StatelessDjangoStrategy'
 SOCIAL_AUTH_URL_NAMESPACE = 'auth'
 SOCIAL_AUTH_REQUIRE_POST = False
 

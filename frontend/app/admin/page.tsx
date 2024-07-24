@@ -33,15 +33,22 @@ function AdminPage() {
       <Navbar />
       <main className="container mx-auto mt-4 p-4">
         <H1>Admin</H1>
-        <table>
-          <thead>
+        <br />
+        <table className="table-auto">
+          <thead className="bg-slate-700">
             <tr>
-              <th>ID</th>
-              <th>Username</th>
+              <th className="text-left border border-slate-500 p-2">ID</th>
+              <th className="text-left border border-slate-500 p-2">Username</th>
             </tr>
           </thead>
           <tbody>
-          {users.map(user => <tr key={user.id}><td>{user.id}</td><td>{user.username}</td></tr>)}
+          {
+            users.map(user =>
+            <tr key={user.id}>
+              <td className="text-left border border-slate-500 p-2">{user.id}</td>
+              <td className="text-left border border-slate-500 p-2">{user.username}</td>
+            </tr>)
+          }
           </tbody>
         </table>
       </main>

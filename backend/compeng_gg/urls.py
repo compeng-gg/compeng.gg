@@ -19,7 +19,7 @@ from django.urls import include, path
 from django.views.generic import TemplateView
 
 urlpatterns = [
-    path('api/v0/', include('api.urls', namespace='v0')),
+    path('api/v0/', include('api.v0.urls', namespace='v0')),
 ]
 
 if settings.BUILTIN_FRONTEND:

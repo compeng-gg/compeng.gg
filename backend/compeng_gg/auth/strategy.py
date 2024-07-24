@@ -5,14 +5,14 @@ from social_django.utils import STRATEGY, STORAGE
 
 def load_strategy(validated_data=None):
     return get_strategy(
-        'compeng_gg.strategy.StatelessDjangoStrategy',
+        'compeng_gg.auth.strategy.StatelessDjangoStrategy',
         STORAGE,
         validated_data=validated_data,
     )
 
 def load_no_create_user_strategy(validated_data=None):
     return get_strategy(
-        'compeng_gg.strategy.StatelessNoCreateUserDjangoStrategy',
+        'compeng_gg.auth.strategy.StatelessNoCreateUserDjangoStrategy',
         STORAGE,
         validated_data=validated_data,
     )

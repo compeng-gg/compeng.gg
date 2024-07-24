@@ -5,6 +5,7 @@ from rest_framework_simplejwt.views import (
 )
 
 from . import views
+from .views_github_webhook import github_webhook
 
 from django.conf import settings
 from django.urls import include, path
@@ -12,9 +13,9 @@ from django.urls import include, path
 app_name = 'api'
 
 urlpatterns = [
-    path('auth/login/', TokenObtainPairView.as_view(), name='jwt-obtain-pair'),
-    path('auth/refresh/', TokenRefreshView.as_view(), name='jwt-refresh'),
-    path('auth/verify/', TokenVerifyView.as_view(), name='jwt-verify'),
+    path('auth/login/', TokenObtainPairView.as_view(), name='login'),
+    path('auth/refresh/', TokenRefreshView.as_view(), name='refresh'),
+    path('auth/verify/', TokenVerifyView.as_view(), name='verify'),
 
     path('auth/discord/', views.auth_discord),
     path('connect/discord/', views.connect_discord),
@@ -29,7 +30,7 @@ urlpatterns = [
 
     path('courses/offerings/', views.offerings),
 
-    path('github/webhook/', views.github_webhook),
+    path('github/webhook/', github_webhook),
 
     path('users/', views.UserViewSet.as_view({'get': 'list'})),
 ]
