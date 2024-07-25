@@ -55,7 +55,7 @@ function SettingsPage() {
   return (
     <>
       <Navbar />
-      <main className="container mx-auto mt-4 p-4">
+      <main className="container mx-auto p-4 space-y-4">
         <H1>Settings</H1>
         {discordElement}
         {githubElement}

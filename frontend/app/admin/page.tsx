@@ -31,9 +31,8 @@ function AdminPage() {
   return (
     <>
       <Navbar />
-      <main className="container mx-auto mt-4 p-4">
+      <main className="container mx-auto p-4 space-y-4">
         <H1>Admin</H1>
-        <br />
         <table className="table-auto">
           <thead className="bg-slate-700">
             <tr>

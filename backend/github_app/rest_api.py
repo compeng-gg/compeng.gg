@@ -18,9 +18,12 @@ class GitHubRestAPI(RestAPI):
     CLIENT_ID = settings.SOCIAL_AUTH_GITHUB_KEY
     CLIENT_SECRET = settings.SOCIAL_AUTH_GITHUB_SECRET
     ORGANIZATION = settings.GITHUB_ORGANIZATION
-    PRIVATE_KEY = load_pem_private_key(
-        settings.GITHUB_PRIVATE_KEY_PEM.encode(encoding='ascii'), password=None
-    )
+    try:
+        PRIVATE_KEY = load_pem_private_key(
+            settings.GITHUB_PRIVATE_KEY_PEM.encode(encoding='ascii'), password=None
+        )
+    except ValueError:
+        PRIVATE_KEY = None
 
     def __init__(self):
         super().__init__()

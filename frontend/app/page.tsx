@@ -28,7 +28,7 @@ function Dashboard() {
   return (
     <>
       <Navbar />
-      <main className="container mx-auto mt-4 p-4">
+      <main className="container mx-auto p-4 space-y-4">
         <H1>Dashboard</H1>
         <p className="mb-2">You&apos;re logged in as <span className="font-bold text-blue-500">{username}</span></p>
         <h2 className="font-bold text-2xl">Courses</h2>
