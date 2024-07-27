@@ -4,9 +4,9 @@ from django.contrib.auth.models import User
 class AnonymousMessage(models.Model):
     sent = models.DateTimeField(auto_now_add=True)
     discord_user_id = models.BigIntegerField()
-    guild_id = models.BigIntegerField()
-    channel_id = models.BigIntegerField()
-    message_id = models.BigIntegerField()
+    discord_guild_id = models.BigIntegerField()
+    discord_channel_id = models.BigIntegerField()
+    discord_message_id = models.BigIntegerField()
     content = models.TextField()
     user = models.ForeignKey(
         User, related_name='anonymous_messages',

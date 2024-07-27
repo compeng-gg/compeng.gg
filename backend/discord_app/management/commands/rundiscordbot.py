@@ -21,9 +21,9 @@ class Client(discord.Client):
             discord_user_id = interaction.user.id
             model = AnonymousMessage(
                 discord_user_id=discord_user_id,
-                channel_id=interaction.channel_id,
-                guild_id=interaction.guild_id,
-                message_id=message.id,
+                discord_channel_id=interaction.channel_id,
+                discord_guild_id=interaction.guild_id,
+                discord_message_id=message.id,
                 content=content,
             )
             try:
