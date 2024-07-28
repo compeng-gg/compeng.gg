@@ -9,9 +9,10 @@ import LoginRequired from '@/app/lib/login-required';
 import DiscordButton from '@/app/ui/discord-button';
 import DiscordDisconnectButton from '@/app/ui/discord-disconnect-button';
 import GitHubButton from '@/app/ui/github-button';
-import Navbar from '@/app/ui/navbar';
 
 import H1 from '@/app/ui/h1';
+import Main from '@/app/ui/main';
+import Navbar from '@/app/ui/navbar';
 
 function SettingsPage() {
   const [jwt, setAndStoreJwt] = useContext(JwtContext);
@@ -55,11 +56,11 @@ function SettingsPage() {
   return (
     <>
       <Navbar />
-      <main className="container mx-auto p-4 space-y-4">
+      <Main>
         <H1>Settings</H1>
         {discordElement}
         {githubElement}
-      </main>
+      </Main>
     </>
   );
 

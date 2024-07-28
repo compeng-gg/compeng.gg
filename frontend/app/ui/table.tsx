@@ -1,0 +1,42 @@
+type Field = [string, string];
+type DataRow = { [key: string]: any };
+
+interface TableProps {
+  data: DataRow[];
+  fields: Field[];
+}
+
+function Table({ data, fields }: TableProps) {
+  return (
+    <table className="table-auto">
+      <thead className="bg-slate-700">
+        <tr>
+          {fields.map((field, index) => (
+            <th
+              key={index}
+              className="text-left border border-slate-500 p-2"
+            >
+              {field[1]}
+            </th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {data.map((row, rowIndex) => (
+          <tr key={rowIndex}>
+            {fields.map((field, fieldIndex) => (
+              <td
+                key={fieldIndex}
+                className="text-left border border-slate-500 p-2"
+              >
+                {row[field[0]]}
+              </td>
+            ))}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
+
+export default Table;

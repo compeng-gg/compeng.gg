@@ -6,9 +6,16 @@ import { fetchApi } from '@/app/lib/api';
 import { JwtContext } from '@/app/lib/jwt-provider';
 
 import LoginRequired from '@/app/lib/login-required';
-import Navbar from '@/app/ui/navbar';
 
 import H1 from '@/app/ui/h1';
+import Main from '@/app/ui/main';
+import Navbar from '@/app/ui/navbar';
+import Table from '@/app/ui/table';
+
+const userFields: [string, string][] = [
+  ['id', 'ID'],
+  ['username', 'Username'],
+]
 
 function AdminPage() {
   const [jwt, setAndStoreJwt] = useContext(JwtContext);
@@ -31,26 +38,10 @@ function AdminPage() {
   return (
     <>
       <Navbar />
-      <main className="container mx-auto p-4 space-y-4">
+      <Main>
         <H1>Admin</H1>
-        <table className="table-auto">
-          <thead className="bg-slate-700">
-            <tr>
-              <th className="text-left border border-slate-500 p-2">ID</th>
-              <th className="text-left border border-slate-500 p-2">Username</th>
-            </tr>
-          </thead>
-          <tbody>
-          {
-            users.map(user =>
-            <tr key={user.id}>
-              <td className="text-left border border-slate-500 p-2">{user.id}</td>
-              <td className="text-left border border-slate-500 p-2">{user.username}</td>
-            </tr>)
-          }
-          </tbody>
-        </table>
-      </main>
+        <Table fields={userFields} data={users} />
+      </Main>
     </>
   );
 
