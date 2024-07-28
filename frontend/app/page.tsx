@@ -9,6 +9,7 @@ import { JwtContext } from '@/app/lib/jwt-provider';
 import { fetchApi } from '@/app/lib/api';
 
 import H1 from '@/app/ui/h1';
+import H2 from '@/app/ui/h2';
 import Main from '@/app/ui/main';
 import Navbar from '@/app/ui/navbar';
 
@@ -31,8 +32,8 @@ function Dashboard() {
       <Navbar />
       <Main>
         <H1>Dashboard</H1>
-        <p className="mb-2">You&apos;re logged in as <span className="font-bold text-blue-500">{username}</span></p>
-        <h2 className="font-bold text-2xl">Courses</h2>
+        <p>You're logged in as <span className="font-bold text-blue-500">{username}</span></p>
+        <H2>Courses</H2>
         <ul>
           {offerings.map((offering, i) => <li key={i}>{offering}</li>)}
         </ul>
