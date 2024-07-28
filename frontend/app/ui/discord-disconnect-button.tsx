@@ -7,22 +7,21 @@ import { useRouter } from 'next/navigation'
 import { JwtContext } from '@/app/lib/jwt-provider';
 import { fetchApi } from '@/app/lib/api';
 
+import Button from '@/app/ui/button';
+
 function DiscordDisconnectButton() {
   const [jwt, setAndStoreJwt] = useContext(JwtContext);
   const router = useRouter();
 
   function handleClick(event: any) {
-    fetchApi(jwt, setAndStoreJwt, "disconnect/discord/")
+    fetchApi(jwt, setAndStoreJwt, "disconnect/discord/", "DELETE")
     .then((res) => { if (res.ok) { location.reload(); } })
   }
 
   return (
-    <button
-      className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-      onClick={handleClick}
-    >
+    <Button kind="secondary" onClick={handleClick}>
       Disconnect Discord
-    </button>
+    </Button>
   )
 
 }

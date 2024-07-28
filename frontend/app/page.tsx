@@ -19,10 +19,10 @@ function Dashboard() {
   const [offerings, setOfferings] = useState([]);
 
   useEffect(() => {
-    fetchApi(jwt, setAndStoreJwt, "users/self/")
+    fetchApi(jwt, setAndStoreJwt, "users/self/", "GET")
     .then((res) => res.json())
     .then((data) => setUsername(data.username));
-    fetchApi(jwt, setAndStoreJwt, "courses/offerings/")
+    fetchApi(jwt, setAndStoreJwt, "courses/offerings/", "GET")
     .then((res) => res.json())
     .then((data) => setOfferings(data));
   }, []);

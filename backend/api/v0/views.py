@@ -30,7 +30,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
 @api_view(['POST'])
 @permission_classes([permissions.AllowAny])
-def auth_common(request, provider):
+def auth_common(request, provider, allow_create_user=False):
     if request.user is None:
         return Response(
             {'detail': 'Already authenticated'},
@@ -45,7 +45,7 @@ def auth_common(request, provider):
     try:
         user = auth_complete(
             provider, validated_data,
-            allow_create_user=False
+            allow_create_user=allow_create_user
         )
     except AuthAlreadyAssociated as e:
         return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
@@ -73,6 +73,9 @@ def auth_discord(request):
 
 def auth_github(request):
     return auth_common(request, 'github')
+
+def auth_laforge(request):
+    return auth_common(request, 'laforge', allow_create_user=True)
 
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
@@ -105,7 +108,10 @@ def connect_discord(request):
 def connect_github(request):
     return connect_common(request, 'github')
 
-@api_view(['GET'])
+def connect_laforge(request):
+    return connect_common(request, 'laforge')
+
+@api_view(['DELETE'])
 @permission_classes([permissions.IsAuthenticated])
 def disconnect_common(request, provider):
     try:

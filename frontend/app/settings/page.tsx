@@ -20,7 +20,7 @@ function SettingsPage() {
 
   const fetchData = async () => {
     try {
-      const response = await fetchApi(jwt, setAndStoreJwt, "settings/");
+      const response = await fetchApi(jwt, setAndStoreJwt, "settings/", "GET");
       const data = await response.json();
       setSettings(data);
     } catch (error) {

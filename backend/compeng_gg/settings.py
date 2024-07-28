@@ -162,7 +162,6 @@ SOCIAL_AUTH_LAFORGE_SECRET = os.environ.setdefault('SOCIAL_AUTH_LAFORGE_SECRET',
 )
 SOCIAL_AUTH_LAFORGE_SCOPE = [
     'read_user',
-    'read_repository',
 ]
 SOCIAL_AUTH_PIPELINE = (
     'social_core.pipeline.social_auth.social_details',

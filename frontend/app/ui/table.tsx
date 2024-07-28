@@ -7,6 +7,7 @@ interface TableProps {
 }
 
 function Table({ data, fields }: TableProps) {
+  const hasData = Array.isArray(data) && data.length !== 0;
   return (
     <table className="table-auto">
       <thead className="bg-slate-700">
@@ -22,7 +23,7 @@ function Table({ data, fields }: TableProps) {
         </tr>
       </thead>
       <tbody>
-        {data.map((row, rowIndex) => (
+        {hasData && data.map((row, rowIndex) => (
           <tr key={rowIndex}>
             {fields.map((field, fieldIndex) => (
               <td

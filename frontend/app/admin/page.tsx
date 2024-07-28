@@ -16,6 +16,9 @@ import Table from '@/app/ui/table';
 const userFields: [string, string][] = [
   ['id', 'ID'],
   ['username', 'Username'],
+  ['email', 'Email'],
+  ['first_name', 'First Name'],
+  ['last_name', 'Last Name'],
 ]
 
 function AdminPage() {
@@ -24,7 +27,7 @@ function AdminPage() {
 
   const fetchData = async () => {
     try {
-      const response = await fetchApi(jwt, setAndStoreJwt, "users/");
+      const response = await fetchApi(jwt, setAndStoreJwt, "users/", "GET");
       const data = await response.json();
       setUsers(data);
     } catch (error) {

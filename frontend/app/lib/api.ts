@@ -4,10 +4,10 @@ export const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/
 export const jwtObtainPairEndpoint = 'auth/login/'
 export const jwtRefreshEndpoint = 'auth/refresh/'
 
-export function fetchApiSingle(endpoint: string, token?: string): Promise<Response>;
-export function fetchApiSingle(endpoint: string, data: object, token?: string): Promise<Response>;
+export function fetchApiSingle(endpoint: string, method: string, token?: string): Promise<Response>;
+export function fetchApiSingle(endpoint: string, method: string, data: object, token?: string): Promise<Response>;
 
-export function fetchApiSingle(endpoint: string, dataOrToken?: object | string, maybeToken?: string): Promise<Response> {
+export function fetchApiSingle(endpoint: string, method: string, dataOrToken?: object | string, maybeToken?: string): Promise<Response> {
   const url = apiUrl + endpoint
 
   let headers: HeadersInit = {
@@ -29,28 +29,28 @@ export function fetchApiSingle(endpoint: string, dataOrToken?: object | string, 
 
   if (data) {
     return fetch(url, {
-      method: 'POST',
+      method: method,
       headers,
       body: JSON.stringify(data),
     });
   } else {
     return fetch(url, {
-      method: 'GET',
+      method: method,
       headers,
     });
   }
 }
 
-export function fetchApi(jwt: any, setAndStoreJwt:any, endpoint: string): Promise<Response>;
-export function fetchApi(jwt: any, setAndStoreJwt:any, endpoint: string, data: object): Promise<Response>;
+export function fetchApi(jwt: any, setAndStoreJwt:any, endpoint: string, method: string): Promise<Response>;
+export function fetchApi(jwt: any, setAndStoreJwt:any, endpoint: string, method: string, data: object): Promise<Response>;
 
-export async function fetchApi(jwt: any, setAndStoreJwt:any, endpoint: string, data?: object): Promise<any> {
+export async function fetchApi(jwt: any, setAndStoreJwt:any, endpoint: string, method: string, data?: object): Promise<any> {
   let response: Response;
   if (data === undefined) {
-    response = await fetchApiSingle(endpoint, jwt.access);
+    response = await fetchApiSingle(endpoint, method, jwt.access);
   }
   else {
-    response = await fetchApiSingle(endpoint, data, jwt.access);
+    response = await fetchApiSingle(endpoint, method, data, jwt.access);
   }
 
   if (response.status !== 401) {
@@ -65,7 +65,7 @@ export async function fetchApi(jwt: any, setAndStoreJwt:any, endpoint: string, d
   let accessToken = undefined;
   try {
     const refreshToken: string = jwt.refresh
-    const refreshResponse: Response = await fetchApiSingle(jwtRefreshEndpoint, {'refresh': refreshToken});
+    const refreshResponse: Response = await fetchApiSingle(jwtRefreshEndpoint, "POST", {'refresh': refreshToken});
     const refreshData: any = await refreshResponse.json();
     accessToken = refreshData.access
     if (accessToken === undefined) {
@@ -80,10 +80,10 @@ export async function fetchApi(jwt: any, setAndStoreJwt:any, endpoint: string, d
   }
 
   if (data === undefined) {
-    response = await fetchApiSingle(endpoint, accessToken);
+    response = await fetchApiSingle(endpoint, method, accessToken);
   }
   else {
-    response = await fetchApiSingle(endpoint, data, accessToken);
+    response = await fetchApiSingle(endpoint, method, data, accessToken);
   }
 
   return response;

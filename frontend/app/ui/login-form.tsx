@@ -18,7 +18,7 @@ function LoginForm() {
     event.preventDefault();
     setError(null);
     try {
-      const response = await fetchApiSingle(jwtObtainPairEndpoint, { username, password });
+      const response = await fetchApiSingle(jwtObtainPairEndpoint, "POST", { username, password });
       const data = await response.json();
       if (response.ok) {
         setAndStoreJwt(data);

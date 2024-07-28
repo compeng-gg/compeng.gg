@@ -1,7 +1,6 @@
 interface ButtonProps {
   kind: 'primary' | 'secondary';
   onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
-  //onClick?: () => void;
   type?: 'button' | 'submit' | 'reset';
   children: React.ReactNode;
 }
