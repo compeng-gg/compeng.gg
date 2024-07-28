@@ -32,7 +32,7 @@ function Dashboard() {
       <Navbar />
       <Main>
         <H1>Dashboard</H1>
-        <p>You're logged in as <span className="font-bold text-blue-500">{username}</span></p>
+        <p>You&apos;re logged in as <span className="font-bold text-blue-500">{username}</span></p>
         <H2>Courses</H2>
         <ul>
           {offerings.map((offering, i) => <li key={i}>{offering}</li>)}
