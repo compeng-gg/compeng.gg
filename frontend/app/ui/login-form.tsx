@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation'
 import { JwtContext } from '@/app/lib/jwt-provider';
 import { fetchApiSingle, jwtObtainPairEndpoint } from "@/app/lib/api";
 
+import Button from '@/app/ui/button';
+
 function LoginForm() {
   const [jwt, setAndStoreJwt] = useContext(JwtContext);
 
@@ -33,13 +35,13 @@ function LoginForm() {
   return (
     <div className="w-full max-w-xs">
       <form
-        className="bg-zinc-900 shadow-md rounded px-8 pt-6 pb-6 mb-4"
+        className="bg-zinc-900 shadow-md rounded px-8 py-8 flex flex-col space-y-4"
         onSubmit={handleSubmit}
       >
         {error && (
           <p className="text-red-500 text-xs font-bold mb-4">{error}</p>
         )}
-        <div className="mb-4">
+        <div>
           <label
             className="block text-zinc-100 text-sm font-bold mb-2"
             htmlFor="username"
@@ -56,7 +58,7 @@ function LoginForm() {
             onChange={({ target }) => setUsername(target.value)}
           />
         </div>
-        <div className="mb-4">
+        <div>
           <label
             className="block text-zinc-100 text-sm font-bold mb-2"
             htmlFor="password"
@@ -64,7 +66,7 @@ function LoginForm() {
             Password
           </label>
           <input
-            className="shadow appearance-none border border-zinc-800 rounded w-full py-2 px-3 text-zinc-100 bg-black mb-3 leading-tight focus:outline-none focus:shadow-outline"
+            className="shadow appearance-none border border-zinc-800 rounded w-full py-2 px-3 text-zinc-100 bg-black leading-tight focus:outline-none focus:shadow-outline"
             id="password"
             type="password"
             autoComplete="current-password"
@@ -72,14 +74,9 @@ function LoginForm() {
             onChange={({ target }) => setPassword(target.value)}
           />
         </div>
-        <div className="flex items-center justify-center">
-          <button
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-            type="submit"
-          >
+          <Button kind="primary" type="submit">
             Login
-          </button>
-        </div>
+          </Button>
       </form>
     </div>
   )

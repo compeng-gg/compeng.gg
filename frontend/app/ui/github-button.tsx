@@ -5,6 +5,8 @@ import { JwtContext } from '@/app/lib/jwt-provider';
 
 import { usePathname } from 'next/navigation';
 
+import Button from '@/app/ui/button';
+
 function generateState() {
   return Math.random().toString(36).substring(6);
 }
@@ -36,12 +38,9 @@ function GitHubButton({ action }: GitHubButtonProps) {
   const buttonText = action === 'auth' ? 'Login with GitHub' : 'Connect with GitHub';
 
   return (
-    <button
-      className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-      onClick={handleClick}
-    >
+    <Button kind="primary" onClick={handleClick}>
       {buttonText}
-    </button>
+    </Button>
   )
 
 }
