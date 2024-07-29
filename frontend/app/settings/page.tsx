@@ -39,19 +39,19 @@ function SettingsPage() {
       <DiscordDisconnectButton />
     </>
   ) : (
-    <div>
       <DiscordButton action='connect' />
-    </div>
   );
 
   const githubElement = settings.github ? (
-    <>
-      <p>GitHub: {settings.github}</p>
-    </>
+    <p>GitHub: {settings.github}</p>
   ) : (
-    <div className="mt-4">
-      <GitHubButton action='connect' />
-    </div>
+    <GitHubButton action='connect' />
+  );
+
+  const googleElement = settings.google ? (
+    <p>Google: {settings.google}</p>
+  ) : (
+    <GoogleButton action='connect' />
   );
 
   return (
@@ -61,7 +61,7 @@ function SettingsPage() {
         <H1>Settings</H1>
         {discordElement}
         {githubElement}
-        <GoogleButton action='connect' />
+        {googleElement}
       </Main>
     </>
   );

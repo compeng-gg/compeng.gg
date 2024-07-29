@@ -44,7 +44,7 @@ export default function Page() {
       }
       try {
         if (action === 'auth') {
-          const response: Response = await fetchApiSingle(`${action}/${provider}/`, "POST", {'code': code, 'state': state});
+          const response: Response = await fetchApiSingle(`${action}/${provider}/`, "POST", {'code': code});
           const data = await response.json();
           if (response.ok) {
             setAndStoreJwt(data);
@@ -60,7 +60,7 @@ export default function Page() {
           }
         }
         else if (action === 'connect') {
-          const response: Response = await fetchApi(jwt, setAndStoreJwt, `${action}/${provider}/`, "POST", {'code': code, 'state': state});
+          const response: Response = await fetchApi(jwt, setAndStoreJwt, `${action}/${provider}/`, "POST", {'code': code});
           if (response.ok) {
             if (next !== null) {
               router.push(next);
