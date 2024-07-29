@@ -140,10 +140,14 @@ class DiscordRestAPI(RestAPI):
     def delete_global_command_for_application(self, command_id):
         return self.delete_global_command(self.APPLICATION_ID, command_id)
 
+    def get_current_user(self):
+        return self.get('/users/@me')
+
     def test(self):
         #print(json.dumps(self.get_guild_roles_for_guild(), indent=4))
         #print(json.dumps(self.create_command_for_application(), indent=4))
-        print(json.dumps(self.get_global_commands_for_application(), indent=4))
+        #print(json.dumps(self.get_global_commands_for_application(), indent=4))
+        print(json.dumps(self.get_current_user(), indent=4))
 
         #from django.contrib.auth.models import User
         #from courses.models import Role

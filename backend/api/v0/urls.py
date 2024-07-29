@@ -24,6 +24,9 @@ urlpatterns = [
     path('auth/github/', views.auth_github),
     path('connect/github/', views.connect_github),
 
+    path('auth/google/', views.auth_google),
+    path('connect/google/', views.connect_google),
+
     path('auth/laforge/', views.auth_laforge),
     path('connect/laforge/', views.connect_laforge),
 

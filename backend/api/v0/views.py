@@ -74,6 +74,9 @@ def auth_discord(request):
 def auth_github(request):
     return auth_common(request, 'github')
 
+def auth_google(request):
+    return auth_common(request, 'google')
+
 def auth_laforge(request):
     return auth_common(request, 'laforge', allow_create_user=True)
 
@@ -107,6 +110,9 @@ def connect_discord(request):
 
 def connect_github(request):
     return connect_common(request, 'github')
+
+def connect_google(request):
+    return connect_common(request, 'google')
 
 def connect_laforge(request):
     return connect_common(request, 'laforge')

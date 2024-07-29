@@ -9,6 +9,7 @@ import LoginRequired from '@/app/lib/login-required';
 import DiscordButton from '@/app/ui/discord-button';
 import DiscordDisconnectButton from '@/app/ui/discord-disconnect-button';
 import GitHubButton from '@/app/ui/github-button';
+import GoogleButton from '@/app/ui/google-button';
 
 import H1 from '@/app/ui/h1';
 import Main from '@/app/ui/main';
@@ -60,6 +61,7 @@ function SettingsPage() {
         <H1>Settings</H1>
         {discordElement}
         {githubElement}
+        <GoogleButton action='connect' />
       </Main>
     </>
   );
