@@ -12,6 +12,7 @@ class AnonymousMessage(models.Model):
         User, related_name='anonymous_messages',
         on_delete=models.SET_NULL, blank=True, null=True
     )
+    undid = models.BooleanField()
 
     def __str__(self):
         timestamp = self.sent.isoformat(sep=" ", timespec="seconds")

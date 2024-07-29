@@ -25,6 +25,7 @@ class Client(discord.Client):
                 discord_guild_id=interaction.guild_id,
                 discord_message_id=message.id,
                 content=content,
+                undid=False,
             )
             try:
                 social_auth = await UserSocialAuth.objects \
