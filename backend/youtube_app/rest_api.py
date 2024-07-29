@@ -31,8 +31,8 @@ class YouTubeRestAPI(RestAPI):
             return None
         return r.json()
 
-    def list_videos(self):
-        return self.get('/videos')
+    def list_channels(self):
+        return self.get('/channels?mine=true&part=snippet,contentDetails')
 
     def test(self):
-        print(json.dumps(self.list_videos(), indent=4))
+        print(json.dumps(self.list_channels(), indent=4))

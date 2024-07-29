@@ -31,7 +31,7 @@ function GoogleButton({ action }: GoogleButtonProps) {
     sessionStorage.setItem('state', state);
 
     // const scope = 'openid email profile https://www.googleapis.com/auth/youtube.readonly';
-    const scope = 'email https://www.googleapis.com/auth/youtube.readonly';
+    const scope = 'email https://www.googleapis.com/auth/youtube';
 
     const redirectUri = encodeURIComponent(authRedirectUri);
     
