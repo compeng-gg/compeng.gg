@@ -23,3 +23,8 @@ def disconnect(provider, user):
         redirect_uri=None,
     )
     return backend.disconnect(user=user)
+
+def get_access_token(provider, user):
+    social = user.social_auth.get(provider=provider)
+    strategy = load_strategy()
+    return social.get_access_token(strategy)

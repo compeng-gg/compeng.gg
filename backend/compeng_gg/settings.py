@@ -57,6 +57,7 @@ INSTALLED_APPS = [
 
     'discord_app',
     'github_app',
+    'youtube_app',
 
     # 'webhook',
     #'lab5',
