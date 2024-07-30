@@ -39,19 +39,25 @@ function SettingsPage() {
       <DiscordDisconnectButton />
     </>
   ) : (
+    <div>
       <DiscordButton action='connect' />
+    </div>
   );
 
   const githubElement = settings.github ? (
     <p>GitHub: {settings.github}</p>
   ) : (
-    <GitHubButton action='connect' />
+    <div>
+      <GitHubButton action='connect' />
+    </div>
   );
 
   const googleElement = settings.google ? (
     <p>Google: {settings.google}</p>
   ) : (
-    <GoogleButton action='connect' />
+    <div>
+      <GoogleButton action='connect' />
+    </div>
   );
 
   return (
@@ -65,7 +71,6 @@ function SettingsPage() {
       </Main>
     </>
   );
-
 }
 
 export default function Page() {
