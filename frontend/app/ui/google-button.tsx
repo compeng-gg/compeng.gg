@@ -30,12 +30,11 @@ function GoogleButton({ action }: GoogleButtonProps) {
     sessionStorage.setItem('next', pathname);
     sessionStorage.setItem('state', state);
 
-    // const scope = 'openid email profile https://www.googleapis.com/auth/youtube.readonly';
-    const scope = 'email https://www.googleapis.com/auth/youtube';
+    const scope = 'openid profile email https://www.googleapis.com/auth/youtube';
 
     const redirectUri = encodeURIComponent(authRedirectUri);
     
-    window.location.href = `https://accounts.google.com/o/oauth2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&state=${state}`;
+    window.location.href = `https://accounts.google.com/o/oauth2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&access_type=offline&prompt=consent&scope=${scope}&state=${state}`;
   }
 
   const buttonText = action === 'auth' ? 'Login with Google' : 'Connect with Google';
