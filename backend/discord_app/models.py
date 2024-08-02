@@ -1,3 +1,4 @@
+#this file contains the AnonymousMessage model, which is used to store information about anonymous messages sent via the Discord bot
 from django.db import models
 from django.contrib.auth.models import User
 
@@ -12,11 +13,12 @@ class AnonymousMessage(models.Model):
         User, related_name='anonymous_messages',
         on_delete=models.SET_NULL, blank=True, null=True
     )
-    undid = models.BooleanField()
+    undid = models.BooleanField(default=False)
 
     def __str__(self):
         timestamp = self.sent.isoformat(sep=" ", timespec="seconds")
+        status = "UNDONE" if self.undid else "ACTIVE"
         if self.user:
-            return f'[{timestamp}] {self.user} "{self.content}"'
+            return f'[{timestamp}] {self.user} "{self.content}" - {status}'
         else:
-            return f'[{timestamp}] "{self.content}"'
+            return f'[{timestamp}] "{self.content}" - {status}'
