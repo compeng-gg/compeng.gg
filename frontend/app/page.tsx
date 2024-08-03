@@ -36,7 +36,13 @@ function Dashboard() {
         <p>You&apos;re logged in as <span className="font-bold text-blue-500">{username}</span></p>
         <H2>Courses</H2>
         <ul>
-          {offerings.map((offering, i) => <li key={i}>{offering.name}</li>)}
+          {offerings.map((offering, i) =>
+            <li key={i}>
+               <Link href={`/${offering.slug}/`} className="text-blue-500 hover:underline">
+                 {offering.name}
+               </Link>
+            </li>
+          )}
         </ul>
       </Main>
     </>
