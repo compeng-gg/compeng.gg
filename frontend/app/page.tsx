@@ -35,9 +35,15 @@ function Dashboard() {
         <H2>TODO</H2>
         <p>You&apos;re logged in as <span className="font-bold text-blue-500">{username}</span></p>
         <H2>Courses</H2>
-        <ul>
-          {offerings.map((offering, i) => <li key={i}>{offering}</li>)}
-        </ul>
+        {offerings.map((offering, index) => (
+        <button
+          key={index}
+          className="block bg-blue-500 text-white font-semibold py-2 px-4 rounded-md shadow-md hover:bg-blue-600 transition duration-200"
+          // onClick={() => router.push(`/courses/${offering.id}`)}
+        >
+          {offering}
+        </button>
+      ))}
       </Main>
     </>
   );
