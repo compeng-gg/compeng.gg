@@ -16,7 +16,7 @@ import Navbar from '@/app/ui/navbar';
 function Dashboard() {
   const [jwt, setAndStoreJwt] = useContext(JwtContext);
   const [username, setUsername] = useState("");
-  const [offerings, setOfferings] = useState([]);
+  const [offerings, setOfferings] = useState<any[]>([]);
 
   useEffect(() => {
     fetchApi(jwt, setAndStoreJwt, "users/self/", "GET")
@@ -36,7 +36,7 @@ function Dashboard() {
         <p>You&apos;re logged in as <span className="font-bold text-blue-500">{username}</span></p>
         <H2>Courses</H2>
         <ul>
-          {offerings.map((offering, i) => <li key={i}>{offering}</li>)}
+          {offerings.map((offering, i) => <li key={i}>{offering.name}</li>)}
         </ul>
       </Main>
     </>

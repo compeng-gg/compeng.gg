@@ -150,7 +150,12 @@ def offerings(request):
     user = request.user
     offerings = []
     for enrollment in user.enrollment_set.all():
-        offerings.append(str(enrollment.role.offering))
+        offering = enrollment.role.offering
+        offerings.append({
+            'name': str(offering),
+            'slug': offering.course.slug,
+            'role': str(enrollment.role),
+        })
     return Response(offerings)
 
 @api_view(['GET'])
