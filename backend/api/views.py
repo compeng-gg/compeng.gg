@@ -51,10 +51,15 @@ def psa_common(request, backend_name, strategy_func, user=None):
             user=user,
         )
     except AuthAlreadyAssociated as e:
-        return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        print(e)
+        return (
+            Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST))
     except AuthCanceled as e:
+        print(e)
         return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
     except AuthForbidden as e:
+        print(e)
+
         return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     return user_result
