@@ -57,6 +57,7 @@ class Offering(models.Model):
     start = models.DateField()
     end = models.DateField()
     active = models.BooleanField()
+    num_lecture_sections = models.IntegerField(blank=True, null=True)
 
     def __str__(self):
         return f'{self.name} {self.course}'

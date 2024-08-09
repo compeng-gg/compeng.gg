@@ -23,6 +23,20 @@ class DiscordRestAPI(RestAPI):
     COMMAND_OPTION_TYPE_SUB_COMMAND_GROUP = 2
     COMMAND_OPTION_TYPE_STRING = 3
 
+    CHANNEL_TYPE_GUILD_TEXT = 0
+    CHANNEL_TYPE_DM = 1
+    CHANNEL_TYPE_GUILD_VOICE = 2
+    CHANNEL_TYPE_GROUP_DM = 3
+    CHANNEL_TYPE_GUILD_CATEGORY = 4
+    CHANNEL_TYPE_GUILD_ANNOUNCEMENT = 5
+    CHANNEL_TYPE_ANNOUNCEMENT_THREAD = 10
+    CHANNEL_TYPE_PUBLIC_THREAD = 11
+    CHANNEL_TYPE_PRIVATE_THREAD = 12
+    CHANNEL_TYPE_GUILD_STAGE_VOICE = 13
+    CHANNEL_TYPE_GUILD_DIRECTORY = 14
+    CHANNEL_TYPE_GUILD_FORUM = 15
+    CHANNEL_TYPE_GUILD_MEDIA = 16
+
     def __init__(self):
         super().__init__()
 
@@ -96,6 +110,21 @@ class DiscordRestAPI(RestAPI):
             return None
         return r.json()
 
+    def get_guild_channels(self, guild_id):
+        return self.get(f'/guilds/{guild_id}/channels')
+
+    def get_guild_channels_for_guild(self):
+        return self.get_guild_channels(self.GUILD_ID)
+
+    # Requires `MANAGE_CHANNELS` permission
+
+    def create_guild_channel(self, guild_id, name, **kwargs):
+        kwargs['name'] = name
+        return self.post(f'/guilds/{guild_id}/channels', kwargs)
+
+    def create_guild_channel_for_guild(self, name, **kwargs):
+        return self.create_guild_channel(self.GUILD_ID, name, **kwargs)
+
     # Requires `MANAGE_ROLES` permission
     def get_guild_roles(self, guild_id):
         return self.get(f'/guilds/{guild_id}/roles')
@@ -147,7 +176,10 @@ class DiscordRestAPI(RestAPI):
         #print(json.dumps(self.get_guild_roles_for_guild(), indent=4))
         #print(json.dumps(self.create_command_for_application(), indent=4))
         #print(json.dumps(self.get_global_commands_for_application(), indent=4))
-        print(json.dumps(self.get_current_user(), indent=4))
+        #print(json.dumps(self.get_current_user(), indent=4))
+
+        # print(json.dumps(self.create_guild_channel_for_guild('Test', type=self.CHANNEL_TYPE_GUILD_CATEGORY), indent=4))
+        print(json.dumps(self.get_guild_channels_for_guild(), indent=4))
 
         #from django.contrib.auth.models import User
         #from courses.models import Role
