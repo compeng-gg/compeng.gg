@@ -147,10 +147,16 @@ def dashboard(request):
             'slug': offering.course.slug,
             'role': str(enrollment.role),
         })
+    failed_checks = []
+    if not user.social_auth.filter(provider='discord').exists():
+        failed_checks.append('connect-discord')
+    if not user.social_auth.filter(provider='github').exists():
+        failed_checks.append('connect-github')
 
     return Response({
         'username': user.username,
         'offerings': offerings,
+        'failed-checks': failed_checks,
     })
 
 @api_view(['GET'])
