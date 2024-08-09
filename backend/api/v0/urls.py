@@ -32,6 +32,7 @@ urlpatterns = [
 
     path('users/self/', views.self),
 
+    path('dashboard/', views.dashboard),
     path('settings/', views.settings),
 
     path('courses/offerings/', views.offerings),

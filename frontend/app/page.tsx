@@ -15,17 +15,33 @@ import Navbar from '@/app/ui/navbar';
 
 function Dashboard() {
   const [jwt, setAndStoreJwt] = useContext(JwtContext);
+  const [isInitialized, setIsInitialized] = useState(false);
   const [username, setUsername] = useState("");
   const [offerings, setOfferings] = useState<any[]>([]);
 
   useEffect(() => {
-    fetchApi(jwt, setAndStoreJwt, "users/self/", "GET")
-    .then((res) => res.json())
-    .then((data) => setUsername(data.username));
-    fetchApi(jwt, setAndStoreJwt, "courses/offerings/", "GET")
-    .then((res) => res.json())
-    .then((data) => setOfferings(data));
+    let ignore = false;
+
+    async function startFetching() {
+      const res = await fetchApi(jwt, setAndStoreJwt, "dashboard/", "GET");
+      const data = await res.json();
+      if (!ignore) {
+        setUsername(data.username);
+        setOfferings(data.offerings);
+        setIsInitialized(true);
+      }
+    }
+
+    startFetching();
+
+    return () => {
+      ignore = true;
+    };
   }, []);
+
+  if (!isInitialized) {
+    return (<></>);
+  }
 
   return (
     <>

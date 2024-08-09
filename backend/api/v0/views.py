@@ -137,6 +137,24 @@ def self(request):
 
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
+def dashboard(request):
+    user = request.user
+    offerings = []
+    for enrollment in user.enrollment_set.all():
+        offering = enrollment.role.offering
+        offerings.append({
+            'name': str(offering),
+            'slug': offering.course.slug,
+            'role': str(enrollment.role),
+        })
+
+    return Response({
+        'username': user.username,
+        'offerings': offerings,
+    })
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
 def settings(request):
     user = request.user
     data = {}
