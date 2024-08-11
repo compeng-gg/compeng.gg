@@ -72,11 +72,6 @@ function Dashboard() {
     }
     todos.push(<div className="flex flex-col gap-4">{...todoCards}</div>);
   }
-  //todos.appendChild(<h2>te</h2>);
-  /*
-  const todos = failedChecks.length > 0 ? <H2>TODOs</H2>
-    {failedChecks.includes('connect-discord') ? <p>test</p> : <p>no</p>}
-    : <></>;*/
 
   return (
     <>
