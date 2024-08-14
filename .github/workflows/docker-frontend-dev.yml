@@ -1,9 +1,9 @@
-name: docker-frontend
+name: docker-frontend-dev
 
 on:
   push:
     branches:
-      - 'main'
+      - 'dev'
 
 env:
   BUILDX_NO_DEFAULT_ATTESTATIONS: 1
@@ -36,4 +36,4 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: true
           tags: |
-            ghcr.io/compeng-gg/compeng-gg-frontend:latest
+            ghcr.io/compeng-gg/compeng-gg-frontend-dev:latest

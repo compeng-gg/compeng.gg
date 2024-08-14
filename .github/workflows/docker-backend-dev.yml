@@ -1,9 +1,9 @@
-name: docker-frontend
+name: docker-backend-dev
 
 on:
   push:
     branches:
-      - 'main'
+      - 'dev'
 
 env:
   BUILDX_NO_DEFAULT_ATTESTATIONS: 1
@@ -31,9 +31,9 @@ jobs:
         name: Build and push
         uses: docker/build-push-action@v6
         with:
-          context: frontend
-          file: frontend/Dockerfile
+          context: backend
+          file: backend/Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
           tags: |
-            ghcr.io/compeng-gg/compeng-gg-frontend:latest
+            ghcr.io/compeng-gg/compeng-gg-backend-dev:latest
