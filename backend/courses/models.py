@@ -57,7 +57,7 @@ class Offering(models.Model):
     start = models.DateField()
     end = models.DateField()
     active = models.BooleanField()
-    num_lecture_sections = models.IntegerField(blank=True, null=True)
+    external_id = models.BigIntegerField(blank=True, null=True)
 
     def __str__(self):
         return f'{self.name} {self.course}'
@@ -96,6 +96,21 @@ class Role(models.Model):
 
     class Meta:
         unique_together = ['kind', 'offering']
+
+class Member(models.Model):
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+    )
+    institution = models.ForeignKey(
+        Institution,
+        on_delete=models.CASCADE,
+    )
+    external_id = models.BigIntegerField()
+
+    class Meta:
+        unique_together = ['institution', 'external_id']
 
 class Enrollment(models.Model):
 
