@@ -7,13 +7,17 @@ from courses.models import *
 from discord_app.rest_api import DiscordRestAPI
 from github_app.rest_api import GitHubRestAPI
 
-def create_utoronto_course(name, title):
+def get_or_create_utoronto():
     utoronto, _ = Institution.objects.get_or_create(
         slug='utoronto',
         defaults={
             'name': 'University of Toronto',
         }
     )
+    return utoronto
+
+def create_utoronto_course(name, title):
+    utoronto = get_or_create_utoronto()
     course, _ = Course.objects.get_or_create(
         institution=utoronto,
         slug=slugify(name),
@@ -54,11 +58,21 @@ def create_default_roles(offering):
         kind=Role.Kind.STUDENT,
     )
 
-def create_discord_roles(offering):
+def get_color_for_role(role, student_color):
+    if role.kind == Role.Kind.INSTRUCTOR:
+        color = DiscordRestAPI.COLOR_RED
+    elif role.kind == Role.Kind.TA:
+        color = DiscordRestAPI.COLOR_YELLOW
+    else:
+        color = student_color
+    return color
+
+def create_discord_roles(offering, student_color=DiscordRestAPI.COLOR_MAGENTA):
     api = DiscordRestAPI()
 
     roles = Role.objects.filter(offering=offering)
     lookup = {}
+    found = set()
     for role in roles:
         lookup[str(role)] = role
 
@@ -66,21 +80,25 @@ def create_discord_roles(offering):
         name = discord_role['name']
         if not name in lookup:
             continue
+        found.add(name)
         role = lookup[name]
         discord_role_id = int(discord_role['id'])
         if not role.discord_role_id is None:
             assert role.discord_role_id == discord_role_id
+            color = get_color_for_role(role, student_color)
+            if discord_role['color'] != color:
+                api.modify_guild_role_for_guild(discord_role_id, color=color)
         else:
             role.discord_role_id = discord_role_id
             role.save()
 
     for name, role in lookup.items():
-        if not role.discord_role_id is None:
+        if not role.discord_role_id is None and name in found:
             continue
-        response = api.create_guild_role_for_guild(
-            name, DiscordRestAPI.COLOR_RED
-        )
-        role.discord_role_id = response['id']
+        color = get_color_for_role(role, student_color)
+        response = api.create_guild_role_for_guild(name, color)
+        discord_role_id = int(response['id'])
+        role.discord_role_id = discord_role_id
         role.save()
 
 def create_github_teams(offering):
@@ -102,6 +120,53 @@ def create_github_teams(offering):
             offering.github_team_slug = slug
             offering.save()
 
+def create_utoronto_roles():
+    api = DiscordRestAPI()
+
+    utoronto = get_or_create_utoronto()
+    lookup = {
+        'Faculty':
+            ('faculty_discord_role_id', DiscordRestAPI.COLOR_RED),
+        'Grad Student':
+            ('grad_student_discord_role_id', DiscordRestAPI.COLOR_YELLOW),
+        '4th Year':
+            ('fourth_year_discord_role_id', DiscordRestAPI.COLOR_PURPLE),
+        '3rd Year':
+            ('third_year_discord_role_id', DiscordRestAPI.COLOR_BLUE),
+        '2nd Year':
+            ('second_year_discord_role_id', DiscordRestAPI.COLOR_CYAN),
+        '1st Year':
+            ('first_year_discord_role_id', DiscordRestAPI.COLOR_MAGENTA),
+        'Verified':
+            ('verified_discord_role_id', DiscordRestAPI.COLOR_GREEN),
+    }
+    found = set()
+
+    for discord_role in api.get_guild_roles_for_guild():
+        name = discord_role['name']
+        if not name in lookup:
+            continue
+        found.add(name)
+        discord_role_id = int(discord_role['id'])
+        field_name, color = lookup[name]
+        model_discord_role_id = getattr(utoronto, field_name)
+        if not model_discord_role_id is None:
+            assert model_discord_role_id == discord_role_id
+            if discord_role['color'] != color:
+                api.modify_guild_role_for_guild(discord_role_id, color=color)
+        else:
+            setattr(utoronto, field_name, discord_role_id)
+            utoronto.save()
+
+    for name, (field_name, color) in lookup.items():
+        model_discord_role_id = getattr(utoronto, field_name)
+        if not model_discord_role_id is None and name in found:
+            continue
+        response = api.create_guild_role_for_guild(name, color, hoist=True)
+        discord_role_id = int(response['id'])
+        setattr(utoronto, field_name, discord_role_id)
+        utoronto.save()
+
 class Command(BaseCommand):
     help = "Populate Courses Test Models"
 
@@ -109,13 +174,20 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
+        create_utoronto_roles()
         ece344 = create_utoronto_course('ECE344', 'Operating Systems')
         ece454 = create_utoronto_course('ECE454', 'Computer Systems Programming')
         ece344_offering = create_2024_fall_offering(ece344)
         ece454_offering = create_2024_fall_offering(ece454)
         create_default_roles(ece344_offering)
-        create_discord_roles(ece344_offering)
+        create_discord_roles(
+            ece344_offering,
+            student_color=DiscordRestAPI.COLOR_BLUE
+        )
         create_github_teams(ece344_offering)
         create_default_roles(ece454_offering)
-        create_discord_roles(ece454_offering)
+        create_discord_roles(
+            ece454_offering,
+            student_color=DiscordRestAPI.COLOR_PURPLE
+        )
         create_github_teams(ece454_offering)

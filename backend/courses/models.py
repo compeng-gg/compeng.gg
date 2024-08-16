@@ -7,6 +7,13 @@ class Institution(models.Model):
 
     slug = models.SlugField(max_length=50)
     name = models.CharField(max_length=50)
+    verified_discord_role_id = models.BigIntegerField(blank=True, null=True)
+    first_year_discord_role_id = models.BigIntegerField(blank=True, null=True)
+    second_year_discord_role_id = models.BigIntegerField(blank=True, null=True)
+    third_year_discord_role_id = models.BigIntegerField(blank=True, null=True)
+    fourth_year_discord_role_id = models.BigIntegerField(blank=True, null=True)
+    grad_student_discord_role_id = models.BigIntegerField(blank=True, null=True)
+    faculty_discord_role_id = models.BigIntegerField(blank=True, null=True)
 
     def __str__(self):
         return self.name
@@ -57,7 +64,7 @@ class Offering(models.Model):
     start = models.DateField()
     end = models.DateField()
     active = models.BooleanField()
-    num_lecture_sections = models.IntegerField(blank=True, null=True)
+    external_id = models.BigIntegerField(blank=True, null=True)
 
     def __str__(self):
         return f'{self.name} {self.course}'
@@ -96,6 +103,21 @@ class Role(models.Model):
 
     class Meta:
         unique_together = ['kind', 'offering']
+
+class Member(models.Model):
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+    )
+    institution = models.ForeignKey(
+        Institution,
+        on_delete=models.CASCADE,
+    )
+    external_id = models.BigIntegerField()
+
+    class Meta:
+        unique_together = ['institution', 'external_id']
 
 class Enrollment(models.Model):
 
