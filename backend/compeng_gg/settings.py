@@ -26,6 +26,16 @@ DATABASES = json.loads(os.environ.setdefault('DATABASES', json.dumps({
 
 DEBUG = json.loads(os.environ.setdefault('DEBUG', 'true'))
 
+# Email
+EMAIL_HOST = os.environ.setdefault('EMAIL_HOST', 'localhost')
+EMAIL_PORT = json.loads(os.environ.setdefault('EMAIL_PORT', '465'))
+EMAIL_HOST_USER = os.environ.setdefault('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.environ.setdefault('EMAIL_HOST_PASSWORD', '')
+EMAIL_USE_SSL = json.loads(os.environ.setdefault('EMAIL_USE_SSL', 'true'))
+DEFAULT_FROM_EMAIL = os.environ.setdefault('DEFAULT_FROM_EMAIL', '')
+SERVER_EMAIL = os.environ.setdefault('SERVER_EMAIL', '')
+ADMINS = json.loads(os.environ.setdefault('ADMINS', '[]'))
+
 ## Globalization (i18n/l10n)
 
 LANGUAGE_CODE = 'en-us'
