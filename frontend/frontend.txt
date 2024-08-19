@@ -9,5 +9,6 @@
 ##courses.tsx
 - lists courses enrolled
 - say "No current courses" if there are no courses to show (can change this text at courses.tsx)
-
+- shrinks the course box to 95% when clicked (for 300 ms)
+- 
 
