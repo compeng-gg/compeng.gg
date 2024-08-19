@@ -7,7 +7,7 @@ interface MainProps {
 
 const Main: React.FC<MainProps> = ({ children, className = '' }) => {
   return (
-    <main className={`container mx-auto p-4 space-y-4 ${className}`}>
+    <main className={`p-12 space-y-4 ${className}`}>
       {children}
     </main>
   );

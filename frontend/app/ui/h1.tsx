@@ -7,7 +7,7 @@ interface H1Props {
 
 const H1: React.FC<H1Props> = ({ children, className = '' }) => {
   return (
-    <h1 className={`font-bold text-5xl mt-4 ${className}`}>
+    <h1 className={`font-bold text-5xl ${className}`}>
       {children}
     </h1>
   );

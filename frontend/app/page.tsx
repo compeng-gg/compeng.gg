@@ -58,7 +58,7 @@ function Dashboard() {
     var todoCards: any[] = [];
     if (failedChecks.includes('connect-discord')) {
       todoCards.push(
-        <div className="p-4 rounded-lg shadow-lg bg-red-900 max-w-fit space-y-4">
+        <div className="p-4 rounded-xl shadow-lg bg-red-900 max-w-fit space-y-4">
           <p>Please connect your Discord account to access discussion.</p>
           <DiscordButton action="connect" />
         </div>
@@ -66,7 +66,7 @@ function Dashboard() {
     }
     if (failedChecks.includes('connect-github')) {
       todoCards.push(
-        <div className="p-4 rounded-lg shadow-lg bg-red-900 max-w-fit space-y-4">
+        <div className="p-4 rounded-xl shadow-lg bg-red-900 max-w-fit space-y-4">
           <p>Please connect your GitHub account to access repositories.</p>
           <GitHubButton action="connect" />
         </div>
@@ -80,11 +80,13 @@ function Dashboard() {
       <Navbar />
       <Main>
         <H1>
-          <Link href="/"> Dashboard</Link>
+          <Link href="/">Dashboard</Link>
         </H1>
-        <p>You&apos;re logged in as <span className="font-bold text-blue-500">{username}</span></p>
+        <p className='text-1xl'>You&apos;re logged in as <span className="font-bold text-blue-500">{username}</span></p>
         {...todos}
+        <Link href='/courses' className="m-4">
         <Courses/>
+        </Link>
       </Main>
     </>
   );
