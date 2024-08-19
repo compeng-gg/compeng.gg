@@ -80,7 +80,7 @@ function Dashboard() {
       <Navbar />
       <Main>
         <H1>
-          <Link href="/" className="transition transform active:scale-95"> Dashboard</Link>
+          <Link href="/"> Dashboard</Link>
         </H1>
         <p>You&apos;re logged in as <span className="font-bold text-blue-500">{username}</span></p>
         {...todos}

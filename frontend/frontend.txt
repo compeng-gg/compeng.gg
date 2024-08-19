@@ -6,5 +6,8 @@
 ##all clickables
 - go 95% of their size on click and turn back to their original size just after to create an illusion of clicking
 
+##courses.tsx
+- lists courses enrolled
+- say "No current courses" if there are no courses to show (can change this text at courses.tsx)
 
 

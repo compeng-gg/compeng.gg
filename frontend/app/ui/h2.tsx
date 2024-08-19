@@ -7,7 +7,7 @@ interface H2Props {
 
 const H2: React.FC<H2Props> = ({ children, className = '' }) => {
   return (
-    <h2 className={`font-semibold text-3xl ${className}`}>
+    <h2 className={"text-3xl font-bold mb-4 ${className}"}>
       {children}
     </h2>
   );
