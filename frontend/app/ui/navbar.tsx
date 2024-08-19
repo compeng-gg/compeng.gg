@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import LogoutButton from '@/app/ui/logout-button';
 
 export default function Navbar() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);  // Ref for the dropdown
 
   const toggleDropdown = () => {
     setIsDropdownOpen((prevState) => !prevState);
@@ -37,6 +38,21 @@ export default function Navbar() {
   const handleMouseLeave = () => {
     closeDropdown();
   };
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   return (
     <nav className="flex items-center justify-between flex-wrap bg-opacity-50 backdrop-blur-lg shadow-md p-2 relative">
       <div className="hidden lg:flex items-center flex-shrink-0 text-white mr-6 transition transform active:scale-95">
@@ -44,7 +60,7 @@ export default function Navbar() {
       </div>
 
       {/* Mobile Profile Button */}
-      <div className="block lg:hidden ml-auto">
+      <div className="block lg:hidden ml-auto relative">
         <button 
           className="flex items-center justify-center w-8 h-8 rounded-full border border-zinc-800 text-zinc-200 hover:text-white hover:border-white transition transform active:scale-95"
           onClick={toggleDropdown}
@@ -55,7 +71,10 @@ export default function Navbar() {
           </svg>
         </button>
         {isDropdownOpen && (
-          <div className="absolute right-2 mt-2 w-48 bg-zinc-800 rounded-lg shadow-lg flex flex-col items-center">
+          <div 
+            ref={dropdownRef}  // Attach ref to the dropdown
+            className="absolute right-2 mt-2 w-48 bg-zinc-800 rounded-lg shadow-lg flex flex-col items-center"
+          >
             <Link href="/" className="w-full px-4 py-2 text-zinc-100 text-center hover:bg-zinc-700 transition transform active:scale-95">
               CompEng.gg
             </Link>
@@ -84,9 +103,8 @@ export default function Navbar() {
         </button>
         {isDropdownOpen && (
           <div 
-            className="absolute right-0 mt-2 w-48 bg-zinc-800 rounded-lg shadow-lg flex flex-col items-center transition transform active:scale-95"
-          >
-           
+            ref={dropdownRef} 
+            className="absolute right-0 mt-2 w-48 bg-zinc-800 rounded-lg shadow-lg flex flex-col items-center transition transform active:scale-95">
             <Link href="/settings/" className="w-full px-4 py-2 text-zinc-100 text-center hover:bg-zinc-700 transition transform active:scale-95">
               Settings
             </Link>
