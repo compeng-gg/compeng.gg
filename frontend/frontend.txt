@@ -1,0 +1,10 @@
+#navbar
+##the profile icon
+- Desktop: dropdown on hover and on click (shows settings, logout), closes dropdown after leaving hover with 300ms delay
+- Mobile: dropdown on click (shows compeng.gg, settings, logout)
+
+##all clickables
+- go 95% of their size on click and turn back to their original size just after to create an illusion of clicking
+
+
+

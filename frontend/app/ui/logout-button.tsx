@@ -13,7 +13,7 @@ function LogoutButton() {
 
   return (
     <button
-      className="inline-block text-sm px-4 py-2 leading-none border rounded text-white border-zinc-800 hover:border-transparent hover:text-red-400 hover:bg-black mt-4 lg:mt-0"
+      className="w-full px-4 py-2 text-red-600 text-center hover:bg-zinc-700 rounded-b-lg transition transform active:scale-95"
       // className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
       onClick={handleClick}
     >

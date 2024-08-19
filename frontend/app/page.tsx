@@ -14,6 +14,8 @@ import H1 from '@/app/ui/h1';
 import H2 from '@/app/ui/h2';
 import Main from '@/app/ui/main';
 import Navbar from '@/app/ui/navbar';
+import Courses from '@/app/ui/courses';
+
 
 function Dashboard() {
   const [jwt, setAndStoreJwt] = useContext(JwtContext);
@@ -77,19 +79,12 @@ function Dashboard() {
     <>
       <Navbar />
       <Main>
-        <H1>Dashboard</H1>
+        <H1>
+          <Link href="/" className="transition transform active:scale-95"> Dashboard</Link>
+        </H1>
         <p>You&apos;re logged in as <span className="font-bold text-blue-500">{username}</span></p>
         {...todos}
-        <H2>Courses</H2>
-        <ul>
-          {offerings.map((offering, i) =>
-            <li key={i}>
-               <Link href={`/${offering.slug}/`} className="text-blue-500 hover:underline">
-                 {offering.name}
-               </Link>
-            </li>
-          )}
-        </ul>
+        <Courses/>
       </Main>
     </>
   );

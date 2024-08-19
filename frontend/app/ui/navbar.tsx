@@ -1,28 +1,98 @@
 'use client';
 
+import { useState, useRef } from 'react';
 import Link from 'next/link';
 import LogoutButton from '@/app/ui/logout-button';
 
 export default function Navbar() {
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const toggleDropdown = () => {
+    setIsDropdownOpen((prevState) => !prevState);
+  };
+
+  const openDropdown = () => {
+    if (dropdownTimeoutRef.current) {
+      clearTimeout(dropdownTimeoutRef.current);
+      dropdownTimeoutRef.current = null;
+    }
+    setIsDropdownOpen(true);
+  };
+
+  const closeDropdown = () => {
+    dropdownTimeoutRef.current = setTimeout(() => {
+      setIsDropdownOpen(false);
+    }, 300);
+  };
+
+  const handleMouseEnter = () => {
+    if (dropdownTimeoutRef.current) {
+      clearTimeout(dropdownTimeoutRef.current);
+      dropdownTimeoutRef.current = null;
+    }
+    openDropdown();
+  };
+
+  const handleMouseLeave = () => {
+    closeDropdown();
+  };
   return (
-    <nav className="flex items-center justify-between flex-wrap bg-zinc-900 p-2">
-      <div className="flex items-center flex-shrink-0 text-white mr-6">
+    <nav className="flex items-center justify-between flex-wrap bg-zinc-900 p-2 relative">
+      <div className="hidden lg:flex items-center flex-shrink-0 text-white mr-6 transition transform active:scale-95">
         <Link href="/" className="font-black text-xl tracking-tight">CompEng.gg</Link>
       </div>
-      <div className="block lg:hidden">
-        <button className="flex items-center px-3 py-2 border rounded text-zinc-200 border-zinc-800 hover:text-white hover:border-white">
-          <svg className="fill-current h-3 w-3" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><title>Menu</title><path d="M0 3h20v2H0V3zm0 6h20v2H0V9zm0 6h20v2H0v-2z"/></svg>
+
+      {/* Mobile Profile Button */}
+      <div className="block lg:hidden ml-auto">
+        <button 
+          className="flex items-center justify-center w-8 h-8 rounded-full border border-zinc-800 text-zinc-200 hover:text-white hover:border-white transition transform active:scale-95"
+          onClick={toggleDropdown}
+        >
+          <svg className="fill-current h-5 w-5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <title>Profile</title>
+            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-3.31 0-6 2.69-6 6v1h12v-1c0-3.31-2.69-6-6-6z"/>
+          </svg>
         </button>
+        {isDropdownOpen && (
+          <div className="absolute right-2 mt-2 w-48 bg-zinc-800 rounded-lg shadow-lg flex flex-col items-center">
+            <Link href="/" className="w-full px-4 py-2 text-zinc-100 text-center hover:bg-zinc-700 transition transform active:scale-95">
+              CompEng.gg
+            </Link>
+            <Link href="/settings/" className="w-full px-4 py-2 text-zinc-100 text-center hover:bg-zinc-700 transition transform active:scale-95">
+              Settings
+            </Link>
+            <LogoutButton />
+          </div>
+        )}
       </div>
-      <div className="w-full block flex-grow lg:flex lg:items-center lg:w-auto">
-        <div className="text-sm lg:flex-grow">
-          <Link href="/settings/" className="block mt-4 lg:inline-block lg:mt-0 text-zinc-100 hover:text-white mr-4">
-            Settings
-          </Link>
-        </div>
-        <div>
-          <LogoutButton />
-        </div>
+
+      {/* Desktop Profile Button */}
+      <div 
+        className="hidden lg:block relative ml-auto" 
+        onMouseEnter={handleMouseEnter} 
+        onMouseLeave={handleMouseLeave}
+        onClick={toggleDropdown}
+      >
+        <button 
+          className="flex items-center justify-center w-8 h-8 rounded-full border border-zinc-800 text-zinc-200 hover:text-white hover:border-white transition transform active:scale-95"
+        >
+          <svg className="fill-current h-5 w-5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <title>Profile</title>
+            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-3.31 0-6 2.69-6 6v1h12v-1c0-3.31-2.69-6-6-6z"/>
+          </svg>
+        </button>
+        {isDropdownOpen && (
+          <div 
+            className="absolute right-0 mt-2 w-48 bg-zinc-800 rounded-lg shadow-lg flex flex-col items-center transition transform active:scale-95"
+          >
+           
+            <Link href="/settings/" className="w-full px-4 py-2 text-zinc-100 text-center hover:bg-zinc-700 transition transform active:scale-95">
+              Settings
+            </Link>
+            <LogoutButton />
+          </div>
+        )}
       </div>
     </nav>
   );
