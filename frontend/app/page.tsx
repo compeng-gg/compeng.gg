@@ -15,6 +15,7 @@ import H2 from '@/app/ui/h2';
 import Main from '@/app/ui/main';
 import Navbar from '@/app/ui/navbar';
 import Courses from '@/app/ui/courses';
+import AdminPage from './ui/adminpage';
 
 
 function Dashboard() {
