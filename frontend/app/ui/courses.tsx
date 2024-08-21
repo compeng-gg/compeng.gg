@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import React from 'react';
 import { useState } from 'react';
+import ProgressTracker from './progress';
 
 interface Offering {
   slug: string;
@@ -11,6 +12,8 @@ const offerings: Offering[] = [
   { slug: 'course1', name: 'APS105' },
   { slug: 'course2', name: 'ECE344' },
 ];
+
+//const done: 
 
 function Courses() {
   const [clickedIndex, setClickedIndex] = useState<number | null>(null);
@@ -30,7 +33,9 @@ function Courses() {
             <Link href={`/${offering.slug}/`} className="text-blue-500 hover:underline">
               <p className="text-2xl mb-1 text-blue-500 font-bold">{offering.name}</p>
             </Link>
-            some info here
+            <p className="text-sm">Lab Progress:</p>
+            {<ProgressTracker progress={40} title={''}/>}
+            <p className="text-sm">Lab Due: </p>
           </div>
         ))
       ) : (
