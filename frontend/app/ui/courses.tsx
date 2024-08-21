@@ -28,7 +28,7 @@ function Courses() {
      
       {offerings.length > 0 ? (
         offerings.map((offering, i) => (
-          <div key={i} className={`p-4 mb-4 bg-zinc-900 border border-gray-600 rounded-xl transition-transform duration-300 ${clickedIndex === i ? 'scale-95' : 'scale-100'}`}
+          <div key={i} className={`p-4 mb-4 bg-zinc-900 border border-gray-600 rounded-xl transition-colors duration-300 ease-in-out p-2 relative hover:bg-zinc-800 ${clickedIndex === i ? 'scale-95' : 'scale-100'}`}
             onClick={() => handleClick(i)}>
             <Link href={`/${offering.slug}/`} className="text-blue-500 hover:underline">
               <p className="text-2xl mb-1 text-blue-500 font-bold">{offering.name}</p>
