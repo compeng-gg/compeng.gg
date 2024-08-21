@@ -54,8 +54,8 @@ export default function Navbar() {
   }, []);
 
   return (
-    <nav className="flex items-center justify-between flex-wrap bg-opacity-50 backdrop-blur-lg shadow-md p-2 relative">
-      <div className="hidden lg:flex items-center flex-shrink-0 text-white mr-6 transition transform active:scale-95">
+    <nav className="flex items-center justify-between flex-wrap bg-zinc-900 transition-colors duration-200 ease-in-out p-2 relative hover:bg-zinc-800">
+      <div className="items-center flex-shrink-0 text-white mr-6 transition transform active:scale-95">
         <Link href="/" className="font-black text-xl tracking-tight">CompEng.gg</Link>
       </div>
 
@@ -72,7 +72,7 @@ export default function Navbar() {
         </button>
         {isDropdownOpen && (
           <div 
-            ref={dropdownRef}  // Attach ref to the dropdown
+            ref={dropdownRef}  
             className="absolute right-2 mt-2 w-48 bg-zinc-800 rounded-lg shadow-lg flex flex-col items-center"
           >
             <Link href="/" className="w-full px-4 py-2 text-zinc-100 text-center hover:bg-zinc-700 transition transform active:scale-95">
