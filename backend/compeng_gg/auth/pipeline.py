@@ -1,5 +1,19 @@
-from social_core.exceptions import AuthForbidden
+from django.contrib.auth.models import User
 
-def disallow_new_discord(backend, is_new, *args, **kwargs):
-    if backend.name == 'discord' and is_new:
-        raise AuthForbidden(backend)
+def associate_by_username(backend, details, user=None, *args, **kwargs):
+    if user:
+        return None
+    
+    if backend.name != 'laforge':
+        return None
+
+    username = details.get('username')
+    try:
+        user = User.objects.get(username=username)
+    except User.DoesNotExist:
+        return None
+
+    if user.email == '':
+        user.email = details.get('email')
+        user.save()
+    return {"user": user, "is_new": False}

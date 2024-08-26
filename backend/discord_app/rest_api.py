@@ -15,27 +15,33 @@ class DiscordRestAPI(RestAPI):
     BOT_TOKEN = settings.DISCORD_BOT_TOKEN
     GUILD_ID = settings.DISCORD_GUILD_ID
 
-    COLOR_RED = 0xDC4633
+    COLOR_BLUE    = 0x007FA3
+    COLOR_CYAN    = 0x00A189
+    COLOR_GREEN   = 0x8DBF2E
+    COLOR_MAGENTA = 0xAB1368
+    COLOR_PURPLE  = 0x6D247A
+    COLOR_RED     = 0xDC4633
+    COLOR_YELLOW  = 0xF1C500
 
     COMMAND_TYPE_CHAT_INPUT = 1
 
-    COMMAND_OPTION_TYPE_SUB_COMMAND = 1
+    COMMAND_OPTION_TYPE_SUB_COMMAND       = 1
     COMMAND_OPTION_TYPE_SUB_COMMAND_GROUP = 2
-    COMMAND_OPTION_TYPE_STRING = 3
+    COMMAND_OPTION_TYPE_STRING            = 3
 
-    CHANNEL_TYPE_GUILD_TEXT = 0
-    CHANNEL_TYPE_DM = 1
-    CHANNEL_TYPE_GUILD_VOICE = 2
-    CHANNEL_TYPE_GROUP_DM = 3
-    CHANNEL_TYPE_GUILD_CATEGORY = 4
-    CHANNEL_TYPE_GUILD_ANNOUNCEMENT = 5
+    CHANNEL_TYPE_GUILD_TEXT          =  0
+    CHANNEL_TYPE_DM                  =  1
+    CHANNEL_TYPE_GUILD_VOICE         =  2
+    CHANNEL_TYPE_GROUP_DM            =  3
+    CHANNEL_TYPE_GUILD_CATEGORY      =  4
+    CHANNEL_TYPE_GUILD_ANNOUNCEMENT  =  5
     CHANNEL_TYPE_ANNOUNCEMENT_THREAD = 10
-    CHANNEL_TYPE_PUBLIC_THREAD = 11
-    CHANNEL_TYPE_PRIVATE_THREAD = 12
-    CHANNEL_TYPE_GUILD_STAGE_VOICE = 13
-    CHANNEL_TYPE_GUILD_DIRECTORY = 14
-    CHANNEL_TYPE_GUILD_FORUM = 15
-    CHANNEL_TYPE_GUILD_MEDIA = 16
+    CHANNEL_TYPE_PUBLIC_THREAD       = 11
+    CHANNEL_TYPE_PRIVATE_THREAD      = 12
+    CHANNEL_TYPE_GUILD_STAGE_VOICE   = 13
+    CHANNEL_TYPE_GUILD_DIRECTORY     = 14
+    CHANNEL_TYPE_GUILD_FORUM         = 15
+    CHANNEL_TYPE_GUILD_MEDIA         = 16
 
     def __init__(self):
         super().__init__()
@@ -63,6 +69,28 @@ class DiscordRestAPI(RestAPI):
             f'{self.API_URL}{endpoint}',
             headers=headers,
         )
+        r.raise_for_status()
+        if r.text == '':
+            return None
+        return r.json()
+
+    def patch(self, endpoint, data=None):
+        token = self.BOT_TOKEN
+        headers = {
+            'Accept': 'application/vnd.github+json',
+            'Authorization': f'Bot {token}',
+        }
+        if data is not None:
+            r = requests.patch(
+                f'{self.API_URL}{endpoint}',
+                headers=headers,
+                json=data,
+            )
+        else:
+            r = requests.put(
+                f'{self.API_URL}{endpoint}',
+                headers=headers,
+            )
         r.raise_for_status()
         if r.text == '':
             return None
@@ -133,15 +161,20 @@ class DiscordRestAPI(RestAPI):
         return self.get_guild_roles(self.GUILD_ID)
 
     # Requires `MANAGE_ROLES` permission
-    def create_guild_role(self, guild_id, name, color):
-        data = {
-            'name': name,
-            'color': color,
-        }
-        return self.post(f'/guilds/{guild_id}/roles', data)
+    def modify_guild_role(self, guild_id, role_id, **kwargs):
+        return self.patch(f'/guilds/{guild_id}/roles/{role_id}', kwargs)
 
-    def create_guild_role_for_guild(self, name, color):
-        return self.create_guild_role(self.GUILD_ID, name, color)
+    def modify_guild_role_for_guild(self, role_id, **kwargs):
+        return self.modify_guild_role(self.GUILD_ID, role_id, **kwargs)
+
+    # Requires `MANAGE_ROLES` permission
+    def create_guild_role(self, guild_id, name, color, **kwargs):
+        kwargs['name'] = name
+        kwargs['color'] = color
+        return self.post(f'/guilds/{guild_id}/roles', kwargs)
+
+    def create_guild_role_for_guild(self, name, color, **kwargs):
+        return self.create_guild_role(self.GUILD_ID, name, color, **kwargs)
 
     def add_guild_member_role(self, guild_id, user_id, role_id):
         return self.put(f'/guilds/{guild_id}/members/{user_id}/roles/{role_id}')
