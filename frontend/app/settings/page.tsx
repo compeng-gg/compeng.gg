@@ -36,7 +36,6 @@ function SettingsPage() {
   const discordElement = settings.discord ? (
     <>
       <p>Discord: {settings.discord}</p>
-      <DiscordDisconnectButton />
     </>
   ) : (
     <div>
@@ -52,14 +51,6 @@ function SettingsPage() {
     </div>
   );
 
-  const googleElement = settings.google ? (
-    <p>Google: {settings.google}</p>
-  ) : (
-    <div>
-      <GoogleButton action='connect' />
-    </div>
-  );
-
   return (
     <>
       <Navbar />
@@ -67,7 +58,6 @@ function SettingsPage() {
         <H1>Settings</H1>
         {discordElement}
         {githubElement}
-        {googleElement}
       </Main>
     </>
   );

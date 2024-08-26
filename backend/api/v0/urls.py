@@ -19,13 +19,13 @@ urlpatterns = [
 
     path('auth/discord/', views.auth_discord),
     path('connect/discord/', views.connect_discord),
-    path('disconnect/discord/', views.disconnect_discord),
+    # path('disconnect/discord/', views.disconnect_discord),
 
     path('auth/github/', views.auth_github),
     path('connect/github/', views.connect_github),
 
-    path('auth/google/', views.auth_google),
-    path('connect/google/', views.connect_google),
+    # path('auth/google/', views.auth_google),
+    # path('connect/google/', views.connect_google),
 
     path('auth/laforge/', views.auth_laforge),
     path('connect/laforge/', views.connect_laforge),
