@@ -15,5 +15,7 @@ def associate_by_username(backend, details, user=None, *args, **kwargs):
 
     if user.email == '':
         user.email = details.get('email')
+        user.first_name = details.get('first_name')
+        user.last_name = details.get('last_name')
         user.save()
     return {"user": user, "is_new": False}
