@@ -6,9 +6,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from quercus_app.models import QuercusUser
 from quercus_app.rest_api import QuercusRestAPI
 
-def update_courses():
-    #user = User.objects.get(username='eyolfso3')
-    #api = QuercusRestAPI(user)
+def update_courses_from_quercus():
     utoronto = Institution.objects.get(slug='utoronto')
 
     for offering in Offering.objects.all():

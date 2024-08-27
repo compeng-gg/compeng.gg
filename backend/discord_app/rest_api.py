@@ -43,6 +43,8 @@ class DiscordRestAPI(RestAPI):
     CHANNEL_TYPE_GUILD_FORUM         = 15
     CHANNEL_TYPE_GUILD_MEDIA         = 16
 
+    PERMISSION_VIEW_CHANNEL = 0x400
+
     def __init__(self):
         super().__init__()
 
@@ -155,7 +157,6 @@ class DiscordRestAPI(RestAPI):
         )
 
     # Requires `MANAGE_CHANNELS` permission
-
     def create_guild_channel(self, guild_id, name, **kwargs):
         kwargs['name'] = name
         return self.post(f'/guilds/{guild_id}/channels', kwargs)

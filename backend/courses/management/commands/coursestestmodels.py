@@ -117,6 +117,32 @@ def create_discord_roles(offering, student_color=DiscordRestAPI.COLOR_MAGENTA):
         role.discord_role_id = discord_role_id
         role.save()
 
+def create_discord_categories(offering):
+    api = DiscordRestAPI()
+    offering_name = str(offering)
+    found_all = False
+    for channel in api.get_guild_channels_for_guild():
+        if channel['type'] != DiscordRestAPI.CHANNEL_TYPE_GUILD_CATEGORY:
+            continue
+        name = channel['name']
+        if name == offering_name:
+            found_all = True
+    student_role_id = offering.role_set.get(kind=Role.Kind.STUDENT).discord_role_id
+    if not found_all:
+        permission_overwrites = []
+        permission_overwrites.append(
+            {
+                'id': student_role_id,
+                'type': 1,
+                'allow': str(DiscordRestAPI.PERMISSION_VIEW_CHANNEL),
+            }
+        )
+        api.create_guild_channel_for_guild(
+            offering_name,
+            type=DiscordRestAPI.CHANNEL_TYPE_GUILD_CATEGORY,
+            permission_overwrites=permission_overwrites,
+        )
+
 def create_github_teams(offering):
     api = GitHubRestAPI()
 
