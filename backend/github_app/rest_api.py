@@ -4,6 +4,7 @@ from django.conf import settings
 
 from cryptography.hazmat.primitives.serialization import load_pem_private_key
 
+import base64
 import logging
 import json
 import jwt
@@ -20,7 +21,7 @@ class GitHubRestAPI(RestAPI):
     ORGANIZATION = settings.GITHUB_ORGANIZATION
     try:
         PRIVATE_KEY = load_pem_private_key(
-            settings.GITHUB_PRIVATE_KEY_PEM.encode(encoding='ascii'), password=None
+            base64.b64decode(settings.GITHUB_PRIVATE_KEY_B64), password=None
         )
     except ValueError:
         PRIVATE_KEY = None

@@ -223,7 +223,7 @@ DISCORD_GUILD_ID = os.environ.setdefault('DISCORD_GUILD_ID', '')
 # GitHub (github)
 
 GITHUB_ORGANIZATION = os.environ.setdefault('GITHUB_ORGANIZATION', '')
-GITHUB_PRIVATE_KEY_PEM = os.environ.setdefault('GITHUB_PRIVATE_KEY_PEM', '')
+GITHUB_PRIVATE_KEY_B64 = os.environ.setdefault('GITHUB_PRIVATE_KEY_B64', '')
 
 # Webhook (webhook)
 
