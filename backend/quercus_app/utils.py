@@ -58,6 +58,10 @@ def update_courses_from_quercus():
             # If they're already in Discord, give them the roles
             try:
                 get_uid('discord', user)
-                add_discord_role_for_enrollment(enrollment)
+                try:
+                    add_discord_role_for_enrollment(enrollment)
+                except:
+                    # Likely they left the server, handle this later
+                    pass
             except ObjectDoesNotExist:
                 pass
