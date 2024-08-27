@@ -106,7 +106,12 @@ def connect_common(request, provider):
     return Response()
 
 def connect_discord(request):
-    return connect_common(request, 'discord')
+    response = connect_common(request, 'discord')
+    if response.status_code == 200:
+        from discord_app.utils import add_to_discord_server
+        user = request.user
+        add_to_discord_server(user)
+    return response
 
 def connect_github(request):
     return connect_common(request, 'github')

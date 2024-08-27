@@ -28,3 +28,7 @@ def get_access_token(provider, user):
     social = user.social_auth.get(provider=provider)
     strategy = load_strategy()
     return social.get_access_token(strategy)
+
+def get_uid(provider, user):
+    social = user.social_auth.get(provider=provider)
+    return social.uid

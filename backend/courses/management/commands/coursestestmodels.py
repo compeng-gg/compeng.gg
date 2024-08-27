@@ -44,6 +44,22 @@ def create_2024_fall_offering(course):
     )
     return offering
 
+def create_2024_winter_offering(course):
+    name = '2024 Winter'
+    start = date(2024, 1, 8)
+    end = date(2024, 4, 30)
+    offering, _ = Offering.objects.get_or_create(
+        course=course,
+        slug=slugify(name),
+        defaults={
+            'name': name,
+            'start': start,
+            'end': end,
+            'active': False,
+        }
+    )
+    return offering
+
 def create_default_roles(offering):
     Role.objects.get_or_create(
         offering=offering,
@@ -175,6 +191,13 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         create_utoronto_roles()
+        ece353 = create_utoronto_course('ECE353', 'Systems Software')
+        ece353_offering = create_2024_winter_offering(ece353)
+        create_default_roles(ece353_offering)
+        create_discord_roles(
+            ece353_offering,
+            student_color=DiscordRestAPI.COLOR_BLUE
+        )
         ece344 = create_utoronto_course('ECE344', 'Operating Systems')
         ece454 = create_utoronto_course('ECE454', 'Computer Systems Programming')
         ece344_offering = create_2024_fall_offering(ece344)

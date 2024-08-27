@@ -19,7 +19,7 @@ class DiscordRestAPI(RestAPI):
     COLOR_CYAN    = 0x00A189
     COLOR_GREEN   = 0x8DBF2E
     COLOR_MAGENTA = 0xAB1368
-    COLOR_PURPLE  = 0x6D247A
+    COLOR_PURPLE  = 0x9E34B0
     COLOR_RED     = 0xDC4633
     COLOR_YELLOW  = 0xF1C500
 
@@ -143,6 +143,16 @@ class DiscordRestAPI(RestAPI):
 
     def get_guild_channels_for_guild(self):
         return self.get_guild_channels(self.GUILD_ID)
+
+    # Requires `CREATE_INSTANT_INVITE` permission
+    def add_guild_member(self, guild_id, user_id, access_token, **kwargs):
+        kwargs['access_token'] = access_token
+        return self.put(f'/guilds/{guild_id}/members/{user_id}', kwargs)
+
+    def add_guild_member_for_guild(self, user_id, access_token, **kwargs):
+        return self.add_guild_member(
+            self.GUILD_ID, user_id, access_token, **kwargs
+        )
 
     # Requires `MANAGE_CHANNELS` permission
 
