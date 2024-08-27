@@ -7,13 +7,26 @@ from quercus_app.models import QuercusUser
 from quercus_app.rest_api import QuercusRestAPI
 
 def update_courses():
-    user = User.objects.get(username='eyolfso3')
-    api = QuercusRestAPI(user)
+    #user = User.objects.get(username='eyolfso3')
+    #api = QuercusRestAPI(user)
     utoronto = Institution.objects.get(slug='utoronto')
 
     for offering in Offering.objects.all():
         if offering.external_id is None:
             continue
+        
+        # Look for an instructor Quercus token
+        instructor = None
+        for enrollment in offering.role_set.get(kind=Role.Kind.INSTRUCTOR) \
+                                  .enrollment_set.all():
+            try:
+                enrollment.user.quercus_token
+                instructor = enrollment.user
+            except User.quercus_token.RelatedObjectDoesNotExist:
+                pass
+
+        assert instructor is not None
+        api = QuercusRestAPI(instructor)
 
         student_role = offering.role_set.get(kind=Role.Kind.STUDENT)
 
