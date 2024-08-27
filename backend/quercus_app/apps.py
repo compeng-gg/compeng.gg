@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 
-
-class QuercusConfig(AppConfig):
+class QuercusAppConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'quercus'
+    name = 'quercus_app'
+    verbose_name = 'Quercus'

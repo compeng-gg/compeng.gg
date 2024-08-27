@@ -62,7 +62,7 @@ class DiscordRestAPI(RestAPI):
     def get(self, endpoint):
         token = self.BOT_TOKEN
         headers = {
-            'Accept': 'application/vnd.github+json',
+            'Accept': 'application/json',
             'Authorization': f'Bot {token}',
         }
         r = requests.get(
@@ -77,7 +77,7 @@ class DiscordRestAPI(RestAPI):
     def patch(self, endpoint, data=None):
         token = self.BOT_TOKEN
         headers = {
-            'Accept': 'application/vnd.github+json',
+            'Accept': 'application/json',
             'Authorization': f'Bot {token}',
         }
         if data is not None:
@@ -99,7 +99,7 @@ class DiscordRestAPI(RestAPI):
     def post(self, endpoint, data=None):
         token = self.BOT_TOKEN
         headers = {
-            'Accept': 'application/vnd.github+json',
+            'Accept': 'application/json',
             'Authorization': f'Bot {token}',
         }
         if data is not None:
@@ -119,7 +119,7 @@ class DiscordRestAPI(RestAPI):
     def put(self, endpoint, data=None):
         token = self.BOT_TOKEN
         headers = {
-            'Accept': 'application/vnd.github+json',
+            'Accept': 'application/json',
             'Authorization': f'Bot {token}',
         }
         if data is not None:

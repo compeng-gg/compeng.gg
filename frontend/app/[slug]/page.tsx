@@ -34,6 +34,7 @@ function Course({ params }: { params: { slug: string } }) {
       } catch (error) {
         console.error('Error fetching labs:', error);
         // this is just for testing since I don't have a backend to test with
+        /*
         setLabs([{
           name: 'Lab 1',
           slug: 'lab-1',
@@ -46,6 +47,7 @@ function Course({ params }: { params: { slug: string } }) {
           start: new Date('2025-09-01'),
           end: new Date('2025-09-30'),
         },]);
+        */
       }
     }
 

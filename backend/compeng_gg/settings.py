@@ -67,6 +67,7 @@ INSTALLED_APPS = [
 
     'discord_app',
     'github_app',
+    'quercus_app',
     'youtube_app',
 
     # 'webhook',

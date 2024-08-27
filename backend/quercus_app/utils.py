@@ -1,0 +1,52 @@
+from compeng_gg.auth import get_uid
+from courses.models import Offering, Institution, Member, Role, Enrollment
+from discord_app.utils import add_discord_role_for_enrollment
+from django.contrib.auth.models import User
+from django.core.exceptions import ObjectDoesNotExist
+from quercus_app.models import QuercusUser
+from quercus_app.rest_api import QuercusRestAPI
+
+def update_courses():
+    user = User.objects.get(username='eyolfso3')
+    api = QuercusRestAPI(user)
+    utoronto = Institution.objects.get(slug='utoronto')
+
+    for offering in Offering.objects.all():
+        if offering.external_id is None:
+            continue
+
+        student_role = offering.role_set.get(kind=Role.Kind.STUDENT)
+
+        quercus_course_id = offering.external_id
+        for student in api.list_students(quercus_course_id):
+            username = student['sis_user_id']
+            quercus_user_id = student['id']
+            student_id = int(student['integration_id'])
+            user, _ = User.objects.get_or_create(username=username)
+            try:
+                member = user.member_set.get(institution=utoronto)
+                assert member.external_id == student_id
+            except Member.DoesNotExist:
+                Member.objects.create(
+                    institution=utoronto, user=user, external_id=student_id
+                )
+            try:
+                quercus_user = user.quercus_user
+                assert quercus_user.id == quercus_user_id
+            except QuercusUser.DoesNotExist:
+                QuercusUser.objects.create(user=user, id=quercus_user_id)
+            try:
+                enrollment = Enrollment.objects.get(
+                    user=user, role=student_role
+                )
+            except Enrollment.DoesNotExist:
+                enrollment = Enrollment.objects.create(
+                    user=user, role=student_role
+                )
+
+            # If they're already in Discord, give them the roles
+            try:
+                get_uid('discord', user)
+                add_discord_role_for_enrollment(enrollment)
+            except ObjectDoesNotExist:
+                pass

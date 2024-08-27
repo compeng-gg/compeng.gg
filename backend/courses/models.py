@@ -116,6 +116,9 @@ class Member(models.Model):
     )
     external_id = models.BigIntegerField()
 
+    def __str__(self):
+        return f'{self.user} ({self.external_id})'
+
     class Meta:
         unique_together = ['institution', 'external_id']
 
@@ -132,3 +135,6 @@ class Enrollment(models.Model):
 
     def __str__(self):
         return f'{self.user} - {self.role}'
+
+    class Meta:
+        unique_together = ['user', 'role']
