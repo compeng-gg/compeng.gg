@@ -1,6 +1,7 @@
 from compeng_gg.auth import get_uid
 from courses.models import Offering, Institution, Member, Role, Enrollment
 from discord_app.utils import add_discord_role_for_enrollment
+from github_app.utils import add_github_team_membership_for_enrollment
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from quercus_app.models import QuercusUser
@@ -63,5 +64,12 @@ def update_courses_from_quercus():
                 except:
                     # Likely they left the server, handle this later
                     pass
+            except ObjectDoesNotExist:
+                pass
+
+            # If they're already connected to GitHub, add them
+            try:
+                get_uid('github', user)
+                add_github_team_membership_for_enrollment(enrollment)
             except ObjectDoesNotExist:
                 pass
