@@ -1,6 +1,8 @@
 from django.core.management.base import BaseCommand, CommandError
 
-from github_app.rest_api import GitHubRestAPI
+from courses.models import Enrollment
+from compeng_gg.auth import get_uid
+from github_app.utils import add_github_team_membership_for_enrollment
 
 class Command(BaseCommand):
     help = "GitHub Test"
@@ -9,6 +11,11 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        api = GitHubRestAPI()
-        self.stdout.write(self.style.SUCCESS('Test'))
-        api.test()
+        self.stdout.write(self.style.SUCCESS('GitHub Test'))
+        for enrollment in Enrollment.objects.all():
+            user = enrollment.user
+            try:
+                get_uid('github', user)
+            except:
+                continue
+            add_github_team_membership_for_enrollment(enrollment)

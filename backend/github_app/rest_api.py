@@ -71,6 +71,46 @@ class GitHubRestAPI(RestAPI):
         r.raise_for_status()
         return r.json()
 
+    def put_with_jwt(self, endpoint, data=None):
+        token = self.generate_jwt_token()
+        headers = {
+            'Accept': 'application/vnd.github+json',
+            'Authorization': f'Bearer {token}',
+        }
+        if data is not None:
+            r = requests.put(
+                f'{self.API_URL}{endpoint}',
+                headers=headers,
+                json=data,
+            )
+        else:
+            r = requests.put(
+                f'{self.API_URL}{endpoint}',
+                headers=headers,
+            )
+        r.raise_for_status()
+        return r.json()
+
+    def put_with_ghs(self, endpoint, data=None):
+        token = self.generate_ghs_token()
+        headers = {
+            'Accept': 'application/vnd.github+json',
+            'Authorization': f'Bearer {token}',
+        }
+        if data is not None:
+            r = requests.put(
+                f'{self.API_URL}{endpoint}',
+                headers=headers,
+                json=data,
+            )
+        else:
+            r = requests.put(
+                f'{self.API_URL}{endpoint}',
+                headers=headers,
+            )
+        r.raise_for_status()
+        return r.json()
+
     def post_with_jwt(self, endpoint, data=None):
         token = self.generate_jwt_token()
         headers = {
@@ -169,6 +209,12 @@ class GitHubRestAPI(RestAPI):
 
     def create_org_repo_for_org(self, name):
         return self.create_org_repo(self.ORGANIZATION, name)
+
+    def add_team_membership(self, org, team_slug, username):
+        return self.put_with_ghs(f'/orgs/{org}/teams/{team_slug}/memberships/{username}')
+
+    def add_team_membership_for_org(self, team_slug, username):
+        return self.add_team_membership(self.ORGANIZATION, team_slug, username)
 
     def test(self):
         print(json.dumps(self.list_teams_for_org(), indent=4))
