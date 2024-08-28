@@ -114,7 +114,12 @@ def connect_discord(request):
     return response
 
 def connect_github(request):
-    return connect_common(request, 'github')
+    response = connect_common(request, 'github')
+    if response.status_code == 200:
+        from github_app.utils import add_github_team_membership
+        user = request.user
+        add_github_team_membership(user)
+    return response
 
 def connect_google(request):
     return connect_common(request, 'google')
