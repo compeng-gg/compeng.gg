@@ -32,6 +32,9 @@ def update_courses_from_quercus():
         quercus_course_id = offering.external_id
         for student in api.list_students(quercus_course_id):
             username = student['sis_user_id']
+            # Likely the test student
+            if username is None:
+                continue
             quercus_user_id = student['id']
             student_id = int(student['integration_id'])
             user, _ = User.objects.get_or_create(username=username)
