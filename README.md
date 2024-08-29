@@ -1,32 +1,28 @@
-= CompEng.gg
-Jonathan Eyolfson <jon@eyolfson.com>
+# CompEng.gg
 
 A site for learning coding.
 
-== Frontend
+## Frontend
 
 Setting up
 
-[source]
-----
+```
 cd frontend
 npm i
-----
+```
 
 Running
 
-[source]
-----
+```
 cd frontend
 npm run dev
-----
+```
 
-== Backend
+## Backend
 
 Setting up
 
-[source]
-----
+```
 cd backend
 python3 -m venv venv
 source venv/bin/activate
@@ -34,17 +30,12 @@ pip install -U pip
 pip install -r requirements.txt
 python manage.py migrate
 python manage.py runserver
-----
+```
 
 Running
 
-[source]
-----
+```
 cd backend
 source venv/bin/activate
 python manage.py runserver
-----
-
-== Resources
-
-- https://testdriven.io/blog/django-spa-auth/
+```
