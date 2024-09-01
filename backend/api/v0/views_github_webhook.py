@@ -23,5 +23,10 @@ def github_webhook(request):
     if not hmac.compare_digest(expected_signature, signature_header):
         return Response(status=status.HTTP_403_FORBIDDEN)
 
+    if not 'X-GitHub-Event' in request.headers:
+        return Response(status=status.HTTP_403_FORBIDDEN)
+    if request.headers['X-GitHub-Event'] != 'push':
+        return Response()
+
     Push.objects.create(payload=json.loads(request.body))
     return Response()
