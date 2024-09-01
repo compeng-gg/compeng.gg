@@ -6,6 +6,7 @@ def test_webhook():
     headers = {
         'X-GitHub-Event': 'push',
         'X-Hub-Signature-256': 'sha256=aa1747ec22a3a949935a0ceb723d7d115ffe7d64d32abf9792a7ad3687ac8903',
+        'X-GitHub-Delivery': '1',
     }
     data = {
         "ref": "refs/heads/main",
