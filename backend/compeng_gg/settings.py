@@ -229,11 +229,10 @@ DISCORD_GUILD_ID = os.environ.setdefault('DISCORD_GUILD_ID', '')
 
 GITHUB_ORGANIZATION = os.environ.setdefault('GITHUB_ORGANIZATION', '')
 GITHUB_PRIVATE_KEY_B64 = os.environ.setdefault('GITHUB_PRIVATE_KEY_B64', '')
+GITHUB_WEBHOOK_TOKEN = os.environ.setdefault('GITHUB_WEBHOOK_TOKEN', '')
 
-# Webhook (webhook)
-
-WEBHOOK_TOKEN = os.environ.setdefault('WEBHOOK_TOKEN', '')
-WEBHOOK_HOSTS = json.loads(os.getenv("WEBHOOK_HOSTS", '["localhost"]'))
+# Runner
+RUNNER_HOSTS = json.loads(os.getenv("RUNNER_HOSTS", '["localhost"]'))
 
 # Custom
 

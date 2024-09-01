@@ -1,3 +1,9 @@
 from django.contrib import admin
 
-# Register your models here.
+from .models import (
+    Push,
+)
+
+@admin.register(Push)
+class PushAdmin(admin.ModelAdmin):
+    pass
