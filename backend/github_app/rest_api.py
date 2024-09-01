@@ -109,6 +109,8 @@ class GitHubRestAPI(RestAPI):
                 headers=headers,
             )
         r.raise_for_status()
+        if r.text == '':
+            return None
         return r.json()
 
     def post_with_jwt(self, endpoint, data=None):
@@ -215,6 +217,55 @@ class GitHubRestAPI(RestAPI):
 
     def add_team_membership_for_org(self, team_slug, username):
         return self.add_team_membership(self.ORGANIZATION, team_slug, username)
+
+    def create_fork(self, owner, repo, **kwargs):
+        return self.post_with_ghs(f'/repos/{owner}/{repo}/forks', kwargs)
+
+    def create_fork_for_org(self, repo, **kwargs):
+        kwargs['organization'] = self.ORGANIZATION
+        return self.create_fork(self.ORGANIZATION, repo, **kwargs)
+
+    def list_repository_collaborators(self, owner, repo, **kwargs):
+        return self.get_with_ghs(f'/repos/{owner}/{repo}/collaborators',
+                                 kwargs)
+    
+    def list_repository_collaborators_for_org(self, repo, **kwargs):
+        return self.list_repository_collaborators(self.ORGANIZATION, repo,
+                                                  **kwargs)
+
+    def add_repository_collaborator(self, owner, repo, username, **kwargs):
+        return self.put_with_ghs(
+            f'/repos/{owner}/{repo}/collaborators/{username}', kwargs
+        )
+
+    def add_repository_collaborator_for_org(self, repo, username, **kwargs):
+        return self.add_repository_collaborator(
+            self.ORGANIZATION, repo, username, **kwargs
+        )
+
+    def check_team_repository_permissions(self, org, team_slug, owner, repo,
+                                        **kwargs):
+        return self.get_with_ghs(
+            f'/orgs/{org}/teams/{team_slug}/repos/{owner}/{repo}', kwargs
+        )
+
+    def check_team_repository_permissions_for_org(self, team_slug, repo,
+                                                **kwargs):
+        return self_check_team_repository_permissions(
+            self.ORGANIZATION, team_slug, self.ORGANIZATION, repo, **kwargs
+        )
+
+    def add_team_repository_permissions(self, org, team_slug, owner, repo,
+                                        **kwargs):
+        return self.put_with_ghs(
+            f'/orgs/{org}/teams/{team_slug}/repos/{owner}/{repo}', kwargs
+        )
+
+    def add_team_repository_permissions_for_org(self, team_slug, repo,
+                                                **kwargs):
+        return self.add_team_repository_permissions(
+            self.ORGANIZATION, team_slug, self.ORGANIZATION, repo, **kwargs
+        )
 
     def test(self):
         print(json.dumps(self.list_teams_for_org(), indent=4))
