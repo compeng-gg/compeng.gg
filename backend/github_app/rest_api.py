@@ -45,6 +45,28 @@ class GitHubRestAPI(RestAPI):
             self.ghs_token = data['token']
         return self.ghs_token
 
+    def delete_with_ghs(self, endpoint, data=None):
+        token = self.generate_ghs_token()
+        headers = {
+            'Accept': 'application/vnd.github+json',
+            'Authorization': f'Bearer {token}',
+        }
+        if data is not None:
+            r = requests.delete(
+                f'{self.API_URL}{endpoint}',
+                headers=headers,
+                json=data,
+            )
+        else:
+            r = requests.delete(
+                f'{self.API_URL}{endpoint}',
+                headers=headers,
+            )
+        r.raise_for_status()
+        if r.text == '':
+            return None
+        return r.json()
+
     def get_with_jwt(self, endpoint):
         token = self.generate_jwt_token()
         headers = {
@@ -264,6 +286,18 @@ class GitHubRestAPI(RestAPI):
     def add_team_repository_permissions_for_org(self, team_slug, repo,
                                                 **kwargs):
         return self.add_team_repository_permissions(
+            self.ORGANIZATION, team_slug, self.ORGANIZATION, repo, **kwargs
+        )
+
+    def remove_team_repository_permissions(self, org, team_slug, owner, repo,
+                                        **kwargs):
+        return self.delete_with_ghs(
+            f'/orgs/{org}/teams/{team_slug}/repos/{owner}/{repo}', kwargs
+        )
+
+    def add_remove_repository_permissions_for_org(self, team_slug, repo,
+                                                **kwargs):
+        return self.remove_team_repository_permissions(
             self.ORGANIZATION, team_slug, self.ORGANIZATION, repo, **kwargs
         )
 

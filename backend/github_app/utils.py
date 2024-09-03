@@ -49,3 +49,8 @@ def create_fork(course_slug, user):
                 repo_name,
                 permission='pull'
             )
+        elif role.kind == Role.Kind.STUDENT:
+            api.add_remove_repository_permissions_for_org(
+                role.github_team_slug,
+                repo_name,
+            )

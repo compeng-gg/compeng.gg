@@ -9,9 +9,21 @@ def test_webhook():
         'X-GitHub-Delivery': '1',
     }
     data = {
-        "ref": "refs/heads/main",
-        "before": "31e989443fc93f1f98fbe7a40b04eb2d2648b417",
-        "after": "742ad44f682ed0bd12eefb9eba72032227a87b12",
+        'ref': 'refs/heads/main',
+        'after': '97918c7df2b06342cf39c5a905a84d4d25597722',
+        'before': '7e5b62e421446ff188f4307e0ff756613992512a',
+        'forced': False,
+        'pusher': {
+            'name': 'eyolfson',
+            'email': 'jon@eyolfson.com'
+        },
+        "repository": {
+            "id": 767692829,
+            "url": "https://github.com/compeng-gg/compeng.gg",
+            "fork": False,
+            "name": "compeng.gg",
+        },
+
         "repository": {
             "id": 850791657,
             "node_id": "R_kgDOMrYM6Q",
