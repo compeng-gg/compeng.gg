@@ -19,6 +19,8 @@ const userFields: [string, string][] = [
   ['email', 'Email'],
   ['first_name', 'First Name'],
   ['last_name', 'Last Name'],
+  ['discord', 'Discord'],
+  ['github', 'GitHub'],
 ]
 
 function AdminPage() {
@@ -29,7 +31,24 @@ function AdminPage() {
     try {
       const response = await fetchApi(jwt, setAndStoreJwt, "users/", "GET");
       const data = await response.json();
-      setUsers(data);
+      const transformedData = data.map((item: any) => {
+        const newItem: any = {
+          id: item.id,
+          username: item.username,
+          email: item.email,
+          first_name: item.first_name,
+          last_name: item.last_name,
+        };
+        
+        item.social_auth.forEach((auth: any) => {
+          newItem[auth.provider] = auth.uid;
+        });
+
+        console.log(newItem);
+      
+        return newItem;
+      });
+      setUsers(transformedData);
     } catch (error) {
       console.error('Error fetching data:', error);
     }
