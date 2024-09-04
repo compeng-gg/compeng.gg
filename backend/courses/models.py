@@ -69,6 +69,9 @@ class Offering(models.Model):
     def __str__(self):
         return f'{self.name} {self.course}'
 
+    def full_slug(self):
+        return f'{self.slug}-{self.course.slug}'
+
     def get_absolute_url(self):
         if self.active:
             return reverse('courses:course', kwargs={'course_slug': self.course.slug})
