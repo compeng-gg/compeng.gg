@@ -163,6 +163,10 @@ def dashboard(request):
         failed_checks.append('connect-discord')
     if not user.social_auth.filter(provider='github').exists():
         failed_checks.append('connect-github')
+    else:
+        from github_app.utils import is_github_organization_member
+        if not is_github_organization_member(user):
+            failed_checks.append('join-github-organization')
 
     return Response({
         'username': user.username,

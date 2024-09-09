@@ -27,6 +27,10 @@ class QuercusRestAPI(RestAPI):
     def list_students(self, course_id):
         return self.get(f'/courses/{course_id}/students')
 
+    # Required to get the `primary_email` of a user
+    def get_user_profile(self, user_id):
+        return self.get(f'/users/{user_id}/profile')
+
     def test(self):
         pass
         #import json

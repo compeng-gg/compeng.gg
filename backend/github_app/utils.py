@@ -1,5 +1,19 @@
 from github_app.rest_api import GitHubRestAPI
 
+def is_github_organization_member(user):
+    try:
+        social = user.social_auth.get(provider='github')
+    except:
+        return False
+    github_username = social.extra_data['login']
+    api = GitHubRestAPI()
+    data = api.check_organization_membership_for_org(github_username)
+    if data['status'] == 204:
+        return True
+    else:
+        assert data['status'] == 404
+        return False
+
 def add_github_team_membership_for_enrollment(enrollment):
     user = enrollment.user
     social = user.social_auth.get(provider='github')
@@ -34,7 +48,6 @@ def create_fork(course_slug, user):
     )
     github_username = user.social_auth.get(provider='github').extra_data['login']
     api.add_repository_collaborator_for_org(repo_name, github_username, permissions='push')
-    import json
     offering = role.offering
     for role in offering.role_set.all():
         if role.kind == Role.Kind.INSTRUCTOR:

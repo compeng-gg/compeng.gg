@@ -70,6 +70,13 @@ function Dashboard() {
         </div>
       );
     }
+    if (failedChecks.includes('join-github-organization')) {
+      todoCards.push(
+        <div className="p-4 rounded-lg shadow-lg bg-red-900 max-w-fit space-y-4">
+          <p>Please join the GitHub organization. Click <a className="text-red-300" href="https://github.com/orgs/compeng-gg/invitation">here</a> to accept the invite.</p>
+        </div>
+      );
+    }
     todos.push(<div className="flex flex-col gap-4">{...todoCards}</div>);
   }
 

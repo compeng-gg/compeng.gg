@@ -90,8 +90,13 @@ class GitHubRestAPI(RestAPI):
             f'{self.API_URL}{endpoint}',
             headers=headers,
         )
+        if r.text == '':
+            data = {}
+        else:
+            data = r.json()
+        data['status'] = r.status_code
         r.raise_for_status()
-        return r.json()
+        return data
 
     def put_with_jwt(self, endpoint, data=None):
         token = self.generate_jwt_token()
@@ -300,6 +305,19 @@ class GitHubRestAPI(RestAPI):
         return self.remove_team_repository_permissions(
             self.ORGANIZATION, team_slug, self.ORGANIZATION, repo, **kwargs
         )
+
+    def check_organization_membership(self, org, username):
+        from requests.exceptions import HTTPError
+        try:
+            return self.get_with_ghs(f'/orgs/{org}/members/{username}')
+        except HTTPError as e:
+            status_code = e.response.status_code
+            if status_code == 404:
+                return {'status': status_code}
+            raise e
+
+    def check_organization_membership_for_org(self, username):
+        return self.check_organization_membership(self.ORGANIZATION, username)
 
     def test(self):
         print(json.dumps(self.list_teams_for_org(), indent=4))
