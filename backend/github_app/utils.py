@@ -33,22 +33,21 @@ def create_fork(course_slug, user):
     from django.core.exceptions import ObjectDoesNotExist
     role = Role.objects.get(kind=Role.Kind.STUDENT, offering__course__slug=course_slug)
     try:
-        Enrollment.objects.get(user=user, role=role)
+        enrollment = Enrollment.objects.get(user=user, role=role)
     except Enrollment.DoesNotExist:
         return
     try:
         get_uid('github', user)
     except ObjectDoesNotExist:
         return
+    offering = role.offering
+    offering_full_slug = offering.full_slug()
     api = GitHubRestAPI()
-    student_repo_name = f'2024-fall-{course_slug}-student'
-    repo_name = f'2024-fall-{course_slug}-{user.username}' # TODO
+    student_repo_name = f'{offering_full_slug}-student'
+    repo_name = f'{offering_full_slug}-{user.username}'
     api.create_fork_for_org(student_repo_name,
         name=repo_name
     )
-    github_username = user.social_auth.get(provider='github').extra_data['login']
-    api.add_repository_collaborator_for_org(repo_name, github_username, permissions='push')
-    offering = role.offering
     for role in offering.role_set.all():
         if role.kind == Role.Kind.INSTRUCTOR:
             api.add_team_repository_permissions_for_org(
@@ -67,3 +66,8 @@ def create_fork(course_slug, user):
                 role.github_team_slug,
                 repo_name,
             )
+    if is_github_organization_member(user):
+        github_username = user.social_auth.get(provider='github').extra_data['login']
+        api.add_repository_collaborator_for_org(repo_name, github_username, permissions='push')
+    else:
+        add_github_team_membership_for_enrollment(enrollment)

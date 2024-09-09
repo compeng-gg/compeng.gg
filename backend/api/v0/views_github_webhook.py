@@ -7,8 +7,8 @@ import hmac
 import json
 
 from django.conf import settings
+from django.contrib.auth.models import User
 from github_app.models import Push
-
 
 @api_view(['POST'])
 @permission_classes([permissions.AllowAny])
@@ -26,9 +26,32 @@ def github_webhook(request):
 
     if not 'X-GitHub-Event' in request.headers:
         return Response(status=status.HTTP_403_FORBIDDEN)
-    if request.headers['X-GitHub-Event'] != 'push':
-        return Response()
 
+    if not 'X-GitHub-Delivery' in request.headers:
+        return Response(status=status.HTTP_403_FORBIDDEN)
     delivery = request.headers['X-GitHub-Delivery']
-    Push.objects.create(delivery=delivery, payload=json.loads(request.body))
+
+    if not 'X-GitHub-Event' in request.headers:
+        return Response(status=status.HTTP_403_FORBIDDEN)
+    event = request.headers['X-GitHub-Event']
+
+    payload = json.loads(request.body)
+    if event == 'push':
+        Push.objects.create(delivery=delivery, payload=payload)
+        return Response()
+    elif event == 'organization':
+        action = payload['action']
+        if action == 'member_added':
+            github_id = payload['membership']['user']['id']
+            user = User.objects.get(social_auth__uid=github_id)
+            from courses.models import Role # TODO
+            for enrollment in user.enrollment_set.filter(role__kind=Role.Kind.STUDENT):
+                role = enrollment.role
+                offering_full_slug = role.offering.full_slug()
+                repo_name = f'{offering_full_slug}-{user.username}'
+                github_username = user.social_auth.get(provider='github').extra_data['login']
+                from github_app.rest_api import GitHubRestAPI # TODO
+                api = GitHubRestAPI()
+                api.add_repository_collaborator_for_org(repo_name, github_username, permissions='push')
+
     return Response()

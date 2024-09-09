@@ -116,10 +116,9 @@ def connect_discord(request):
 def connect_github(request):
     response = connect_common(request, 'github')
     if response.status_code == 200:
-        from github_app.utils import add_github_team_membership, create_fork
+        from github_app.utils import add_github_team_membership
         user = request.user
         add_github_team_membership(user)
-        create_fork('ece344', user) # TODO
     return response
 
 def connect_google(request):
