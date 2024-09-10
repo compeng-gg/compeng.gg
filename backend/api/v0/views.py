@@ -120,6 +120,7 @@ def connect_github(request):
         user = request.user
         add_github_team_membership(user)
         create_fork('ece344', user)
+        create_fork('ece454', user)
     return response
 
 def connect_google(request):
