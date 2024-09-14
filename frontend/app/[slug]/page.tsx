@@ -54,7 +54,7 @@ function Course({ params }: { params: { slug: string } }) {
         <ul className="mt-2">
           {labs.length > 0 ? (
             labs.map((lab, index) => {
-              const isFutureLab = new Date(lab.start) > new Date();
+              const isFutureLab = new Date(lab.due_date) > new Date();
               return (
                 <li key={index} className="mb-4">
                   <Link
