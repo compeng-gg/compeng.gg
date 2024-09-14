@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
-from django.db import transaction
+from django.db import close_old_connections
 
 import logging
 import socket
@@ -55,6 +55,7 @@ class Command(BaseCommand):
             task.status = Task.Status.FAILURE
             self.stdout.write(f'{task} failure')
         task.save()
+        close_old_connections()
 
     def run(self, conn):
         with conn:
