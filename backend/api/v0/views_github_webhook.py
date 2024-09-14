@@ -6,14 +6,40 @@ import hashlib
 import hmac
 import json
 
+from courses.models import AssignmentTask
+from courses.utils import get_data_for_push
 from django.conf import settings
 from django.contrib.auth.models import User
 from github_app.models import Push
+from runner.models import Task
+from runner.socket import send_task
+
+def create_tasks(push):
+    data = get_data_for_push(push)
+    user = data['user']
+    for assignment in data['assignments']:
+        task = Task.objects.create(
+            runner=assignment.runner,
+            status=Task.Status.QUEUED,
+            push=push,
+        )
+        assignment_task = AssignmentTask.objects.create(
+            user=user,
+            assignment=assignment,
+            task=task,
+        )
+
+        try:
+            send_task(task)
+        except:
+            pass
 
 @api_view(['POST'])
 @permission_classes([permissions.AllowAny])
 def github_webhook(request):
     if not 'X-GitHub-Delivery' in request.headers:
+        return Response(status=status.HTTP_403_FORBIDDEN)
+    if not 'X-GitHub-Event' in request.headers:
         return Response(status=status.HTTP_403_FORBIDDEN)
     if not 'X-Hub-Signature-256' in request.headers:
         return Response(status=status.HTTP_403_FORBIDDEN)
@@ -24,21 +50,19 @@ def github_webhook(request):
     if not hmac.compare_digest(expected_signature, signature_header):
         return Response(status=status.HTTP_403_FORBIDDEN)
 
-    if not 'X-GitHub-Event' in request.headers:
-        return Response(status=status.HTTP_403_FORBIDDEN)
-
-    if not 'X-GitHub-Delivery' in request.headers:
-        return Response(status=status.HTTP_403_FORBIDDEN)
     delivery = request.headers['X-GitHub-Delivery']
-
-    if not 'X-GitHub-Event' in request.headers:
-        return Response(status=status.HTTP_403_FORBIDDEN)
     event = request.headers['X-GitHub-Event']
-
     payload = json.loads(request.body)
     if event == 'push':
-        Push.objects.create(delivery=delivery, payload=payload)
-        return Response()
+        push, created = Push.objects.get_or_create(
+            delivery=delivery,
+            defaults={'payload': payload},
+        )
+        if created:
+            create_tasks(push)
+            return Response(status=status.HTTP_201_CREATED)
+        else:
+            return Response(status=status.HTTP_200_OK)
     elif event == 'organization':
         action = payload['action']
         if action == 'member_added':

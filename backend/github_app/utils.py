@@ -1,4 +1,16 @@
+import os
+
+from django.conf import settings
 from github_app.rest_api import GitHubRestAPI
+
+def get_file(repo, path, ref):
+    api = GitHubRestAPI()
+    full_path = settings.GITHUB_CONTENT_DIR / repo / ref / path
+    content = api.get_repository_content_raw_for_org(repo, path, ref=ref)
+    os.makedirs(full_path.parent, exist_ok=True)
+    with open(full_path, 'w') as f:
+        f.write(content)
+    return full_path
 
 def is_github_organization_member(user):
     try:

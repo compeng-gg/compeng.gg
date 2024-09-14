@@ -70,8 +70,7 @@ INSTALLED_APPS = [
     'quercus_app',
     'youtube_app',
 
-    # 'webhook',
-    #'lab5',
+    'runner',
 
     'corsheaders',
     'social_django',
@@ -227,6 +226,7 @@ DISCORD_GUILD_ID = os.environ.setdefault('DISCORD_GUILD_ID', '')
 
 # GitHub (github)
 
+GITHUB_CONTENT_DIR = BASE_DIR / 'github_content'
 GITHUB_ORGANIZATION = os.environ.setdefault('GITHUB_ORGANIZATION', '')
 GITHUB_PRIVATE_KEY_B64 = os.environ.setdefault('GITHUB_PRIVATE_KEY_B64', '')
 GITHUB_WEBHOOK_TOKEN = os.environ.setdefault('GITHUB_WEBHOOK_TOKEN', '')

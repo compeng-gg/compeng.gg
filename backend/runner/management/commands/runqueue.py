@@ -7,8 +7,8 @@ import socket
 import subprocess
 import threading
 
-from webhook.models import Task
-from webhook.socket import HOST, PORT
+from runner.models import Task
+from runner.socket import HOST, PORT
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +18,7 @@ class Manager:
         self.current_index = 0
         self.current_lock = threading.Lock()
         self.hosts = []
-        for host in settings.WEBHOOK_HOSTS:
+        for host in settings.RUNNER_HOSTS:
             self.hosts.append((host, threading.Lock()))
 
     def next_host(self):

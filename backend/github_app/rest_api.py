@@ -80,16 +80,23 @@ class GitHubRestAPI(RestAPI):
         r.raise_for_status()
         return r.json()
 
-    def get_with_ghs(self, endpoint):
+    def get_with_ghs(self, endpoint, data=None):
         token = self.generate_ghs_token()
         headers = {
             'Accept': 'application/vnd.github+json',
             'Authorization': f'Bearer {token}',
         }
-        r = requests.get(
-            f'{self.API_URL}{endpoint}',
-            headers=headers,
-        )
+        if data is not None:
+            r = requests.get(
+                f'{self.API_URL}{endpoint}',
+                headers=headers,
+                json=data,
+            )
+        else:
+            r = requests.get(
+                f'{self.API_URL}{endpoint}',
+                headers=headers,
+            )
         if r.text == '':
             data = {}
         else:
@@ -97,6 +104,25 @@ class GitHubRestAPI(RestAPI):
         data['status'] = r.status_code
         r.raise_for_status()
         return data
+
+    def get_with_ghs_raw(self, endpoint, data=None):
+        token = self.generate_ghs_token()
+        headers = {
+            'Accept': 'application/vnd.github.raw+json',
+            'Authorization': f'Bearer {token}',
+        }
+        if data is not None:
+            r = requests.get(
+                f'{self.API_URL}{endpoint}',
+                headers=headers,
+                json=data,
+            )
+        else:
+            r = requests.get(
+                f'{self.API_URL}{endpoint}',
+                headers=headers,
+            )
+        return r.text
 
     def put_with_jwt(self, endpoint, data=None):
         token = self.generate_jwt_token()
@@ -318,6 +344,17 @@ class GitHubRestAPI(RestAPI):
 
     def check_organization_membership_for_org(self, username):
         return self.check_organization_membership(self.ORGANIZATION, username)
+
+    def get_repository_content_raw(self, owner, repo, path, **kwargs):
+        return self.get_with_ghs_raw(
+            f'/repos/{owner}/{repo}/contents/{path}',
+            data=kwargs if kwargs else None,
+        )
+    
+    def get_repository_content_raw_for_org(self, repo, path, **kwargs):
+        return self.get_repository_content_raw(
+            self.ORGANIZATION, repo, path, **kwargs
+        )
 
     def test(self):
         print(json.dumps(self.list_teams_for_org(), indent=4))

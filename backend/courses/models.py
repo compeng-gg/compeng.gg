@@ -3,6 +3,8 @@ from django.db import models
 from django.urls import reverse, NoReverseMatch
 from django.utils.translation import gettext_lazy as _
 
+from runner.models import Runner, Task
+
 class Institution(models.Model):
 
     slug = models.SlugField(max_length=50)
@@ -85,6 +87,29 @@ class Offering(models.Model):
     class Meta:
         ordering = ['-start', 'slug']
 
+class Assignment(models.Model):
+
+    offering = models.ForeignKey(
+        Offering,
+        on_delete=models.CASCADE,
+    )
+    runner = models.ForeignKey(
+        Runner,
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+    )
+    slug = models.SlugField(max_length=50)
+    name = models.CharField(max_length=50)
+    due_date = models.DateTimeField()
+    files = models.JSONField()
+
+    def __str__(self):
+        return f'{self.offering} - {self.name}'
+
+    class Meta:
+        ordering = ['-due_date']
+
 class Role(models.Model):
 
     class Kind(models.IntegerChoices):
@@ -141,3 +166,21 @@ class Enrollment(models.Model):
 
     class Meta:
         unique_together = ['user', 'role']
+
+class AssignmentTask(models.Model):
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+    )
+    assignment = models.ForeignKey(
+        Assignment,
+        on_delete=models.CASCADE,
+    )
+    task = models.ForeignKey(
+        Task,
+        on_delete=models.CASCADE,
+    )
+
+    def __str__(self):
+        return f'{self.user} - {self.assignment} - {self.task}'

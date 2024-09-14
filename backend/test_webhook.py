@@ -5,7 +5,7 @@ from compeng_gg import settings
 def test_webhook():
     headers = {
         'X-GitHub-Event': 'push',
-        'X-Hub-Signature-256': 'sha256=aa1747ec22a3a949935a0ceb723d7d115ffe7d64d32abf9792a7ad3687ac8903',
+        'X-Hub-Signature-256': 'sha256=7212283ccc3152e71efad72901f3891eb0186619bb84342e4d6ddb77ee5243b1',
         'X-GitHub-Delivery': '1',
     }
     data = {
@@ -153,8 +153,8 @@ def test_webhook():
             "description": None
         },
         "sender": {
-            "login": "eyolfson",
-            "id": 147030,
+            "login": "joneyolfson",
+            "id": 96020445,
             "node_id": "MDQ6VXNlcjE0NzAzMA==",
             "avatar_url": "https://avatars.githubusercontent.com/u/147030?v=4",
             "gravatar_id": "",
@@ -202,7 +202,8 @@ def test_webhook():
 
             ],
             "modified": [
-                "README.md"
+                "README.md",
+                "tps/src/main.c"
             ]
             }
         ],
@@ -230,7 +231,8 @@ def test_webhook():
 
             ],
             "modified": [
-            "README.md"
+            "README.md",
+            "tps/src/main.c"
             ]
         }
     }

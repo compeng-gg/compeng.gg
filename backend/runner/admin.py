@@ -1,5 +1,10 @@
 from django.contrib import admin
+
 from . import models
+
+@admin.register(models.Runner)
+class RunnerAdmin(admin.ModelAdmin):
+    pass
 
 @admin.register(models.Task)
 class TaskAdmin(admin.ModelAdmin):
@@ -12,9 +17,9 @@ class TaskAdmin(admin.ModelAdmin):
             },
         ),
         (
-            "GitLab",
+            "GitHub",
             {
-                "fields": ["data"],
+                "fields": ["push"],
             },
         ),
     ]

@@ -1,6 +1,5 @@
 from django.apps import AppConfig
 
-class WebhookConfig(AppConfig):
+class RunnerConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'webhook'
-    verbose_name = 'Webhook'
+    name = 'runner'
