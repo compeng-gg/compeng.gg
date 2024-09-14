@@ -8,7 +8,6 @@ import subprocess
 import threading
 
 from runner.models import Task
-from runner.socket import HOST, PORT
 
 logger = logging.getLogger(__name__)
 
@@ -69,7 +68,7 @@ class Command(BaseCommand):
 
     def _socket_listen(self):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.bind((HOST, PORT))
+        s.bind((settings.RUNNER_QUEUE_HOST, settings.RUNNER_QUEUE_PORT))
         s.listen()
         return s
 
@@ -82,7 +81,10 @@ class Command(BaseCommand):
 
         try:
             s = self._socket_listen()
-            self.stdout.write(self.style.SUCCESS(f'Listening on {HOST}:{PORT}'))
+            self.stdout.write(self.style.SUCCESS(
+                f'Listening on {settings.RUNNER_QUEUE_HOST}' \
+                f':{settings.RUNNER_QUEUE_PORT}'
+            ))
         except OSError as err:
             raise CommandError(f'Socket failed: {err}')
 

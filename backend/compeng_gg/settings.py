@@ -232,7 +232,10 @@ GITHUB_PRIVATE_KEY_B64 = os.environ.setdefault('GITHUB_PRIVATE_KEY_B64', '')
 GITHUB_WEBHOOK_TOKEN = os.environ.setdefault('GITHUB_WEBHOOK_TOKEN', '')
 
 # Runner
-RUNNER_HOSTS = json.loads(os.getenv("RUNNER_HOSTS", '["localhost"]'))
+
+RUNNER_QUEUE_HOST = os.environ.setdefault('RUNNER_QUEUE_HOST', 'localhost')
+RUNNER_QUEUE_PORT = int(os.environ.setdefault('RUNNER_QUEUE_PORT', '8002'))
+RUNNER_HOSTS = json.loads(os.getenv('RUNNER_HOSTS', '["localhost"]'))
 
 # Custom
 
