@@ -41,7 +41,8 @@ class Command(BaseCommand):
                 cmd = [py, '-u', 'manage.py', 'runtask', str(task.id)]
             else:
                 cmd = [
-                    'ssh', host, '/opt/compeng.gg/venv/bin/python', '-u',
+                    'ssh', f'compeng.gg@{host}',
+                    '/opt/compeng.gg/venv/bin/python', '-u',
                     '/opt/compeng.gg/backend/manage.py', 'runtask', str(task.id)
                 ]
             p = subprocess.run(cmd, cwd=settings.BASE_DIR)
