@@ -3,6 +3,8 @@
 import { useEffect, useState, useContext } from 'react';
 
 import LoginRequired from '@/app/lib/login-required';
+import H1 from '@/app/ui/h1';
+import H2 from '@/app/ui/h2';
 import Main from '@/app/ui/main';
 import Navbar from '@/app/ui/navbar';
 import Link from 'next/link';
@@ -12,10 +14,8 @@ import { fetchApi } from '@/app/lib/api';
 interface Lab {
   name: string;
   slug: string;
-  start: Date;
-  end: Date;
+  due_date: Date;
 }
-
 
 function Course({ params }: { params: { slug: string } }) {
   const [jwt, setAndStoreJwt] = useContext(JwtContext);
@@ -24,41 +24,33 @@ function Course({ params }: { params: { slug: string } }) {
   useEffect(() => {
     async function fetchLabs() {
       try {
-        const response = await fetchApi(jwt, setAndStoreJwt, `courses/labs/`, "GET", params);  // I expect this path to be added to urls.py in the backend. I'm paasing it params as data so that it knows the labs of which course to return.
-        if (response.ok) {
-          const data = await response.json();
-          setLabs(data); // Assuming data is an array of labs
-        } else {
-          console.error('Failed to fetch labs:', response.statusText);
-        }
+        const response = await fetchApi(jwt, setAndStoreJwt, `courses/${params.slug}/`, "GET");
+        const data = await response.json();
+        setLabs(data);
       } catch (error) {
         console.error('Error fetching labs:', error);
-        // this is just for testing since I don't have a backend to test with
-        /*
-        setLabs([{
-          name: 'Lab 1',
-          slug: 'lab-1',
-          start: new Date(),
-          end: new Date(),
-        },
-        {
-          name: 'Lab 2',
-          slug: 'lab-2',
-          start: new Date('2025-09-01'),
-          end: new Date('2025-09-30'),
-        },]);
-        */
       }
     }
 
     fetchLabs();
   }, [params.slug, jwt, setAndStoreJwt]);
 
+  if (labs.length === 0) {
+    return (
+      <>
+        <Navbar />
+        <Main>
+          <></>
+        </Main>
+      </>
+    );
+  }
+
   return (
     <>
       <Navbar />
       <Main>
-        <h2 className="text-xl font-bold mt-4">Labs for {params.slug}</h2>
+        <H1>{params.slug}</H1>
         <ul className="mt-2">
           {labs.length > 0 ? (
             labs.map((lab, index) => {
@@ -78,10 +70,7 @@ function Course({ params }: { params: { slug: string } }) {
                   >
                     <div className="flex justify-between items-center">
                       <span className="text-2xl font-bold">{lab.name}</span>
-                      <span className="text-sm text-right">{`Start: ${new Date(lab.start).toLocaleDateString()}`}</span>
-                    </div>
-                    <div className="text-sm text-right text-gray-200">
-                      {`End: ${new Date(lab.end).toLocaleDateString()}`}
+                      <span className="text-sm text-right">{`Due: ${new Date(lab.due_date)}`}</span>
                     </div>
                   </Link>
                 </li>

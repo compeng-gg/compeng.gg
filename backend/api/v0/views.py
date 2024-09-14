@@ -185,6 +185,33 @@ def settings(request):
     return Response(data)
 
 @api_view(['GET'])
+@permission_classes([permissions.IsAdminUser])
+def tasks(request):
+    data = []
+    from runner.models import Task
+    for task in Task.objects.all():
+        data.append({
+            'id': task.id,
+            'status': task.get_status_display(),
+            'push': str(task.push),
+        })
+    return Response(data)
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def ece344(request):
+    from courses.models import Offering
+    ece344 = Offering.objects.get(course__slug='ece344')
+    data = []
+    for assignment in ece344.assignment_set.all():
+        data.append({
+            'slug': assignment.slug,
+            'name': assignment.name,
+            'due_date': assignment.due_date,
+        })
+    return Response(data)
+
+@api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
 def offerings(request):
     user = request.user
