@@ -16,6 +16,8 @@ from runner.socket import send_task
 
 def create_tasks(push):
     data = get_data_for_push(push)
+    if not 'assignments' in data:
+        return
     user = data['user']
     for assignment in data['assignments']:
         task = Task.objects.create(
