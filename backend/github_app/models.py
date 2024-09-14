@@ -6,4 +6,4 @@ class Push(models.Model):
     payload = models.JSONField()
 
     def __str__(self):
-        return f'{self.payload['repository']['name']} {self.payload['after']}'
+        return f'{self.payload["repository"]["name"]} {self.payload["after"]}'
