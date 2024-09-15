@@ -7,6 +7,7 @@ import H1 from '@/app/ui/h1';
 import H2 from '@/app/ui/h2';
 import Main from '@/app/ui/main';
 import Navbar from '@/app/ui/navbar';
+import Table from '@/app/ui/table';
 import Link from 'next/link';
 import { JwtContext } from '@/app/lib/jwt-provider';
 import { fetchApi } from '@/app/lib/api';
@@ -16,7 +17,17 @@ interface Lab {
   slug: string;
   due_date: Date;
   grade: number;
+  tasks: any;
 }
+
+const taskFields: [string, string][] = [
+  ['id', 'ID'],
+  ['status', 'Status'],
+  ['grade', 'Grade'],
+  ['repo', 'Repo'],
+  ['commit', 'Commit'],
+  ['received', 'Received'],
+]
 
 function Course({ params }: { params: { slug: string } }) {
   const [jwt, setAndStoreJwt] = useContext(JwtContext);
@@ -58,11 +69,15 @@ function Course({ params }: { params: { slug: string } }) {
           {labs.length > 0 ? (
             labs.map((lab, index) => {
               const isFutureLab = new Date(lab.due_date) > new Date();
+              const transformedTasks = lab.tasks.map((task: any) => ({
+                ...task, // Spread the other properties of each task
+                received: new Date(task.received).toString() // Convert the 'received' field to a date string
+              }));
               return (
                 <li key={index} className="mb-4">
                   <Link
                     href={`/${params.slug}/${lab.slug}`}
-                    className={`block p-6 rounded-md shadow-md transition duration-200 ${
+                    className={`block p-6 rounded-md shadow-md transition duration-200 mb-4 ${
                       isFutureLab
                         ? 'bg-blue-500 hover:bg-blue-600 text-white'
                         : 'bg-gray-500 cursor-not-allowed'
@@ -79,6 +94,7 @@ function Course({ params }: { params: { slug: string } }) {
                       Grade: {lab.grade}
                     </span>
                   </Link>
+                  <Table fields={taskFields} data={transformedTasks} />
                 </li>
               );
             })

@@ -20,6 +20,13 @@ from compeng_gg.auth.serializers import CodeSerializer
 
 from .serializers import UserSerializer
 
+# TODO: with sqlite task.result is a dict, with postgres it's a str
+def get_task_result(task):
+    if type(task.result) is str:
+        import json
+        return json.loads(task.result)
+    return task.result
+
 class UserViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows users to be viewed or edited.
@@ -191,8 +198,8 @@ def tasks(request):
     from runner.models import Task
     for task in Task.objects.all():
         push = task.push
-        grade = task.result['grade'] if task.result and 'grade' in task.result \
-                                     else None
+        result = get_task_result(task)
+        grade = result['grade'] if result and 'grade' in result else None
         data.append({
             'id': task.id,
             'status': task.get_status_display(),
@@ -214,24 +221,35 @@ def ece344(request):
     assignments = []
     for assignment in ece344.assignment_set.all():
         due_date = assignment.due_date
-        grade = 0
-        for assignment_task in assignment.assignmenttask_set.all():
+        assignment_grade = 0
+        tasks = []
+        for assignment_task in assignment.assignmenttask_set.filter(
+            user=request.user, assignment=assignment
+        ).order_by('-task__created'):
             task = assignment_task.task
-            if not task.result:
-                continue
-            if not 'grade' in task.result:
-                continue
             push = task.push
+            result = get_task_result(task)
+            grade = result['grade'] if result and 'grade' in result else None
+            tasks.append({
+                'id': task.id,
+                'status': task.get_status_display(),
+                'grade': grade,
+                'repo': push.payload['repository']['name'],
+                'commit': push.payload['after'],
+                'received': push.received,
+            })
             if push.received > due_date:
                 continue
-            task_grade = task.result['grade']
-            if task_grade > grade:
-                grade = task_grade
+            if grade is None:
+                continue
+            if grade > assignment_grade:
+                assignment_grade = grade
         assignments.append({
             'slug': assignment.slug,
             'name': assignment.name,
             'due_date': assignment.due_date,
-            'grade': grade,
+            'grade': assignment_grade,
+            'tasks': tasks,
         })
     data['assignments'] = assignments
     return Response(data)
