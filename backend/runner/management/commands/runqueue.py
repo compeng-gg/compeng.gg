@@ -47,6 +47,7 @@ class Command(BaseCommand):
                 ]
             p = subprocess.run(cmd, cwd=settings.BASE_DIR)
 
+        # Need to reload the task, since the subprocess updates it
         task = Task.objects.get(id=task.id)
         if p.returncode == 0:
             task.status = Task.Status.SUCCESS

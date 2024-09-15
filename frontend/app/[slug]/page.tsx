@@ -15,6 +15,7 @@ interface Lab {
   name: string;
   slug: string;
   due_date: Date;
+  grade: number;
 }
 
 function Course({ params }: { params: { slug: string } }) {
@@ -61,8 +62,8 @@ function Course({ params }: { params: { slug: string } }) {
                     href={`/${params.slug}/${lab.slug}`}
                     className={`block p-6 rounded-md shadow-md transition duration-200 ${
                       isFutureLab
-                        ? 'bg-gray-400 cursor-not-allowed'
-                        : 'bg-blue-500 hover:bg-blue-600 text-white'
+                        ? 'bg-blue-500 hover:bg-blue-600 text-white'
+                        : 'bg-gray-500 cursor-not-allowed'
                     }`}
                     style={{
                       pointerEvents: isFutureLab ? 'none' : 'auto',
@@ -72,6 +73,9 @@ function Course({ params }: { params: { slug: string } }) {
                       <span className="text-2xl font-bold">{lab.name}</span>
                       <span className="text-sm text-right">{`Due: ${new Date(lab.due_date)}`}</span>
                     </div>
+                    <span>
+                      Grade: {lab.grade}
+                    </span>
                   </Link>
                 </li>
               );

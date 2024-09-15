@@ -204,10 +204,25 @@ def ece344(request):
     ece344 = Offering.objects.get(course__slug='ece344')
     data = []
     for assignment in ece344.assignment_set.all():
+        due_date = assignment.due_date
+        grade = 0
+        for assignment_task in assignment.assignmenttask_set.all():
+            task = assignment_task.task
+            if not task.result:
+                continue
+            if not 'grade' in task.result:
+                continue
+            push = task.push
+            if push.received > due_date:
+                continue
+            task_grade = task.result['grade']
+            if task_grade > grade:
+                grade = task_grade
         data.append({
             'slug': assignment.slug,
             'name': assignment.name,
             'due_date': assignment.due_date,
+            'grade': grade,
         })
     return Response(data)
 
