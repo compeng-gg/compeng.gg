@@ -22,7 +22,7 @@ from .serializers import UserSerializer
 
 # TODO: with sqlite task.result is a dict, with postgres it's a str
 def get_task_result(task):
-    if type(task.result) is str:
+    if type(task.result) is str and task.result != '':
         import json
         return json.loads(task.result)
     return task.result
