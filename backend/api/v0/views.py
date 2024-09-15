@@ -190,10 +190,16 @@ def tasks(request):
     data = []
     from runner.models import Task
     for task in Task.objects.all():
+        push = task.push
+        grade = task.result['grade'] if task.result and 'grade' in task.result \
+                                     else None
         data.append({
             'id': task.id,
             'status': task.get_status_display(),
-            'push': str(task.push),
+            'grade': grade,
+            'repo': push.payload['repository']['name'],
+            'commit': push.payload['after'],
+            'received': push.received,
         })
     return Response(data)
 
@@ -202,7 +208,10 @@ def tasks(request):
 def ece344(request):
     from courses.models import Offering
     ece344 = Offering.objects.get(course__slug='ece344')
-    data = []
+    data = {
+        'name': str(ece344),
+    }
+    assignments = []
     for assignment in ece344.assignment_set.all():
         due_date = assignment.due_date
         grade = 0
@@ -218,12 +227,13 @@ def ece344(request):
             task_grade = task.result['grade']
             if task_grade > grade:
                 grade = task_grade
-        data.append({
+        assignments.append({
             'slug': assignment.slug,
             'name': assignment.name,
             'due_date': assignment.due_date,
             'grade': grade,
         })
+    data['assignments'] = assignments
     return Response(data)
 
 @api_view(['GET'])

@@ -39,13 +39,9 @@ function AdminPage() {
           first_name: item.first_name,
           last_name: item.last_name,
         };
-        
         item.social_auth.forEach((auth: any) => {
           newItem[auth.provider] = auth.uid;
         });
-
-        console.log(newItem);
-      
         return newItem;
       });
       setUsers(transformedData);

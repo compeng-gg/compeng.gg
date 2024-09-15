@@ -16,7 +16,10 @@ import Table from '@/app/ui/table';
 const taskFields: [string, string][] = [
   ['id', 'ID'],
   ['status', 'Status'],
-  ['push', 'Push'],
+  ['grade', 'Grade'],
+  ['repo', 'Repo'],
+  ['commit', 'Commit'],
+  ['received', 'Received'],
 ]
 
 function AdminPage() {
@@ -27,7 +30,18 @@ function AdminPage() {
     try {
       const response = await fetchApi(jwt, setAndStoreJwt, "tasks/", "GET");
       const data = await response.json();
-      setTasks(data);
+      const transformedData = data.map((item: any) => {
+        const newItem: any = {
+          id: item.id,
+          status: item.status,
+          grade: item.grade,
+          repo: item.repo,
+          commit: item.commit,
+        };
+        newItem["received"] = new Date(item.received).toString();
+        return newItem;
+      });
+      setTasks(transformedData);
     } catch (error) {
       console.error('Error fetching data:', error);
     }

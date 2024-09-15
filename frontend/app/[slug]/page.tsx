@@ -20,6 +20,7 @@ interface Lab {
 
 function Course({ params }: { params: { slug: string } }) {
   const [jwt, setAndStoreJwt] = useContext(JwtContext);
+  const [name, setName] = useState();
   const [labs, setLabs] = useState([] as Lab[]);
 
   useEffect(() => {
@@ -27,7 +28,8 @@ function Course({ params }: { params: { slug: string } }) {
       try {
         const response = await fetchApi(jwt, setAndStoreJwt, `courses/${params.slug}/`, "GET");
         const data = await response.json();
-        setLabs(data);
+        setName(data.name);
+        setLabs(data.assignments);
       } catch (error) {
         console.error('Error fetching labs:', error);
       }
@@ -51,7 +53,7 @@ function Course({ params }: { params: { slug: string } }) {
     <>
       <Navbar />
       <Main>
-        <H1>{params.slug}</H1>
+        <H1>{name}</H1>
         <ul className="mt-2">
           {labs.length > 0 ? (
             labs.map((lab, index) => {
