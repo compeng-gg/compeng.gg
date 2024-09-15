@@ -48,3 +48,4 @@ class Command(BaseCommand):
         p = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
         task.result = p.stdout
         task.save()
+        exit(p.returncode)
