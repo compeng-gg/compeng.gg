@@ -30,7 +30,9 @@ def update_courses_from_quercus():
         student_role = offering.role_set.get(kind=Role.Kind.STUDENT)
 
         quercus_course_id = offering.external_id
-        for student in api.list_students(quercus_course_id):
+        students = api.list_students(quercus_course_id)
+        print(f'Got {len(students)} students')
+        for student in students:
             username = student['sis_user_id']
             # Likely the test student
             if username is None:
@@ -50,14 +52,14 @@ def update_courses_from_quercus():
                 assert quercus_user.id == quercus_user_id
             except QuercusUser.DoesNotExist:
                 QuercusUser.objects.create(user=user, id=quercus_user_id)
-            try:
-                enrollment = Enrollment.objects.get(
-                    user=user, role=student_role
-                )
-            except Enrollment.DoesNotExist:
-                enrollment = Enrollment.objects.create(
-                    user=user, role=student_role
-                )
+
+            enrollment, enrollment_created = Enrollment.objects.get_or_create(
+                user=user, role=student_role
+            )
+            if not enrollment_created:
+                continue
+
+            print('Adding', user.username)
 
             # If they're already in Discord, give them the roles
             try:
@@ -74,5 +76,8 @@ def update_courses_from_quercus():
             try:
                 get_uid('github', user)
                 add_github_team_membership_for_enrollment(enrollment)
+                offering = enrollment.offering
+                from github_app.utils import create_fork
+                create_fork(offering.slug, user)
             except ObjectDoesNotExist:
                 pass
