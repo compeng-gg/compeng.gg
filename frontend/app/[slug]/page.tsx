@@ -68,7 +68,7 @@ function Course({ params }: { params: { slug: string } }) {
         {labs.map((assignment) => (
           <div
             key={assignment.slug}
-            className="bg-gray-900 shadow-md rounded-lg p-6 mb-6"
+            className="bg-gray-100 dark:bg-gray-900 shadow-md rounded-lg p-6 mb-6"
           >
             <h2 className="text-2xl font-semibold mb-2">{assignment.name}</h2>
             <p>
@@ -81,7 +81,7 @@ function Course({ params }: { params: { slug: string } }) {
               {assignment.tasks.map((task: any) => (
                 <div
                   key={task.id}
-                  className="bg-gray-800 rounded-lg p-4 mb-4 shadow"
+                  className="bg-gray-200 dark:bg-gray-800 rounded-lg p-4 mb-4 shadow"
                 >
                   <p>
                     <strong>Status:</strong>{' '}
@@ -123,7 +123,7 @@ function Course({ params }: { params: { slug: string } }) {
                     {task.result.tests.map((test:any, index:any) => (
                       <div
                         key={index}
-                        className="bg-black p-3 rounded-lg shadow-sm mb-2"
+                        className="bg-white dark:bg-black p-3 rounded-lg shadow-sm mb-2"
                       >
                         <p>
                           <strong>Test:</strong> {test.name}

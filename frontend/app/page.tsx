@@ -56,7 +56,7 @@ function Dashboard() {
     var todoCards: any[] = [];
     if (failedChecks.includes('connect-discord')) {
       todoCards.push(
-        <div className="p-4 rounded-lg shadow-lg bg-red-900 max-w-fit space-y-4">
+        <div className="text-white p-4 rounded-lg shadow-lg bg-red-900 max-w-fit space-y-4">
           <p>Please connect your Discord account to access discussion.</p>
           <DiscordButton action="connect" />
         </div>
@@ -64,7 +64,7 @@ function Dashboard() {
     }
     if (failedChecks.includes('connect-github')) {
       todoCards.push(
-        <div className="p-4 rounded-lg shadow-lg bg-red-900 max-w-fit space-y-4">
+        <div className="text-white p-4 rounded-lg shadow-lg bg-red-900 max-w-fit space-y-4">
           <p>Please connect your GitHub account to access repositories.</p>
           <GitHubButton action="connect" />
         </div>
@@ -72,7 +72,7 @@ function Dashboard() {
     }
     if (failedChecks.includes('join-github-organization')) {
       todoCards.push(
-        <div className="p-4 rounded-lg shadow-lg bg-red-900 max-w-fit space-y-4">
+        <div className="text-white p-4 rounded-lg shadow-lg bg-red-900 max-w-fit space-y-4">
           <p>Please join the GitHub organization. Click <a className="text-red-300" href="https://github.com/orgs/compeng-gg/invitation">here</a> to accept the invite.</p>
         </div>
       );
