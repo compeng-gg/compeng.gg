@@ -74,9 +74,10 @@ function Course({ params }: { params: { slug: string } }) {
             <p>
               Due: {`${new Date(assignment.due_date)}`}
             </p>
-            <p className="mb-4">Grade: {assignment.grade}</p>
+            <p>Current Grade: {assignment.grade}</p>
 
-            <div className="border-t border-gray-500 pt-4">
+            {assignment.tasks && assignment.tasks.length > 0 && (
+            <div className="border-t border-gray-500 pt-4 mt-4">
               <h3 className="text-xl font-semibold mb-3">Pushes:</h3>
               {assignment.tasks.map((task: any) => (
                 <div
@@ -147,8 +148,9 @@ function Course({ params }: { params: { slug: string } }) {
                           <strong>Duration:</strong> {test.duration.toFixed(2)}s
                         </p>
                         {test.stderr && (
-                          <div className="bg-red-100 text-red-600 p-3 rounded mt-2">
-                            <strong>Error:</strong> <pre>{test.stderr}</pre>
+                          <div className="bg-red-100 font-xs text-red-600 p-3 rounded mt-2">
+                            <p className="mb-2"><strong>Standard Error</strong></p>
+                            <pre className="text-sm">{test.stderr}</pre>
                           </div>
                         )}
                       </div>
@@ -158,6 +160,7 @@ function Course({ params }: { params: { slug: string } }) {
                 </div>
               ))}
             </div>
+            )}
           </div>
         ))}
       </Main>
