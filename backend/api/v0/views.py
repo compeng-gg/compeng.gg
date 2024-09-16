@@ -257,7 +257,6 @@ def course(request, slug):
             'tasks': tasks,
         })
     data['assignments'] = assignments
-    print(data)
     return Response(data)
 
 @api_view(['GET'])

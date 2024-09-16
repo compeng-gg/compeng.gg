@@ -84,7 +84,14 @@ function Course({ params }: { params: { slug: string } }) {
                   className="bg-gray-800 rounded-lg p-4 mb-4 shadow"
                 >
                   <p>
-                    <strong>Status:</strong> {task.status}
+                    <strong>Status:</strong>{' '}
+                    {task.status === 'Success' ? (
+                      <span className="text-green-600 font-semibold">{task.status}</span>
+                    ) : task.status === 'Failure' ? (
+                      <span className="text-red-600 font-semibold">{task.status}</span>
+                    ) : (
+                      task.status
+                    )}
                   </p>
                   {task.grade !== null && (
                     <p>
