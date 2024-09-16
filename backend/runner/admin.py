@@ -8,18 +8,4 @@ class RunnerAdmin(admin.ModelAdmin):
 
 @admin.register(models.Task)
 class TaskAdmin(admin.ModelAdmin):
-    readonly_fields = ('id', 'created')
-    fieldsets = [
-        (
-            None,
-            {
-                "fields": ["id", "created", "status", "result"],
-            },
-        ),
-        (
-            "GitHub",
-            {
-                "fields": ["push"],
-            },
-        ),
-    ]
+    pass

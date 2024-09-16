@@ -86,9 +86,11 @@ function Course({ params }: { params: { slug: string } }) {
                   <p>
                     <strong>Status:</strong> {task.status}
                   </p>
-                  <p>
-                    <strong>Grade:</strong> {task.grade}
-                  </p>
+                  {task.grade !== null && (
+                    <p>
+                      <strong>Grade:</strong> {task.grade}
+                    </p>
+                  )}
                   <p>
                     <strong>Repo:</strong>{' '}
                     <a
@@ -108,6 +110,7 @@ function Course({ params }: { params: { slug: string } }) {
                     {`${new Date(task.received)}`}
                   </p>
 
+                  {task.result !== null &&
                   <div className="border-t border-gray-500 mt-4 pt-2">
                     <h4 className="font-semibold mb-2">Test Results:</h4>
                     {task.result.tests.map((test:any, index:any) => (
@@ -144,6 +147,7 @@ function Course({ params }: { params: { slug: string } }) {
                       </div>
                     ))}
                   </div>
+                  }
                 </div>
               ))}
             </div>
