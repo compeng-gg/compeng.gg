@@ -38,7 +38,7 @@ urlpatterns = [
     path('tasks/', views.tasks),
 
     path('courses/offerings/', views.offerings),
-    path('courses/ece344/', views.ece344), # TODO: Make this general
+    path('courses/<slug:slug>/', views.course),
 
     path('github/webhook/', github_webhook),
 

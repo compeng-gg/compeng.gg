@@ -49,7 +49,7 @@ function Course({ params }: { params: { slug: string } }) {
     fetchLabs();
   }, [params.slug, jwt, setAndStoreJwt]);
 
-  if (labs.length === 0) {
+  if (!name) {
     return (
       <>
         <Navbar />
@@ -65,43 +65,90 @@ function Course({ params }: { params: { slug: string } }) {
       <Navbar />
       <Main>
         <H1>{name}</H1>
-        <ul className="mt-2">
-          {labs.length > 0 ? (
-            labs.map((lab, index) => {
-              const isFutureLab = new Date(lab.due_date) > new Date();
-              const transformedTasks = lab.tasks.map((task: any) => ({
-                ...task, // Spread the other properties of each task
-                received: new Date(task.received).toString() // Convert the 'received' field to a date string
-              }));
-              return (
-                <li key={index} className="mb-4">
-                  <Link
-                    href={`/${params.slug}/${lab.slug}`}
-                    className={`block p-6 rounded-md shadow-md transition duration-200 mb-4 ${
-                      isFutureLab
-                        ? 'bg-blue-500 hover:bg-blue-600 text-white'
-                        : 'bg-gray-500 cursor-not-allowed'
-                    }`}
-                    style={{
-                      pointerEvents: isFutureLab ? 'none' : 'auto',
-                    }}
-                  >
-                    <div className="flex justify-between items-center">
-                      <span className="text-2xl font-bold">{lab.name}</span>
-                      <span className="text-sm text-right">{`Due: ${new Date(lab.due_date)}`}</span>
-                    </div>
-                    <span>
-                      Grade: {lab.grade}
-                    </span>
-                  </Link>
-                  <Table fields={taskFields} data={transformedTasks} />
-                </li>
-              );
-            })
-          ) : (
-            <p>No labs available for this course.</p>
-          )}
-        </ul>
+        {labs.map((assignment) => (
+          <div
+            key={assignment.slug}
+            className="bg-gray-900 shadow-md rounded-lg p-6 mb-6"
+          >
+            <h2 className="text-2xl font-semibold mb-2">{assignment.name}</h2>
+            <p>
+              Due: {`${new Date(assignment.due_date)}`}
+            </p>
+            <p className="mb-4">Grade: {assignment.grade}</p>
+
+            <div className="border-t border-gray-500 pt-4">
+              <h3 className="text-xl font-semibold mb-3">Pushes:</h3>
+              {assignment.tasks.map((task: any) => (
+                <div
+                  key={task.id}
+                  className="bg-gray-800 rounded-lg p-4 mb-4 shadow"
+                >
+                  <p>
+                    <strong>Status:</strong> {task.status}
+                  </p>
+                  <p>
+                    <strong>Grade:</strong> {task.grade}
+                  </p>
+                  <p>
+                    <strong>Repo:</strong>{' '}
+                    <a
+                      href={`https://github.com/compeng-gg/${task.repo}`}
+                      className="text-blue-500 hover:underline"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {task.repo}
+                    </a>
+                  </p>
+                  <p>
+                    <strong>Commit:</strong> {task.commit}
+                  </p>
+                  <p>
+                    <strong>Received:</strong>{' '}
+                    {`${new Date(task.received)}`}
+                  </p>
+
+                  <div className="border-t border-gray-500 mt-4 pt-2">
+                    <h4 className="font-semibold mb-2">Test Results:</h4>
+                    {task.result.tests.map((test:any, index:any) => (
+                      <div
+                        key={index}
+                        className="bg-black p-3 rounded-lg shadow-sm mb-2"
+                      >
+                        <p>
+                          <strong>Test:</strong> {test.name}
+                        </p>
+                        <p>
+                          <strong>Weight:</strong> {test.weight}
+                        </p>
+                        <p>
+                          <strong>Result:</strong>{' '}
+                          <span
+                            className={
+                              test.result === 'OK'
+                                ? 'text-green-600 font-semibold'
+                                : 'text-red-600 font-semibold'
+                            }
+                          >
+                            {test.result}
+                          </span>
+                        </p>
+                        <p>
+                          <strong>Duration:</strong> {test.duration.toFixed(2)}s
+                        </p>
+                        {test.stderr && (
+                          <div className="bg-red-100 text-red-600 p-3 rounded mt-2">
+                            <strong>Error:</strong> <pre>{test.stderr}</pre>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
       </Main>
     </>
   );

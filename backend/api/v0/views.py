@@ -212,14 +212,18 @@ def tasks(request):
 
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
-def ece344(request):
+def course(request, slug):
     from courses.models import Offering
-    ece344 = Offering.objects.get(course__slug='ece344')
+    try:
+        offering = Offering.objects.get(course__slug=slug)
+    except Offering.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
     data = {
-        'name': str(ece344),
+        'name': str(offering),
     }
     assignments = []
-    for assignment in ece344.assignment_set.all():
+    for assignment in offering.assignment_set.all():
         due_date = assignment.due_date
         assignment_grade = 0
         tasks = []
@@ -237,6 +241,7 @@ def ece344(request):
                 'repo': push.payload['repository']['name'],
                 'commit': push.payload['after'],
                 'received': push.received,
+                'result': task.result,
             })
             if push.received > due_date:
                 continue
@@ -252,6 +257,7 @@ def ece344(request):
             'tasks': tasks,
         })
     data['assignments'] = assignments
+    print(data)
     return Response(data)
 
 @api_view(['GET'])
