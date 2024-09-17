@@ -28,3 +28,7 @@ class AssignmentAdmin(admin.ModelAdmin):
 @admin.register(models.AssignmentTask)
 class AssignmentTaskAdmin(admin.ModelAdmin):
     pass
+
+@admin.register(models.Accommodation)
+class AccommodationAdmin(admin.ModelAdmin):
+    pass

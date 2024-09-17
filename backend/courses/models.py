@@ -184,3 +184,21 @@ class AssignmentTask(models.Model):
 
     def __str__(self):
         return f'{self.user} - {self.assignment} - {self.task}'
+
+class Accommodation(models.Model):
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+    )
+    assignment = models.ForeignKey(
+        Assignment,
+        on_delete=models.CASCADE,
+    )
+    due_date = models.DateTimeField()
+
+    def __str__(self):
+        return f'{self.user} - {self.assignment} - {self.due_date}'
+
+    class Meta:
+        unique_together = ['user', 'assignment']

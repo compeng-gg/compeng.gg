@@ -213,7 +213,8 @@ def tasks(request):
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
 def course(request, slug):
-    from courses.models import Offering
+    from courses.models import Accommodation, Offering
+    user = request.user
     try:
         offering = Offering.objects.get(course__slug=slug)
     except Offering.DoesNotExist:
@@ -225,6 +226,14 @@ def course(request, slug):
     assignments = []
     for assignment in offering.assignment_set.all():
         due_date = assignment.due_date
+        # Look for accommodations
+        try:
+            accommodation = Accommodation.objects.get(
+                user=user, assignment=assignment
+            )
+            due_date = accommodation.due_date
+        except Accommodation.DoesNotExist:
+            pass
         assignment_grade = 0
         tasks = []
         for assignment_task in assignment.assignmenttask_set.filter(
