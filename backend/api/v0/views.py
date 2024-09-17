@@ -261,7 +261,7 @@ def course(request, slug):
         assignments.append({
             'slug': assignment.slug,
             'name': assignment.name,
-            'due_date': assignment.due_date,
+            'due_date': due_date,
             'grade': assignment_grade,
             'tasks': tasks,
         })
