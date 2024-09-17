@@ -241,7 +241,7 @@ def course(request, slug):
                 'repo': push.payload['repository']['name'],
                 'commit': push.payload['after'],
                 'received': push.received,
-                'result': task.result,
+                'result': result,
             })
             if push.received > due_date:
                 continue
