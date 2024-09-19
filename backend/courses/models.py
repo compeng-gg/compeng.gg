@@ -196,6 +196,7 @@ class Accommodation(models.Model):
         on_delete=models.CASCADE,
     )
     due_date = models.DateTimeField()
+    max_grade = models.IntegerField(blank=True, null=True)
 
     def __str__(self):
         return f'{self.user} - {self.assignment} - {self.due_date}'

@@ -231,9 +231,8 @@ def course(request, slug):
             accommodation = Accommodation.objects.get(
                 user=user, assignment=assignment
             )
-            due_date = accommodation.due_date
         except Accommodation.DoesNotExist:
-            pass
+            accommodation = None
         assignment_grade = 0
         tasks = []
         for assignment_task in assignment.assignmenttask_set.filter(
@@ -252,10 +251,18 @@ def course(request, slug):
                 'received': push.received,
                 'result': result,
             })
-            if push.received > due_date:
+            on_time = push.received <= due_date
+            max_grade = 100 # TODO: This should probably come from the assign.
+            if accommodation and not on_time:
+                if push.received > accommodation.due_date:
+                    continue
+                if accommodation.max_grade:
+                    max_grade = accommodation.max_grade
+            elif not on_time:
                 continue
             if grade is None:
                 continue
+            grade = min(grade, max_grade)
             if grade > assignment_grade:
                 assignment_grade = grade
         assignments.append({
