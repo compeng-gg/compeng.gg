@@ -20,13 +20,9 @@ interface Lab {
   tasks: any;
 }
 
-const taskFields: [string, string][] = [
+const leaderboardFields: [string, string][] = [
   ['id', 'ID'],
-  ['status', 'Status'],
-  ['grade', 'Grade'],
-  ['repo', 'Repo'],
-  ['commit', 'Commit'],
-  ['received', 'Received'],
+  ['speedup', 'Speedup'],
 ]
 
 function Course({ params }: { params: { slug: string } }) {
@@ -65,7 +61,7 @@ function Course({ params }: { params: { slug: string } }) {
       <Navbar />
       <Main>
         <H1>{name}</H1>
-        {labs.map((assignment) => (
+        {labs.map((assignment: any) => (
           <div
             key={assignment.slug}
             className="bg-gray-100 dark:bg-gray-900 shadow-md rounded-lg p-6 mb-6"
@@ -74,7 +70,17 @@ function Course({ params }: { params: { slug: string } }) {
             <p>
               Due: {`${new Date(assignment.due_date)}`}
             </p>
-            <p>Current Grade: {assignment.grade}</p>
+            {"grade" in assignment && (
+              <p>Current Grade: {assignment.grade}</p>
+            )}
+
+
+            {"leaderboard" in assignment && (<>
+              <div className="border-t border-gray-500 pt-4 mt-4">
+                <h3 className="text-xl font-semibold mb-3">Leaderboard</h3>
+                <Table fields={leaderboardFields} data={assignment.leaderboard} ></Table>
+              </div>
+            </>)}
 
             {assignment.tasks && assignment.tasks.length > 0 && (
             <div className="border-t border-gray-500 pt-4 mt-4">
@@ -97,6 +103,11 @@ function Course({ params }: { params: { slug: string } }) {
                   {task.grade && (
                     <p>
                       <strong>Grade:</strong> {task.grade}
+                    </p>
+                  )}
+                  {"speedup" in task && (
+                    <p>
+                      <strong>Speedup:</strong> {task.speedup}
                     </p>
                   )}
                   <p>

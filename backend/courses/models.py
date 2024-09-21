@@ -202,6 +202,9 @@ class AssignmentLeaderboardEntry(models.Model):
     )
     speedup = models.IntegerField()
 
+    def __str__(self):
+        return f'{self.user} - {self.assignment} - {self.speedup}'
+
     class Meta:
         unique_together = ['user', 'assignment']
 

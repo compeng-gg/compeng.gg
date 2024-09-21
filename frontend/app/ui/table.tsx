@@ -24,7 +24,7 @@ function Table({ data, fields }: TableProps) {
       </thead>
       <tbody>
         {hasData && data.map((row, rowIndex) => (
-          <tr key={rowIndex}>
+          <tr key={rowIndex} {...(row.highlight ? { className: "bg-green-200 dark:bg-green-800" } : {})}>
             {fields.map((field, fieldIndex) => (
               <td
                 key={fieldIndex}
