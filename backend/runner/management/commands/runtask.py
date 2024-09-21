@@ -43,9 +43,18 @@ class Command(BaseCommand):
             file_full_path = get_file(push.payload['repository']['name'], file_path, push.payload['after'])
             volume_args += ['-v', f'{file_full_path}:/workspace/{file_path}']
 
-        cmd = ['docker', 'run', '--rm'] + volume_args + [runner.image]
-        cmd += shlex.split(runner.command)
-        p = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+        # TODO: make this better
+        if runner.image == '2024-fall-ece454-runner:latest' and runner.command == '/workspace/lab2/benchmark.py':
+            cmd = ['docker', 'run', '--rm',
+              '-e', 'RUNNER_MACHINE="rpi4"',
+              -'e', 'ECE454_2024_FALL_LAB2_REFERENCE="135724095438"',
+            ] + volume_args + [runner.image]
+            cmd += shlex.split(runner.command)
+            p = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
+        else:
+            cmd = ['docker', 'run', '--rm'] + volume_args + [runner.image]
+            cmd += shlex.split(runner.command)
+            p = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
         task.result = p.stdout
         task.save()
         exit(p.returncode)
