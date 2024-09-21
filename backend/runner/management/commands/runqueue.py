@@ -56,6 +56,22 @@ class Command(BaseCommand):
             task.status = Task.Status.FAILURE
             self.stdout.write(f'{task} failure')
         task.save()
+        for assignment_task in task.assignmenttask_set.all():
+            if not task.result:
+                continue
+            result = task.result
+            if not 'kind' in result:
+                continue
+            if not result['kind'] == 'benchmark':
+                continue
+            if not 'speedup' in result:
+                continue
+            from courses.models import AssignmentLeaderboardEntry
+            entry, _ = AssignmentLeaderboardEntry.objects.update_or_create(
+                user=user,
+                assignment=assignment,
+                defaults={'speedup': result['speedup']}
+            )
         close_old_connections()
 
     def run(self, conn):

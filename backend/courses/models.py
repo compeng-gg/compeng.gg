@@ -89,10 +89,15 @@ class Offering(models.Model):
 
 class Assignment(models.Model):
 
+    class Kind(models.IntegerChoices):
+        TESTS = 1
+        LEADERBOARD = 2
+
     offering = models.ForeignKey(
         Offering,
         on_delete=models.CASCADE,
     )
+    kind = models.IntegerField(choices=Kind)
     runner = models.ForeignKey(
         Runner,
         on_delete=models.CASCADE,
@@ -184,6 +189,21 @@ class AssignmentTask(models.Model):
 
     def __str__(self):
         return f'{self.user} - {self.assignment} - {self.task}'
+
+class AssignmentLeaderboardEntry(models.Model):
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+    )
+    assignment = models.ForeignKey(
+        Assignment,
+        on_delete=models.CASCADE,
+    )
+    speedup = models.IntegerField()
+
+    class Meta:
+        unique_together = ['user', 'assignment']
 
 class Accommodation(models.Model):
 
