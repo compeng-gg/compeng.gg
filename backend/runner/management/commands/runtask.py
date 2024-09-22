@@ -57,7 +57,8 @@ class Command(BaseCommand):
                     'docker', 'ps', '-a', '-q'
                 ], stdout=subprocess.PIPE, text=True).stdout.splitlines()
                 if len(containers) > 0:
-                    subprocess.run(['docker', 'stop'] + containers)
+                    subprocess.run(['docker', 'stop'] + containers,
+                                   stdout=subprocess.DEVNULL)
                 task.result = {'error': 'timeout'}
                 task.save()
                 exit(1)
@@ -71,7 +72,8 @@ class Command(BaseCommand):
                     'docker', 'ps', '-a', '-q'
                 ], stdout=subprocess.PIPE, text=True).stdout.splitlines()
                 if len(containers) > 0:
-                    subprocess.run(['docker', 'stop'] + containers)
+                    subprocess.run(['docker', 'stop'] + containers,
+                                   stdout=subprocess.DEVNULL)
                 task.result = {'error': 'timeout'}
                 task.save()
                 exit(1)
