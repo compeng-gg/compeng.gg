@@ -19,9 +19,14 @@ def get_data_for_push(push):
     except User.DoesNotExist:
         return data
     data['user'] = user
-    role = Role.objects.get(
-        kind=Role.Kind.STUDENT, offering__course__slug='ece344'
-    )
+    if name.startswith(ece344_prefix):
+        role = Role.objects.get(
+            kind=Role.Kind.STUDENT, offering__course__slug='ece344'
+        )
+    elif name.startswith(ece454_prefix):
+        role = Role.objects.get(
+            kind=Role.Kind.STUDENT, offering__course__slug='ece454'
+        )
     try:
         enrollment = Enrollment.objects.get(user=user, role=role)
     except Enrollment.DoesNotExist:
