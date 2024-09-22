@@ -51,7 +51,7 @@ class Command(BaseCommand):
             ] + volume_args + [runner.image]
             cmd += shlex.split(runner.command)
             try:
-                p = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
+                p = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
             except subprocess.TimeoutExpired:
                 task.result = {'error': 'timeout'}
                 task.save()
