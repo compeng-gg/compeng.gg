@@ -59,7 +59,9 @@ class Command(BaseCommand):
         for assignment_task in task.assignmenttask_set.all():
             if not task.result:
                 continue
-            result = task.result
+            # TODO, this not a great way to get the result...
+            from api.v0.views import get_task_result
+            result = get_task_result(task)
             if not 'kind' in result:
                 continue
             if not result['kind'] == 'benchmark':
