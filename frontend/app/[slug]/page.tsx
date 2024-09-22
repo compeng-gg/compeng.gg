@@ -95,7 +95,16 @@ function Course({ params }: { params: { slug: string } }) {
                     {task.status === 'Success' ? (
                       <span className="text-green-600 font-semibold">{task.status}</span>
                     ) : task.status === 'Failure' ? (
-                      <span className="text-red-600 font-semibold">{task.status}</span>
+                      <>
+                      <span className="text-red-600 font-semibold">{task.status}
+                      {task.result && "error" in task.result && (
+                        <>
+                           {' '}
+                          ({task.result.error})
+                        </>
+                      )}
+                      </span>
+                      </>
                     ) : (
                       task.status
                     )}
