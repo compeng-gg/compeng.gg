@@ -53,6 +53,11 @@ class Command(BaseCommand):
             try:
                 p = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
             except subprocess.TimeoutExpired:
+                containers = subprocess.run([
+                    'docker', 'ps', '-a', '-q'
+                ], stdout=subprocess.PIPE, text=True).stdout.splitlines()
+                if len(containers) > 0:
+                    subprocess.run(['docker', 'stop'] + containers)
                 task.result = {'error': 'timeout'}
                 task.save()
                 exit(1)
@@ -62,6 +67,11 @@ class Command(BaseCommand):
             try:
                 p = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
             except subprocess.TimeoutExpired:
+                containers = subprocess.run([
+                    'docker', 'ps', '-a', '-q'
+                ], stdout=subprocess.PIPE, text=True).stdout.splitlines()
+                if len(containers) > 0:
+                    subprocess.run(['docker', 'stop'] + containers)
                 task.result = {'error': 'timeout'}
                 task.save()
                 exit(1)
