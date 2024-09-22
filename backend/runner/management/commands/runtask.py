@@ -59,7 +59,12 @@ class Command(BaseCommand):
         else:
             cmd = ['docker', 'run', '--rm'] + volume_args + [runner.image]
             cmd += shlex.split(runner.command)
-            p = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+            try:
+                p = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+            except subprocess.TimeoutExpired:
+                task.result = {'error': 'timeout'}
+                task.save()
+                exit(1)
         task.result = p.stdout
         task.save()
         exit(p.returncode)
