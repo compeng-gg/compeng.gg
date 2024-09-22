@@ -70,7 +70,7 @@ class Command(BaseCommand):
                 continue
             from courses.models import AssignmentLeaderboardEntry
             entry, _ = AssignmentLeaderboardEntry.objects.update_or_create(
-                user=user,
+                user=assignment_task.user,
                 assignment=assignment,
                 defaults={'speedup': result['speedup']}
             )
