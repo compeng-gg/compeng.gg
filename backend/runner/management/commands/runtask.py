@@ -44,6 +44,11 @@ class Command(BaseCommand):
             volume_args += ['-v', f'{file_full_path}:/workspace/{file_path}']
 
         # TODO: make this better
+        # 1. The extra options for a leaderboard shouldn't be hardcoded
+        # 2. Whenever `docker run` starts, we should grab the container id.
+        #    Killing the `docker run` command does not stop the command running
+        #    in the container. It should `docker stop` only the container this
+        #    task created.
         if runner.image == '2024-fall-ece454-runner:latest' and runner.command == '/workspace/lab2/benchmark.py':
             cmd = ['docker', 'run', '--rm',
               '-e', 'RUNNER_MACHINE=rpi4',
