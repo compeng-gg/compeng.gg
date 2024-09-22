@@ -46,8 +46,8 @@ class Command(BaseCommand):
         # TODO: make this better
         if runner.image == '2024-fall-ece454-runner:latest' and runner.command == '/workspace/lab2/benchmark.py':
             cmd = ['docker', 'run', '--rm',
-              '-e', 'RUNNER_MACHINE="rpi4"',
-              '-e', 'ECE454_2024_FALL_LAB2_REFERENCE="135724095438"',
+              '-e', 'RUNNER_MACHINE=rpi4',
+              '-e', 'ECE454_2024_FALL_LAB2_REFERENCE=135724095438',
             ] + volume_args + [runner.image]
             cmd += shlex.split(runner.command)
             p = subprocess.run(cmd, capture_output=True, text=True, timeout=900)
