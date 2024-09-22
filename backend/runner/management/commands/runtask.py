@@ -50,7 +50,12 @@ class Command(BaseCommand):
               '-e', 'ECE454_2024_FALL_LAB2_REFERENCE=135724095438',
             ] + volume_args + [runner.image]
             cmd += shlex.split(runner.command)
-            p = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
+            try:
+                p = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
+            except subprocess.TimeoutExpired:
+                task.result = {'error': 'timeout'}
+                task.save()
+                exit(1)
         else:
             cmd = ['docker', 'run', '--rm'] + volume_args + [runner.image]
             cmd += shlex.split(runner.command)
