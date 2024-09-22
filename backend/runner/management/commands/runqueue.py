@@ -69,11 +69,22 @@ class Command(BaseCommand):
             if not 'speedup' in result:
                 continue
             from courses.models import AssignmentLeaderboardEntry
-            entry, _ = AssignmentLeaderboardEntry.objects.update_or_create(
-                user=assignment_task.user,
-                assignment=assignment_task.assignment,
-                defaults={'speedup': result['speedup']}
-            )
+            user = assignment_task.user
+            assignment = assignment_task.assignment
+            speedup = result['speedup']
+            try:
+                entry = AssignmentLeaderboardEntry.objects.get(
+                    user=user,
+                    assignment=assignment,
+                )
+                if speedup > entry.speedup:
+                    entry.speedup = speedup
+                    entry.save()
+            except AssignmentLeaderboardEntry.DoesNotExist:
+                AssignmentLeaderboardEntry.objects.create(
+                    user=user,
+                    assignment=assignment,
+                )
         close_old_connections()
 
     def run(self, conn):
