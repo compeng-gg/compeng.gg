@@ -50,7 +50,7 @@ class Command(BaseCommand):
               '-e', 'ECE454_2024_FALL_LAB2_REFERENCE="135724095438"',
             ] + volume_args + [runner.image]
             cmd += shlex.split(runner.command)
-            p = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
+            p = subprocess.run(cmd, capture_output=True, text=True, timeout=900)
         else:
             cmd = ['docker', 'run', '--rm'] + volume_args + [runner.image]
             cmd += shlex.split(runner.command)
