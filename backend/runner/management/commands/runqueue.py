@@ -32,6 +32,7 @@ class Command(BaseCommand):
 
     def run_task(self, task):
         self.stdout.write(f'{task} received')
+        close_old_connections()
 
         host, lock = self.manager.next_host()
         with lock:
