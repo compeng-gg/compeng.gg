@@ -85,6 +85,7 @@ class Command(BaseCommand):
                 AssignmentLeaderboardEntry.objects.create(
                     user=user,
                     assignment=assignment,
+                    speedup=speedup,
                 )
         close_old_connections()
 
