@@ -10,7 +10,7 @@ function Table({ data, fields }: TableProps) {
   const hasData = Array.isArray(data) && data.length !== 0;
   return (
     <table className="table-auto">
-      <thead className="bg-slate-700">
+      <thead className="bg-slate-300 dark:bg-slate-700">
         <tr>
           {fields.map((field, index) => (
             <th
