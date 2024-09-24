@@ -236,46 +236,25 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        create_utoronto_roles()
-
-        aps105 = create_utoronto_course('APS105', 'Computer Fundamentals')
-        aps105_offering = create_2025_winter_offering(aps105)
-        create_default_roles(aps105_offering)
-        create_discord_roles(
-            aps105_offering,
-            student_color=DiscordRestAPI.COLOR_MAGENTA
-        )
-        create_github_teams(aps105_offering)
-
+        # create_utoronto_roles()
         ece353 = create_utoronto_course('ECE353', 'Systems Software')
         ece353_offering = create_2025_winter_offering(ece353)
         create_default_roles(ece353_offering)
-        create_discord_roles(
-            ece353_offering,
-            student_color=DiscordRestAPI.COLOR_BLUE
-        )
-        create_github_teams(ece353_offering)
-
-        ece419 = create_utoronto_course('ECE419', 'Distributed Systems')
-        ece419_offering = create_2025_winter_offering(ece419)
-        create_default_roles(ece419_offering)
-        create_discord_roles(
-            ece419_offering,
-            student_color=DiscordRestAPI.COLOR_BLUE
-        )
-        create_github_teams(ece419_offering)
-
-        # ece344 = create_utoronto_course('ECE344', 'Operating Systems')
-        # ece454 = create_utoronto_course('ECE454', 'Computer Systems Programming')
-        # ece344_offering = create_2024_fall_offering(ece344)
-        # ece454_offering = create_2024_fall_offering(ece454)
-        # create_default_roles(ece344_offering)
+        # create_discord_roles(
+        #     ece353_offering,
+        #     student_color=DiscordRestAPI.COLOR_BLUE
+        # )
+        ece344 = create_utoronto_course('ECE344', 'Operating Systems')
+        ece454 = create_utoronto_course('ECE454', 'Computer Systems Programming')
+        ece344_offering = create_2024_fall_offering(ece344)
+        ece454_offering = create_2024_fall_offering(ece454)
+        create_default_roles(ece344_offering)
         # create_discord_roles(
         #     ece344_offering,
         #     student_color=DiscordRestAPI.COLOR_BLUE
         # )
         # create_github_teams(ece344_offering)
-        # create_default_roles(ece454_offering)
+        create_default_roles(ece454_offering)
         # create_discord_roles(
         #     ece454_offering,
         #     student_color=DiscordRestAPI.COLOR_PURPLE
