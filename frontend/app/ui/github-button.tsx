@@ -5,7 +5,8 @@ import { JwtContext } from '@/app/lib/jwt-provider';
 
 import { usePathname } from 'next/navigation';
 
-import Button from '@/app/ui/button';
+import { Button } from 'primereact/button';
+import PrimeWrapper from '../components/primeWrapper';
 
 function generateState() {
   return Math.random().toString(36).substring(6);
@@ -38,9 +39,9 @@ function GitHubButton({ action }: GitHubButtonProps) {
   const buttonText = action === 'auth' ? 'Login with GitHub' : 'Connect with GitHub';
 
   return (
-    <Button kind="primary" onClick={handleClick}>
-      {buttonText}
-    </Button>
+    <PrimeWrapper>
+      <Button label={buttonText} onClick={handleClick} raised outlined/>
+    </PrimeWrapper>
   )
 
 }

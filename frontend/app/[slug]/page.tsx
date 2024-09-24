@@ -6,13 +6,15 @@ import LoginRequired from '@/app/lib/login-required';
 import H1 from '@/app/ui/h1';
 import H2 from '@/app/ui/h2';
 import Main from '@/app/ui/main';
-import Navbar from '@/app/ui/navbar';
+import Navbar from '@/app/components/navbar';
 import Table from '@/app/ui/table';
 import Link from 'next/link';
 import { JwtContext } from '@/app/lib/jwt-provider';
 import { fetchApi } from '@/app/lib/api';
+import { TabMenu } from 'primereact/tabmenu';
+import StudentView from '../studentView/student-view';
 
-interface Lab {
+export interface Lab {
   name: string;
   slug: string;
   due_date: Date;
@@ -37,6 +39,7 @@ function Course({ params }: { params: { slug: string } }) {
   useEffect(() => {
     async function fetchLabs() {
       try {
+        //To do: include role in this API
         const response = await fetchApi(jwt, setAndStoreJwt, `courses/${params.slug}/`, "GET");
         const data = await response.json();
         setName(data.name);
@@ -60,11 +63,31 @@ function Course({ params }: { params: { slug: string } }) {
     );
   }
 
+  const items = [
+    { label: 'Assignments', icon: 'pi pi-list-check'},
+    { label: 'Exercises', icons: 'pi pi-pencil'},
+
+  ]
+
+  //Temp value
+  const role = "Student";
+
+  if(role == "Student"){
+    return (
+      <>
+        <Navbar />
+        <StudentView courseName={name} labs={labs} />
+      </>
+    )
+  }
+
+
   return (
     <>
       <Navbar />
       <Main>
         <H1>{name}</H1>
+
         {labs.map((assignment) => (
           <div
             key={assignment.slug}

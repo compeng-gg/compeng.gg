@@ -13,7 +13,7 @@ import GoogleButton from '@/app/ui/google-button';
 
 import H1 from '@/app/ui/h1';
 import Main from '@/app/ui/main';
-import Navbar from '@/app/ui/navbar';
+import Navbar from '@/app/components/navbar';
 
 function SettingsPage() {
   const [jwt, setAndStoreJwt] = useContext(JwtContext);

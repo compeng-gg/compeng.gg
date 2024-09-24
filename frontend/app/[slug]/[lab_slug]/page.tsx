@@ -1,6 +1,6 @@
 import LoginRequired from '@/app/lib/login-required';
 import Main from '@/app/ui/main';
-import Navbar from '@/app/ui/navbar';
+import Navbar from '@/app/components/navbar';
 import H2 from '@/app/ui/h2';
 
 

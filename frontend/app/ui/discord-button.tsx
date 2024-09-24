@@ -5,7 +5,7 @@ import { JwtContext } from '@/app/lib/jwt-provider';
 
 import { usePathname } from 'next/navigation';
 
-import Button from '@/app/ui/button';
+import { Button } from 'primereact/button';
 
 function generateState() {
   return Math.random().toString(36).substring(6);
@@ -39,9 +39,7 @@ function DiscordButton({ action }: DiscordButtonProps) {
   const buttonText = action === 'auth' ? 'Login with Discord' : 'Connect with Discord';
 
   return (
-    <Button kind="primary" onClick={handleClick}>
-      {buttonText}
-    </Button>
+    <Button label={buttonText} onClick={handleClick} raised outlined/>
   )
 
 }
