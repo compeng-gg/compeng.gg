@@ -1,7 +1,9 @@
 from django.conf import settings
+from uuid import uuid4
 from django.db import models
 from django.urls import reverse, NoReverseMatch
 from django.utils.translation import gettext_lazy as _
+from django.utils import timezone
 
 from runner.models import Runner, Task
 
@@ -150,6 +152,17 @@ class Member(models.Model):
     class Meta:
         unique_together = ['institution', 'external_id']
 
+class Team(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
+    name = models.CharField(max_length=255, blank=False, null=False)
+    created_at = models.DateTimeField(default=timezone.now)
+    offering = models.ForeignKey(Offering, on_delete=models.CASCADE, related_name='teams')
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['name', 'offering'], name='unique_team_name_per_offering')
+        ]
+
 class Enrollment(models.Model):
 
     user = models.ForeignKey(
@@ -159,6 +172,12 @@ class Enrollment(models.Model):
     role = models.ForeignKey(
         Role,
         on_delete=models.CASCADE,
+    )
+    team = models.ForeignKey(
+        Team,
+        null=True,
+        on_delete=models.CASCADE,
+        related_name='members'
     )
 
     def __str__(self):
