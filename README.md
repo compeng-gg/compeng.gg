@@ -43,5 +43,6 @@ python manage.py runserver
 Run Unit Tests
 
 ```
+cd backend
 pytest
 ```
