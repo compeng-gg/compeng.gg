@@ -18,6 +18,7 @@ def create_offering() -> db.Offering:
 
     return offering
 
+
 @pytest.mark.django_db
 def test_team_create_and_retrieve():
     offering = create_offering()
