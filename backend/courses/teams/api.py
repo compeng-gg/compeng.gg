@@ -1,7 +1,12 @@
 import courses.models as db
 from rest_framework import permissions
 from rest_framework.decorators import api_view, permission_classes
-from courses.teams.schemas import JoinTeamRequestSerializer, LeaveTeamRequestSerializer, ApproveTeamMemberRequestSerializer
+from courses.teams.schemas import (
+    JoinTeamRequestSerializer,
+    LeaveTeamRequestSerializer, 
+    ApproveTeamMemberRequestSerializer,
+    DeleteTeamRequestSerializer,
+)
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
@@ -119,7 +124,7 @@ def approve_join_team_request(request):
 @api_view(['DELETE'])
 @permission_classes([permissions.IsAuthenticated])
 def delete_team(request):
-    serializer = LeaveTeamRequestSerializer(data=request.data)
+    serializer = DeleteTeamRequestSerializer(data=request.data)
 
     if serializer.is_valid():
         team_id = serializer.validated_data.get('team_id')
