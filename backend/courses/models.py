@@ -7,6 +7,12 @@ from django.utils import timezone
 
 from runner.models import Runner, Task
 
+from enum import Enum, auto
+
+class AutoStrEnum(Enum):
+    def __str__(self):
+        return str(self.value)
+
 class Institution(models.Model):
 
     slug = models.SlugField(max_length=50)
@@ -58,7 +64,7 @@ class Course(models.Model):
         ordering = ['slug']
 
 class Offering(models.Model):
-
+    id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
     course = models.ForeignKey(
         Course,
         on_delete=models.CASCADE,
@@ -155,7 +161,7 @@ class Member(models.Model):
 
 
 class Enrollment(models.Model):
-
+    id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -171,17 +177,31 @@ class Enrollment(models.Model):
     class Meta:
         unique_together = ['user', 'role']
 
+
 class Team(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
     name = models.CharField(max_length=255, blank=False, null=False)
     created_at = models.DateTimeField(default=timezone.now)
     offering = models.ForeignKey(Offering, on_delete=models.CASCADE, related_name='teams')
-    members = models.ManyToManyField(Enrollment, related_name='teams')
 
     class Meta:
         constraints = [
             models.UniqueConstraint(fields=['name', 'offering'], name='unique_team_name_per_offering')
         ]
+
+class TeamMember(models.Model):
+    class MembershipType(models.TextChoices):
+        MEMBER = "MEMBER", _("Member")
+        LEADER = "LEADER", _("Leader")
+        REQUESTED_TO_JOIN = "REQUESTED_TO_JOIN", _("Requested to Join")
+
+    enrollment = models.ForeignKey(Enrollment, on_delete=models.CASCADE)
+    membership_type = models.CharField(
+        choices=MembershipType.choices,
+        max_length=max(len(choice.value) for choice in MembershipType),
+    )
+    team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='members')
+
 
 class AssignmentTask(models.Model):
 
