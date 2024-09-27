@@ -172,16 +172,7 @@ class Member(models.Model):
     class Meta:
         unique_together = ['institution', 'external_id']
 
-class Team(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
-    name = models.CharField(max_length=255, blank=False, null=False)
-    created_at = models.DateTimeField(default=timezone.now)
-    offering = models.ForeignKey(Offering, on_delete=models.CASCADE, related_name='teams')
 
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(fields=['name', 'offering'], name='unique_team_name_per_offering')
-        ]
 
 class Enrollment(models.Model):
 
@@ -193,18 +184,24 @@ class Enrollment(models.Model):
         Role,
         on_delete=models.CASCADE,
     )
-    team = models.ForeignKey(
-        Team,
-        null=True,
-        on_delete=models.CASCADE,
-        related_name='members'
-    )
 
     def __str__(self):
         return f'{self.user} - {self.role}'
 
     class Meta:
         unique_together = ['user', 'role']
+
+class Team(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
+    name = models.CharField(max_length=255, blank=False, null=False)
+    created_at = models.DateTimeField(default=timezone.now)
+    offering = models.ForeignKey(Offering, on_delete=models.CASCADE, related_name='teams')
+    members = models.ManyToManyField(Enrollment, related_name='teams')
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['name', 'offering'], name='unique_team_name_per_offering')
+        ]
 
 class AssignmentTask(models.Model):
 
