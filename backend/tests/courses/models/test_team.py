@@ -58,7 +58,7 @@ def test_team_add_retrieve_and_remove_members():
 
     assert team.members.count() == 2
 
-    retrieved_team = db.Team.objects.prefetch_related('members').get(id=team.id)
+    retrieved_team = db.Team.objects.get(id=team.id)
 
     team_members_set = set(retrieved_team.members.all())
     expected_team_members_set = {
@@ -92,7 +92,7 @@ def test_team_remove_members():
     team.members.remove(enrollment_1)
     enrollment_1.save()
 
-    retrieved_team = db.Team.objects.prefetch_related('members').get(id=team.id)
+    retrieved_team = db.Team.objects.get(id=team.id)
 
     team_members_set = set(retrieved_team.members.all())
 
