@@ -48,22 +48,29 @@ def test_team_add_retrieve_and_remove_members():
     # Create an enrollment with the team
     enrollment_1 = db.Enrollment.objects.create(user=user_1, role=student_role)
 
-    team.members.add(enrollment_1)
+    team_member_1 = db.TeamMember.objects.create(
+        enrollment=enrollment_1,
+        membership_type=db.TeamMember.MembershipType.LEADER,
+        team=team,
+    )
 
     assert team.members.count() == 1
 
     enrollment_2 = db.Enrollment.objects.create(user=user_2, role=student_role)
 
-    team.members.add(enrollment_2)
-
+    team_member_2 = db.TeamMember.objects.create(
+        enrollment=enrollment_2,
+        membership_type=db.TeamMember.MembershipType.LEADER,
+        team=team,
+    )
     assert team.members.count() == 2
 
     retrieved_team = db.Team.objects.get(id=team.id)
 
     team_members_set = set(retrieved_team.members.all())
     expected_team_members_set = {
-        enrollment_1,
-        enrollment_2,
+        team_member_1,
+        team_member_2,
     }
 
     assert team_members_set == expected_team_members_set
@@ -83,28 +90,35 @@ def test_team_remove_members():
     enrollment_1 = db.Enrollment.objects.create(user=user_1, role=student_role)
     enrollment_2 = db.Enrollment.objects.create(user=user_2, role=student_role)
 
-    team.members.add(enrollment_1)
-    team.members.add(enrollment_2)
+    team_member_1 = db.TeamMember.objects.create(
+        enrollment=enrollment_1,
+        membership_type=db.TeamMember.MembershipType.LEADER,
+        team=team,
+    )
+
+    team_member_2 = db.TeamMember.objects.create(
+        enrollment=enrollment_2,
+        membership_type=db.TeamMember.MembershipType.LEADER,
+        team=team,
+    )
 
     assert team.members.count() == 2
 
     # Remove enrollment 1 from team
-    team.members.remove(enrollment_1)
-    enrollment_1.save()
+    team_member_1.delete()
 
     retrieved_team = db.Team.objects.get(id=team.id)
 
     team_members_set = set(retrieved_team.members.all())
 
     expected_team_members_set = {
-        enrollment_2,
+        team_member_2,
     }
 
     assert team_members_set == expected_team_members_set
 
     # Remove enrollment 2 from team
-    team.members.remove(enrollment_2)
-    enrollment_1.save()
+    team_member_2.delete()
 
     assert team.members.count() == 0
 
