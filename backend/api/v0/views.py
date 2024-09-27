@@ -213,7 +213,7 @@ def tasks(request):
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
 def course(request, slug):
-    from courses.models import Accommodation, Offering
+    from courses.models import Accommodation, Assignment, AssignmentLeaderboardEntry, Offering
     user = request.user
     try:
         offering = Offering.objects.get(course__slug=slug)
@@ -242,15 +242,21 @@ def course(request, slug):
             push = task.push
             result = get_task_result(task)
             grade = result['grade'] if result and 'grade' in result else None
-            tasks.append({
+            task_data = {
                 'id': task.id,
                 'status': task.get_status_display(),
-                'grade': grade,
                 'repo': push.payload['repository']['name'],
                 'commit': push.payload['after'],
                 'received': push.received,
                 'result': result,
-            })
+            }
+            if assignment.kind == Assignment.Kind.TESTS:
+                task_data['grade'] = grade
+            elif assignment.kind == Assignment.Kind.LEADERBOARD:
+                speedup = result['speedup'] if result and 'speedup' in result else None
+                if speedup:
+                    task_data['speedup'] = speedup
+            tasks.append(task_data)
             on_time = push.received <= due_date
             max_grade = 100 # TODO: This should probably come from the assign.
             if accommodation and not on_time:
@@ -265,13 +271,24 @@ def course(request, slug):
             grade = min(grade, max_grade)
             if grade > assignment_grade:
                 assignment_grade = grade
-        assignments.append({
+        assignment_data = {
             'slug': assignment.slug,
             'name': assignment.name,
+            'kind': assignment.kind,
             'due_date': due_date,
-            'grade': assignment_grade,
             'tasks': tasks,
-        })
+        }
+        if assignment.kind == Assignment.Kind.TESTS:
+            assignment_data['grade'] = assignment_grade
+        elif assignment.kind == Assignment.Kind.LEADERBOARD:
+            leaderboard = []
+            for entry in AssignmentLeaderboardEntry.objects.filter(assignment=assignment).order_by('-speedup'):
+                entry_data = {'id': entry.user.id, 'speedup': entry.speedup}
+                if entry.user.id == request.user.id:
+                    entry_data['highlight'] = True
+                leaderboard.append(entry_data)
+            assignment_data['leaderboard'] = leaderboard
+        assignments.append(assignment_data)
     data['assignments'] = assignments
     return Response(data)
 

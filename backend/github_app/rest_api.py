@@ -87,10 +87,11 @@ class GitHubRestAPI(RestAPI):
             'Authorization': f'Bearer {token}',
         }
         if data is not None:
+            from urllib.parse import urlencode
+            query = urlencode(data)
             r = requests.get(
-                f'{self.API_URL}{endpoint}',
+                f'{self.API_URL}{endpoint}?{query}',
                 headers=headers,
-                json=data,
             )
         else:
             r = requests.get(
@@ -112,10 +113,11 @@ class GitHubRestAPI(RestAPI):
             'Authorization': f'Bearer {token}',
         }
         if data is not None:
+            from urllib.parse import urlencode
+            query = urlencode(data)
             r = requests.get(
-                f'{self.API_URL}{endpoint}',
+                f'{self.API_URL}{endpoint}?{query}',
                 headers=headers,
-                json=data,
             )
         else:
             r = requests.get(

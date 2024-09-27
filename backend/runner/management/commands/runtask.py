@@ -43,9 +43,47 @@ class Command(BaseCommand):
             file_full_path = get_file(push.payload['repository']['name'], file_path, push.payload['after'])
             volume_args += ['-v', f'{file_full_path}:/workspace/{file_path}']
 
-        cmd = ['docker', 'run', '--rm'] + volume_args + [runner.image]
-        cmd += shlex.split(runner.command)
-        p = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+        # TODO: make this better
+        # 1. The extra options for a leaderboard shouldn't be hardcoded
+        # 2. Whenever `docker run` starts, we should grab the container id.
+        #    Killing the `docker run` command does not stop the command running
+        #    in the container. It should `docker stop` only the container this
+        #    task created.
+        if runner.image == '2024-fall-ece454-runner:latest' and runner.command == '/workspace/lab2/benchmark.py':
+            cmd = ['docker', 'run', '--rm',
+              '--network', 'none',
+              '-e', 'RUNNER_MACHINE=rpi4',
+              '-e', 'ECE454_2024_FALL_LAB2_REFERENCE=96855895713',
+            ] + volume_args + [runner.image]
+            cmd += shlex.split(runner.command)
+            try:
+                p = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
+            except subprocess.TimeoutExpired:
+                containers = subprocess.run([
+                    'docker', 'ps', '-a', '-q'
+                ], stdout=subprocess.PIPE, text=True).stdout.splitlines()
+                if len(containers) > 0:
+                    subprocess.run(['docker', 'stop'] + containers,
+                                   stdout=subprocess.DEVNULL)
+                task.result = {'error': 'timeout'}
+                task.save()
+                exit(1)
+        else:
+            cmd = ['docker', 'run', '--rm', '--network', 'none']
+            cmd += volume_args + [runner.image]
+            cmd += shlex.split(runner.command)
+            try:
+                p = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+            except subprocess.TimeoutExpired:
+                containers = subprocess.run([
+                    'docker', 'ps', '-a', '-q'
+                ], stdout=subprocess.PIPE, text=True).stdout.splitlines()
+                if len(containers) > 0:
+                    subprocess.run(['docker', 'stop'] + containers,
+                                   stdout=subprocess.DEVNULL)
+                task.result = {'error': 'timeout'}
+                task.save()
+                exit(1)
         task.result = p.stdout
         task.save()
         exit(p.returncode)

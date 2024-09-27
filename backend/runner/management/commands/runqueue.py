@@ -32,6 +32,7 @@ class Command(BaseCommand):
 
     def run_task(self, task):
         self.stdout.write(f'{task} received')
+        close_old_connections()
 
         host, lock = self.manager.next_host()
         with lock:
@@ -56,6 +57,36 @@ class Command(BaseCommand):
             task.status = Task.Status.FAILURE
             self.stdout.write(f'{task} failure')
         task.save()
+        for assignment_task in task.assignmenttask_set.all():
+            if not task.result:
+                continue
+            # TODO, this not a great way to get the result...
+            from api.v0.views import get_task_result
+            result = get_task_result(task)
+            if not 'kind' in result:
+                continue
+            if not result['kind'] == 'benchmark':
+                continue
+            if not 'speedup' in result:
+                continue
+            from courses.models import AssignmentLeaderboardEntry
+            user = assignment_task.user
+            assignment = assignment_task.assignment
+            speedup = result['speedup']
+            try:
+                entry = AssignmentLeaderboardEntry.objects.get(
+                    user=user,
+                    assignment=assignment,
+                )
+                if speedup > entry.speedup:
+                    entry.speedup = speedup
+                    entry.save()
+            except AssignmentLeaderboardEntry.DoesNotExist:
+                AssignmentLeaderboardEntry.objects.create(
+                    user=user,
+                    assignment=assignment,
+                    speedup=speedup,
+                )
         close_old_connections()
 
     def run(self, conn):
