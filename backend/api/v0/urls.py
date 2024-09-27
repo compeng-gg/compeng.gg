@@ -6,6 +6,7 @@ from rest_framework_simplejwt.views import (
 
 from . import views
 from .views_github_webhook import github_webhook
+import courses.teams.api as teams_api
 
 from django.conf import settings
 from django.urls import include, path
@@ -39,13 +40,10 @@ urlpatterns = [
 
     path('courses/offerings/', views.offerings),
     path('courses/<slug:slug>/', views.course),
-    path('courses/<slug:course_slug>/staff/', views.staff),
-    path('courses/<slug:course_slug>/staff/<slug:assignment_slug>/', views.staff_assignment),
-    path('courses/<slug:course_slug>/staff/<slug:assignment_slug>/accommodation/', views.staff_assignment_accommodation),
-    path('courses/<slug:course_slug>/staff/<slug:assignment_slug>/private-release/', views.staff_assignment_private_release),
-    path('courses/<slug:course_slug>/staff/<slug:assignment_slug>/<str:student_username>/', views.staff_assignment_student),
-    path('courses/<slug:slug>/students/', views.students),
-    path('courses/<slug:slug>/students/commits/', views.students_commits),
+    path('courses/team/join/request/', teams_api.request_to_join_team),
+    path('courses/team/join/approve/', teams_api.approve_join_team_request),
+    path('courses/team/delete/', teams_api.delete_team),
+    path('courses/team/leave/', teams_api.leave_team),
 
     path('github/webhook/', github_webhook),
 
