@@ -40,10 +40,10 @@ urlpatterns = [
 
     path('courses/offerings/', views.offerings),
     path('courses/<slug:slug>/', views.course),
-    path('courses/team/join/request/', teams_api.request_to_join_team),
-    path('courses/team/join/approve/', teams_api.approve_join_team_request),
-    path('courses/team/delete/', teams_api.delete_team),
-    path('courses/team/leave/', teams_api.leave_team),
+    path('teams/join/request/', teams_api.request_to_join_team),
+    path('teams/join/approve/', teams_api.approve_join_team_request),
+    path('teams/delete/', teams_api.delete_team),
+    path('teams/leave/', teams_api.leave_team),
 
     path('github/webhook/', github_webhook),
 
