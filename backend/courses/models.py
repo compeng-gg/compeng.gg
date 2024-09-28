@@ -7,11 +7,6 @@ from django.utils import timezone
 
 from runner.models import Runner, Task
 
-from enum import Enum, auto
-
-class AutoStrEnum(Enum):
-    def __str__(self):
-        return str(self.value)
 
 class Institution(models.Model):
 
@@ -161,7 +156,6 @@ class Member(models.Model):
 
 
 class Enrollment(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,

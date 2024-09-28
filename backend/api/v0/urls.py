@@ -6,6 +6,7 @@ from rest_framework_simplejwt.views import (
 
 from . import views
 from .views_github_webhook import github_webhook
+import courses.teams.api as teams_api
 
 from django.conf import settings
 from django.urls import include, path
@@ -39,6 +40,10 @@ urlpatterns = [
 
     path('courses/offerings/', views.offerings),
     path('courses/<slug:slug>/', views.course),
+    path('teams/join/request/', teams_api.request_to_join_team),
+    path('teams/join/approve/', teams_api.approve_join_team_request),
+    path('teams/delete/', teams_api.delete_team),
+    path('teams/leave/', teams_api.leave_team),
 
     path('github/webhook/', github_webhook),
 
