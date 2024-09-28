@@ -26,7 +26,7 @@ class DeleteTeamTests(TestCasesWithUserAuth):
             'team_id': team.id,
         }
 
-        response = self.client.delete('/api/v0/courses/team/delete/', data=request_data)
+        response = self.client.delete('/api/v0/teams/delete/', data=request_data)
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
@@ -56,7 +56,7 @@ class DeleteTeamTests(TestCasesWithUserAuth):
             'team_id': team.id,
         }
 
-        response = self.client.delete('/api/v0/courses/team/delete/', data=request_data)
+        response = self.client.delete('/api/v0/teams/delete/', data=request_data)
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
@@ -72,7 +72,7 @@ class DeleteTeamTests(TestCasesWithUserAuth):
             'team_id': team.id,
         }
 
-        response = self.client.delete('/api/v0/courses/team/delete/', data=request_data)
+        response = self.client.delete('/api/v0/teams/delete/', data=request_data)
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 

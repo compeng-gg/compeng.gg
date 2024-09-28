@@ -30,7 +30,7 @@ class ApproveJoinTeamRequestTests(TestCasesWithUserAuth):
             'user_id': requesting_user.id
         }
 
-        response = self.client.patch('/api/v0/courses/team/join/approve/', data=request_data)
+        response = self.client.patch('/api/v0/teams/join/approve/', data=request_data)
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
@@ -50,6 +50,6 @@ class ApproveJoinTeamRequestTests(TestCasesWithUserAuth):
             'user_id': requesting_user.id
         }
 
-        response = self.client.patch('/api/v0/courses/team/join/approve/', data=request_data)
+        response = self.client.patch('/api/v0/teams/join/approve/', data=request_data)
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

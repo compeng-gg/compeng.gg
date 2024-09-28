@@ -27,7 +27,7 @@ class LeaveTeamTests(TestCasesWithUserAuth):
             'team_id': team.id,
         }
 
-        response = self.client.patch('/api/v0/courses/team/leave/', data=request_data)
+        response = self.client.patch('/api/v0/teams/leave/', data=request_data)
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         
@@ -57,7 +57,7 @@ class LeaveTeamTests(TestCasesWithUserAuth):
             'team_id': team.id,
         }
 
-        response = self.client.patch('/api/v0/courses/team/leave/', data=request_data)
+        response = self.client.patch('/api/v0/teams/leave/', data=request_data)
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         
