@@ -13,6 +13,7 @@ import { JwtContext } from '@/app/lib/jwt-provider';
 import { fetchApi } from '@/app/lib/api';
 import { TabMenu } from 'primereact/tabmenu';
 import StudentView from '../studentView/student-view';
+import { Card } from 'primereact/card';
 
 export interface Lab {
   name: string;
@@ -76,7 +77,9 @@ function Course({ params }: { params: { slug: string } }) {
     return (
       <>
         <Navbar />
-        <StudentView courseName={name} labs={labs} />
+        <Card>
+          <StudentView courseName={name} labs={labs} />
+          </Card>
       </>
     )
   }

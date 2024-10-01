@@ -4,6 +4,8 @@ import { useState } from 'react';
 import PrimeWrapper from "../components/primeWrapper";
 import 'primeicons/primeicons.css';
 import { Button } from "primereact/button";
+import StudentAssignmentTab from "./components/student-assignment-tab";
+import StudentTeamViewTab from "./components/student-team-view-tab";
 
 
 
@@ -32,34 +34,29 @@ export default function StudentView(props: StudentViewProps){
                 activeIndex={idx}
                 onTabChange={(e) => setIdx(e.index)}
             />
-        
+            <DisplayCourseTab idx={idx} labs={labs} />
         </PrimeWrapper>
     </>
     )
 }
 
-// function DisplayCourseTab({idx, labs}){
+function DisplayCourseTab({idx, labs}){
 
-//     return ({null});
-//     if(idx == 0){
-//         return (
-//             <AssignmentDisplay labs={labs} />
-//         )
-//     }
-//     if(idx == 4){
-//         return (
-//             <TeamsDisplay/>
-//         )
-//     }
-//     else {
-//         return (
-//             <WIP/>
-//         )
-//     }
-// }
+    if(idx == 0){
+        return <StudentAssignmentTab labs={labs}/>
+    }
 
-// function WIP(){
-//     return (<
-        
-//     )
-// }
+    if(idx == 3){
+        return <StudentTeamViewTab  />
+    }
+
+    return (
+        <WIP/>
+    )
+}
+
+function WIP(){
+    return (
+        <h4>This is a work in progress</h4>
+    )
+}
