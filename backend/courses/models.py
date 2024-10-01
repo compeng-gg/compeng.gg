@@ -60,7 +60,6 @@ class Course(models.Model):
         ordering = ['slug']
 
 class Offering(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
     course = models.ForeignKey(
         Course,
         on_delete=models.CASCADE,
