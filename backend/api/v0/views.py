@@ -158,14 +158,20 @@ def self(request):
 @permission_classes([permissions.IsAuthenticated])
 def dashboard(request):
     user = request.user
+    print(request)
+    print(request.user)
     offerings = []
     for enrollment in user.enrollment_set.all():
-        offering = enrollment.role.offering
-        offerings.append({
-            'name': str(offering),
-            'slug': offering.course.slug,
-            'role': str(enrollment.role),
-        })
+        print("hi")
+        if(enrollment.role):    
+            offering = enrollment.role.offering
+            offerings.append({
+                'name': str(offering),
+                'slug': offering.course.slug,
+                'role': str(enrollment.role),
+            })
+        else:
+            print("NO ROLE IN ENROLLMENT")
     failed_checks = []
     if not user.social_auth.filter(provider='discord').exists():
         failed_checks.append('connect-discord')

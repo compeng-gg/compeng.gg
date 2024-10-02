@@ -13,6 +13,7 @@ import { FilterMatchMode } from "primereact/api";
 import { Message } from "primereact/message";
 import { Divider } from "primereact/divider";
 import { Panel } from "primereact/panel";
+import { fetchApi } from "@/app/lib/api";
 
 
 
@@ -44,7 +45,6 @@ const defaultData: Team[] = [
 export default function StudentTeamViewTab(props: StudentTeamViewTabProps){
 
     const {courseId, userId} = props;
-
     const [teams, setTeams] = useState<Team[]>([]);
 
     const [userTeam, setUserTeam] = useState<Team | undefined>(defaultData[2]);
@@ -55,7 +55,6 @@ export default function StudentTeamViewTab(props: StudentTeamViewTabProps){
         async function fetchTeams() {
             try {
                 //eventually call API here
-
                 setTeams(defaultData);
             } catch (error) {
                 console.error("Failed to retrieve teams", error)
