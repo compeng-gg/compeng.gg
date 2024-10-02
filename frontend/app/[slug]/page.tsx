@@ -54,6 +54,7 @@ function Course({ params }: { params: { slug: string } }) {
     fetchLabs();
   }, [params.slug, jwt, setAndStoreJwt]);
 
+  console.log(params.slug);
   if (!name) {
     return (
       <>
@@ -80,7 +81,7 @@ function Course({ params }: { params: { slug: string } }) {
       <Navbar />
       <Card>
         {(role == "Student")
-        ? <StudentView courseName={name} labs={labs} />
+        ? <StudentView courseName={name} labs={labs} courseSlug={params.slug}/>
         : <StaffView courseName={name} labs={labs} />}
       </Card>
     </>

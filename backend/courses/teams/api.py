@@ -201,10 +201,10 @@ def teams(request, slug):
     data = []
     for team in Team.objects.filter(offering=offering):
         members = []
-        for enrollment in team.members.all():
+        for teamMember in team.members.all():
             members.append({
-                'id': enrollment.user.id,
-                'name': enrollment.user.username,
+                'role': teamMember.membership_type,
+                'name': teamMember.enrollment.user.username,
             })
         
         data.append({

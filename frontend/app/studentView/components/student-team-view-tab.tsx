@@ -1,4 +1,4 @@
-import React, { ReactNode, useEffect, useState } from "react";
+import React, { ReactNode, useContext, useEffect, useState } from "react";
 import { DataView, DataViewLayoutOptions } from 'primereact/dataview';
 import { Card } from "primereact/card";
 import { Button } from "primereact/button";
@@ -14,19 +14,28 @@ import { Message } from "primereact/message";
 import { Divider } from "primereact/divider";
 import { Panel } from "primereact/panel";
 import { fetchApi } from "@/app/lib/api";
+import { JwtContext } from "@/app/lib/jwt-provider";
 
 
 
 export interface StudentTeamViewTabProps {
-    courseId: string,
-    userId: "seb",
+    courseSlug: string;
 }
 
-export type TeamMembershipStatus = "leader" | "member" | "requested";
+export enum TeamMembershipRole {
+    Leader = "LEADER",
+    Member = "MEMBER",
+    Requested = "REQUESTED_TO_JOIN"
+}
 
 export interface TeamMembership {
-    user: string;
-    status: TeamMembershipStatus;
+    name: string;
+    role: TeamMembershipRole;
+}
+
+export interface UserMembership {
+    team: Team;
+    role: TeamMembershipRole;
 }
 
 export interface Team {
@@ -35,34 +44,39 @@ export interface Team {
     members: TeamMembership[];
 }
 
-const defaultData: Team[] = [
-    {id: "Team 1", name: "Team 1", members: [{user: "Nick", status: "leader"}, {user: "Will", status: "member"}]},
-    {id: "Team 2", name: "Team 2", members: [{user: "Abdullah", status: "leader"}, {user: "Zaid", status: "requested"}]},
-    {id: "Team 3", name: "Team 3", members: [{user: "Seb", status: "leader"}, {user: "Kat", status: "member"}, {user: "Santiago", status: "requested"}, {user: "Kris", status: "requested"}]}
-];
-
 
 export default function StudentTeamViewTab(props: StudentTeamViewTabProps){
+    const [jwt, setAndStoreJwt] = useContext(JwtContext);
 
-    const {courseId, userId} = props;
+    const userName = "seb";
+    const {courseSlug} = props;
     const [teams, setTeams] = useState<Team[]>([]);
 
-    const [userTeam, setUserTeam] = useState<Team | undefined>(defaultData[2]);
-
-    const [userMembershipStatus, setUserMembershipStatus] = useState<TeamMembershipStatus | undefined>("leader");
+    const [userMembership, setUserMembership] = useState<UserMembership | undefined>(undefined);
 
     useEffect(() => {
         async function fetchTeams() {
             try {
                 //eventually call API here
-                setTeams(defaultData);
+                const res = await fetchApi(jwt, setAndStoreJwt, `teams/get/${courseSlug}`, "GET");
+                const data = await res.json();
+                const returnedTeams : Team[] = [];
+                data.forEach(team => {
+                    const newTeam = team as Team;
+                    const userMember = newTeam.members.find(m => m.name == userName);
+                    if(userMember != undefined){
+                        setUserMembership({team: newTeam, role: userMember.role});
+                    }
+                    returnedTeams.push(team as Team);
+                })
+                setTeams(returnedTeams);
             } catch (error) {
                 console.error("Failed to retrieve teams", error)
             }
         }
 
         fetchTeams()
-    })
+    }, [courseSlug])
 
     const memberColumnTemplate = (team : Team) => {
         return (
@@ -70,13 +84,12 @@ export default function StudentTeamViewTab(props: StudentTeamViewTabProps){
     }
 
     const joinTeam = ({team} : {team: Team}) => {
-        setUserTeam(team);
-        setUserMembershipStatus("requested");
+        //TODO
     }
 
     const actionsColumnTemplate = (team: Team) => {
-        if(team.name == userTeam?.name){
-            return (<LeaveTeamButton status={userMembershipStatus} leaveTeam={leaveTeam}/>)
+        if(team.id === userMembership?.team.id){
+            return (<LeaveTeamButton membership={userMembership} leaveTeam={leaveTeam}/>)
         }
         return (
             <Button size="small" label="Join Team" raised text onClick={() => joinTeam({team})}/>
@@ -99,20 +112,26 @@ export default function StudentTeamViewTab(props: StudentTeamViewTabProps){
         setGlobalFilterValue(value);
     };
 
+    const createTeam = () => {
+
+    }
+
     const renderHeader = () => {
         return (
-            <div className="flex justify-content-end">
+            <div className="flex" style={{justifyContent: "space-between"}}>
                 <IconField iconPosition="left">
                     <InputIcon className="pi pi-search" />
                     <InputText value={globalFilterValue} onChange={onGlobalFilterChange} placeholder="Keyword Search" />
                 </IconField>
+                {(userMembership == undefined)
+                    ? <Button size="small" label="Create Team" raised text onClick={createTeam} /> 
+                    : null}
             </div>
         );
     };
 
     const leaveTeam = () => {
-        setUserTeam(undefined);
-        setUserMembershipStatus(undefined);
+        //Todo
     }
 
     const header = renderHeader();
@@ -123,8 +142,7 @@ export default function StudentTeamViewTab(props: StudentTeamViewTabProps){
     return(
         <div style={{display: "flex", flexDirection: "column", gap: "8px"}}>
             <UserTeamStatus
-                team={userTeam}
-                userStatus={userMembershipStatus}
+                membership={userMembership}
                 leaveTeam={leaveTeam}
             />
             <DataTable
@@ -145,31 +163,30 @@ export default function StudentTeamViewTab(props: StudentTeamViewTabProps){
 }
 
 export interface LeaveTeamButtonProps {
-    status: TeamMembershipStatus | undefined;
+    membership: UserMembership | undefined;
     leaveTeam: () => void;
 }
 
 const LeaveTeamButton = (props: LeaveTeamButtonProps) => {
-    const {status, leaveTeam} = props;
+    const {membership, leaveTeam} = props;
     
-    if(status == undefined) return null;
+    if(membership == undefined) return null;
     var mssg = "";
-    if(status == "member") mssg = "Leave Team"
-    else if (status == "leader") mssg = "Delete Team"
-    else if (status == "requested") mssg = "Withdraw Request"
+    if(membership.role == TeamMembershipRole.Member) mssg = "Leave Team"
+    else if (membership.role == TeamMembershipRole.Leader) mssg = "Delete Team"
+    else if (membership.role == TeamMembershipRole.Requested) mssg = "Withdraw Request"
     return  (<Button size="small" label={mssg} raised text severity="danger" onClick={leaveTeam} />)
 }
 
 export interface UserTeamStatusProps {
-    team: Team | undefined;
-    userStatus: TeamMembershipStatus | undefined;
+    membership: UserMembership | undefined;
     leaveTeam: () => void;
 }
 
 const UserTeamStatus = (props: UserTeamStatusProps) => {
-    const {team, userStatus, leaveTeam} = props;
+    const {membership, leaveTeam} = props;
 
-    if(team  == undefined || userStatus == undefined){
+    if(membership  == undefined){
         return (<Message severity="warn" text="You are not a member of any team. Please create a team or join a team from the list below" />)
     }
 
@@ -181,11 +198,11 @@ const UserTeamStatus = (props: UserTeamStatusProps) => {
     const JoinRequestList = ({team}: {team: Team}) => {
         return (
             <div style={{display: "flex", flexDirection: "column", maxWidth: "fit-content", gap: "8px"}}>
-            {team.members.map((m: TeamMembership)=>{
-                if(m.status != "requested"){
+            {membership.team.members.map((m: TeamMembership)=>{
+                if(m.role != TeamMembershipRole.Requested){
                     return null;
                 }
-                const displayString = `${m.user} has requested to join your team`;
+                const displayString = `${m.name} has requested to join your team`;
                 return (
                     <Message content={(
                         <div className="flex" style={{alignItems: "center", gap: "8px", justifyContent: "space-between", width: "100%"}}>
@@ -204,32 +221,32 @@ const UserTeamStatus = (props: UserTeamStatusProps) => {
     }
     
 
-    if(userStatus == "member"){
+    if(membership.role == TeamMembershipRole.Member){
         return (
             <Wrapper>
-                <h3>You are a member of {team.name}</h3>
-                <TeamMemberList showLabel members={team.members}/>
-                <LeaveTeamButton status={userStatus} leaveTeam={leaveTeam}/>    
+                <h3>You are a member of {membership.team.name}</h3>
+                <TeamMemberList showLabel members={membership.team.members}/>
+                <LeaveTeamButton membership={membership} leaveTeam={leaveTeam}/>    
             </Wrapper>
 
         )
-    } else if (userStatus == "requested"){
+    } else if (membership.role == TeamMembershipRole.Requested){
         return (
             <Wrapper>
-                <h3>You have requested to join {team.name}</h3>
-                <TeamMemberList showLabel members={team.members}/>
-                <LeaveTeamButton status={userStatus} leaveTeam={leaveTeam}/>
+                <h3>You have requested to join {membership.team.name}</h3>
+                <TeamMemberList showLabel members={membership.team.members}/>
+                <LeaveTeamButton membership={membership} leaveTeam={leaveTeam}/>
             </Wrapper>
         )
-    } else if (userStatus == "leader"){
+    } else if (membership.role == TeamMembershipRole.Leader){
         return (
             <>
             <Wrapper>
-                <h3>You are the leader of {team.name}</h3>
-                <TeamMemberList showLabel members={team.members}/>
-                <LeaveTeamButton status={userStatus} leaveTeam={leaveTeam}/>
+                <h3>You are the leader of {membership.team.name}</h3>
+                <TeamMemberList showLabel members={membership.team.members}/>
+                <LeaveTeamButton membership={membership} leaveTeam={leaveTeam}/>
             </Wrapper>
-            <JoinRequestList team={team} />
+            <JoinRequestList team={membership.team} />
             </>
         )
     }
@@ -242,9 +259,9 @@ const TeamMemberList = ({members, showLabel} : {members : TeamMembership[], show
             {showLabel ? <p>Team Members: </p> : null}
             {members.map((m) => {
             //don't display member requests
-            if(m.status == "requested") return null;
-            const ret : string = m.user.charAt(0).toUpperCase() + m.user.slice(1);
-            if(m.status == "leader"){
+            if(m.role == TeamMembershipRole.Requested) return null;
+            const ret : string = m.name.charAt(0).toUpperCase() + m.name.slice(1);
+            if(m.role == TeamMembershipRole.Leader){
                 return (<p><b>{ret}</b></p>)
             }
             return (<p>{ret}</p>)})}
