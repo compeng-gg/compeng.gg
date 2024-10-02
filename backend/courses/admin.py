@@ -32,3 +32,11 @@ class AssignmentTaskAdmin(admin.ModelAdmin):
 @admin.register(models.Accommodation)
 class AccommodationAdmin(admin.ModelAdmin):
     pass
+
+@admin.register(models.Team)
+class TeamAdmin(admin.ModelAdmin):
+    pass
+
+@admin.register(models.TeamMember)
+class TeamMemberAdmin(admin.ModelAdmin):
+    pass
