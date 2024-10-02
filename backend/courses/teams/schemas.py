@@ -13,3 +13,7 @@ class LeaveTeamRequestSerializer(serializers.Serializer):
 
 class DeleteTeamRequestSerializer(serializers.Serializer):
     team_id = serializers.UUIDField(required=True)
+
+class CreateTeamRequestSerializer(serializers.Serializer):
+    team_name = serializers.CharField(max_length=255, required=True)
+    offering_id = serializers.UUIDField(required=True)
