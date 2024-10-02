@@ -242,7 +242,7 @@ def create_team(request):
         try:
             enrollment = db.Enrollment.objects.get(
                 role=role,
-                user_id=user_id,
+                user=request.user,
             )
         except db.Enrollment.DoesNotExist:
             return Response({'detail': 'Enrollment not found.'}, status=status.HTTP_404_NOT_FOUND)
