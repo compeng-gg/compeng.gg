@@ -214,3 +214,50 @@ def teams(request, slug):
         })
     
     return Response(data)
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def create_team(request):
+    from courses.teams.schemas import CreateTeamRequestSerializer
+    serializer = CreateTeamRequestSerializer(data=request.data)
+
+    if serializer.is_valid():
+        user_id = request.user.id
+        team_name = serializer.validated_data.get('team_name')
+        offering_id = serializer.validated_data.get('offering_id')
+
+        try:
+            offering = db.Offering.objects.get(id=offering_id)
+        except db.Offering.DoesNotExist:
+            return Response({'detail': 'Offering not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        try:
+            role = db.Role.objects.get(
+                kind=db.Role.Kind.STUDENT,
+                offering=offering,
+            )
+        except db.Role.DoesNotExist:
+            return Response({'detail': 'Role not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        try:
+            enrollment = db.Enrollment.objects.get(
+                role=role,
+                user_id=user_id,
+            )
+        except db.Enrollment.DoesNotExist:
+            return Response({'detail': 'Enrollment not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        team = db.Team.objects.create(
+            name=team_name,
+            offering=offering,
+        )
+
+        db.TeamMember.objects.create(
+            team=team,
+            enrollment=enrollment,
+            membership_type=db.TeamMember.MembershipType.LEADER,
+        )
+
+        return Response({'id': team.id, 'name': team.name}, status=status.HTTP_201_CREATED)
+
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
