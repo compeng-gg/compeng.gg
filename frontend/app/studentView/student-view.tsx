@@ -12,10 +12,11 @@ import StudentTeamViewTab from "./components/student-team-view-tab";
 export interface StudentViewProps {
     courseName: string;
     labs: Lab[];
+    courseSlug: string;
 }
 
 export default function StudentView(props: StudentViewProps){
-    const {courseName, labs} = props;
+    const {courseName, labs, courseSlug} = props;
 
     const [idx, setIdx] = useState<number>(0);
     const items = [
@@ -34,20 +35,20 @@ export default function StudentView(props: StudentViewProps){
                 activeIndex={idx}
                 onTabChange={(e) => setIdx(e.index)}
             />
-            <DisplayCourseTab idx={idx} labs={labs} />
+            <DisplayCourseTab idx={idx} labs={labs} courseSlug={courseSlug}/>
         </PrimeWrapper>
     </>
     )
 }
 
-function DisplayCourseTab({idx, labs}){
+function DisplayCourseTab({idx, labs, courseSlug}){
 
     if(idx == 0){
         return <StudentAssignmentTab labs={labs}/>
     }
 
     if(idx == 3){
-        return <StudentTeamViewTab  />
+        return <StudentTeamViewTab  courseSlug={courseSlug}/>
     }
 
     return (
