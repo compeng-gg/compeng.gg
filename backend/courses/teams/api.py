@@ -187,3 +187,30 @@ def leave_team(request):
         return Response(status=status.HTTP_204_NO_CONTENT)
     
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def teams(request, slug):
+    from courses.models import Team, Offering
+    user = request.user
+    try:
+        offering = Offering.objects.get(course__slug=slug)
+    except Offering.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    
+    data = []
+    for team in Team.objects.filter(offering=offering):
+        members = []
+        for enrollment in team.members.all():
+            members.append({
+                'id': enrollment.user.id,
+                'name': enrollment.user.username,
+            })
+        
+        data.append({
+            'id': team.id,
+            'name': team.name,
+            'members': members,
+        })
+    
+    return Response(data)
