@@ -19,6 +19,7 @@ class RoleAdmin(admin.ModelAdmin):
 
 @admin.register(models.Enrollment)
 class EnrollmentAdmin(admin.ModelAdmin):
+    list_display = ('user', 'role')
     pass
 
 @admin.register(models.Assignment)

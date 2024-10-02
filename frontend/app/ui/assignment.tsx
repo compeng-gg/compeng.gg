@@ -8,6 +8,7 @@ import { fetchApi } from '@/app/lib/api';
 import { TabMenu } from 'primereact/tabmenu';
 import StudentView from '../studentView/student-view';
 import { Card } from 'primereact/card';
+import StaffView from '../staffView/staff-view';
 
 export interface Lab {
   name: string;
@@ -61,18 +62,20 @@ function Course({ params }: { params: { slug: string } }) {
   ]
 
   //Temp value
+
   const role = "Student";
 
-  if(role == "Student"){
-    return (
-      <>
-        <Navbar />
-        <Card>
-          <StudentView courseName={name} labs={labs} />
-          </Card>
-      </>
-    )
-  }
+  return (
+    <>
+      <Navbar />
+      <Card>
+        {(role == "Student")
+        ? <StudentView courseName={name} labs={labs} />
+        : <StaffView courseName={name} labs={labs} />}
+      </Card>
+    </>
+  )
+
 
 
   return (
