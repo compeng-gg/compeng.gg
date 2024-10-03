@@ -4,7 +4,7 @@ from rest_framework.decorators import api_view, permission_classes
 from courses.teams.schemas import (
     JoinTeamRequestSerializer,
     LeaveTeamRequestSerializer, 
-    ApproveTeamMemberRequestSerializer,
+    ManageTeamMemberRequestSerializer,
     DeleteTeamRequestSerializer,
 )
 from rest_framework.response import Response
@@ -91,33 +91,43 @@ def request_to_join_team(request):
 
 @api_view(['PATCH'])
 @permission_classes([permissions.IsAuthenticated])
-def approve_join_team_request(request):
-    serializer = ApproveTeamMemberRequestSerializer(data=request.data)
+def manage_join_team_request(request):
+    from courses.models import TeamMember
+    serializer = ManageTeamMemberRequestSerializer(data=request.data)
     
     if serializer.is_valid():
         team_id = serializer.validated_data.get('team_id')
-        user_id = serializer.validated_data.get('user_id')
-
-        team_enrollment_data = get_student_enrollment_for_team(
-            team_id=team_id,
-            user_id=user_id,
+        joiner_name = serializer.validated_data.get('joiner_name')
+        approved = serializer.validated_data.get('approved')
+        request_id = request.user.id
+        
+        teamMembers = db.TeamMember.objects.filter(
+            team_id=team_id
         )
-        enrollment = team_enrollment_data.enrollment
-
-        try:
-            team_member = db.TeamMember.objects.get(
-                team_id=team_id,
-                enrollment=enrollment,
-                membership_type=db.TeamMember.MembershipType.REQUESTED_TO_JOIN,
-            )   
-        except db.TeamMember.DoesNotExist:
+        
+        
+        leader = None
+        approvedJoiner = None
+        for member in teamMembers:
+            if member.membership_type == TeamMember.MembershipType.LEADER:
+                if member.enrollment.user.id == request_id:
+                    leader = member
+                else: #If leader is not person requesting operation, throw error
+                    return Response(status=status.HTTP_401_UNAUTHORIZED)
+            elif member.membership_type == TeamMember.MembershipType.REQUESTED_TO_JOIN \
+                and member.enrollment.user.username == joiner_name:
+                    approvedJoiner = member
+        
+        if leader == None or approvedJoiner == None:
             raise ValidationError()
-
-        team_member.membership_type = db.TeamMember.MembershipType.MEMBER
-        team_member.save()
+        
+        if approved:
+            approvedJoiner.membership_type = db.TeamMember.MembershipType.MEMBER
+            approvedJoiner.save()
+        else:
+            approvedJoiner.delete()
 
         return Response(status=status.HTTP_204_NO_CONTENT)
-    
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
 
@@ -179,10 +189,15 @@ def leave_team(request):
         except db.TeamMember.DoesNotExist:
             raise ValidationError()
         
+        team_empty = False
+        
+        #Frontend only allows deletion by leader if team is empty
         if team_member.membership_type == db.TeamMember.MembershipType.LEADER:
-            raise ValidationError()
+            team_empty = True
         
         team_member.delete()
+        if team_empty:
+            team.delete()
     
         return Response(status=status.HTTP_204_NO_CONTENT)
     
@@ -219,17 +234,18 @@ def teams(request, slug):
 @permission_classes([permissions.IsAuthenticated])
 def create_team(request):
     from courses.teams.schemas import CreateTeamRequestSerializer
+    from courses.models import Offering
     serializer = CreateTeamRequestSerializer(data=request.data)
 
     if serializer.is_valid():
         user_id = request.user.id
         team_name = serializer.validated_data.get('team_name')
-        offering_id = serializer.validated_data.get('offering_id')
+        course_slug = serializer.validated_data.get('course_slug')
 
         try:
-            offering = db.Offering.objects.get(id=offering_id)
-        except db.Offering.DoesNotExist:
-            return Response({'detail': 'Offering not found.'}, status=status.HTTP_404_NOT_FOUND)
+            offering = Offering.objects.get(course__slug=course_slug)
+        except Offering.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
         try:
             role = db.Role.objects.get(

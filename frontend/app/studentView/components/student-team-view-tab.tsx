@@ -15,6 +15,7 @@ import { Divider } from "primereact/divider";
 import { Panel } from "primereact/panel";
 import { fetchApi } from "@/app/lib/api";
 import { JwtContext } from "@/app/lib/jwt-provider";
+import { Dialog } from "primereact/dialog";
 
 
 
@@ -54,27 +55,30 @@ export default function StudentTeamViewTab(props: StudentTeamViewTabProps){
 
     const [userMembership, setUserMembership] = useState<UserMembership | undefined>(undefined);
 
-    useEffect(() => {
-        async function fetchTeams() {
-            try {
-                //eventually call API here
-                const res = await fetchApi(jwt, setAndStoreJwt, `teams/get/${courseSlug}`, "GET");
-                const data = await res.json();
-                const returnedTeams : Team[] = [];
-                data.forEach(team => {
-                    const newTeam = team as Team;
-                    const userMember = newTeam.members.find(m => m.name == userName);
-                    if(userMember != undefined){
-                        setUserMembership({team: newTeam, role: userMember.role});
-                    }
-                    returnedTeams.push(team as Team);
-                })
-                setTeams(returnedTeams);
-            } catch (error) {
-                console.error("Failed to retrieve teams", error)
-            }
-        }
+    async function fetchTeams() {
+        try {
+            //eventually call API here
+            const res = await fetchApi(jwt, setAndStoreJwt, `teams/get/${courseSlug}`, "GET");
+            const data = await res.json();
+            const returnedTeams : Team[] = [];
+            setUserMembership(undefined);
+            data.forEach(team => {
+                const newTeam = team as Team;
+                const userMember = newTeam.members.find(m => m.name == userName);
+                if(userMember != undefined){
+                    setUserMembership({team: newTeam, role: userMember.role});
+                }
+                returnedTeams.push(team as Team);
+            })
+            console.log(JSON.stringify(returnedTeams, null, 2));
+            setTeams(returnedTeams);
 
+        } catch (error) {
+            console.error("Failed to retrieve teams", error)
+        }
+    }
+
+    useEffect(() => {
         fetchTeams()
     }, [courseSlug])
 
@@ -84,6 +88,12 @@ export default function StudentTeamViewTab(props: StudentTeamViewTabProps){
     }
 
     const joinTeam = ({team} : {team: Team}) => {
+        fetchApi(jwt, setAndStoreJwt, `teams/join/request/`, "PATCH", {
+            team_id: team.id
+        }).then((response) => {
+            console.log(response.status);
+            fetchTeams();
+        })
         //TODO
     }
 
@@ -113,7 +123,12 @@ export default function StudentTeamViewTab(props: StudentTeamViewTabProps){
     };
 
     const createTeam = () => {
-
+        fetchApi(jwt, setAndStoreJwt, `teams/create/`, 'POST', {
+            team_name: "Team " + (teams.length+1).toString(),
+            course_slug: courseSlug
+        }).then((response) => {
+            fetchTeams();
+        })
     }
 
     const renderHeader = () => {
@@ -131,18 +146,21 @@ export default function StudentTeamViewTab(props: StudentTeamViewTabProps){
     };
 
     const leaveTeam = () => {
-        //Todo
+        console.log("Leaving team " + userMembership?.team.id);
+        fetchApi(jwt, setAndStoreJwt, `teams/leave/`, "PATCH", {
+            team_id: userMembership?.team.id ?? ""
+        }).then((response) => {
+            fetchTeams();
+        })
     }
 
     const header = renderHeader();
-
-    
-
 
     return(
         <div style={{display: "flex", flexDirection: "column", gap: "8px"}}>
             <UserTeamStatus
                 membership={userMembership}
+                fetchTeams={fetchTeams}
                 leaveTeam={leaveTeam}
             />
             <DataTable
@@ -180,11 +198,15 @@ const LeaveTeamButton = (props: LeaveTeamButtonProps) => {
 
 export interface UserTeamStatusProps {
     membership: UserMembership | undefined;
+    fetchTeams: () => void; 
     leaveTeam: () => void;
 }
 
 const UserTeamStatus = (props: UserTeamStatusProps) => {
-    const {membership, leaveTeam} = props;
+
+    const [jwt, setAndStoreJwt] = useContext(JwtContext);
+
+    const {membership, leaveTeam, fetchTeams} = props;
 
     if(membership  == undefined){
         return (<Message severity="warn" text="You are not a member of any team. Please create a team or join a team from the list below" />)
@@ -193,6 +215,16 @@ const UserTeamStatus = (props: UserTeamStatusProps) => {
     const Wrapper = ({children}: {children: ReactNode}) => {
         return  (<div style={{display: "flex", flexDirection: "row", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap"}}>
             {children}</div>);
+    }
+
+    const manageJoinRequest = ({team, name, approved}) => {
+        fetchApi(jwt, setAndStoreJwt, `teams/join/manage/`, "PATCH", {
+            team_id: team.id,
+            joiner_name: name,
+            approved: approved
+        }).then((response) => {
+            fetchTeams();
+        })
     }
 
     const JoinRequestList = ({team}: {team: Team}) => {
@@ -208,8 +240,8 @@ const UserTeamStatus = (props: UserTeamStatusProps) => {
                         <div className="flex" style={{alignItems: "center", gap: "8px", justifyContent: "space-between", width: "100%"}}>
                             <div>{displayString}</div>
                             <div>
-                                <Button icon="pi pi-check" text style={{padding: "0"}}/>
-                                <Button icon="pi pi-times" text style={{padding: "0"}}/>
+                                <Button icon="pi pi-check" text style={{padding: "0"}} onClick={() => manageJoinRequest({team, name:m.name, approved: true})}/>
+                                <Button icon="pi pi-times" text style={{padding: "0"}} onClick={() => manageJoinRequest({team, name:m.name, approved: false})}/>
                             </div>
                         </div>
                     )}/>
@@ -244,7 +276,9 @@ const UserTeamStatus = (props: UserTeamStatusProps) => {
             <Wrapper>
                 <h3>You are the leader of {membership.team.name}</h3>
                 <TeamMemberList showLabel members={membership.team.members}/>
-                <LeaveTeamButton membership={membership} leaveTeam={leaveTeam}/>
+                {(membership.team.members.length == 1) 
+                ? <LeaveTeamButton membership={membership} leaveTeam={leaveTeam}/>
+                : null}
             </Wrapper>
             <JoinRequestList team={membership.team} />
             </>

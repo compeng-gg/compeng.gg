@@ -27,10 +27,11 @@ class ApproveJoinTeamRequestTests(TestCasesWithUserAuth):
 
         request_data = {
             'team_id': team.id,
-            'user_id': requesting_user.id
+            'user_id': requesting_user.username,
+            'approved': True
         }
 
-        response = self.client.patch('/api/v0/teams/join/approve/', data=request_data)
+        response = self.client.patch('/api/v0/teams/join/manage/', data=request_data)
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
@@ -47,7 +48,8 @@ class ApproveJoinTeamRequestTests(TestCasesWithUserAuth):
 
         request_data = {
             'team_id': team.id,
-            'user_id': requesting_user.id
+            'user_id': requesting_user.id,
+            'approved': True
         }
 
         response = self.client.patch('/api/v0/teams/join/approve/', data=request_data)
