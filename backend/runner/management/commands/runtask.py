@@ -73,7 +73,7 @@ class Command(BaseCommand):
             cmd += volume_args + [runner.image]
             cmd += shlex.split(runner.command)
             try:
-                p = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+                p = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
             except subprocess.TimeoutExpired:
                 containers = subprocess.run([
                     'docker', 'ps', '-a', '-q'

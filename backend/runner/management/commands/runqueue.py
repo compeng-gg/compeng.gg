@@ -30,33 +30,7 @@ class Manager:
 
 class Command(BaseCommand):
 
-    def run_task(self, task):
-        self.stdout.write(f'{task} received')
-        close_old_connections()
-
-        host, lock = self.manager.next_host()
-        with lock:
-            self.stdout.write(f'{task} sent to {host}')
-            if host == 'localhost':
-                py = settings.BASE_DIR / 'venv' / 'bin' / 'python'
-                cmd = [py, '-u', 'manage.py', 'runtask', str(task.id)]
-            else:
-                cmd = [
-                    'ssh', f'compeng.gg@{host}',
-                    '/opt/compeng.gg/backend/venv/bin/python', '-u',
-                    '/opt/compeng.gg/backend/manage.py', 'runtask', str(task.id)
-                ]
-            p = subprocess.run(cmd, cwd=settings.BASE_DIR)
-
-        # Need to reload the task, since the subprocess updates it
-        task = Task.objects.get(id=task.id)
-        if p.returncode == 0:
-            task.status = Task.Status.SUCCESS
-            self.stdout.write(f'{task} success')
-        else:
-            task.status = Task.Status.FAILURE
-            self.stdout.write(f'{task} failure')
-        task.save()
+    def update_leaderboard(self, task):
         for assignment_task in task.assignmenttask_set.all():
             if not task.result:
                 continue
@@ -87,6 +61,37 @@ class Command(BaseCommand):
                     assignment=assignment,
                     speedup=speedup,
                 )
+
+    def run_task(self, task):
+        self.stdout.write(f'{task} received')
+        close_old_connections()
+
+        host, lock = self.manager.next_host()
+        with lock:
+            self.stdout.write(f'{task} sent to {host}')
+            if host == 'localhost':
+                py = settings.BASE_DIR / 'venv' / 'bin' / 'python'
+                cmd = [py, '-u', 'manage.py', 'runtask', str(task.id)]
+            else:
+                cmd = [
+                    'ssh', f'compeng.gg@{host}',
+                    '/opt/compeng.gg/backend/venv/bin/python', '-u',
+                    '/opt/compeng.gg/backend/manage.py', 'runtask', str(task.id)
+                ]
+            p = subprocess.run(cmd, cwd=settings.BASE_DIR)
+
+        # Need to reload the task, since the subprocess updates it
+        task = Task.objects.get(id=task.id)
+        if p.returncode == 0:
+            task.status = Task.Status.SUCCESS
+            self.stdout.write(f'{task} success')
+        else:
+            task.status = Task.Status.FAILURE
+            self.stdout.write(f'{task} failure')
+        task.save()
+
+        self.update_leaderboard(task)
+
         close_old_connections()
 
     def run(self, conn):
