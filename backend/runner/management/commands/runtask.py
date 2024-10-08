@@ -68,6 +68,24 @@ class Command(BaseCommand):
                 task.result = {'error': 'timeout'}
                 task.save()
                 exit(1)
+        elif runner.image == '2024-fall-ece454-runner:latest' and runner.command == '/workspace/lab3/grade.py':
+            cmd = ['docker', 'run', '--rm',
+              '--network', 'none',
+              '-e', 'RUNNER_MACHINE=rpi4',
+            ] + volume_args + [runner.image]
+            cmd += shlex.split(runner.command)
+            try:
+                p = subprocess.run(cmd, capture_output=True, text=True, timeout=90)
+            except subprocess.TimeoutExpired:
+                containers = subprocess.run([
+                    'docker', 'ps', '-a', '-q'
+                ], stdout=subprocess.PIPE, text=True).stdout.splitlines()
+                if len(containers) > 0:
+                    subprocess.run(['docker', 'stop'] + containers,
+                                   stdout=subprocess.DEVNULL)
+                task.result = {'error': 'timeout'}
+                task.save()
+                exit(1)
         else:
             cmd = ['docker', 'run', '--rm', '--network', 'none']
             cmd += volume_args + [runner.image]
