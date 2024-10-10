@@ -1,10 +1,10 @@
 from compeng_gg.auth import get_uid
-from courses.models import Offering, Institution, Member, Role, Enrollment
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from quercus_app.models import QuercusUser
 from quercus_app.rest_api import QuercusRestAPI
 
+from courses.models import *
 from discord_app.utils import *
 from github_app.utils import *
 
@@ -115,3 +115,10 @@ def update_courses_from_quercus():
                 remove_github_fork(enrollment)
             except:
                 print('      GitHub Repository not found')
+
+            offering = enrollment.role.offering
+            for assignment in offering.assignment_set.all():
+                AssignmentTask.objects.filter(user=user, assignment=assignment).delete()
+                AssignmentLeaderboardEntry.objects.filter(user=user, assignment=assignment).delete()
+                Accommodation.objects.filter(user=user, assignment=assignment).delete()
+            enrollment.delete()
