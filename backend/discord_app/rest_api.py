@@ -193,6 +193,12 @@ class DiscordRestAPI(RestAPI):
     def add_guild_member_role_for_guild(self, user_id, role_id):
         return self.add_guild_member_role(self.GUILD_ID, user_id, role_id)
 
+    def remove_guild_member_role(self, guild_id, user_id, role_id):
+        return self.delete(f'/guilds/{guild_id}/members/{user_id}/roles/{role_id}')
+
+    def remove_guild_member_role_for_guild(self, user_id, role_id):
+        return self.remove_guild_member_role(self.GUILD_ID, user_id, role_id)
+
     def get_global_commands(self, application_id):
         return self.get(f'/applications/{application_id}/commands')
 

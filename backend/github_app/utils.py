@@ -35,6 +35,23 @@ def add_github_team_membership_for_enrollment(enrollment):
     api = GitHubRestAPI()
     api.add_team_membership_for_org(github_team_slug, github_username)
 
+def remove_github_team_membership_for_enrollment(enrollment):
+    user = enrollment.user
+    social = user.social_auth.get(provider='github')
+    github_username = social.extra_data['login']
+    role = enrollment.role
+    github_team_slug = role.github_team_slug
+    api = GitHubRestAPI()
+    api.remove_team_membership_for_org(github_team_slug, github_username)
+
+def remove_github_fork(enrollment):
+    user = enrollment.user
+    offering = enrollment.role.offering
+    offering_full_slug = offering.full_slug()
+    repo_name = f'{offering_full_slug}-{user.username}'
+    api = GitHubRestAPI()
+    api.remove_repository_for_org(repo_name)
+
 def add_github_team_membership(user):
     for enrollment in user.enrollment_set.all():
         add_github_team_membership_for_enrollment(enrollment)

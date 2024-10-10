@@ -273,6 +273,18 @@ class GitHubRestAPI(RestAPI):
     def add_team_membership_for_org(self, team_slug, username):
         return self.add_team_membership(self.ORGANIZATION, team_slug, username)
 
+    def remove_team_membership(self, org, team_slug, username):
+        return self.delete_with_ghs(f'/orgs/{org}/teams/{team_slug}/memberships/{username}')
+
+    def remove_team_membership_for_org(self, team_slug, username):
+        return self.remove_team_membership(self.ORGANIZATION, team_slug, username)
+
+    def remove_repository(self, owner, repo):
+        return self.delete_with_ghs(f'/repos/{owner}/{repo}')
+
+    def remove_repository_for_org(self, repo):
+        return self.remove_repository(self.ORGANIZATION, repo)
+
     def create_fork(self, owner, repo, **kwargs):
         return self.post_with_ghs(f'/repos/{owner}/{repo}/forks', kwargs)
 

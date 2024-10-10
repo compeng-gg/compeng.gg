@@ -1,11 +1,12 @@
 from compeng_gg.auth import get_uid
 from courses.models import Offering, Institution, Member, Role, Enrollment
-from discord_app.utils import add_discord_role_for_enrollment
-from github_app.utils import add_github_team_membership_for_enrollment
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from quercus_app.models import QuercusUser
 from quercus_app.rest_api import QuercusRestAPI
+
+from discord_app.utils import *
+from github_app.utils import *
 
 def update_courses_from_quercus():
     utoronto = Institution.objects.get(slug='utoronto')
@@ -27,11 +28,15 @@ def update_courses_from_quercus():
         assert instructor is not None
         api = QuercusRestAPI(instructor)
 
+        print(f'Updating {offering}')
         student_role = offering.role_set.get(kind=Role.Kind.STUDENT)
+        current_enrollments  = Enrollment.objects.filter(role=student_role)
+        print(f'  Current enrollments: {current_enrollments.count()}')
+        students_removed = set([e.user for e in current_enrollments])
 
         quercus_course_id = offering.external_id
         students = api.list_students(quercus_course_id)
-        print(f'Got {len(students)} students')
+        print(f'  Quercus students: {len(students)}')
         for student in students:
             username = student['sis_user_id']
             # Likely the test student
@@ -53,13 +58,16 @@ def update_courses_from_quercus():
             except QuercusUser.DoesNotExist:
                 QuercusUser.objects.create(user=user, id=quercus_user_id)
 
+            if user in students_removed:
+                students_removed.remove(user)
+
             enrollment, enrollment_created = Enrollment.objects.get_or_create(
                 user=user, role=student_role
             )
             if not enrollment_created:
                 continue
 
-            print('Adding', user.username)
+            print('    Adding', user.username)
 
             # If they're already in Discord, give them the roles
             try:
@@ -81,3 +89,29 @@ def update_courses_from_quercus():
                 create_fork(offering.slug, user)
             except ObjectDoesNotExist:
                 pass
+
+        print(f"  Removed students: {len(students_removed)}")
+        for user in students_removed:
+            enrollment = Enrollment.objects.get(user=user, role=student_role)
+            print(f'    Removing {user.username}')
+            # If they're already in Discord, remove the roles
+            try:
+                get_uid('discord', user)
+                try:
+                    remove_discord_role_for_enrollment(enrollment)
+                except:
+                    # Likely they left the server, handle this later
+                    pass
+            except ObjectDoesNotExist:
+                pass
+
+            try:
+                get_uid('github', user)
+                remove_github_team_membership_for_enrollment(enrollment)
+            except ObjectDoesNotExist:
+                pass
+            
+            try:
+                remove_github_fork(enrollment)
+            except:
+                print('      GitHub Repository not found')
