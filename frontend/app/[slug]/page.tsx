@@ -138,6 +138,19 @@ function Course({ params }: { params: { slug: string } }) {
                     {`${new Date(task.received)}`}
                   </p>
 
+                  {task.result && "thru" in task.result && "util" in task. result &&
+                    <div className="border-t border-gray-500 mt-4 pt-2">
+                      <p>
+                        <strong>Throughput:</strong>{' '}
+                        {task.result.thru}/40
+                      </p>
+                      <p>
+                        <strong>Utilization:</strong>{' '}
+                        {task.result.util}/60
+                      </p>
+                    </div>
+                  }
+
                   {task.result && task.result.tests &&
                   <div className="border-t border-gray-500 mt-4 pt-2">
                     <h4 className="font-semibold mb-2">Test Results:</h4>
