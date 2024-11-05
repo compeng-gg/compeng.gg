@@ -120,5 +120,6 @@ def update_courses_from_quercus():
             for assignment in offering.assignment_set.all():
                 AssignmentTask.objects.filter(user=user, assignment=assignment).delete()
                 AssignmentLeaderboardEntry.objects.filter(user=user, assignment=assignment).delete()
+                AssignmentGrade.objects.filter(user=user, assignment=assignment).delete()
                 Accommodation.objects.filter(user=user, assignment=assignment).delete()
             enrollment.delete()

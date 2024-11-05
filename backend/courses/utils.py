@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User
-from courses.models import Enrollment, Role
+from courses.models import Enrollment, Role, Accommodation, Assignment
 from github_app.models import Push
 
 def get_data_for_push(push):
@@ -49,3 +49,64 @@ def get_data_for_push(push):
     data['assignments'] = assignments
 
     return data
+
+def get_grade_for_assignment(user, assignment):
+    from api.v0.views import get_task_result
+    due_date = assignment.due_date
+    # Look for accommodations
+    try:
+        accommodation = Accommodation.objects.get(
+            user=user, assignment=assignment
+        )
+    except Accommodation.DoesNotExist:
+        accommodation = None
+    assignment_grade = 0
+    tasks = []
+    for assignment_task in assignment.assignmenttask_set.filter(
+        user=user, assignment=assignment
+    ).order_by('-task__created'):
+        task = assignment_task.task
+        push = task.push
+        result = get_task_result(task)
+        grade = result['grade'] if result and 'grade' in result else None
+        if assignment.kind == Assignment.Kind.TESTS:
+            pass
+        elif assignment.kind == Assignment.Kind.LEADERBOARD:
+            speedup = result['speedup'] if result and 'speedup' in result else None
+            if speedup:
+                if speedup > 985:
+                    grade = 100
+                elif speedup > 885:
+                    grade = 98
+                elif speedup > 785:
+                    grade = 96
+                elif speedup > 685:
+                    grade = 94
+                elif speedup > 585:
+                    grade = 92
+                elif speedup > 485:
+                    grade = 90
+                elif speedup > 385:
+                    grade = 88
+                elif speedup > 285:
+                    grade = 86
+                elif speedup > 185:
+                    grade = 84
+                elif speedup > 85:
+                    grade = 82
+                task_data['speedup'] = speedup
+        on_time = push.received <= due_date
+        max_grade = 100 # TODO: This should probably come from the assign.
+        if accommodation and not on_time:
+            if push.received > accommodation.due_date:
+                continue
+            if accommodation.max_grade:
+                max_grade = accommodation.max_grade
+        elif not on_time:
+            continue
+        if grade is None:
+            continue
+        grade = min(grade, max_grade)
+        if grade > assignment_grade:
+            assignment_grade = grade
+    return assignment_grade

@@ -33,6 +33,10 @@ class AssignmentTaskAdmin(admin.ModelAdmin):
 class AssignmentLeaderboardEntryAdmin(admin.ModelAdmin):
     pass
 
+@admin.register(models.AssignmentGrade)
+class AssignmentGradeAdmin(admin.ModelAdmin):
+    pass
+
 @admin.register(models.Accommodation)
 class AccommodationAdmin(admin.ModelAdmin):
     pass

@@ -208,6 +208,24 @@ class AssignmentLeaderboardEntry(models.Model):
     class Meta:
         unique_together = ['user', 'assignment']
 
+class AssignmentGrade(models.Model):
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+    )
+    assignment = models.ForeignKey(
+        Assignment,
+        on_delete=models.CASCADE,
+    )
+    grade = models.IntegerField()
+
+    def __str__(self):
+        return f'{self.user} - {self.assignment} - Grade: {self.grade}'
+
+    class Meta:
+        unique_together = ['user', 'assignment']
+
 class Accommodation(models.Model):
 
     user = models.ForeignKey(

@@ -20,6 +20,8 @@ from compeng_gg.auth.serializers import CodeSerializer
 
 from .serializers import UserSerializer
 
+from courses.utils import get_grade_for_assignment
+
 # TODO: with sqlite task.result is a dict, with postgres it's a str
 def get_task_result(task):
     if type(task.result) is str and task.result != '':
