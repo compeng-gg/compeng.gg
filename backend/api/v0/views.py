@@ -215,7 +215,7 @@ def tasks(request):
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
 def course(request, slug):
-    from courses.models import Accommodation, Assignment, AssignmentLeaderboardEntry, Offering
+    from courses.models import Accommodation, Assignment, AssignmentLeaderboardEntry, Offering, AssignmentGrade
     user = request.user
     try:
         offering = Offering.objects.get(course__slug=slug)
@@ -280,6 +280,12 @@ def course(request, slug):
             'due_date': due_date,
             'tasks': tasks,
         }
+        try:
+            ag = AssignmentGrade.objects.get(user=user, assignment=assignment)
+            assignment_grade = ag.grade
+            assignment_data['grade'] = assignment_grade
+        except AssignmentGrade.DoesNotExist:
+            pass
         if assignment.kind == Assignment.Kind.TESTS:
             assignment_data['grade'] = assignment_grade
         elif assignment.kind == Assignment.Kind.LEADERBOARD:
