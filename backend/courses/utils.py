@@ -94,7 +94,6 @@ def get_grade_for_assignment(user, assignment):
                     grade = 84
                 elif speedup > 85:
                     grade = 82
-                task_data['speedup'] = speedup
         on_time = push.received <= due_date
         max_grade = 100 # TODO: This should probably come from the assign.
         if accommodation and not on_time:

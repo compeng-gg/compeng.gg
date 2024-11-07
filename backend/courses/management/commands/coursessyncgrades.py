@@ -19,3 +19,8 @@ class Command(BaseCommand):
                 for enrollment in Enrollment.objects.filter(role=student_role):
                     user = enrollment.user
                     grade = get_grade_for_assignment(user, assignment)
+                    AssignmentGrade.objects.get_or_create(
+                        user=user,
+                        assignment=assignment,
+                        grade=grade,
+                    )
