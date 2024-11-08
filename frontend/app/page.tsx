@@ -29,7 +29,9 @@ import PrimeWrapper from './components/primeWrapper';
 import { routeModule } from 'next/dist/build/templates/app-page';
 
 export function getBadgeForRole(role: string, size?: "xlarge" | "large"){
-  return <Badge value={role} severity={"info"} size={size}/>
+
+  const severity : string = (role == "Student") ? "info":"success";
+  return <Badge value={role} severity={severity} size={size}/>
 }
 
 export function getRoleFromOffering(offering) {
@@ -125,7 +127,7 @@ function Dashboard() {
     <>
       <Navbar username={username} offerings={offerings}/>
       <Main>
-        {todos}
+        {/* {todos} */}
         <H2>Courses</H2>
         <ul>
           <div style={{display: "flex", flexDirection: "row", flexWrap: "wrap", gap: "10px"}}>

@@ -19,6 +19,7 @@ class RoleAdmin(admin.ModelAdmin):
 
 @admin.register(models.Enrollment)
 class EnrollmentAdmin(admin.ModelAdmin):
+    list_display = ('user', 'role')
     pass
 
 @admin.register(models.Assignment)
@@ -35,8 +36,12 @@ class AccommodationAdmin(admin.ModelAdmin):
 
 @admin.register(models.Team)
 class TeamAdmin(admin.ModelAdmin):
+    list_display = ('name', 'id')
     pass
 
 @admin.register(models.TeamMember)
 class TeamMemberAdmin(admin.ModelAdmin):
+    list_display = ('enrollment', 'team')
+    list_display_links = ('enrollment', 'team')
+    
     pass

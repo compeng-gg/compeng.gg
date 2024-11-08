@@ -8,49 +8,40 @@ import StudentAssignmentTab from "./components/student-assignment-tab";
 import StudentTeamViewTab from "./components/student-team-view-tab";
 
 
-
-export interface StudentViewProps {
+export interface StaffViewProps {
     courseName: string;
     labs: Lab[];
-    courseSlug: string;
 }
 
-export default function StudentView(props: StudentViewProps){
-    const {courseName, labs, courseSlug} = props;
+export default function StaffView(props: StaffViewProps){
+    const {courseName, labs} = props;
 
     const [idx, setIdx] = useState<number>(0);
+
     const items = [
         { label: 'Assignments', icon: 'pi pi-list-check'},
         { label: 'Exercises', icon: 'pi pi-check-circle'},
         { label: 'Tests', icon: 'pi pi-pencil'},
-        { label: 'Teams', icon: 'pi pi-users'}
+        { label: 'Teams', icon: 'pi pi-users'},
+        { label: 'Course Settings', icon: 'pi pi-cog'}
     ]
 
     return (
-    <>
-        <h2>{courseName}</h2>
-        <PrimeWrapper>
-            <TabMenu
-                model = {items}
-                activeIndex={idx}
-                onTabChange={(e) => setIdx(e.index)}
-            />
-            <DisplayCourseTab idx={idx} labs={labs} courseSlug={courseSlug}/>
-        </PrimeWrapper>
-    </>
+        <>
+            <h2>{courseName}</h2>
+            <PrimeWrapper>
+                <TabMenu
+                    model = {items}
+                    activeIndex={idx}
+                    onTabChange={(e) => setIdx(e.index)}
+                />
+                <DisplayCourseTab idx={idx} labs={labs}/>
+            </PrimeWrapper>
+        </>
     )
 }
 
-function DisplayCourseTab({idx, labs, courseSlug}){
-
-    if(idx == 0){
-        return <StudentAssignmentTab labs={labs}/>
-    }
-
-    if(idx == 3){
-        return <StudentTeamViewTab  courseSlug={courseSlug}/>
-    }
-
+function DisplayCourseTab({idx, labs}){
     return (
         <WIP/>
     )
