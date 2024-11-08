@@ -282,8 +282,9 @@ def course(request, slug):
         }
         try:
             ag = AssignmentGrade.objects.get(user=user, assignment=assignment)
-            assignment_grade = ag.grade
-            assignment_data['grade'] = assignment_grade
+            if ag.grade > assignment_grade:
+                assignment_grade = ag.grade
+                assignment_data['grade'] = assignment_grade
         except AssignmentGrade.DoesNotExist:
             pass
         if assignment.kind == Assignment.Kind.TESTS:
