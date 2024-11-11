@@ -18,3 +18,17 @@ class DeleteTeamRequestSerializer(serializers.Serializer):
 class CreateTeamRequestSerializer(serializers.Serializer):
     team_name = serializers.CharField(max_length=255, required=True)
     course_slug = serializers.CharField(max_length=255, required=True)
+
+class CreateTeamSettingsForOfferingRequestSerializer(serializers.Serializer):
+    offering_id = serializers.UUIDField(required=True)
+    max_team_size = serializers.IntegerField(required=True)
+    formation_deadline = serializers.DateTimeField(required=True)
+    show_group_members = serializers.BooleanField(default=True)
+    allow_custom_names = serializers.BooleanField(default=False)
+
+class UpdateTeamSettingsForOfferingRequestSerializer(serializers.Serializer):
+    offering_id = serializers.UUIDField(required=True)
+    max_team_size = serializers.IntegerField(required=True)
+    formation_deadline = serializers.DateTimeField(required=True)
+    show_group_members = serializers.BooleanField(default=True)
+    allow_custom_names = serializers.BooleanField(default=False)
