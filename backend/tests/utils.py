@@ -25,6 +25,13 @@ def create_offering(offering_name: str="ece496 fall 2024", course_name: str="ece
 
     return offering
 
+def create_offering_teams_settings(offering: db.Offering, max_team_size=3,formation_deadline=datetime.now()+timedelta(days=1)) -> db.OfferingTeamsSettings:
+    return db.OfferingTeamsSettings.objects.create(
+        offering=offering,
+        max_team_size=max_team_size,
+        formation_deadline=formation_deadline,
+    )
+
 
 class TestCasesWithUserAuth(TestCase):
     def setUp(self):

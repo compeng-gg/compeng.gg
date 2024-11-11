@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from datetime import datetime, timedelta
 from django.db import IntegrityError, transaction
 from django.conf import settings
+from django.utils import timezone
 
 
 def create_offering() -> db.Offering:
@@ -17,6 +18,7 @@ def create_offering() -> db.Offering:
     )
 
     return offering
+
 
 
 @pytest.mark.django_db
@@ -169,3 +171,37 @@ def test_team_duplicate_names_for_different_offerings_succeeds():
     db.Team.objects.create(offering=offering_2, name='Team 1')
 
     assert db.Team.objects.count() == 2
+
+@pytest.mark.django_db
+def test_offering_teams_settings_creation():
+    offering = create_offering()
+    settings = db.OfferingTeamsSettings.objects.create(offering=offering)
+    
+    # Assert that the instance was created
+    assert isinstance(settings, db.OfferingTeamsSettings)
+    assert settings.offering == offering
+    assert settings.max_team_size == 3
+    now = timezone.now()
+    assert abs((settings.formation_deadline - now).total_seconds()) < 1
+    assert settings.show_group_members is True
+    assert settings.allow_custom_names is False
+
+@pytest.mark.django_db
+def test_offering_teams_settings_custom_max_values():
+    offering = create_offering()
+    settings = db.OfferingTeamsSettings.objects.create(
+        offering=offering, 
+        max_team_size=5,
+        formation_deadline = timezone.now() + timedelta(days=1),
+        show_group_members = False,
+        allow_custom_names = True,
+    )
+    assert settings.max_team_size == 5
+
+@pytest.mark.django_db
+def test_unique_offering_constraint():
+    offering = create_offering()
+    db.OfferingTeamsSettings.objects.create(offering=offering)
+    with pytest.raises(Exception):
+        # Trying to create another OfferingTeamsSettings for the same Offering should raise an error
+        db.OfferingTeamsSettings.objects.create(offering=offering)
