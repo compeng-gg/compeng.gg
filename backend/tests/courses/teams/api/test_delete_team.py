@@ -1,11 +1,12 @@
 import courses.models as db
 from rest_framework import status
-from tests.utils import create_offering, TestCasesWithUserAuth
+from tests.utils import create_offering, create_offering_teams_settings, TestCasesWithUserAuth
 import pytest
 
 class DeleteTeamTests(TestCasesWithUserAuth):
     def test_delete_team_happy_path(self):
         offering = create_offering()
+        offering_teams_settings = create_offering_teams_settings(offering)
         
         student_role = db.Role.objects.create(kind=db.Role.Kind.STUDENT, offering=offering)
 
@@ -36,6 +37,7 @@ class DeleteTeamTests(TestCasesWithUserAuth):
 
     def test_delete_team_fails_when_not_team_leader(self):
         offering = create_offering()
+        offering_teams_settings = create_offering_teams_settings(offering)
         
         student_role = db.Role.objects.create(kind=db.Role.Kind.STUDENT, offering=offering)
 
