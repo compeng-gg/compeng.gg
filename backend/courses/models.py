@@ -4,6 +4,7 @@ from django.db import models
 from django.urls import reverse, NoReverseMatch
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
+from datetime import timedelta
 
 from compeng_gg.django.github.models import Repository
 from runner.models import Runner, Task
@@ -96,6 +97,16 @@ class Offering(models.Model):
 
     class Meta:
         ordering = ['-start', 'slug']
+
+class OfferingTeamsSettings(models.Model):
+    offering = models.OneToOneField(
+        Offering,
+        on_delete=models.CASCADE,
+    )
+    max_team_size = models.IntegerField(default=3)
+    formation_deadline = models.DateTimeField(default=(timezone.now))
+    show_group_members = models.BooleanField(default=True)
+    allow_custom_names = models.BooleanField(default=False)
 
 class Assignment(models.Model):
 
