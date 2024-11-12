@@ -177,9 +177,16 @@ function Course({ params }: { params: { slug: string } }) {
                             {test.result}
                           </span>
                         </p>
-                        <p>
+                        {test.duration &&
+                        (<p>
                           <strong>Duration:</strong> {test.duration.toFixed(2)}s
-                        </p>
+                        </p>)}
+                        {test.stdout && (
+                          <div className="bg-blue-100 font-xs text-blue-600 p-3 rounded mt-2">
+                            <p className="mb-2"><strong>Standard Output</strong></p>
+                            <pre className="text-sm">{test.stdout}</pre>
+                          </div>
+                        )}
                         {test.stderr && (
                           <div className="bg-red-100 font-xs text-red-600 p-3 rounded mt-2">
                             <p className="mb-2"><strong>Standard Error</strong></p>
