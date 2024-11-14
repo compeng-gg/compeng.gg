@@ -9,17 +9,17 @@ import Link from "next/link";
 export interface ExamProps {
     name: string;
     courseSlug: string;
-    slug: string;
+    examSlug: string;
     startTime: Date;
     endTime: Date;
-    grade?: number;
+    grade: number;
 }
 
 function ExamDisplayBadges(props: ExamProps){
     const {grade} = props;
     const duration = Math.abs(differenceInMinutes(props.endTime, props.startTime));
 
-    const gradeString = (grade) ? `Grade: ${grade}%` : "Ungraded";
+    const gradeString = (grade != -1) ? `Grade: ${grade}%` : "Ungraded";
     return (
         <div style={{ position: 'relative'}}>
             <span></span>
@@ -35,7 +35,7 @@ function ExamVisitButton({buttonText, examProps}: {buttonText: string, examProps
     return (
         <div style={{ position: 'relative', display: "flex", flexDirection: "row-reverse", }}>
             <span></span>
-            <Link href={`/${examProps.courseSlug}/exam/${examProps.slug}`}>
+            <Link href={`/${examProps.courseSlug}/exam/${examProps.examSlug}`}>
                 <Button label={buttonText} size="small"/>
             </Link>
         </div>
