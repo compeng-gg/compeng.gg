@@ -65,6 +65,14 @@ urlpatterns = [
     path('assessments/<slug:assessment_slug>/answer/coding/<uuid:coding_question_id>/', assessments_api.submit_coding_answer),
     path('assessments/<slug:assessment_slug>/complete/', assessments_api.complete_assessment),
 
+    path('teams/settings/get/', teams_api.get_team_settings_for_offering),
+    path('teams/settings/create/', teams_api.create_team_settings_for_offering),
+    path('teams/settings/update/', teams_api.update_team_settings_for_offering),
+    path('teams/admin/create/', teams_api.create_team_with_leader),
+    path('teams/admin/add/', teams_api.add_member_to_team),
+    path('teams/admin/remove/', teams_api.remove_member_from_team),
+    path('teams/admin/delete/', teams_api.delete_team_as_admin),
+    
     path('github/webhook/', github_webhook),
 
     path('users/', views.UserViewSet.as_view({'get': 'list'})),
