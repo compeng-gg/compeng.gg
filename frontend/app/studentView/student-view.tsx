@@ -23,13 +23,15 @@ export default function StudentView(props: StudentViewProps){
         { label: 'Assignments', icon: 'pi pi-list-check'},
         { label: 'Exercises', icon: 'pi pi-check-circle'},
         { label: 'Tests', icon: 'pi pi-pencil'},
-        { label: 'Teams', icon: 'pi pi-users'}
+        { label: 'Teams beta', icon: 'pi pi-users'}
     ]
 
     return (
     <>
-        <h2>{courseName}</h2>
+    
+        <h2>{courseName + "beta"}</h2>
         <PrimeWrapper>
+        
             <TabMenu
                 model = {items}
                 activeIndex={idx}

@@ -49,7 +49,7 @@ export interface Team {
 export default function StudentTeamViewTab(props: StudentTeamViewTabProps){
     const [jwt, setAndStoreJwt] = useContext(JwtContext);
 
-    const userName = "seb";
+    const userName = jwt ? JSON.parse(atob(jwt.split('.')[1])).username : "testUser"; // Extract username from JWT
     const {courseSlug} = props;
     const [teams, setTeams] = useState<Team[]>([]);
 

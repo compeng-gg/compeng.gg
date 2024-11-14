@@ -45,3 +45,9 @@ class TeamMemberAdmin(admin.ModelAdmin):
     list_display_links = ('enrollment', 'team')
     
     pass
+
+@admin.register(models.OfferingTeamsSettings)
+class OfferingTeamsSettingsAdmin(admin.ModelAdmin):
+    list_display = ('offering', 'max_team_size', 'formation_deadline')
+    list_display_links = ('offering', 'max_team_size', 'formation_deadline')
+    pass
