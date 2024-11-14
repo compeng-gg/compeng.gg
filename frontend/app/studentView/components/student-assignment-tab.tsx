@@ -1,4 +1,5 @@
 import { Lab } from "@/app/[slug]/page";
+import { Card } from "primereact/card";
 
 
 export interface StudentAssignmentTabProps {
@@ -8,21 +9,18 @@ export interface StudentAssignmentTabProps {
 export default function StudentAssignmentTab(props: StudentAssignmentTabProps){
 
     const {labs} = props;
-
+    console.log(JSON.stringify(labs, null, 2));
     return (
-        <div style={{display: "flex", gap: "10px"}}>
+        <div style={{display: "flex", gap: "10px", width: "100%", flexDirection: "column"}}>
             <span></span>
-            <div>
             {labs.map((assignment) => (
-            <div
+            <Card
             key={assignment.slug}
-            className="bg-gray-100 dark:bg-gray-900 shadow-md rounded-lg p-6 mb-6"
+            title={assignment.name}
+            className="bg-gray-50 dark:white shadow-md rounded-lg"
+            subTitle={`Due: ${new Date(assignment.due_date)}`}
             >
-            <h2 className="text-2xl font-semibold mb-2">{assignment.name}</h2>
-            <p>
-                Due: {`${new Date(assignment.due_date)}`}
-            </p>
-            <p>Current Grade: {assignment.grade}</p>
+            <p style={{marginTop: "-10px"}}>Current Grade: {assignment.grade}</p>
 
             {assignment.tasks && assignment.tasks.length > 0 && (
             <div className="border-t border-gray-500 pt-4 mt-4">
@@ -109,9 +107,8 @@ export default function StudentAssignmentTab(props: StudentAssignmentTabProps){
                 ))}
             </div>
             )}
-            </div>
+            </Card>
         ))}
-        </div>
       </div>
     )
 
