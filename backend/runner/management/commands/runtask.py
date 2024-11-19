@@ -86,7 +86,7 @@ class Command(BaseCommand):
                 task.result = {'error': 'timeout'}
                 task.save()
                 exit(1)
-        elif runner.image == '2024-fall-ece344-runner:latest' and runner.command == '/workspace/hello-ext2/grade.py --json'
+        elif runner.image == '2024-fall-ece344-runner:latest' and runner.command == '/workspace/hello-ext2/grade.py --json':
             cmd = ['docker', 'run', '--rm',
               '--network', 'none',
               '--privileged',
