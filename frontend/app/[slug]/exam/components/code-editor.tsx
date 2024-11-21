@@ -4,6 +4,7 @@ import ace from 'ace-builds/src-noconflict/ace';
 import AceEditor from 'react-ace';
 import 'ace-builds/src-noconflict/ext-language_tools';
 import Head from 'next/head';
+import { CodeState } from '../question-models';
 
 // Set base path for other Ace dependencies
 ace.config.set('basePath', '/ace');
@@ -13,12 +14,8 @@ ace.config.setModuleUrl('ace/mode/c_cpp', '/ace/mode-c_cpp.js');
 ace.config.setModuleUrl('ace/theme/monokai', '/ace/theme-monokai.js');
 ace.config.setModuleUrl('ace/ext/language_tools', '/ace/ext-language_tools.js');
 
-interface CodeEditorProps {
-  value: string;
-  onChange: (newValue: string) => void;
-}
 
-export default function CodeEditor({ value, onChange }: CodeEditorProps) {
+export default function CodeEditor(props: CodeState) {
   const [loaded, setLoaded] = useState<boolean>(false);
 
   useEffect(() => {
@@ -41,8 +38,8 @@ export default function CodeEditor({ value, onChange }: CodeEditorProps) {
           mode="c_cpp"
           theme="monokai"
           name="my_ace_editor"
-          value={value}
-          onChange={onChange}
+          value={props.value}
+          onChange={props.setValue}
           fontSize={14}
           showPrintMargin={false}
           showGutter={true}
