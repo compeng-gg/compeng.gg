@@ -1,34 +1,16 @@
 // Base Data Classes
-
-//To-do: align question types
-export const ServerToLocal = new Map([
-    ["CODING", "CODE"],
-    ["MULTIPLE_CHOICE", "SELECT"],
-    ["WRITTEN_RESPONSE", "TEXT"]
-])
-
-export type QuestionType = "CODE" | "SELECT" | "TEXT";
-export type ServerQuestionType = "CODING" | "MULTIPLE_CHOICE" | "WRITTEN_RESPONSE"
-
-export interface BaseQuestionData {
+interface BaseQuestionData {
     title?: string;
-    id: string;
-    exam_slug: string;
-    prompt: string;
+    text: string;
     totalMarks: number;
     isMutable: boolean;
-    questionType: QuestionType;
-    serverQuestionType: ServerQuestionType;
-    idx?: number;
+    questionType: "CODE" | "SELECT" | "TEXT";
 }
-
-
 
 // Question Data
 export interface CodeQuestionData extends BaseQuestionData {
     questionType: "CODE";
     starterCode: string;
-    programmingLanguage: "C_PP" | "C" | "PYTHON";
 }
 
 export interface SelectQuestionData extends BaseQuestionData {
@@ -77,14 +59,3 @@ export const isSelectQuestion = (props: QuestionProps): props is SelectQuestionP
 
 export const isTextQuestion = (props: QuestionProps): props is TextQuestionProps =>
     props.questionType === "TEXT";
-
-export const isAnswered = (props: QuestionProps) => {
-    switch(props.questionType){
-        case "TEXT":
-            return props.state.value.length;
-        case "CODE":
-            return props.state.value != props.starterCode;
-        case "SELECT":
-            return props.state.value != -1;
-    }
-}
