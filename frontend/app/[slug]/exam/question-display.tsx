@@ -1,55 +1,26 @@
 import { Badge } from "primereact/badge";
 import { Button } from "primereact/button";
 import { Card } from "primereact/card";
-import CodeEditor from "./code-editor";
+import CodeEditor from "./components/code-editor";
+import { QuestionProps } from "./question-models";
+import TextEditor from "./components/text-editor";
+import SelectEditor from "./components/select-editor";
 
-export interface QuestionData {
-    title?: string;
-    text: string;
-    starterCode: string;
-    totalMarks: number;
-    isMutable: boolean;
-}
-
-export interface QuestionProps {
-    data: QuestionData
-    status: QuestionStatus;
-    setStatus: (newStatus: QuestionStatus) => void;
-}
-
-
-export interface SubmissionProps {
-    submittedCode: string;
-    submittedTime: Date;
-    result: number;
-    status: SubmissionStatus;
-}
-
-export enum SubmissionStatus {
-    IN_PROGRESS = "In Progress",
-    ERROR = "Error",
-    SUBMITTED = "Submitted"
-}
-
-export interface QuestionStatus {
-    currentText: string;
-    submissions: SubmissionProps[];
-    bestGrade: number; //Stored as number of marks!
-}
 
 //Display of the question inside a container
 export function QuestionDisplay(props: QuestionProps){
 
-    const {data, status, setStatus} = props;
-    const {title, text, starterCode, totalMarks, isMutable} = data;
+    const {title, text, totalMarks, isMutable, questionType} = props;
 
-    const gradeString = `Current Grade: ${status.bestGrade}%`;
+
+    //To-do
+    const gradeString = `Current Grade: ?%`;
 
     const header = (
         <div style={{position: 'relative'}}>
             <span></span>
             <div style={{ position: 'absolute', top: '10px', right: '10px', display: 'flex', gap: '8px' }}>
-                <GradeBadge grade={status.bestGrade} totalAvailable={totalMarks}/>
+                <GradeBadge grade={totalMarks} totalAvailable={totalMarks}/>
             </div>
         </div>
     )
@@ -61,10 +32,6 @@ export function QuestionDisplay(props: QuestionProps){
         </div>
     ) : null;
 
-    const setText = (newText: string) => {
-        setStatus({...status, currentText: newText})
-    };
-
     return (
         <Card
             title={title ?? "Question"}
@@ -72,10 +39,27 @@ export function QuestionDisplay(props: QuestionProps){
             header={header}
             footer={footer}
         >
-            <CodeEditor value={status.currentText} onChange={setText}/>
-            <h3>Submission information here</h3>
+            <QuestionContent {...props}/>
         </Card>
     )
+}
+
+function QuestionContent(props: QuestionProps){
+    
+    switch(props.questionType){
+        case "CODE":
+            return (
+                <CodeEditor {...props.state}/>
+            )
+        case "TEXT":
+            return (
+                <TextEditor {...props.state}/>
+            )
+        case "SELECT":
+            return (
+                <SelectEditor state={props.state} options={props.options}/>
+            )
+    }
 }
 
 function GradeBadge({grade, totalAvailable}:{grade: number, totalAvailable: number}){
