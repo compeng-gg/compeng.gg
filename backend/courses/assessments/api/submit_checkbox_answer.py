@@ -2,8 +2,10 @@ import courses.models as db
 from uuid import UUID
 from django.utils import timezone
 from rest_framework.response import Response
-from rest_framework import status
-from rest_framework import permissions
+from rest_framework import (
+    status,
+    permissions
+)
 from rest_framework.decorators import api_view, permission_classes
 from courses.assessments.schemas import AnswerCheckboxQuestionRequestSerializer
 from courses.assessments.api.utils import (
