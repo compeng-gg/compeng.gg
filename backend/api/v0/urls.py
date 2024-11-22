@@ -49,10 +49,11 @@ urlpatterns = [
     path('teams/create/', teams_api.create_team),
 
     path('assessments/<uuid:assessment_id>/', assessments_api.get_assessment),
-    path('assessments/<uuid:assessment_id>/answer_question/checkbox/<uuid:checkbox_question_id>/', assessments_api.answer_checkbox_question),
-    path('assessments/<uuid:assessment_id>/answer_question/multiple_choice/<uuid:multiple_choice_question_id>/', assessments_api.answer_multiple_choice_question),
-    path('assessments/<uuid:assessment_id>/answer_question/written_response/<uuid:written_response_question_id>/', assessments_api.answer_written_response_question),
-    path('assessments/<uuid:assessment_id>/answer_question/coding/<uuid:coding_question_id>/', assessments_api.answer_coding_question),
+    path('assessments/<uuid:assessment_id>/answer/checkbox/<uuid:checkbox_question_id>/', assessments_api.submit_checkbox_answer),
+    path('assessments/<uuid:assessment_id>/answer/multiple_choice/<uuid:multiple_choice_question_id>/', assessments_api.submit_multiple_choice_answer),
+    path('assessments/<uuid:assessment_id>/answer/written_response/<uuid:written_response_question_id>/', assessments_api.submit_written_response_answer),
+    path('assessments/<uuid:assessment_id>/answer/coding/<uuid:coding_question_id>/', assessments_api.submit_coding_answer),
+    path('assessments/<uuid:assessment_id>/complete/', assessments_api.complete_assessment),
 
     path('github/webhook/', github_webhook),
 
