@@ -438,7 +438,7 @@ class MultipleChoiceAnswer(models.Model):
     selected_answer_index = models.PositiveIntegerField()
 
 
-class CheckboxQuestion(AssessmentQuestionBaseModel)
+class CheckboxQuestion(AssessmentQuestionBaseModel):
 
     id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
     assessment = models.ForeignKey(Assessment, on_delete=models.CASCADE, related_name="checkbox_questions")
