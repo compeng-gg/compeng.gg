@@ -332,6 +332,7 @@ class Accommodation(models.Model):
 
 
 class Assessment(models.Model):
+
     id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
     offering = models.ForeignKey(Offering, on_delete=models.CASCADE, related_name='assessments')
     title = models.TextField()
@@ -341,12 +342,14 @@ class Assessment(models.Model):
     
 
 class AssessmentSubmission(models.Model):
+
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     assessment = models.ForeignKey(Assessment, on_delete=models.CASCADE, related_name="assessment_submissions")
     start_datetime = models.DateTimeField()
     
 
 class AssessmentQuestionBaseModel(models.Model):
+
     prompt = models.TextField()
     points = models.PositiveIntegerField(default=1)
     order = models.PositiveIntegerField()
@@ -356,8 +359,11 @@ class AssessmentQuestionBaseModel(models.Model):
 
 
 class WrittenResponseQuestion(AssessmentQuestionBaseModel):
+
+    id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
     assessment = models.ForeignKey(Assessment, on_delete=models.CASCADE, related_name="written_response_questions")
-    max_length = models.PositiveIntegerField(default=1)
+    
+    max_length = models.PositiveIntegerField(default=1, null=True)
 
     class Meta:
         constraints = [
@@ -367,7 +373,8 @@ class WrittenResponseQuestion(AssessmentQuestionBaseModel):
         ]
     
 
-class WrittenResponseQuestionAnswer(models.Model):
+class WrittenResponseAnswer(models.Model):
+
     assessment_submission = models.ForeignKey(AssessmentSubmission, on_delete=models.CASCADE, related_name="written_response_answers")
     question = models.ForeignKey(WrittenResponseQuestion, on_delete=models.CASCADE, related_name="answers")
     
@@ -375,11 +382,13 @@ class WrittenResponseQuestionAnswer(models.Model):
 
 
 class CodingQuestion(AssessmentQuestionBaseModel):
+
     class ProgrammingLanguage(models.TextChoices):
         C_PP = "C_PP", _("C++")
         C = "C", _("C")
         PYTHON = "PYTHON", _("Python")
 
+    id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
     assessment = models.ForeignKey(Assessment, on_delete=models.CASCADE, related_name="coding_questions")
 
     starter_code = models.TextField(blank=True, null=True)
@@ -398,7 +407,8 @@ class CodingQuestion(AssessmentQuestionBaseModel):
         ]
 
 
-class CodingQuestionAnswer(models.Model):
+class CodingAnswer(models.Model):
+
     assessment_submission = models.ForeignKey(AssessmentSubmission, on_delete=models.CASCADE, related_name="coding_question_answers")
     question = models.ForeignKey(CodingQuestion, on_delete=models.CASCADE, related_name="answers")
     
@@ -406,6 +416,8 @@ class CodingQuestionAnswer(models.Model):
 
 
 class MultipleChoiceQuestion(AssessmentQuestionBaseModel):
+
+    id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
     assessment = models.ForeignKey(Assessment, on_delete=models.CASCADE, related_name="multiple_choice_questions")
 
     options = models.JSONField() # TODO: validate this is an array
@@ -419,17 +431,20 @@ class MultipleChoiceQuestion(AssessmentQuestionBaseModel):
         ]
 
 
-class MultipleChoiceQuestionAnswer(models.Model):
+class MultipleChoiceAnswer(models.Model):
+
     assessment_submission = models.ForeignKey(AssessmentSubmission, on_delete=models.CASCADE, related_name="multiple_choice_answers")
     question = models.ForeignKey(MultipleChoiceQuestion, on_delete=models.CASCADE, related_name="answers")
     selected_answer_index = models.PositiveIntegerField()
 
 
-class CheckboxQuestion(AssessmentQuestionBaseModel):
+class CheckboxQuestion(AssessmentQuestionBaseModel)
+
+    id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
     assessment = models.ForeignKey(Assessment, on_delete=models.CASCADE, related_name="checkbox_questions")
 
     options = models.JSONField() # TODO: validate this is an array
-    correct_option_indices = models.JSONField() # TODO: validate this is an array
+    correct_option_indices = models.JSONField(null=True) # TODO: validate this is an array
 
     class Meta:
         constraints = [
@@ -439,8 +454,9 @@ class CheckboxQuestion(AssessmentQuestionBaseModel):
         ]
 
 
-class CheckboxQuestionAnswer(models.Model):
+class CheckboxAnswer(models.Model):
+
     assessment_submission = models.ForeignKey(AssessmentSubmission, on_delete=models.CASCADE, related_name="checkbox_answers")
     question = models.ForeignKey(CheckboxQuestion, on_delete=models.CASCADE, related_name="answers")
     
-    selected_answer_indices = models.JSONField() # TODO: validate this is an array
+    selected_answer_indices = models.JSONField(null=True) # TODO: validate this is an array
