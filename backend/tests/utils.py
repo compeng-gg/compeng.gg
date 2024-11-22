@@ -8,6 +8,7 @@ from django.test import TestCase
 import courses.models as db
 from rest_framework.test import APIClient
 from django.contrib.auth.models import User
+from uuid import UUID
 from rest_framework_simplejwt.tokens import RefreshToken
 
 
@@ -47,17 +48,27 @@ def create_assessment(user_id: int) -> db.Assessment:
         role=student_role,
     )
 
-    start_datetime = datetime.now(timezone.utc)
-    end_datetime = start_datetime + timedelta(hours=1)
+    starts_at = datetime.now(timezone.utc)
+    ends_at = starts_at + timedelta(hours=1)
 
     assessment = db.Assessment.objects.create(
         title='ECE454 Exam',
-        start_datetime=start_datetime,
-        end_datetime=end_datetime,
+        starts_at=starts_at,
+        ends_at=ends_at,
         offering=offering,
     )
     
     return assessment
+
+
+def create_assessment_submission(user_id: int, assessment_id: UUID) -> db.AssessmentSubmission:
+    started_at = datetime.now(timezone.utc)
+    return db.AssessmentSubmission.objects.create(
+        user_id=user_id,
+        assessment_id=assessment_id,
+        started_at=started_at,
+        completed_at=started_at + timedelta(hours=1)
+    )
 
 
 class TestCasesWithUserAuth(TestCase):

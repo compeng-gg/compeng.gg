@@ -1,6 +1,7 @@
 from tests.utils import (
     TestCasesWithUserAuth,
-    create_assessment
+    create_assessment,
+    create_assessment_submission
 )
 from django.contrib.auth.models import User
 import courses.models as db
@@ -16,18 +17,17 @@ from uuid import (
 
 
 class AnswerCheckboxQuestion(TestCasesWithUserAuth):
-    def get_api_endpoint(self, checkbox_question_id: UUID) -> str:
-        return f'/api/v0/assessments/answer_question/checkbox/{str(checkbox_question_id)}/'
+    def get_api_endpoint(self, assessment_id: UUID, checkbox_question_id: UUID) -> str:
+        return f'/api/v0/assessments/{assessment_id}/answer_question/checkbox/{str(checkbox_question_id)}/'
     
     def test_no_existing_answer_obj_happy_path(self):
         requesting_user_id = self.user.id
         
         assessment = create_assessment(user_id=requesting_user_id)
         
-        assessment_submission = db.AssessmentSubmission.objects.create(
+        assessment_submission = create_assessment_submission(
             user_id=requesting_user_id,
-            assessment=assessment,
-            start_datetime=datetime.now(timezone.utc)
+            assessment_id=assessment.id
         )
         
         checkbox_question = db.CheckboxQuestion.objects.create(
@@ -49,7 +49,10 @@ class AnswerCheckboxQuestion(TestCasesWithUserAuth):
         ).exists())
         
         response = self.client.post(
-            self.get_api_endpoint(checkbox_question_id=checkbox_question.id), data=data
+            self.get_api_endpoint(
+                assessment_id=assessment.id,
+                checkbox_question_id=checkbox_question.id
+            ), data=data
         )
         
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
@@ -66,10 +69,9 @@ class AnswerCheckboxQuestion(TestCasesWithUserAuth):
         
         assessment = create_assessment(user_id=requesting_user_id)
         
-        assessment_submission = db.AssessmentSubmission.objects.create(
+        assessment_submission = create_assessment_submission(
             user_id=requesting_user_id,
-            assessment=assessment,
-            start_datetime=datetime.now(timezone.utc)
+            assessment_id=assessment.id
         )
         
         checkbox_question = db.CheckboxQuestion.objects.create(
@@ -92,7 +94,10 @@ class AnswerCheckboxQuestion(TestCasesWithUserAuth):
         }
 
         response = self.client.post(
-            self.get_api_endpoint(checkbox_question_id=checkbox_question.id), data=data
+            self.get_api_endpoint(
+                assessment_id=assessment.id,
+                checkbox_question_id=checkbox_question.id
+            ), data=data
         )
         
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
@@ -106,10 +111,9 @@ class AnswerCheckboxQuestion(TestCasesWithUserAuth):
         
         assessment = create_assessment(user_id=requesting_user_id)
         
-        assessment_submission = db.AssessmentSubmission.objects.create(
+        assessment_submission = create_assessment_submission(
             user_id=requesting_user_id,
-            assessment=assessment,
-            start_datetime=datetime.now(timezone.utc)
+            assessment_id=assessment.id
         )
         
         checkbox_question = db.CheckboxQuestion.objects.create(
@@ -132,7 +136,10 @@ class AnswerCheckboxQuestion(TestCasesWithUserAuth):
         }
         
         response = self.client.post(
-            self.get_api_endpoint(checkbox_question_id=checkbox_question.id), data=data
+            self.get_api_endpoint(
+                assessment_id=assessment.id,
+                checkbox_question_id=checkbox_question.id
+            ), data=data
         )
     
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
@@ -160,7 +167,10 @@ class AnswerCheckboxQuestion(TestCasesWithUserAuth):
         }
 
         response = self.client.post(
-            self.get_api_endpoint(checkbox_question_id=checkbox_question.id), data=data
+            self.get_api_endpoint(
+                assessment_id=assessment.id,
+                checkbox_question_id=checkbox_question.id
+            ), data=data
         )
         
         expected_body = {'selected_answer_indices': {'1': ['Ensure this value is greater than or equal to 0.']}}
@@ -173,10 +183,9 @@ class AnswerCheckboxQuestion(TestCasesWithUserAuth):
         
         assessment = create_assessment(user_id=requesting_user_id)
         
-        assessment_submission = db.AssessmentSubmission.objects.create(
+        assessment_submission = create_assessment_submission(
             user_id=requesting_user_id,
-            assessment=assessment,
-            start_datetime=datetime.now(timezone.utc)
+            assessment_id=assessment.id
         )
         
         checkbox_question = db.CheckboxQuestion.objects.create(
@@ -193,7 +202,10 @@ class AnswerCheckboxQuestion(TestCasesWithUserAuth):
         }
 
         response = self.client.post(
-            self.get_api_endpoint(checkbox_question_id=checkbox_question.id), data=data
+            self.get_api_endpoint(
+                assessment_id=assessment.id,
+                checkbox_question_id=checkbox_question.id
+            ), data=data
         )
         
         expected_body = {'error': f'Maximum index for checkbox question is {len(checkbox_question.options) - 1}'}
@@ -206,10 +218,9 @@ class AnswerCheckboxQuestion(TestCasesWithUserAuth):
         
         assessment = create_assessment(user_id=requesting_user_id)
         
-        db.AssessmentSubmission.objects.create(
+        assessment_submission = create_assessment_submission(
             user_id=requesting_user_id,
-            assessment=assessment,
-            start_datetime=datetime.now(timezone.utc)
+            assessment_id=assessment.id
         )
         
         checkbox_question = db.CheckboxQuestion.objects.create(
@@ -226,7 +237,10 @@ class AnswerCheckboxQuestion(TestCasesWithUserAuth):
         }
 
         response = self.client.post(
-            self.get_api_endpoint(checkbox_question_id=checkbox_question.id), data=data
+            self.get_api_endpoint(
+                assessment_id=assessment.id,
+                checkbox_question_id=checkbox_question.id
+            ), data=data
         )
         
         expected_body = {'selected_answer_indices': ['Input list must not contain duplicate values']}
@@ -239,10 +253,9 @@ class AnswerCheckboxQuestion(TestCasesWithUserAuth):
         
         assessment = create_assessment(user_id=requesting_user_id)
         
-        db.AssessmentSubmission.objects.create(
+        create_assessment_submission(
             user_id=requesting_user_id,
-            assessment=assessment,
-            start_datetime=datetime.now(timezone.utc)
+            assessment_id=assessment.id
         )
         
         data = {
@@ -250,7 +263,10 @@ class AnswerCheckboxQuestion(TestCasesWithUserAuth):
         }
         
         response = self.client.post(
-            self.get_api_endpoint(checkbox_question_id=uuid4()), data=data
+            self.get_api_endpoint(
+                assessment_id=assessment.id,
+                checkbox_question_id=uuid4()
+            ), data=data
         )
         
         expected_body = {'error': 'Question not found'}
@@ -263,10 +279,9 @@ class AnswerCheckboxQuestion(TestCasesWithUserAuth):
         
         assessment = create_assessment(user_id=other_user_id)
 
-        db.AssessmentSubmission.objects.create(
+        create_assessment_submission(
             user_id=other_user_id,
-            assessment=assessment,
-            start_datetime=datetime.now(timezone.utc)
+            assessment_id=assessment.id
         )
         
         checkbox_question = db.CheckboxQuestion.objects.create(
@@ -283,7 +298,10 @@ class AnswerCheckboxQuestion(TestCasesWithUserAuth):
         }
         
         response = self.client.post(
-            self.get_api_endpoint(checkbox_question_id=checkbox_question.id), data=data
+            self.get_api_endpoint(
+                assessment_id=assessment.id,
+                checkbox_question_id=checkbox_question.id
+            ), data=data
         )
         
         expected_body = {'error': 'Question not found'}

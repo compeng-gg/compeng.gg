@@ -57,10 +57,10 @@ urlpatterns = [
     
 
     path('assessments/<uuid:assessment_id>/', assessments_api.get_assessment),
-    path('assessments/answer_question/checkbox/<uuid:checkbox_question_id>/', assessments_api.answer_checkbox_question),
-    path('assessments/answer_question/multiple_choice/<uuid:multiple_choice_question_id>/', assessments_api.answer_multiple_choice_question),
-    path('assessments/answer_question/written_response/<uuid:written_response_question_id>/', assessments_api.answer_written_response_question),
-    path('assessments/answer_question/coding/<uuid:coding_question_id>/', assessments_api.answer_coding_question),
+    path('assessments/<uuid:assessment_id>/answer_question/checkbox/<uuid:checkbox_question_id>/', assessments_api.answer_checkbox_question),
+    path('assessments/<uuid:assessment_id>/answer_question/multiple_choice/<uuid:multiple_choice_question_id>/', assessments_api.answer_multiple_choice_question),
+    path('assessments/<uuid:assessment_id>/answer_question/written_response/<uuid:written_response_question_id>/', assessments_api.answer_written_response_question),
+    path('assessments/<uuid:assessment_id>/answer_question/coding/<uuid:coding_question_id>/', assessments_api.answer_coding_question),
 
     path('github/webhook/', github_webhook),
 

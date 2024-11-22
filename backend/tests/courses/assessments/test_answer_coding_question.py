@@ -1,6 +1,7 @@
 from tests.utils import (
     TestCasesWithUserAuth,
-    create_assessment
+    create_assessment,
+    create_assessment_submission
 )
 from django.contrib.auth.models import User
 import courses.models as db
@@ -16,18 +17,17 @@ from uuid import (
 
 
 class AnswerCodingQuestion(TestCasesWithUserAuth):
-    def get_api_endpoint(self, coding_question_id: UUID) -> str:
-        return f'/api/v0/assessments/answer_question/coding/{str(coding_question_id)}/'
+    def get_api_endpoint(self, assessment_id: UUID, coding_question_id: UUID) -> str:
+        return f'/api/v0/assessments/{assessment_id}/answer_question/coding/{str(coding_question_id)}/'
     
     def test_no_existing_answer_obj_happy_path(self):
         requesting_user_id = self.user.id
         
         assessment = create_assessment(user_id=requesting_user_id)
         
-        assessment_submission = db.AssessmentSubmission.objects.create(
+        assessment_submission = create_assessment_submission(
             user_id=requesting_user_id,
-            assessment=assessment,
-            start_datetime=datetime.now(timezone.utc)
+            assessment_id=assessment.id
         )
         
         coding_question = db.CodingQuestion.objects.create(
@@ -48,7 +48,10 @@ class AnswerCodingQuestion(TestCasesWithUserAuth):
         ).exists())
         
         response = self.client.post(
-            self.get_api_endpoint(coding_question_id=coding_question.id), data=data
+            self.get_api_endpoint(
+                assessment_id=assessment.id,
+                coding_question_id=coding_question.id
+            ), data=data
         )
         
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
@@ -65,10 +68,9 @@ class AnswerCodingQuestion(TestCasesWithUserAuth):
         
         assessment = create_assessment(user_id=requesting_user_id)
         
-        assessment_submission = db.AssessmentSubmission.objects.create(
+        assessment_submission = create_assessment_submission(
             user_id=requesting_user_id,
-            assessment=assessment,
-            start_datetime=datetime.now(timezone.utc)
+            assessment_id=assessment.id
         )
         
         coding_question = db.CodingQuestion.objects.create(
@@ -90,7 +92,10 @@ class AnswerCodingQuestion(TestCasesWithUserAuth):
         }
         
         response = self.client.post(
-            self.get_api_endpoint(coding_question_id=coding_question.id), data=data
+            self.get_api_endpoint(
+                assessment_id=assessment.id,
+                coding_question_id=coding_question.id
+            ), data=data
         )
         
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
@@ -104,18 +109,25 @@ class AnswerCodingQuestion(TestCasesWithUserAuth):
         
         assessment = create_assessment(user_id=requesting_user_id)
         
-        db.AssessmentSubmission.objects.create(
+        create_assessment_submission(
             user_id=requesting_user_id,
-            assessment=assessment,
-            start_datetime=datetime.now(timezone.utc)
+            assessment_id=assessment.id
         )
         
         data = {
             'solution': 'print("Hello World!")'
         }
         
+        print(f"Endpint {self.get_api_endpoint(
+                assessment_id=assessment.id,
+                coding_question_id=uuid4()
+            )}")
+        
         response = self.client.post(
-            self.get_api_endpoint(coding_question_id=uuid4()), data=data
+            self.get_api_endpoint(
+                assessment_id=assessment.id,
+                coding_question_id=uuid4()
+            ), data=data
         )
         
         expected_body = {'error': 'Question not found'}
@@ -123,15 +135,16 @@ class AnswerCodingQuestion(TestCasesWithUserAuth):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertDictEqual(response.json(), expected_body)
         
+        exit()
+        
     def test_question_id_in_different_offering_throws_error(self):
         other_user_id = User.objects.create().id
         
         assessment = create_assessment(user_id=other_user_id)
 
-        db.AssessmentSubmission.objects.create(
+        create_assessment_submission(
             user_id=other_user_id,
-            assessment=assessment,
-            start_datetime=datetime.now(timezone.utc)
+            assessment_id=assessment.id
         )
         
         coding_question = db.CodingQuestion.objects.create(
@@ -147,7 +160,10 @@ class AnswerCodingQuestion(TestCasesWithUserAuth):
         }
         
         response = self.client.post(
-            self.get_api_endpoint(coding_question_id=coding_question.id), data=data
+            self.get_api_endpoint(
+                assessment_id=assessment.id,
+                coding_question_id=coding_question.id
+            ), data=data
         )
         
         expected_body = {'error': 'Question not found'}
