@@ -7,6 +7,7 @@ from rest_framework_simplejwt.views import (
 from . import views
 from .views_github_webhook import github_webhook
 import courses.teams.api as teams_api
+import courses.assessments.api as assessments_api
 
 from django.conf import settings
 from django.urls import include, path
@@ -46,6 +47,12 @@ urlpatterns = [
     path('teams/leave/', teams_api.leave_team),
     path('teams/get/<slug:slug>', teams_api.teams),
     path('teams/create/', teams_api.create_team),
+
+    path('assessments/<uuid:assessment_id>/', assessments_api.get_assessment),
+    path('assessments/answer_question/checkbox/<uuid:question_id>/', assessments_api.answer_checkbox_question),
+    path('assessments/answer_question/multiple_choice/<uuid:question_id>', assessments_api.answer_coding_question),
+    path('assessments/answer_question/written_answer/<uuid:question_id>', assessments_api.answer_written_response_question),
+    path('assessments/answer_question/coding/<uuid:question_id>', assessments_api.answer_coding_question),
 
     path('github/webhook/', github_webhook),
 
