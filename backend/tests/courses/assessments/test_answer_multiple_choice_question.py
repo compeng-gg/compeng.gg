@@ -1,6 +1,7 @@
 from tests.utils import (
     TestCasesWithUserAuth,
-    create_assessment
+    create_assessment,
+    create_assessment_submission
 )
 from django.contrib.auth.models import User
 import courses.models as db
@@ -16,18 +17,17 @@ from uuid import (
 
 
 class AnswerMultipleChoiceQuestion(TestCasesWithUserAuth):
-    def get_api_endpoint(self, multiple_choice_question_id: UUID) -> str:
-        return f'/api/v0/assessments/answer_question/multiple_choice/{str(multiple_choice_question_id)}/'
+    def get_api_endpoint(self, assessment_id: UUID, multiple_choice_question_id: UUID) -> str:
+        return f'/api/v0/assessments/{assessment_id}/answer_question/multiple_choice/{str(multiple_choice_question_id)}/'
     
     def test_no_existing_answer_obj_happy_path(self):
         requesting_user_id = self.user.id
         
         assessment = create_assessment(user_id=requesting_user_id)
         
-        assessment_submission = db.AssessmentSubmission.objects.create(
+        assessment_submission = create_assessment_submission(
             user_id=requesting_user_id,
-            assessment=assessment,
-            start_datetime=datetime.now(timezone.utc)
+            assessment_id=assessment.id
         )
         
         multiple_choice_question = db.MultipleChoiceQuestion.objects.create(
@@ -53,7 +53,10 @@ class AnswerMultipleChoiceQuestion(TestCasesWithUserAuth):
         ).exists())
         
         response = self.client.post(
-            self.get_api_endpoint(multiple_choice_question_id=multiple_choice_question.id), data=data
+            self.get_api_endpoint(
+                assessment_id=assessment.id,
+                multiple_choice_question_id=multiple_choice_question.id
+            ), data=data
         )
         
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
@@ -70,10 +73,9 @@ class AnswerMultipleChoiceQuestion(TestCasesWithUserAuth):
         
         assessment = create_assessment(user_id=requesting_user_id)
         
-        assessment_submission = db.AssessmentSubmission.objects.create(
+        assessment_submission = create_assessment_submission(
             user_id=requesting_user_id,
-            assessment=assessment,
-            start_datetime=datetime.now(timezone.utc)
+            assessment_id=assessment.id
         )
         
         multiple_choice_question = db.MultipleChoiceQuestion.objects.create(
@@ -100,7 +102,10 @@ class AnswerMultipleChoiceQuestion(TestCasesWithUserAuth):
         }
 
         response = self.client.post(
-            self.get_api_endpoint(multiple_choice_question_id=multiple_choice_question.id), data=data
+            self.get_api_endpoint(
+                assessment_id=assessment.id,
+                multiple_choice_question_id=multiple_choice_question.id
+            ), data=data
         )
         
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
@@ -132,7 +137,10 @@ class AnswerMultipleChoiceQuestion(TestCasesWithUserAuth):
         }
 
         response = self.client.post(
-            self.get_api_endpoint(multiple_choice_question_id=multiple_choice_question.id), data=data
+            self.get_api_endpoint(
+                assessment_id=assessment.id,
+                multiple_choice_question_id=multiple_choice_question.id
+            ), data=data
         )
         
         expected_body = {'selected_answer_index': ['The selected answer index must not be negative']}
@@ -145,10 +153,9 @@ class AnswerMultipleChoiceQuestion(TestCasesWithUserAuth):
         
         assessment = create_assessment(user_id=requesting_user_id)
         
-        db.AssessmentSubmission.objects.create(
+        create_assessment_submission(
             user_id=requesting_user_id,
-            assessment=assessment,
-            start_datetime=datetime.now(timezone.utc)
+            assessment_id=assessment.id
         )
         
         multiple_choice_question = db.MultipleChoiceQuestion.objects.create(
@@ -169,7 +176,10 @@ class AnswerMultipleChoiceQuestion(TestCasesWithUserAuth):
         }
         
         response = self.client.post(
-            self.get_api_endpoint(multiple_choice_question_id=multiple_choice_question.id), data=data
+            self.get_api_endpoint(
+                assessment_id=assessment.id,
+                multiple_choice_question_id=multiple_choice_question.id
+            ), data=data
         )
 
         expected_body = {'error': f'Maximum index for multiple choice question is {len(multiple_choice_question.options) - 1}'}
@@ -182,10 +192,9 @@ class AnswerMultipleChoiceQuestion(TestCasesWithUserAuth):
         
         assessment = create_assessment(user_id=requesting_user_id)
         
-        db.AssessmentSubmission.objects.create(
+        create_assessment_submission(
             user_id=requesting_user_id,
-            assessment=assessment,
-            start_datetime=datetime.now(timezone.utc)
+            assessment_id=assessment.id
         )
         
         data = {
@@ -193,7 +202,10 @@ class AnswerMultipleChoiceQuestion(TestCasesWithUserAuth):
         }
         
         response = self.client.post(
-            self.get_api_endpoint(multiple_choice_question_id=uuid4()), data=data
+            self.get_api_endpoint(
+                assessment_id=assessment.id,
+                multiple_choice_question_id=uuid4()
+            ), data=data
         )
         
         expected_body = {'error': 'Question not found'}
@@ -206,10 +218,9 @@ class AnswerMultipleChoiceQuestion(TestCasesWithUserAuth):
         
         assessment = create_assessment(user_id=other_user_id)
 
-        db.AssessmentSubmission.objects.create(
+        create_assessment_submission(
             user_id=other_user_id,
-            assessment=assessment,
-            start_datetime=datetime.now(timezone.utc)
+            assessment_id=assessment.id
         )
         
         multiple_choice_question = db.MultipleChoiceQuestion.objects.create(
@@ -230,7 +241,10 @@ class AnswerMultipleChoiceQuestion(TestCasesWithUserAuth):
         }
         
         response = self.client.post(
-            self.get_api_endpoint(multiple_choice_question_id=multiple_choice_question.id), data=data
+            self.get_api_endpoint(
+                assessment_id=assessment.id,
+                multiple_choice_question_id=multiple_choice_question.id
+            ), data=data
         )
         
         expected_body = {'error': 'Question not found'}

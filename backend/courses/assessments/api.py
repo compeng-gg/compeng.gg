@@ -1,5 +1,6 @@
 import courses.models as db
 from uuid import UUID
+from django.utils import timezone
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
@@ -46,8 +47,6 @@ def validate_assessment_enrollment(user_id: int, assessment_id: UUID) -> db.Asse
 @permission_classes([permissions.IsAuthenticated])
 def get_assessment(request, assessment_id: UUID):
     user_id = request.user.id
-    print(f"THe user is is{user_id}")
-    print(f"API request.user ID: {request.user.id}")
 
     assessment = validate_assessment_enrollment(user_id=user_id, assessment_id=assessment_id)
 
@@ -115,7 +114,8 @@ def get_assessment(request, assessment_id: UUID):
         db.AssessmentSubmission.objects.create(
             user_id=user_id,
             assessment_id=assessment_id,
-            start_datetime=datetime.now(),
+            started_at=datetime.now(),
+            completed_at=assessment.ends_at # Initialize this to the end datetime for the assessment
         )
 
     return Response(
@@ -150,9 +150,34 @@ def get_existing_answer_object(
         return None
 
 
+def get_assessment_submission_or_error_response(
+    answered_at: datetime, user_id: int, assessment_id: UUID
+) -> Union[db.AssessmentSubmission, Response]:
+    try:
+        assessment_submission = db.AssessmentSubmission.objects.get(
+            assessment_id=assessment_id,
+            user_id=user_id,
+        )
+    except db.AssessmentSubmission.DoesNotExist:
+        return Response(
+            {'error': 'Question not found'},
+            status=status.HTTP_404_NOT_FOUND
+        )
+        
+    if answered_at > assessment_submission.completed_at:
+        return Response(
+            {'error': 'The assessment has already been completed'},
+            status=status.HTTP_403_FORBIDDEN
+        )
+        
+    return assessment_submission
+
+
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
-def answer_multiple_choice_question(request, multiple_choice_question_id: UUID):
+def answer_multiple_choice_question(request, assessment_id: UUID, multiple_choice_question_id: UUID):
+    answered_at = timezone.now()
+    
     serializer = AnswerMultipleChoiceQuestionRequestSerializer(data=request.data)
     
     if not serializer.is_valid():
@@ -161,30 +186,32 @@ def answer_multiple_choice_question(request, multiple_choice_question_id: UUID):
     user_id = request.user.id
     selected_answer_index = serializer.validated_data.get('selected_answer_index')
     
+    assessment_submission_or_error_response = get_assessment_submission_or_error_response(
+        answered_at=answered_at, user_id=user_id, assessment_id=assessment_id
+    )
+    
+    if isinstance(assessment_submission_or_error_response, Response):
+        error_response = assessment_submission_or_error_response
+        return error_response
+    
+    assessment_submission = assessment_submission_or_error_response
+    
     multiple_choice_answer = get_existing_answer_object(
         answer_model=db.MultipleChoiceAnswer,
         question_id=multiple_choice_question_id,
         user_id=user_id,
     )
-    
-    if multiple_choice_answer is None:
-        # If there is no existing answer object, we first need to validate the user is allowed to take the exam
-        
-        try:
-            assessment_submission = db.AssessmentSubmission.objects.get(
-                assessment__multiple_choice_questions__id=multiple_choice_question_id,
-                user_id=user_id,
-            )
-        except db.AssessmentSubmission.DoesNotExist:
-            return Response(
-                {'error': 'Question not found'},
-                status=status.HTTP_404_NOT_FOUND
-            )
             
     ### Validate selected multiple choice index is valid
-    multiple_choice_question = db.MultipleChoiceQuestion.objects.get(
-        id=multiple_choice_question_id,
-    )
+    try:
+        multiple_choice_question = db.MultipleChoiceQuestion.objects.get(
+            id=multiple_choice_question_id,
+        )
+    except db.MultipleChoiceQuestion.DoesNotExist:
+        return Response(
+            {'error': 'Question not found'},
+            status=status.HTTP_404_NOT_FOUND
+        )
     
     max_option_index = len(multiple_choice_question.options) - 1
     
@@ -209,7 +236,9 @@ def answer_multiple_choice_question(request, multiple_choice_question_id: UUID):
 
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
-def answer_checkbox_question(request, checkbox_question_id: UUID):
+def answer_checkbox_question(request, assessment_id: UUID, checkbox_question_id: UUID):
+    answered_at = timezone.now()
+    
     serializer = AnswerCheckboxQuestionRequestSerializer(data=request.data)
     if not serializer.is_valid():
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -217,29 +246,33 @@ def answer_checkbox_question(request, checkbox_question_id: UUID):
     user_id = request.user.id
     selected_answer_indices = serializer.validated_data.get('selected_answer_indices')
     
+    assessment_submission_or_error_response = get_assessment_submission_or_error_response(
+        answered_at=answered_at, user_id=user_id, assessment_id=assessment_id
+    )
+    
+    if isinstance(assessment_submission_or_error_response, Response):
+        error_response = assessment_submission_or_error_response
+        return error_response
+    
+    assessment_submission = assessment_submission_or_error_response
+    
     checkbox_answer = get_existing_answer_object(
         answer_model=db.CheckboxAnswer,
         question_id=checkbox_question_id,
         user_id=user_id,
     )
-    
-    if checkbox_answer is None:
-        # If there is no existing answer object, we first need to validate the user is allowed to take the exam
-        try:
-            assessment_submission = db.AssessmentSubmission.objects.get(
-                assessment__checkbox_questions__id=checkbox_question_id,
-                user_id=user_id,
-            )
-        except db.AssessmentSubmission.DoesNotExist:
-            return Response(
-                {'error': 'Question not found'},
-                status=status.HTTP_404_NOT_FOUND
-            )
-    
+
     ### Validate selected checkbox indices are valid
-    checkbox_question = db.CheckboxQuestion.objects.get(
-        id=checkbox_question_id,
-    )
+    try:
+        checkbox_question = db.CheckboxQuestion.objects.get(
+            assessment_id=assessment_id,
+            id=checkbox_question_id
+        )
+    except db.CheckboxQuestion.DoesNotExist:
+        return Response(
+            {'error': 'Question not found'},
+            status=status.HTTP_404_NOT_FOUND
+        )
     
     max_option_index = len(checkbox_question.options) - 1
     
@@ -266,7 +299,9 @@ def answer_checkbox_question(request, checkbox_question_id: UUID):
 
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
-def answer_written_response_question(request, written_response_question_id: UUID):
+def answer_written_response_question(request, assessment_id: UUID, written_response_question_id: UUID):
+    answered_at = timezone.now()
+    
     serializer = AnswerWrittenResponseQuestionRequestSerializer(data=request.data)
     if not serializer.is_valid():
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -274,29 +309,33 @@ def answer_written_response_question(request, written_response_question_id: UUID
     user_id = request.user.id
     response = serializer.validated_data.get('response')
     
+    assessment_submission_or_error_response = get_assessment_submission_or_error_response(
+        answered_at=answered_at, user_id=user_id, assessment_id=assessment_id
+    )
+    
+    if isinstance(assessment_submission_or_error_response, Response):
+        error_response = assessment_submission_or_error_response
+        return error_response
+    
+    assessment_submission = assessment_submission_or_error_response
+    
     written_response_answer = get_existing_answer_object(
         answer_model=db.WrittenResponseAnswer,
         question_id=written_response_question_id,
         user_id=user_id,
     )
-    
-    if written_response_answer is None:
-        # If there is no existing answer object, we first need to validate the user is allowed to take the exam
-        try:
-            assessment_submission = db.AssessmentSubmission.objects.get(
-                assessment__written_response_questions__id=written_response_question_id,
-                user_id=user_id,
-            )
-        except db.AssessmentSubmission.DoesNotExist:
-            return Response(
-                {'error': 'Question not found'},
-                status=status.HTTP_404_NOT_FOUND
-            )
             
     ### Validate selected checkbox indices are valid
-    written_response_question = db.WrittenResponseQuestion.objects.get(
-        id=written_response_question_id
-    )
+    try:
+        written_response_question = db.WrittenResponseQuestion.objects.get(
+            assessment_id=assessment_id,
+            id=written_response_question_id
+        )
+    except db.WrittenResponseQuestion.DoesNotExist:
+        return Response(
+            {'error': 'Question not found'},
+            status=status.HTTP_404_NOT_FOUND
+        )
     
     if written_response_question.max_length is not None and len(response) > written_response_question.max_length:
         return Response(
@@ -319,7 +358,9 @@ def answer_written_response_question(request, written_response_question_id: UUID
 
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
-def answer_coding_question(request, coding_question_id: UUID):
+def answer_coding_question(request, assessment_id: UUID, coding_question_id: UUID):
+    answered_at = timezone.now()
+    
     serializer = AnswerCodingQuestionRequestSerializer(data=request.data)
     if not serializer.is_valid():
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -327,24 +368,49 @@ def answer_coding_question(request, coding_question_id: UUID):
     user_id = request.user.id
     solution = serializer.validated_data.get('solution')
     
+    assessment_submission_or_error_response = get_assessment_submission_or_error_response(
+        answered_at=answered_at, user_id=user_id, assessment_id=assessment_id
+    )
+    
+    if isinstance(assessment_submission_or_error_response, Response):
+        error_response = assessment_submission_or_error_response
+        return error_response
+    
+    assessment_submission = assessment_submission_or_error_response
+    
+    print(db.CodingQuestion.objects.count())
+    
+    if not db.CodingQuestion.objects.filter(
+        assessment_id=assessment_id,
+        id=coding_question_id
+    ).exists:
+        return Response(
+            {'error': 'Question not found'},
+            status=status.HTTP_404_NOT_FOUND
+        )
+        
+    print(f"it sexist")
+    print(assessment_id)
+    print(coding_question_id)
+    
+    """try:
+        written_response_question = db.CodingQuestion.objects.get(
+            assessment_id=assessment_id,
+            id=coding_question_id
+        )
+    except db.CodingQuestion.DoesNotExist:
+        return Response(
+            {'error': 'Question not found'},
+            status=status.HTTP_404_NOT_FOUND
+        )"""
+        
+    print("dd")
+    
     coding_answer = get_existing_answer_object(
         answer_model=db.CodingAnswer,
         question_id=coding_question_id,
-        user_id=user_id,
+        user_id=user_id
     )
-    
-    if coding_answer is None:
-        # If there is no existing answer object, we first need to validate the user is allowed to take the exam
-        try:
-            assessment_submission = db.AssessmentSubmission.objects.get(
-                assessment__coding_questions__id=coding_question_id,
-                user_id=user_id,
-            )
-        except db.AssessmentSubmission.DoesNotExist:
-            return Response(
-                {'error': 'Question not found'},
-                status=status.HTTP_404_NOT_FOUND
-            )
     
     if coding_answer is None:
         db.CodingAnswer.objects.create(
@@ -357,3 +423,26 @@ def answer_coding_question(request, coding_question_id: UUID):
         coding_answer.save()
         
     return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def complete_assessment(request, assessment_id: UUID):
+    user_id = request.user.id
+    
+    try:
+        assessment_submission = db.AssessmentSubmission.objects.get(
+            assessment_id=assessment_id,
+            user_id=user_id,
+        )
+    except db.AssessmentSubmission.DoesNotExist:
+        return Response(
+            {'error': 'Assessment does not exist, or user did not start this assessment yet'},
+            status=status.HTTP_404_NOT_FOUND
+        )
+        
+    assessment_submission.completed_at = datetime.now()
+    assessment_submission.save()
+    
+    return Response(status=status.HTTP_204_NO_CONTENT)
+    
