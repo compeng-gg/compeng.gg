@@ -51,6 +51,8 @@ def get_data_for_push(push):
                         found = True
                         assignments.append(assignment)
                         break
+                    if found:
+                        break
             if found:
                 break
     data['assignments'] = assignments
