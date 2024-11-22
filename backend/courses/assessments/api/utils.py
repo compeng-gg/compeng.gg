@@ -38,7 +38,7 @@ def get_existing_answer_object(
 
 
 def get_assessment_submission_or_error_response(
-    answered_at: datetime, user_id: int, assessment_id: UUID
+    request_at: datetime, user_id: int, assessment_id: UUID
 ) -> Union[db.AssessmentSubmission, Response]:
     try:
         assessment_submission = db.AssessmentSubmission.objects.get(
@@ -47,13 +47,11 @@ def get_assessment_submission_or_error_response(
         )
     except db.AssessmentSubmission.DoesNotExist:
         return Response(
-            {'error': 'Question not found'},
+            {'error': 'Assessment submission not found'},
             status=status.HTTP_404_NOT_FOUND
         )
     
-    print(f"Completed at {assessment_submission.completed_at}, answered at {answered_at}")
-        
-    if answered_at > assessment_submission.completed_at:
+    if request_at > assessment_submission.completed_at:
         return Response(
             {'error': 'The assessment has already been completed'},
             status=status.HTTP_403_FORBIDDEN

@@ -16,7 +16,7 @@ from courses.assessments.api.utils import (
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
 def submit_written_response_answer(request, assessment_id: UUID, written_response_question_id: UUID):
-    answered_at = timezone.now()
+    request_at = timezone.now()
     
     serializer = AnswerWrittenResponseQuestionRequestSerializer(data=request.data)
     if not serializer.is_valid():
@@ -26,7 +26,7 @@ def submit_written_response_answer(request, assessment_id: UUID, written_respons
     response = serializer.validated_data.get('response')
     
     assessment_submission_or_error_response = get_assessment_submission_or_error_response(
-        answered_at=answered_at, user_id=user_id, assessment_id=assessment_id
+        request_at=request_at, user_id=user_id, assessment_id=assessment_id
     )
     
     if isinstance(assessment_submission_or_error_response, Response):
