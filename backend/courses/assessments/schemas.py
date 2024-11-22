@@ -59,7 +59,7 @@ class CodingQuestionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = db.CodingQuestion
-        fields = ['order', 'prompt', 'points', 'programming_language', 'question_type', 'solution']
+        fields = ['order', 'prompt', 'points', 'programming_language', 'question_type', 'starter_code', 'solution']
 
     def get_solution(self, coding_question: db.CodingQuestion) -> str:
         if (answer := coding_question.answers.first()) is None:
