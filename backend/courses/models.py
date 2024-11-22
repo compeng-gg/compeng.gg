@@ -275,6 +275,14 @@ class AssessmentQuestionBaseModel(models.Model):
         abstract = True
 
 
+class AssessmentAnswerBaseModel(models.Model):
+
+    last_updated_at = models.DateTimeField()
+
+    class Meta:
+        abstract = True
+
+
 class WrittenResponseQuestion(AssessmentQuestionBaseModel):
 
     id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
@@ -290,7 +298,7 @@ class WrittenResponseQuestion(AssessmentQuestionBaseModel):
         ]
     
 
-class WrittenResponseAnswer(models.Model):
+class WrittenResponseAnswer(AssessmentAnswerBaseModel):
 
     assessment_submission = models.ForeignKey(AssessmentSubmission, on_delete=models.CASCADE, related_name='written_response_answers')
     question = models.ForeignKey(WrittenResponseQuestion, on_delete=models.CASCADE, related_name='answers')
@@ -324,7 +332,7 @@ class CodingQuestion(AssessmentQuestionBaseModel):
         ]
 
 
-class CodingAnswer(models.Model):
+class CodingAnswer(AssessmentAnswerBaseModel):
 
     assessment_submission = models.ForeignKey(AssessmentSubmission, on_delete=models.CASCADE, related_name="coding_question_answers")
     question = models.ForeignKey(CodingQuestion, on_delete=models.CASCADE, related_name="answers")
@@ -348,7 +356,7 @@ class MultipleChoiceQuestion(AssessmentQuestionBaseModel):
         ]
 
 
-class MultipleChoiceAnswer(models.Model):
+class MultipleChoiceAnswer(AssessmentAnswerBaseModel):
 
     assessment_submission = models.ForeignKey(AssessmentSubmission, on_delete=models.CASCADE, related_name='multiple_choice_answers')
     question = models.ForeignKey(MultipleChoiceQuestion, on_delete=models.CASCADE, related_name='answers')
@@ -371,7 +379,7 @@ class CheckboxQuestion(AssessmentQuestionBaseModel):
         ]
 
 
-class CheckboxAnswer(models.Model):
+class CheckboxAnswer(AssessmentAnswerBaseModel):
 
     assessment_submission = models.ForeignKey(AssessmentSubmission, on_delete=models.CASCADE, related_name='checkbox_answers')
     question = models.ForeignKey(CheckboxQuestion, on_delete=models.CASCADE, related_name='answers')

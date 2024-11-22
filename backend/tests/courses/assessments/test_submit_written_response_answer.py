@@ -81,7 +81,8 @@ class AnswerWrittenResponseQuestion(TestCasesWithUserAuth):
         written_response_answer = db.WrittenResponseAnswer.objects.create(
             assessment_submission=assessment_submission,
             question=written_response_question,
-            response="Noooooo"
+            response="Noooooo",
+            last_updated_at=timezone.now()
         )
         
         data = {
@@ -240,7 +241,8 @@ class AnswerWrittenResponseQuestion(TestCasesWithUserAuth):
         written_response_answer = db.WrittenResponseAnswer.objects.create(
             assessment_submission=assessment_submission,
             question=written_response_question,
-            response='Noooooo'
+            response='Noooooo',
+            last_updated_at=timezone.now()
         )
 
         assessment_submission.completed_at = timezone.now()

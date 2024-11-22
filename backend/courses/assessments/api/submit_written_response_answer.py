@@ -64,9 +64,11 @@ def submit_written_response_answer(request, assessment_id: UUID, written_respons
             assessment_submission=assessment_submission,
             question_id=written_response_question_id,
             response=response,
+            last_updated_at=timezone.now()
         )
     else:
         written_response_answer.response = response
+        written_response_answer.last_updated_at = timezone.now()
         written_response_answer.save()
     
     return Response(status=status.HTTP_204_NO_CONTENT)

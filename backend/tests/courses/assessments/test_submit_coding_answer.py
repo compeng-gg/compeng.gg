@@ -81,7 +81,8 @@ class AnswerCodingQuestion(TestCasesWithUserAuth):
         coding_answer = db.CodingAnswer.objects.create(
             assessment_submission=assessment_submission,
             question=coding_question,
-            solution='print("Hi World!")'
+            solution='print("Hi World!")',
+            last_updated_at=timezone.now()
         )
         
         data = {
@@ -187,7 +188,8 @@ class AnswerCodingQuestion(TestCasesWithUserAuth):
         coding_answer = db.CodingAnswer.objects.create(
             assessment_submission=assessment_submission,
             question=coding_question,
-            solution='print("Hi World!")'
+            solution='print("Hi World!")',
+            last_updated_at=timezone.now()
         )
 
         assessment_submission.completed_at = timezone.now()
