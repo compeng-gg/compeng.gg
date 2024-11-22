@@ -4,6 +4,7 @@ from typing import (
     List,
     Dict,
     Any,
+    Optional
 )
 
 
@@ -28,7 +29,7 @@ class CheckboxQuestionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = db.CheckboxQuestion
-        fields = ['order', 'prompt', 'question_type', 'points', 'options', 'select_answer_indices']
+        fields = ['order', 'prompt', 'question_type', 'points', 'options', 'selected_answer_indices']
 
     def get_selected_answer_indices(self, checkbox_question: db.CheckboxQuestion) -> List[int]:
         if (answer := checkbox_question.answers.first()) is None:
@@ -108,17 +109,40 @@ class AssessmentSerializer(serializers.ModelSerializer):
         for question in sorted_questions:
             question.pop('order')
 
-        return all_questions
+        return sorted_questions
     
     def get_end_unix_timestamp(self, assessment: db.Assessment) -> int:
         return int(assessment.end_datetime.timestamp())
 
 
-"""
-class AssessmentQuestionSerializer(serializers.ModelSerializer):
-    written_response = WrittenResponseQuestionSerializer(read_only=True)
+class AnswerMultipleChoiceQuestionRequestSerializer(serializers.Serializer):
+    selected_answer_index = serializers.IntegerField(required=True)
+    
+    def validate_selected_answer_index(self, selected_answer_index: int) -> int:
+        if selected_answer_index < 0:
+            raise serializers.ValidationError('The selected answer index must not be negative')
+        
+        return selected_answer_index
+    
+class AnswerWrittenResponseQuestionRequestSerializer(serializers.Serializer):
+    response = serializers.CharField(required=True)
+    
+class AnswerCodingQuestionRequestSerializer(serializers.Serializer):
+    solution = serializers.CharField(required=True)
 
-    class Meta:
-        model = db.AssessmentQuestion
-        fields = ['id', 'prompt', 'question_type', 'points', 'order', 'written_response']  # Add fields to include in the response
-"""
+
+def validate_list_is_set(input_list: Optional[List[int]]) -> Optional[List[int]]:
+    if input_list is None:
+        return None
+    
+    if len(input_list) != len(set(input_list)):
+        raise serializers.ValidationError('Input list must not contain duplicate values')
+
+    return input_list
+
+class AnswerCheckboxQuestionRequestSerializer(serializers.Serializer):
+    selected_answer_indices = serializers.ListField(
+        child=serializers.IntegerField(min_value=0),
+        required=False,
+        validators=[validate_list_is_set],
+    )
