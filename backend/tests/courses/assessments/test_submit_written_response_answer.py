@@ -5,10 +5,7 @@ from tests.utils import (
 )
 from django.contrib.auth.models import User
 import courses.models as db
-from datetime import (
-    datetime,
-    timezone
-)
+from django.utils import timezone
 from rest_framework import status
 from uuid import (
     UUID,
@@ -18,7 +15,7 @@ from uuid import (
 
 class AnswerWrittenResponseQuestion(TestCasesWithUserAuth):
     def get_api_endpoint(self, assessment_id: UUID, written_response_question_id: UUID) -> str:
-        return f'/api/v0/assessments/{assessment_id}/answer_question/written_response/{str(written_response_question_id)}/'
+        return f'/api/v0/assessments/{assessment_id}/answer/written_response/{str(written_response_question_id)}/'
         
     def test_no_existing_answer_obj_happy_path(self):
         requesting_user_id = self.user.id
@@ -221,3 +218,50 @@ class AnswerWrittenResponseQuestion(TestCasesWithUserAuth):
         
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertDictEqual(response.json(), expected_body)
+
+    def test_submission_after_assessment_completed_throws_error(self):
+        requesting_user_id = self.user.id
+        
+        assessment = create_assessment(user_id=requesting_user_id)
+        
+        assessment_submission = create_assessment_submission(
+            user_id=requesting_user_id,
+            assessment_id=assessment.id
+        )
+        
+        written_response_question = db.WrittenResponseQuestion.objects.create(
+            assessment=assessment,
+            prompt='Write a poem',
+            order=1,
+            points=5,
+            max_length=None
+        )
+        
+        written_response_answer = db.WrittenResponseAnswer.objects.create(
+            assessment_submission=assessment_submission,
+            question=written_response_question,
+            response='Noooooo'
+        )
+
+        assessment_submission.completed_at = timezone.now()
+        assessment_submission.save()
+        
+        data = {
+            'response': 'This is a test.'
+        }
+        
+        response = self.client.post(
+            self.get_api_endpoint(
+                assessment_id=assessment.id,
+                written_response_question_id=written_response_question.id
+            ), data=data
+        )
+        
+        expected_body = {'error': 'The assessment has already been completed'}
+        
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertDictEqual(response.json(), expected_body)
+        
+        written_response_answer.refresh_from_db()
+        
+        self.assertEqual(written_response_answer.response, 'Noooooo')
