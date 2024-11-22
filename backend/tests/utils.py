@@ -1,5 +1,9 @@
 import courses.models as db
-from datetime import datetime, timedelta
+from datetime import (
+    datetime,
+    timedelta,
+    timezone
+)
 from django.test import TestCase
 import courses.models as db
 from rest_framework.test import APIClient
@@ -12,9 +16,9 @@ def create_offering(offering_name: str="ece496 fall 2024", course_name: str="ece
     course = db.Course.objects.create(
         institution=intitution,
         name=course_name,
-        slug="test",
-        
+        slug=f'slug_{course_name}',
     )
+
     offering = db.Offering.objects.create(
         name=offering_name,
         course=course,
@@ -31,6 +35,29 @@ def create_offering_teams_settings(offering: db.Offering, max_team_size=3,format
         max_team_size=max_team_size,
         formation_deadline=formation_deadline,
     )
+
+
+def create_assessment(user_id: int) -> db.Assessment:
+    offering = create_offering()
+        
+    student_role = db.Role.objects.create(kind=db.Role.Kind.STUDENT, offering=offering)
+
+    db.Enrollment.objects.create(
+        user_id=user_id,
+        role=student_role,
+    )
+
+    start_datetime = datetime.now(timezone.utc)
+    end_datetime = start_datetime + timedelta(hours=1)
+
+    assessment = db.Assessment.objects.create(
+        title='ECE454 Exam',
+        start_datetime=start_datetime,
+        end_datetime=end_datetime,
+        offering=offering,
+    )
+    
+    return assessment
 
 
 class TestCasesWithUserAuth(TestCase):
