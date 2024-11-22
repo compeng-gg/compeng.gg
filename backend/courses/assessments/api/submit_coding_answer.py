@@ -34,8 +34,6 @@ def submit_coding_answer(request, assessment_id: UUID, coding_question_id: UUID)
     
     assessment_submission = assessment_submission_or_error_response
     
-    print(db.CodingQuestion.objects.count())
-    
     if not db.CodingQuestion.objects.filter(
         assessment_id=assessment_id,
         id=coding_question_id
