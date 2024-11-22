@@ -66,9 +66,11 @@ def submit_multiple_choice_answer(request, assessment_id: UUID, multiple_choice_
             assessment_submission=assessment_submission,
             question_id=multiple_choice_question_id,
             selected_answer_index=selected_answer_index,
+            last_updated_at=timezone.now()
         )
     else:
         multiple_choice_answer.selected_answer_index = selected_answer_index
+        multiple_choice_answer.last_updated_at = timezone.now()
         multiple_choice_answer.save()
     
     return Response(status=status.HTTP_204_NO_CONTENT)

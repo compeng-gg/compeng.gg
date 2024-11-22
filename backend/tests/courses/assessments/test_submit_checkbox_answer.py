@@ -83,7 +83,8 @@ class AnswerCheckboxQuestion(TestCasesWithUserAuth):
         checkbox_answer = db.CheckboxAnswer.objects.create(
             assessment_submission=assessment_submission,
             question=checkbox_question,
-            selected_answer_indices=[0, 1, 2]
+            selected_answer_indices=[0, 1, 2],
+            last_updated_at=timezone.now()
         )
         
         data = {
@@ -125,7 +126,8 @@ class AnswerCheckboxQuestion(TestCasesWithUserAuth):
         checkbox_answer = db.CheckboxAnswer.objects.create(
             assessment_submission=assessment_submission,
             question=checkbox_question,
-            selected_answer_indices=[0, 1, 2]
+            selected_answer_indices=[0, 1, 2],
+            last_updated_at=timezone.now()
         )
         
         data = {
@@ -328,7 +330,8 @@ class AnswerCheckboxQuestion(TestCasesWithUserAuth):
         checkbox_answer = db.CheckboxAnswer.objects.create(
             assessment_submission=assessment_submission,
             question=checkbox_question,
-            selected_answer_indices=[0, 1, 2]
+            selected_answer_indices=[0, 1, 2],
+            last_updated_at=timezone.now()
         )
 
         assessment_submission.completed_at = timezone.now()
