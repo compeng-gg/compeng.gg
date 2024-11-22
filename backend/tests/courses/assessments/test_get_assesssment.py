@@ -34,6 +34,45 @@ class GetAssessmentTests(TestCasesWithUserAuth):
             assessment=assessment
         ).exists())
         
+    def test_returns_starter_code(self):
+        requesting_user_id = self.user.id
+        
+        assessment = create_assessment(user_id=requesting_user_id)
+
+        coding_question = db.CodingQuestion.objects.create(
+            assessment=assessment,
+            prompt='Write a function that prints "Hello World!" in Python',
+            order=1,
+            points=20,
+            programming_language=db.CodingQuestion.ProgrammingLanguage.PYTHON,
+            starter_code='print("HI!")'
+        )
+        
+        response = self.client.get(
+            f"/api/v0/assessments/{assessment.id}/",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        
+        expected_body = {
+            'title': assessment.title,
+            'end_unix_timestamp': int(assessment.ends_at.timestamp()),
+            'questions': [
+                {
+                    'prompt': coding_question.prompt,
+                    'question_type': 'CODING',
+                    'points': coding_question.points,
+                    'programming_language': str(coding_question.programming_language),
+                    'solution': None,
+                    'starter_code': coding_question.starter_code
+                }
+            ]
+        }
+        
+        self.assertDictEqual(
+            response.json(), expected_body
+        )
+
     def test_returns_saved_coding_solution(self):
         requesting_user_id = self.user.id
         
@@ -74,7 +113,8 @@ class GetAssessmentTests(TestCasesWithUserAuth):
                     'question_type': 'CODING',
                     'points': coding_question.points,
                     'programming_language': str(coding_question.programming_language),
-                    'solution': coding_answer.solution
+                    'solution': coding_answer.solution,
+                    'starter_code': None
                 }
             ]
         }
@@ -315,7 +355,8 @@ class GetAssessmentTests(TestCasesWithUserAuth):
                     'question_type': 'CODING',
                     'points': coding_question.points,
                     'programming_language': str(coding_question.programming_language),
-                    'solution': None
+                    'solution': None,
+                    'starter_code': coding_question.starter_code
                 }
             ]
         }
