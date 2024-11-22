@@ -6,6 +6,7 @@ from tests.utils import (
     create_assessment_submission
 )
 from rest_framework import status
+from datetime import timedelta
 
 
 class GetAssessmentTests(TestCasesWithUserAuth):
@@ -33,6 +34,76 @@ class GetAssessmentTests(TestCasesWithUserAuth):
             user_id=requesting_user_id,
             assessment=assessment
         ).exists())
+
+
+    def test_request_after_viewable_exam_completed_happy_path(self):
+        requesting_user_id = self.user.id
+        
+        assessment = create_assessment(
+            user_id=requesting_user_id,
+            content_viewable_after_submission=True
+        )
+
+        # Create a assessment that is nonviewable after submission
+        assessment_submission = create_assessment_submission(
+            user_id=requesting_user_id,
+            assessment_id=assessment.id,
+        )
+        # Mark assessment as completed now
+        assessment_submission.completed_at = timezone.now()
+        assessment_submission.save()
+
+        response = self.client.get(
+            f"/api/v0/assessments/{assessment.id}/",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+
+    def test_request_after_nonviewable_exam_completed_throws_error(self):
+        requesting_user_id = self.user.id
+        
+        assessment = create_assessment(
+            user_id=requesting_user_id,
+            content_viewable_after_submission=False
+        )
+
+        # Create a assessment that is nonviewable after submission
+        assessment_submission = create_assessment_submission(
+            user_id=requesting_user_id,
+            assessment_id=assessment.id,
+        )
+        # Mark assessment as completed now
+        assessment_submission.completed_at = timezone.now()
+        assessment_submission.save()
+
+        response = self.client.get(
+            f"/api/v0/assessments/{assessment.id}/",
+        )
+
+        expected_body = {'error': 'Assessment content cannot be viewed after submission'}
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.json(), expected_body)
+
+    
+    def test_request_before_assessment_started_throws_error(self):
+        requesting_user_id = self.user.id
+        
+        assessment = create_assessment(
+            user_id=requesting_user_id,
+            starts_at=timezone.now() + timedelta(days=1)
+        )
+
+        response = self.client.get(
+            f"/api/v0/assessments/{assessment.id}/",
+        )
+
+        expected_body = {'error': 'Assessment has not started yet'}
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.json(), expected_body)
+
         
     def test_returns_starter_code(self):
         requesting_user_id = self.user.id

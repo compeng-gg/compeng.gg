@@ -48,6 +48,8 @@ urlpatterns = [
     path('teams/get/<slug:slug>', teams_api.teams),
     path('teams/create/', teams_api.create_team),
 
+    path('assessments/list/all/', assessments_api.list_all_assessments),
+    path('assessments/list/<slug:course_slug>/', assessments_api.list_assessments_for_course),
     path('assessments/<uuid:assessment_id>/', assessments_api.get_assessment),
     path('assessments/<uuid:assessment_id>/answer/checkbox/<uuid:checkbox_question_id>/', assessments_api.submit_checkbox_answer),
     path('assessments/<uuid:assessment_id>/answer/multiple_choice/<uuid:multiple_choice_question_id>/', assessments_api.submit_multiple_choice_answer),

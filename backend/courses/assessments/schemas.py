@@ -149,3 +149,29 @@ class AnswerCheckboxQuestionRequestSerializer(serializers.Serializer):
         required=False,
         validators=[validate_list_is_set],
     )
+
+
+class CourseAssessmentsListSerializer(serializers.ModelSerializer):
+    start_unix_timestamp = serializers.SerializerMethodField()
+    end_unix_timestamp = serializers.SerializerMethodField()
+
+    class Meta:
+        model = db.Assessment
+        fields = [
+            'title', 
+            'start_unix_timestamp',
+            'end_unix_timestamp'
+        ]
+
+    def get_start_unix_timestamp(self, assessment: db.Assessment) -> int:
+        return int(assessment.starts_at.timestamp())
+
+    def get_end_unix_timestamp(self, assessment: db.Assessment) -> int:
+        return int(assessment.ends_at.timestamp())
+    
+
+class AllAssessmentsListSerializer(CourseAssessmentsListSerializer):
+    course_slug = serializers.CharField(source='offering.course.slug', read_only=True)
+    
+    class Meta(CourseAssessmentsListSerializer.Meta):
+        fields = CourseAssessmentsListSerializer.Meta.fields + ['course_slug']
