@@ -15,7 +15,7 @@ from courses.assessments.api.utils import (
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
 def submit_coding_answer(request, assessment_id: UUID, coding_question_id: UUID):
-    answered_at = timezone.now()
+    request_at = timezone.now()
     
     serializer = AnswerCodingQuestionRequestSerializer(data=request.data)
     if not serializer.is_valid():
@@ -25,7 +25,7 @@ def submit_coding_answer(request, assessment_id: UUID, coding_question_id: UUID)
     solution = serializer.validated_data.get('solution')
     
     assessment_submission_or_error_response = get_assessment_submission_or_error_response(
-        answered_at=answered_at, user_id=user_id, assessment_id=assessment_id
+        request_at=request_at, user_id=user_id, assessment_id=assessment_id
     )
     
     if isinstance(assessment_submission_or_error_response, Response):
