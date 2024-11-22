@@ -4,7 +4,6 @@ from datetime import (
     timedelta,
     timezone
 )
-from django.utils import timezone
 from django.test import TestCase
 import courses.models as db
 from rest_framework.test import APIClient
@@ -23,7 +22,7 @@ def create_offering(
     course = db.Course.objects.create(
         institution=intitution,
         name=course_name,
-        slug=course_slug
+        slug=f'slug_{course_name}',
     )
 
     offering = db.Offering.objects.create(
@@ -44,14 +43,8 @@ def create_offering_teams_settings(offering: db.Offering, max_team_size=3,format
     )
 
 
-def create_exam(
-    user_id: int,
-    exam_title: Optional[str]='Final Exam',
-    course_slug: Optional[str]='ECE454',
-    starts_at: Optional[datetime]=timezone.now(),
-    content_viewable_after_submission: Optional[bool]=True
-) -> db.Exam:
-    offering = create_offering(course_slug=course_slug)
+def create_assessment(user_id: int) -> db.Assessment:
+    offering = create_offering()
         
     student_role = db.Role.objects.create(kind=db.Role.Kind.STUDENT, offering=offering)
 
@@ -60,29 +53,17 @@ def create_exam(
         role=student_role,
     )
 
-    ends_at = starts_at + timedelta(hours=1)
-    visible_at = starts_at - timedelta(hours=1)
+    start_datetime = datetime.now(timezone.utc)
+    end_datetime = start_datetime + timedelta(hours=1)
 
-    exam = db.Exam.objects.create(
-        title=exam_title,
-        starts_at=starts_at,
-        ends_at=ends_at,
-        visible_at=visible_at,
+    assessment = db.Assessment.objects.create(
+        title='ECE454 Exam',
+        start_datetime=start_datetime,
+        end_datetime=end_datetime,
         offering=offering,
-        content_viewable_after_submission=content_viewable_after_submission
     )
     
-    return exam
-
-
-def create_exam_submission(user_id: int, exam_slug: str) -> db.ExamSubmission:
-    started_at = timezone.now()
-    return db.ExamSubmission.objects.create(
-        user_id=user_id,
-        exam_slug=exam_slug,
-        started_at=started_at,
-        completed_at=started_at + timedelta(hours=1)
-    )
+    return assessment
 
 
 class TestCasesWithUserAuth(TestCase):
