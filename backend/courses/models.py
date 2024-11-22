@@ -348,9 +348,6 @@ class AssessmentSubmission(models.Model):
     started_at = models.DateTimeField()
     completed_at = models.DateTimeField()
     
-    def is_completion_passed(self) -> bool:
-        return timezone.now() > self.completed_at
-    
 
 class AssessmentQuestionBaseModel(models.Model):
 
