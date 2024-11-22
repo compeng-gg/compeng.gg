@@ -1,3 +1,4 @@
+import json
 import os
 
 from django.conf import settings
@@ -10,6 +11,21 @@ def get_file(repo, path, ref):
     os.makedirs(full_path.parent, exist_ok=True)
     with open(full_path, 'w') as f:
         f.write(content)
+    return full_path
+
+def get_dir(repo, path, ref):
+    api = GitHubRestAPI()
+    full_path = settings.GITHUB_CONTENT_DIR / repo / ref / path
+    os.makedirs(full_path.parent, exist_ok=True)
+
+    content = api.get_repository_content_raw_for_org(repo, path, ref=ref)
+    data = json.loads(content)
+
+    for entry in data:
+        if entry["type"] == "file":
+            get_file(repo, entry["path"], ref)
+        elif entry["type"] == "dir":
+            get_dir(repo, entry["path"], ref)
     return full_path
 
 def is_github_organization_member(user):

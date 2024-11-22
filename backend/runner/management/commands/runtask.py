@@ -3,7 +3,7 @@ from django.core.management.base import BaseCommand, CommandError
 
 from social_django.models import UserSocialAuth
 from runner.models import Task
-from github_app.utils import get_file
+from github_app.utils import get_dir, get_file
 
 import shlex
 import subprocess
@@ -40,8 +40,12 @@ class Command(BaseCommand):
 
         volume_args = []
         for file_path in assignment.files:
-            file_full_path = get_file(push.payload['repository']['name'], file_path, push.payload['after'])
-            volume_args += ['-v', f'{file_full_path}:/workspace/{file_path}']
+            if not file_path.endswith('/'):
+                file_full_path = get_file(push.payload['repository']['name'], file_path, push.payload['after'])
+                volume_args += ['-v', f'{file_full_path}:/workspace/{file_path}']
+            else:
+                dir_full_path = get_dir(push.payload['repository']['name'], file_path, push.payload['after'])
+                volume_args += ['-v', f'{dir_full_path}:/workspace/{file_path}']
 
         # TODO: make this better
         # 1. The extra options for a leaderboard shouldn't be hardcoded
@@ -86,6 +90,13 @@ class Command(BaseCommand):
                 task.result = {'error': 'timeout'}
                 task.save()
                 exit(1)
+        elif runner.image == '2024-fall-ece454-runner:latest' and runner.command == '/workspace/lab5-runner/benchmark.py':
+            cmd = ['docker', 'run', '--rm',
+              '--network', 'none',
+              '-e', 'RUNNER_MACHINE=rpi4',
+            ] + volume_args + [runner.image]
+            cmd += shlex.split(runner.command)
+            p = subprocess.run(cmd, capture_output=True, text=True)
         elif runner.image == '2024-fall-ece344-runner:latest' and runner.command == '/workspace/hello-ext2/grade.py --json':
             cmd = ['docker', 'run', '--rm',
               '--network', 'none',

@@ -36,7 +36,9 @@ def get_data_for_push(push):
     offering = role.offering
     assignments = []
     for assignment in offering.assignment_set.all():
-        files = assignment.files
+        raw_files = list(assignment.files)
+        files = list(filter(lambda x: not x.endswith('/'), raw_files))
+        dirs = list(filter(lambda x: x.endswith('/'), raw_files))
         found = False
         for commit in push.payload['commits']:
             for modified_file in commit['modified']:
@@ -44,6 +46,11 @@ def get_data_for_push(push):
                     found = True
                     assignments.append(assignment)
                     break
+                for d in dirs:
+                    if modified_file.startswith(d):
+                        found = True
+                        assignments.append(assignment)
+                        break
             if found:
                 break
     data['assignments'] = assignments
