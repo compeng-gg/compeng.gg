@@ -1,9 +1,6 @@
 from tests.utils import TestCasesWithUserAuth
 import courses.models as db
-from datetime import (
-    datetime,
-    timezone,
-)
+from django.utils import timezone
 from tests.utils import (
     create_assessment,
     create_assessment_submission
@@ -58,7 +55,8 @@ class GetAssessmentTests(TestCasesWithUserAuth):
         coding_answer = db.CodingAnswer.objects.create(
             assessment_submission=assessment_submission,
             question=coding_question,
-            solution='print("Hello World!")'
+            solution='print("Hello World!")',
+            last_updated_at=timezone.now()
         )
         
         response = self.client.get(
@@ -111,7 +109,8 @@ class GetAssessmentTests(TestCasesWithUserAuth):
         multiple_choice_answer = db.MultipleChoiceAnswer.objects.create(
             assessment_submission=assessment_submission,
             question=multiple_choice_question,
-            selected_answer_index=0
+            selected_answer_index=0,
+            last_updated_at=timezone.now()
         )
         
         response = self.client.get(
@@ -160,7 +159,8 @@ class GetAssessmentTests(TestCasesWithUserAuth):
         checkbox_answer = db.CheckboxAnswer.objects.create(
             assessment_submission=assessment_submission,
             question=checkbox_question,
-            selected_answer_indices=[0, 1, 2]
+            selected_answer_indices=[0, 1, 2],
+            last_updated_at=timezone.now()
         )
         
         response = self.client.get(
@@ -208,7 +208,8 @@ class GetAssessmentTests(TestCasesWithUserAuth):
         written_response_answer = db.WrittenResponseAnswer.objects.create(
             assessment_submission=assessment_submission,
             question=written_response_question,
-            response="Noooooo"
+            response="Noooooo",
+            last_updated_at=timezone.now()
         )
         
         response = self.client.get(
