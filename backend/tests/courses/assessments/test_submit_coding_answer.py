@@ -115,12 +115,7 @@ class SubmitCodingAnswerTests(TestCasesWithUserAuth):
         data = {
             'solution': 'print("Hello World!")'
         }
-        
-        print(f"Endpint {self.get_api_endpoint(
-                assessment_id=assessment.id,
-                coding_question_id=uuid4()
-            )}")
-        
+
         response = self.client.post(
             self.get_api_endpoint(
                 assessment_id=assessment.id,
