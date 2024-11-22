@@ -250,7 +250,8 @@ class Assessment(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
     offering = models.ForeignKey(Offering, on_delete=models.CASCADE, related_name='assessments')
     title = models.TextField()
-
+    content_viewable_after_submission = models.BooleanField(default=False)
+    visible_at = models.DateTimeField()
     starts_at = models.DateTimeField() # TODO: validate ends_at > starts_at
     ends_at = models.DateTimeField()
     

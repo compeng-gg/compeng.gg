@@ -3,17 +3,19 @@ from uuid import UUID
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
 from django.db.models import Prefetch, prefetch_related_objects
-from rest_framework import permissions
+from rest_framework import (
+    permissions,
+    status
+)
 from rest_framework.decorators import api_view, permission_classes
 from datetime import datetime
 from courses.assessments.schemas import AssessmentSerializer
+from django.utils import timezone
 
 
-def validate_assessment_enrollment(user_id: int, assessment_id: UUID) -> db.Assessment:
+def get_assessment_or_error_response(user_id: int, assessment_id: UUID) -> db.Assessment:
     try:
-        assessment = db.Assessment.objects.get(
-            id=assessment_id
-        )
+        assessment = db.Assessment.objects.get(id=assessment_id)
     except db.Role.DoesNotExist:
         raise ValidationError("Assessment does not exist")
     
@@ -26,16 +28,30 @@ def validate_assessment_enrollment(user_id: int, assessment_id: UUID) -> db.Asse
     except db.Enrollment.DoesNotExist:
         raise ValidationError("Student is not enrolled in this course")
     
+    if assessment.starts_at > timezone.now():
+        return Response(
+            {'error': 'Assessment has not started yet'},
+            status=status.HTTP_403_FORBIDDEN
+        )
+    
     return assessment
 
 
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
 def get_assessment(request, assessment_id: UUID):
+    request_at = timezone.now()
+
     user_id = request.user.id
 
-    assessment = validate_assessment_enrollment(user_id=user_id, assessment_id=assessment_id)
+    assessment_or_error_response = get_assessment_or_error_response(user_id=user_id, assessment_id=assessment_id)
 
+    if isinstance(assessment_or_error_response, Response):
+        error_response = assessment_or_error_response
+        return error_response
+    
+    assessment = assessment_or_error_response
+    
     written_response_questions_prefetch = Prefetch(
         'written_response_questions',
         queryset=db.WrittenResponseQuestion.objects.prefetch_related(
@@ -92,18 +108,24 @@ def get_assessment(request, assessment_id: UUID):
         checkbox_questions_prefetch
     )
 
-    if not db.AssessmentSubmission.objects.filter(
-        assessment_id=assessment_id,
-        user_id=user_id,
-    ).exists():
-        # Create a submission object when assessment is first viewed
+    try:
+        assessment_submission = db.AssessmentSubmission.objects.get(
+            assessment_id=assessment_id,
+            user_id=user_id,
+        )
+
+        if (not assessment.content_viewable_after_submission
+            and assessment_submission.completed_at <= timezone.now()):
+            return Response(
+                {'error': 'Assessment content cannot be viewed after submission'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+    except db.AssessmentSubmission.DoesNotExist:
         db.AssessmentSubmission.objects.create(
             user_id=user_id,
             assessment_id=assessment_id,
-            started_at=datetime.now(),
+            started_at=request_at,
             completed_at=assessment.ends_at # Initialize this to the end datetime for the assessment
         )
 
-    return Response(
-        data=AssessmentSerializer(assessment).data
-    )
+    return Response(data=AssessmentSerializer(assessment).data)
