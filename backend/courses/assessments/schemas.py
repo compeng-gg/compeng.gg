@@ -112,7 +112,7 @@ class AssessmentSerializer(serializers.ModelSerializer):
         return sorted_questions
     
     def get_end_unix_timestamp(self, assessment: db.Assessment) -> int:
-        return int(assessment.end_datetime.timestamp())
+        return int(assessment.ends_at.timestamp())
 
 
 class AnswerMultipleChoiceQuestionRequestSerializer(serializers.Serializer):
@@ -124,9 +124,11 @@ class AnswerMultipleChoiceQuestionRequestSerializer(serializers.Serializer):
         
         return selected_answer_index
     
+
 class AnswerWrittenResponseQuestionRequestSerializer(serializers.Serializer):
     response = serializers.CharField(required=True)
-    
+
+
 class AnswerCodingQuestionRequestSerializer(serializers.Serializer):
     solution = serializers.CharField(required=True)
 
@@ -139,6 +141,7 @@ def validate_list_is_set(input_list: Optional[List[int]]) -> Optional[List[int]]
         raise serializers.ValidationError('Input list must not contain duplicate values')
 
     return input_list
+
 
 class AnswerCheckboxQuestionRequestSerializer(serializers.Serializer):
     selected_answer_indices = serializers.ListField(

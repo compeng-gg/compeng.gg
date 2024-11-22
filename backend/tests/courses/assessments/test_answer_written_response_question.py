@@ -1,6 +1,7 @@
 from tests.utils import (
     TestCasesWithUserAuth,
-    create_assessment
+    create_assessment,
+    create_assessment_submission
 )
 from django.contrib.auth.models import User
 import courses.models as db
@@ -16,18 +17,17 @@ from uuid import (
 
 
 class AnswerWrittenResponseQuestion(TestCasesWithUserAuth):
-    def get_api_endpoint(self, written_response_question_id: UUID) -> str:
-        return f'/api/v0/assessments/answer_question/written_response/{str(written_response_question_id)}/'
+    def get_api_endpoint(self, assessment_id: UUID, written_response_question_id: UUID) -> str:
+        return f'/api/v0/assessments/{assessment_id}/answer_question/written_response/{str(written_response_question_id)}/'
         
     def test_no_existing_answer_obj_happy_path(self):
         requesting_user_id = self.user.id
         
         assessment = create_assessment(user_id=requesting_user_id)
         
-        assessment_submission = db.AssessmentSubmission.objects.create(
+        assessment_submission = create_assessment_submission(
             user_id=requesting_user_id,
-            assessment=assessment,
-            start_datetime=datetime.now(timezone.utc)
+            assessment_id=assessment.id
         )
         
         written_response_question = db.WrittenResponseQuestion.objects.create(
@@ -48,7 +48,10 @@ class AnswerWrittenResponseQuestion(TestCasesWithUserAuth):
         ).exists())
         
         response = self.client.post(
-            self.get_api_endpoint(written_response_question_id=written_response_question.id), data=data
+            self.get_api_endpoint(
+                assessment_id=assessment.id,
+                written_response_question_id=written_response_question.id
+            ), data=data
         )
         
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
@@ -65,10 +68,9 @@ class AnswerWrittenResponseQuestion(TestCasesWithUserAuth):
         
         assessment = create_assessment(user_id=requesting_user_id)
         
-        assessment_submission = db.AssessmentSubmission.objects.create(
+        assessment_submission = create_assessment_submission(
             user_id=requesting_user_id,
-            assessment=assessment,
-            start_datetime=datetime.now(timezone.utc)
+            assessment_id=assessment.id
         )
         
         written_response_question = db.WrittenResponseQuestion.objects.create(
@@ -90,7 +92,10 @@ class AnswerWrittenResponseQuestion(TestCasesWithUserAuth):
         }
         
         response = self.client.post(
-            self.get_api_endpoint(written_response_question_id=written_response_question.id), data=data
+            self.get_api_endpoint(
+                assessment_id=assessment.id,
+                written_response_question_id=written_response_question.id
+            ), data=data
         )
         
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
@@ -104,10 +109,9 @@ class AnswerWrittenResponseQuestion(TestCasesWithUserAuth):
         
         assessment = create_assessment(user_id=requesting_user_id)
         
-        assessment_submission = db.AssessmentSubmission.objects.create(
+        assessment_submission = create_assessment_submission(
             user_id=requesting_user_id,
-            assessment=assessment,
-            start_datetime=datetime.now(timezone.utc)
+            assessment_id=assessment.id
         )
         
         written_response_question = db.WrittenResponseQuestion.objects.create(
@@ -123,7 +127,10 @@ class AnswerWrittenResponseQuestion(TestCasesWithUserAuth):
         }
         
         response = self.client.post(
-            self.get_api_endpoint(written_response_question_id=written_response_question.id), data=valid_data
+            self.get_api_endpoint(
+                assessment_id=assessment.id,
+                written_response_question_id=written_response_question.id
+            ), data=valid_data
         )
         
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
@@ -140,7 +147,10 @@ class AnswerWrittenResponseQuestion(TestCasesWithUserAuth):
         }
         
         response = self.client.post(
-            self.get_api_endpoint(written_response_question_id=written_response_question.id), data=invalid_data
+            self.get_api_endpoint(
+                assessment_id=assessment.id,
+                written_response_question_id=written_response_question.id
+            ), data=invalid_data
         )
         
         expected_body = {'error': f'Response length ({len(invalid_data['response'])}) is greater than the maximum allowed ({written_response_question.max_length})'}
@@ -157,10 +167,9 @@ class AnswerWrittenResponseQuestion(TestCasesWithUserAuth):
         
         assessment = create_assessment(user_id=requesting_user_id)
         
-        db.AssessmentSubmission.objects.create(
+        create_assessment_submission(
             user_id=requesting_user_id,
-            assessment=assessment,
-            start_datetime=datetime.now(timezone.utc)
+            assessment_id=assessment.id
         )
         
         data = {
@@ -168,7 +177,10 @@ class AnswerWrittenResponseQuestion(TestCasesWithUserAuth):
         }
         
         response = self.client.post(
-            self.get_api_endpoint(written_response_question_id=uuid4()), data=data
+            self.get_api_endpoint(
+                assessment_id=assessment.id,
+                written_response_question_id=uuid4()
+            ), data=data
         )
         
         expected_body = {'error': 'Question not found'}
@@ -181,10 +193,9 @@ class AnswerWrittenResponseQuestion(TestCasesWithUserAuth):
         
         assessment = create_assessment(user_id=other_user_id)
 
-        db.AssessmentSubmission.objects.create(
+        create_assessment_submission(
             user_id=other_user_id,
-            assessment=assessment,
-            start_datetime=datetime.now(timezone.utc)
+            assessment_id=assessment.id
         )
         
         written_response_question = db.WrittenResponseQuestion.objects.create(
@@ -200,7 +211,10 @@ class AnswerWrittenResponseQuestion(TestCasesWithUserAuth):
         }
         
         response = self.client.post(
-            self.get_api_endpoint(written_response_question_id=written_response_question.id), data=data
+            self.get_api_endpoint(
+                assessment_id=assessment.id,
+                written_response_question_id=written_response_question.id
+            ), data=data
         )
         
         expected_body = {'error': 'Question not found'}
