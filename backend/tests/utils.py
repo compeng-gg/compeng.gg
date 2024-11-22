@@ -4,6 +4,7 @@ from datetime import (
     timedelta,
     timezone
 )
+from django.utils import timezone
 from django.test import TestCase
 import courses.models as db
 from rest_framework.test import APIClient
@@ -22,7 +23,7 @@ def create_offering(
     course = db.Course.objects.create(
         institution=intitution,
         name=course_name,
-        slug=f'slug_{course_name}',
+        slug=course_slug
     )
 
     offering = db.Offering.objects.create(
@@ -43,8 +44,14 @@ def create_offering_teams_settings(offering: db.Offering, max_team_size=3,format
     )
 
 
-def create_assessment(user_id: int) -> db.Assessment:
-    offering = create_offering()
+def create_assessment(
+    user_id: int,
+    assessment_title: Optional[str]='Final Exam',
+    course_slug: Optional[str]='ECE454',
+    starts_at: Optional[datetime]=timezone.now(),
+    content_viewable_after_submission: Optional[bool]=True
+) -> db.Assessment:
+    offering = create_offering(course_slug=course_slug)
         
     student_role = db.Role.objects.create(kind=db.Role.Kind.STUDENT, offering=offering)
 
@@ -53,21 +60,23 @@ def create_assessment(user_id: int) -> db.Assessment:
         role=student_role,
     )
 
-    starts_at = datetime.now(timezone.utc)
     ends_at = starts_at + timedelta(hours=1)
+    visible_at = starts_at - timedelta(hours=1)
 
     assessment = db.Assessment.objects.create(
-        title='ECE454 Exam',
+        title=assessment_title,
         starts_at=starts_at,
         ends_at=ends_at,
+        visible_at=visible_at,
         offering=offering,
+        content_viewable_after_submission=content_viewable_after_submission
     )
     
     return assessment
 
 
 def create_assessment_submission(user_id: int, assessment_id: UUID) -> db.AssessmentSubmission:
-    started_at = datetime.now(timezone.utc)
+    started_at = timezone.now()
     return db.AssessmentSubmission.objects.create(
         user_id=user_id,
         assessment_id=assessment_id,
