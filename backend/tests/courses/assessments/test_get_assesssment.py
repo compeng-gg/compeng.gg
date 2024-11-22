@@ -5,7 +5,8 @@ from datetime import (
     timezone,
 )
 from tests.utils import (
-    create_assessment
+    create_assessment,
+    create_assessment_submission
 )
 from rest_framework import status
 
@@ -41,10 +42,9 @@ class GetAssessmentTests(TestCasesWithUserAuth):
         
         assessment = create_assessment(user_id=requesting_user_id)
         
-        assessment_submission = db.AssessmentSubmission.objects.create(
+        assessment_submission = create_assessment_submission(
             user_id=requesting_user_id,
-            assessment=assessment,
-            start_datetime=datetime.now(timezone.utc)
+            assessment_id=assessment.id
         )
 
         coding_question = db.CodingQuestion.objects.create(
@@ -69,7 +69,7 @@ class GetAssessmentTests(TestCasesWithUserAuth):
         
         expected_body = {
             'title': assessment.title,
-            'end_unix_timestamp': int(assessment.end_datetime.timestamp()),
+            'end_unix_timestamp': int(assessment.ends_at.timestamp()),
             'questions': [
                 {
                     'prompt': coding_question.prompt,
@@ -90,10 +90,9 @@ class GetAssessmentTests(TestCasesWithUserAuth):
         
         assessment = create_assessment(user_id=requesting_user_id)
         
-        assessment_submission = db.AssessmentSubmission.objects.create(
+        assessment_submission = create_assessment_submission(
             user_id=requesting_user_id,
-            assessment=assessment,
-            start_datetime=datetime.now(timezone.utc)
+            assessment_id=assessment.id
         )
 
         multiple_choice_question = db.MultipleChoiceQuestion.objects.create(
@@ -123,7 +122,7 @@ class GetAssessmentTests(TestCasesWithUserAuth):
         
         expected_body = {
             'title': assessment.title,
-            'end_unix_timestamp': int(assessment.end_datetime.timestamp()),
+            'end_unix_timestamp': int(assessment.ends_at.timestamp()),
             'questions': [
                 {
                     'prompt': multiple_choice_question.prompt,
@@ -144,10 +143,9 @@ class GetAssessmentTests(TestCasesWithUserAuth):
         
         assessment = create_assessment(user_id=requesting_user_id)
         
-        assessment_submission = db.AssessmentSubmission.objects.create(
+        assessment_submission = create_assessment_submission(
             user_id=requesting_user_id,
-            assessment=assessment,
-            start_datetime=datetime.now(timezone.utc)
+            assessment_id=assessment.id
         )
 
         checkbox_question = db.CheckboxQuestion.objects.create(
@@ -173,7 +171,7 @@ class GetAssessmentTests(TestCasesWithUserAuth):
         
         expected_body = {
             'title': assessment.title,
-            'end_unix_timestamp': int(assessment.end_datetime.timestamp()),
+            'end_unix_timestamp': int(assessment.ends_at.timestamp()),
             'questions': [
                 {
                     'prompt': checkbox_question.prompt,
@@ -194,10 +192,9 @@ class GetAssessmentTests(TestCasesWithUserAuth):
         
         assessment = create_assessment(user_id=requesting_user_id)
         
-        assessment_submission = db.AssessmentSubmission.objects.create(
+        assessment_submission = create_assessment_submission(
             user_id=requesting_user_id,
-            assessment=assessment,
-            start_datetime=datetime.now(timezone.utc)
+            assessment_id=assessment.id
         )
 
         written_response_question = db.WrittenResponseQuestion.objects.create(
@@ -222,7 +219,7 @@ class GetAssessmentTests(TestCasesWithUserAuth):
         
         expected_body = {
             'title': assessment.title,
-            'end_unix_timestamp': int(assessment.end_datetime.timestamp()),
+            'end_unix_timestamp': int(assessment.ends_at.timestamp()),
             'questions': [
                 {
                     'prompt': written_response_question.prompt,
@@ -289,7 +286,7 @@ class GetAssessmentTests(TestCasesWithUserAuth):
 
         expected_body = {
             'title': assessment.title,
-            'end_unix_timestamp': int(assessment.end_datetime.timestamp()),
+            'end_unix_timestamp': int(assessment.ends_at.timestamp()),
             'questions': [
                 {
                     'prompt': multiple_choice_question.prompt,
