@@ -91,7 +91,8 @@ class AnswerMultipleChoiceQuestion(TestCasesWithUserAuth):
         multiple_choice_answer = db.MultipleChoiceAnswer.objects.create(
             assessment_submission=assessment_submission,
             question=multiple_choice_question,
-            selected_answer_index=0
+            selected_answer_index=0,
+            last_updated_at=timezone.now()
         )
         
         data = {
@@ -275,7 +276,8 @@ class AnswerMultipleChoiceQuestion(TestCasesWithUserAuth):
         multiple_choice_answer = db.MultipleChoiceAnswer.objects.create(
             assessment_submission=assessment_submission,
             question=multiple_choice_question,
-            selected_answer_index=0
+            selected_answer_index=0,
+            last_updated_at=timezone.now()
         )
         
         assessment_submission.completed_at = timezone.now()

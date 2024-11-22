@@ -67,9 +67,11 @@ def submit_checkbox_answer(request, assessment_id: UUID, checkbox_question_id: U
             assessment_submission=assessment_submission,
             question_id=checkbox_question_id,
             selected_answer_indices=selected_answer_indices,
+            last_updated_at=timezone.now()
         )
     else:
         checkbox_answer.selected_answer_indices = selected_answer_indices
+        checkbox_answer.last_updated_at=timezone.now()
         checkbox_answer.save()
     
     return Response(status=status.HTTP_204_NO_CONTENT)

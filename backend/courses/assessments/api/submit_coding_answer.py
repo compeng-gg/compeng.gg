@@ -56,9 +56,11 @@ def submit_coding_answer(request, assessment_id: UUID, coding_question_id: UUID)
             assessment_submission=assessment_submission,
             question_id=coding_question_id,
             solution=solution,
+            last_updated_at=timezone.now()
         )
     else:
         coding_answer.solution = solution
+        coding_answer.last_updated_at=timezone.now()
         coding_answer.save()
         
     return Response(status=status.HTTP_204_NO_CONTENT)
