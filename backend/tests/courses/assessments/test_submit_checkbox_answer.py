@@ -13,7 +13,7 @@ from uuid import (
 )
 
 
-class AnswerCheckboxQuestion(TestCasesWithUserAuth):
+class SubmitCheckboxAnswerTests(TestCasesWithUserAuth):
     def get_api_endpoint(self, assessment_id: UUID, checkbox_question_id: UUID) -> str:
         return f'/api/v0/assessments/{assessment_id}/answer/checkbox/{str(checkbox_question_id)}/'
     
@@ -273,7 +273,7 @@ class AnswerCheckboxQuestion(TestCasesWithUserAuth):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertDictEqual(response.json(), expected_body)
         
-    def test_question_id_in_different_offering_throws_error(self):
+    def test_assessment_in_different_offering_throws_error(self):
         other_user_id = User.objects.create().id
         
         assessment = create_assessment(user_id=other_user_id)
@@ -303,7 +303,7 @@ class AnswerCheckboxQuestion(TestCasesWithUserAuth):
             ), data=data
         )
         
-        expected_body = {'error': 'Question not found'}
+        expected_body = {'error': 'Assessment submission not found'}
         
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertDictEqual(response.json(), expected_body)
