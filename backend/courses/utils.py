@@ -51,8 +51,20 @@ def get_data_for_push(push):
                         found = True
                         assignments.append(assignment)
                         break
-                    if found:
+                if found:
+                    break
+            if found:
+                break
+
+            for added_file in commit['added']:
+                for d in dirs:
+                    if added_file.startswith(d):
+                        found = True
+                        assignments.append(assignment)
                         break
+                if found:
+                    break
+
             if found:
                 break
     data['assignments'] = assignments
