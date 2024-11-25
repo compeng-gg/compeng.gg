@@ -7,6 +7,7 @@ from rest_framework_simplejwt.views import (
 from . import views
 from .views_github_webhook import github_webhook
 import courses.teams.api as teams_api
+import courses.assessments.api as assessments_api
 
 from django.conf import settings
 from django.urls import include, path
@@ -46,6 +47,15 @@ urlpatterns = [
     path('teams/leave/', teams_api.leave_team),
     path('teams/get/<slug:slug>', teams_api.teams),
     path('teams/create/', teams_api.create_team),
+
+    path('assessments/list/all/', assessments_api.list_all_assessments),
+    path('assessments/list/<slug:course_slug>/', assessments_api.list_assessments_for_course),
+    path('assessments/<uuid:assessment_id>/', assessments_api.get_assessment),
+    path('assessments/<uuid:assessment_id>/answer/checkbox/<uuid:checkbox_question_id>/', assessments_api.submit_checkbox_answer),
+    path('assessments/<uuid:assessment_id>/answer/multiple_choice/<uuid:multiple_choice_question_id>/', assessments_api.submit_multiple_choice_answer),
+    path('assessments/<uuid:assessment_id>/answer/written_response/<uuid:written_response_question_id>/', assessments_api.submit_written_response_answer),
+    path('assessments/<uuid:assessment_id>/answer/coding/<uuid:coding_question_id>/', assessments_api.submit_coding_answer),
+    path('assessments/<uuid:assessment_id>/complete/', assessments_api.complete_assessment),
 
     path('github/webhook/', github_webhook),
 
