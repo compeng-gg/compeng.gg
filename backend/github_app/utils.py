@@ -20,6 +20,9 @@ def get_dir(repo, path, ref):
 
     content = api.get_repository_content_raw_for_org(repo, path, ref=ref)
     data = json.loads(content)
+    # This shouldn't actually happen
+    if "status" in data and data["status"] == "404":
+        return None
 
     for entry in data:
         if entry["type"] == "file":
