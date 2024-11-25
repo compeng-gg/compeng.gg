@@ -57,3 +57,23 @@ class TeamMemberAdmin(admin.ModelAdmin):
     list_display_links = ('enrollment', 'team')
     
     pass
+
+@admin.register(models.Assessment)
+class AssessmentAdmin(admin.ModelAdmin):
+    pass
+
+@admin.register(models.WrittenResponseQuestion)
+class WrittenResponseQuestionAdmn(admin.ModelAdmin):
+    pass
+
+@admin.register(models.CodingQuestion)
+class CodingQuestionAdmn(admin.ModelAdmin):
+    pass
+
+@admin.register(models.MultipleChoiceQuestion)
+class MultipleChoiceQuestionAdmn(admin.ModelAdmin):
+    pass
+
+@admin.register(models.CheckboxQuestion)
+class CheckboxQuestionAdmin(admin.ModelAdmin):
+    pass
