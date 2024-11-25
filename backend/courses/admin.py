@@ -51,3 +51,22 @@ class OfferingTeamsSettingsAdmin(admin.ModelAdmin):
     list_display = ('offering', 'max_team_size', 'formation_deadline')
     list_display_links = ('offering', 'max_team_size', 'formation_deadline')
     pass
+@admin.register(models.Assessment)
+class AssessmentAdmin(admin.ModelAdmin):
+    pass
+
+@admin.register(models.WrittenResponseQuestion)
+class WrittenResponseQuestionAdmn(admin.ModelAdmin):
+    pass
+
+@admin.register(models.CodingQuestion)
+class CodingQuestionAdmn(admin.ModelAdmin):
+    pass
+
+@admin.register(models.MultipleChoiceQuestion)
+class MultipleChoiceQuestionAdmn(admin.ModelAdmin):
+    pass
+
+@admin.register(models.CheckboxQuestion)
+class CheckboxQuestionAdmin(admin.ModelAdmin):
+    pass
