@@ -92,7 +92,6 @@ class Command(BaseCommand):
                 exit(1)
         elif runner.image == '2024-fall-ece454-runner:latest' and runner.command == '/workspace/lab5-runner/benchmark.py':
             cmd = ['docker', 'run', '--rm',
-              '--network', 'none',
               '-e', 'RUNNER_MACHINE=rpi4',
             ] + volume_args + [runner.image]
             cmd += shlex.split(runner.command)
