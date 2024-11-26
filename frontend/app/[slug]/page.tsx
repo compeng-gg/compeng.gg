@@ -138,7 +138,7 @@ function Course({ params }: { params: { slug: string } }) {
                     {`${new Date(task.received)}`}
                   </p>
 
-                  {task.result && "thru" in task.result && "util" in task. result &&
+                  {task.result && "thru" in task.result && "util" in task.result &&
                     <div className="border-t border-gray-500 mt-4 pt-2">
                       <p>
                         <strong>Throughput:</strong>{' '}
@@ -150,6 +150,19 @@ function Course({ params }: { params: { slug: string } }) {
                       </p>
                     </div>
                   }
+
+                  {task.result && "stdout" in task.result  && (
+                    <div className="bg-blue-100 font-xs text-blue-600 p-3 rounded mt-2">
+                      <p className="mb-2"><strong>Standard Output</strong></p>
+                      <pre className="text-sm">{task.result.stdout}</pre>
+                    </div>
+                  )}
+                  {task.result && "stderr" in task.result  && (
+                    <div className="bg-red-100 font-xs text-red-600 p-3 rounded mt-2">
+                      <p className="mb-2"><strong>Standard Error</strong></p>
+                      <pre className="text-sm">{task.result.stderr}</pre>
+                    </div>
+                  )}
 
                   {task.result && task.result.tests &&
                   <div className="border-t border-gray-500 mt-4 pt-2">
