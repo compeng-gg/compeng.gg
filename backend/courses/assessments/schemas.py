@@ -71,10 +71,11 @@ class CodingQuestionSerializer(serializers.ModelSerializer):
 class AssessmentSerializer(serializers.ModelSerializer):
     questions = serializers.SerializerMethodField()
     end_unix_timestamp = serializers.SerializerMethodField()
+    start_unix_timestamp = serializers.SerializerMethodField()
 
     class Meta:
         model = db.Assessment
-        fields = ['title', 'end_unix_timestamp', 'questions']
+        fields = ['title', 'end_unix_timestamp', 'start_unix_timestamp', 'questions']
 
     def get_questions(self, assessment: db.Assessment) -> List[Dict[str, Any]]:
         checkbox_questions = assessment.checkbox_questions
@@ -113,6 +114,9 @@ class AssessmentSerializer(serializers.ModelSerializer):
     
     def get_end_unix_timestamp(self, assessment: db.Assessment) -> int:
         return int(assessment.ends_at.timestamp())
+    
+    def get_start_unix_timestamp(self, assessment: db.Assessment) -> int:
+        return int(assessment.starts_at.timestamp())
 
 
 class AnswerMultipleChoiceQuestionRequestSerializer(serializers.Serializer):
