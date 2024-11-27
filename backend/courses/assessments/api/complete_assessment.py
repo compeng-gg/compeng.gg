@@ -10,13 +10,13 @@ from courses.assessments.api.utils import get_assessment_submission_or_error_res
 
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
-def complete_assessment(request, assessment_id: UUID):
+def complete_assessment(request, assessment_slug: str):
     request_at = timezone.now()
 
     user_id = request.user.id
     
     assessment_submission_or_error_response = get_assessment_submission_or_error_response(
-        request_at=request_at, user_id=user_id, assessment_id=assessment_id
+        request_at=request_at, user_id=user_id, assessment_slug=assessment_slug
     )
     
     if isinstance(assessment_submission_or_error_response, Response):

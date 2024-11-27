@@ -58,12 +58,12 @@ urlpatterns = [
 
     path('assessments/list/all/', assessments_api.list_all_assessments),
     path('assessments/list/<slug:course_slug>/', assessments_api.list_assessments_for_course),
-    path('assessments/<uuid:assessment_id>/', assessments_api.get_assessment),
-    path('assessments/<uuid:assessment_id>/answer/checkbox/<uuid:checkbox_question_id>/', assessments_api.submit_checkbox_answer),
-    path('assessments/<uuid:assessment_id>/answer/multiple_choice/<uuid:multiple_choice_question_id>/', assessments_api.submit_multiple_choice_answer),
-    path('assessments/<uuid:assessment_id>/answer/written_response/<uuid:written_response_question_id>/', assessments_api.submit_written_response_answer),
-    path('assessments/<uuid:assessment_id>/answer/coding/<uuid:coding_question_id>/', assessments_api.submit_coding_answer),
-    path('assessments/<uuid:assessment_id>/complete/', assessments_api.complete_assessment),
+    path('assessments/<slug:assessment_slug>/', assessments_api.get_assessment),
+    path('assessments/<slug:assessment_slug>/answer/checkbox/<uuid:checkbox_question_id>/', assessments_api.submit_checkbox_answer),
+    path('assessments/<slug:assessment_slug>/answer/multiple_choice/<uuid:multiple_choice_question_id>/', assessments_api.submit_multiple_choice_answer),
+    path('assessments/<slug:assessment_slug>/answer/written_response/<uuid:written_response_question_id>/', assessments_api.submit_written_response_answer),
+    path('assessments/<slug:assessment_slug>/answer/coding/<uuid:coding_question_id>/', assessments_api.submit_coding_answer),
+    path('assessments/<slug:assessment_slug>/complete/', assessments_api.complete_assessment),
 
     path('github/webhook/', github_webhook),
 

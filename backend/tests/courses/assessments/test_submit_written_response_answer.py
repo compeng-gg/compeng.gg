@@ -14,8 +14,8 @@ from uuid import (
 
 
 class SubmitWrittenResponseAnswerTests(TestCasesWithUserAuth):
-    def get_api_endpoint(self, assessment_id: UUID, written_response_question_id: UUID) -> str:
-        return f'/api/v0/assessments/{assessment_id}/answer/written_response/{str(written_response_question_id)}/'
+    def get_api_endpoint(self, assessment_slug: str, written_response_question_id: UUID) -> str:
+        return f'/api/v0/assessments/{assessment_slug}/answer/written_response/{str(written_response_question_id)}/'
         
     def test_no_existing_answer_obj_happy_path(self):
         requesting_user_id = self.user.id
@@ -24,7 +24,7 @@ class SubmitWrittenResponseAnswerTests(TestCasesWithUserAuth):
         
         assessment_submission = create_assessment_submission(
             user_id=requesting_user_id,
-            assessment_id=assessment.id
+            assessment_slug=assessment.id
         )
         
         written_response_question = db.WrittenResponseQuestion.objects.create(
@@ -46,7 +46,7 @@ class SubmitWrittenResponseAnswerTests(TestCasesWithUserAuth):
         
         response = self.client.post(
             self.get_api_endpoint(
-                assessment_id=assessment.id,
+                assessment_slug=assessment.id,
                 written_response_question_id=written_response_question.id
             ), data=data
         )
@@ -67,7 +67,7 @@ class SubmitWrittenResponseAnswerTests(TestCasesWithUserAuth):
         
         assessment_submission = create_assessment_submission(
             user_id=requesting_user_id,
-            assessment_id=assessment.id
+            assessment_slug=assessment.id
         )
         
         written_response_question = db.WrittenResponseQuestion.objects.create(
@@ -91,7 +91,7 @@ class SubmitWrittenResponseAnswerTests(TestCasesWithUserAuth):
         
         response = self.client.post(
             self.get_api_endpoint(
-                assessment_id=assessment.id,
+                assessment_slug=assessment.id,
                 written_response_question_id=written_response_question.id
             ), data=data
         )
@@ -109,7 +109,7 @@ class SubmitWrittenResponseAnswerTests(TestCasesWithUserAuth):
         
         assessment_submission = create_assessment_submission(
             user_id=requesting_user_id,
-            assessment_id=assessment.id
+            assessment_slug=assessment.id
         )
         
         written_response_question = db.WrittenResponseQuestion.objects.create(
@@ -126,7 +126,7 @@ class SubmitWrittenResponseAnswerTests(TestCasesWithUserAuth):
         
         response = self.client.post(
             self.get_api_endpoint(
-                assessment_id=assessment.id,
+                assessment_slug=assessment.id,
                 written_response_question_id=written_response_question.id
             ), data=valid_data
         )
@@ -146,7 +146,7 @@ class SubmitWrittenResponseAnswerTests(TestCasesWithUserAuth):
         
         response = self.client.post(
             self.get_api_endpoint(
-                assessment_id=assessment.id,
+                assessment_slug=assessment.id,
                 written_response_question_id=written_response_question.id
             ), data=invalid_data
         )
@@ -167,7 +167,7 @@ class SubmitWrittenResponseAnswerTests(TestCasesWithUserAuth):
         
         create_assessment_submission(
             user_id=requesting_user_id,
-            assessment_id=assessment.id
+            assessment_slug=assessment.id
         )
         
         data = {
@@ -176,7 +176,7 @@ class SubmitWrittenResponseAnswerTests(TestCasesWithUserAuth):
         
         response = self.client.post(
             self.get_api_endpoint(
-                assessment_id=assessment.id,
+                assessment_slug=assessment.id,
                 written_response_question_id=uuid4()
             ), data=data
         )
@@ -193,7 +193,7 @@ class SubmitWrittenResponseAnswerTests(TestCasesWithUserAuth):
 
         create_assessment_submission(
             user_id=other_user_id,
-            assessment_id=assessment.id
+            assessment_slug=assessment.id
         )
         
         written_response_question = db.WrittenResponseQuestion.objects.create(
@@ -210,7 +210,7 @@ class SubmitWrittenResponseAnswerTests(TestCasesWithUserAuth):
         
         response = self.client.post(
             self.get_api_endpoint(
-                assessment_id=assessment.id,
+                assessment_slug=assessment.id,
                 written_response_question_id=written_response_question.id
             ), data=data
         )
@@ -227,7 +227,7 @@ class SubmitWrittenResponseAnswerTests(TestCasesWithUserAuth):
         
         assessment_submission = create_assessment_submission(
             user_id=requesting_user_id,
-            assessment_id=assessment.id
+            assessment_slug=assessment.id
         )
         
         written_response_question = db.WrittenResponseQuestion.objects.create(
@@ -254,7 +254,7 @@ class SubmitWrittenResponseAnswerTests(TestCasesWithUserAuth):
         
         response = self.client.post(
             self.get_api_endpoint(
-                assessment_id=assessment.id,
+                assessment_slug=assessment.id,
                 written_response_question_id=written_response_question.id
             ), data=data
         )
