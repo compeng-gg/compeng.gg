@@ -13,8 +13,8 @@ from uuid import (
 
 
 class CompleteAssessmentTests(TestCasesWithUserAuth):
-    def get_api_endpoint(self, assessment_id: UUID) -> str:
-        return f'/api/v0/assessments/{assessment_id}/complete/'
+    def get_api_endpoint(self, assessment_slug: str) -> str:
+        return f'/api/v0/assessments/{assessment_slug}/complete/'
 
     def test_happy_path(self):
         requesting_user_id = self.user.id
@@ -40,7 +40,7 @@ class CompleteAssessmentTests(TestCasesWithUserAuth):
 
         # Complete the assignment
         response = self.client.post(
-            self.get_api_endpoint(assessment_id=assessment.id)
+            self.get_api_endpoint(assessment_slug=assessment.id)
         )
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
@@ -60,14 +60,14 @@ class CompleteAssessmentTests(TestCasesWithUserAuth):
         
         assessment_submission = create_assessment_submission(
             user_id=requesting_user_id,
-            assessment_id=assessment.id
+            assessment_slug=assessment.id
         )
 
         assessment_submission.completed_at = timezone.now()
         assessment_submission.save()
 
         response = self.client.post(
-            self.get_api_endpoint(assessment_id=assessment.id)
+            self.get_api_endpoint(assessment_slug=assessment.id)
         )
 
         expected_body = {'error': 'The assessment has already been completed'}
@@ -77,7 +77,7 @@ class CompleteAssessmentTests(TestCasesWithUserAuth):
 
     def test_nonexistent_assessment_throws_error(self):
         response = self.client.post(
-            self.get_api_endpoint(assessment_id=uuid4())
+            self.get_api_endpoint(assessment_slug=uuid4())
         )
 
         expected_body = {'error': 'Assessment submission not found'}

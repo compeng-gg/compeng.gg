@@ -14,7 +14,7 @@ from courses.assessments.api.utils import (
 
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
-def submit_coding_answer(request, assessment_id: UUID, coding_question_id: UUID):
+def submit_coding_answer(request, assessment_slug: str, coding_question_id: UUID):
     request_at = timezone.now()
     
     serializer = AnswerCodingQuestionRequestSerializer(data=request.data)
@@ -25,7 +25,7 @@ def submit_coding_answer(request, assessment_id: UUID, coding_question_id: UUID)
     solution = serializer.validated_data.get('solution')
     
     assessment_submission_or_error_response = get_assessment_submission_or_error_response(
-        request_at=request_at, user_id=user_id, assessment_id=assessment_id
+        request_at=request_at, user_id=user_id, assessment_slug=assessment_slug
     )
     
     if isinstance(assessment_submission_or_error_response, Response):
@@ -35,7 +35,7 @@ def submit_coding_answer(request, assessment_id: UUID, coding_question_id: UUID)
     assessment_submission = assessment_submission_or_error_response
     
     if not db.CodingQuestion.objects.filter(
-        assessment_id=assessment_id,
+        assessment_slug=assessment_slug,
         id=coding_question_id
     ).exists():
         return Response(

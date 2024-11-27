@@ -13,9 +13,9 @@ from courses.assessments.schemas import AssessmentSerializer
 from django.utils import timezone
 
 
-def get_assessment_or_error_response(user_id: int, assessment_id: UUID) -> db.Assessment:
+def get_assessment_or_error_response(user_id: int, assessment_slug: str) -> db.Assessment:
     try:
-        assessment = db.Assessment.objects.get(id=assessment_id)
+        assessment = db.Assessment.objects.get(id=assessment_slug)
     except db.Role.DoesNotExist:
         raise ValidationError("Assessment does not exist")
     
@@ -39,12 +39,12 @@ def get_assessment_or_error_response(user_id: int, assessment_id: UUID) -> db.As
 
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
-def get_assessment(request, assessment_id: UUID):
+def get_assessment(request, assessment_slug: str):
     request_at = timezone.now()
 
     user_id = request.user.id
 
-    assessment_or_error_response = get_assessment_or_error_response(user_id=user_id, assessment_id=assessment_id)
+    assessment_or_error_response = get_assessment_or_error_response(user_id=user_id, assessment_slug=assessment_slug)
 
     if isinstance(assessment_or_error_response, Response):
         error_response = assessment_or_error_response
@@ -110,7 +110,7 @@ def get_assessment(request, assessment_id: UUID):
 
     try:
         assessment_submission = db.AssessmentSubmission.objects.get(
-            assessment_id=assessment_id,
+            assessment_slug=assessment_slug,
             user_id=user_id,
         )
 
@@ -123,7 +123,7 @@ def get_assessment(request, assessment_id: UUID):
     except db.AssessmentSubmission.DoesNotExist:
         db.AssessmentSubmission.objects.create(
             user_id=user_id,
-            assessment_id=assessment_id,
+            assessment_slug=assessment_slug,
             started_at=request_at,
             completed_at=assessment.ends_at # Initialize this to the end datetime for the assessment
         )

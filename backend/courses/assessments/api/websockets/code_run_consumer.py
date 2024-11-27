@@ -6,7 +6,7 @@ class CodeRunConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         kwargs = self.scope['url_route']['kwargs']
 
-        self.assessment_id = kwargs.get('assessment_id')
+        self.assessment_slug = kwargs.get('assessment_slug')
         self.coding_question_id = kwargs.get('coding_question_id')
         
         await self.accept()

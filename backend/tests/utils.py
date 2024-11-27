@@ -75,11 +75,11 @@ def create_assessment(
     return assessment
 
 
-def create_assessment_submission(user_id: int, assessment_id: UUID) -> db.AssessmentSubmission:
+def create_assessment_submission(user_id: int, assessment_slug: str) -> db.AssessmentSubmission:
     started_at = timezone.now()
     return db.AssessmentSubmission.objects.create(
         user_id=user_id,
-        assessment_id=assessment_id,
+        assessment_slug=assessment_slug,
         started_at=started_at,
         completed_at=started_at + timedelta(hours=1)
     )
