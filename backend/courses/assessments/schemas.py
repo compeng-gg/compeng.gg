@@ -159,6 +159,7 @@ class CourseAssessmentsListSerializer(serializers.ModelSerializer):
         model = db.Assessment
         fields = [
             'title', 
+            'slug',
             'start_unix_timestamp',
             'end_unix_timestamp'
         ]

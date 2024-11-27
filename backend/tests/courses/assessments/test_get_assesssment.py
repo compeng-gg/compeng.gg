@@ -47,7 +47,7 @@ class GetAssessmentTests(TestCasesWithUserAuth):
         # Create a assessment that is nonviewable after submission
         assessment_submission = create_assessment_submission(
             user_id=requesting_user_id,
-            assessment_id=assessment.id,
+            assessment_slug=assessment.id,
         )
         # Mark assessment as completed now
         assessment_submission.completed_at = timezone.now()
@@ -71,7 +71,7 @@ class GetAssessmentTests(TestCasesWithUserAuth):
         # Create a assessment that is nonviewable after submission
         assessment_submission = create_assessment_submission(
             user_id=requesting_user_id,
-            assessment_id=assessment.id,
+            assessment_slug=assessment.id,
         )
         # Mark assessment as completed now
         assessment_submission.completed_at = timezone.now()
@@ -151,7 +151,7 @@ class GetAssessmentTests(TestCasesWithUserAuth):
         
         assessment_submission = create_assessment_submission(
             user_id=requesting_user_id,
-            assessment_id=assessment.id
+            assessment_slug=assessment.id
         )
 
         coding_question = db.CodingQuestion.objects.create(
@@ -201,7 +201,7 @@ class GetAssessmentTests(TestCasesWithUserAuth):
         
         assessment_submission = create_assessment_submission(
             user_id=requesting_user_id,
-            assessment_id=assessment.id
+            assessment_slug=assessment.id
         )
 
         multiple_choice_question = db.MultipleChoiceQuestion.objects.create(
@@ -255,7 +255,7 @@ class GetAssessmentTests(TestCasesWithUserAuth):
         
         assessment_submission = create_assessment_submission(
             user_id=requesting_user_id,
-            assessment_id=assessment.id
+            assessment_slug=assessment.id
         )
 
         checkbox_question = db.CheckboxQuestion.objects.create(
@@ -305,7 +305,7 @@ class GetAssessmentTests(TestCasesWithUserAuth):
         
         assessment_submission = create_assessment_submission(
             user_id=requesting_user_id,
-            assessment_id=assessment.id
+            assessment_slug=assessment.id
         )
 
         written_response_question = db.WrittenResponseQuestion.objects.create(

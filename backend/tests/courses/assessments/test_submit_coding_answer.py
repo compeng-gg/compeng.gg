@@ -14,8 +14,8 @@ from django.utils import timezone
 
 
 class SubmitCodingAnswerTests(TestCasesWithUserAuth):
-    def get_api_endpoint(self, assessment_id: UUID, coding_question_id: UUID) -> str:
-        return f'/api/v0/assessments/{assessment_id}/answer/coding/{str(coding_question_id)}/'
+    def get_api_endpoint(self, assessment_slug: str, coding_question_id: UUID) -> str:
+        return f'/api/v0/assessments/{assessment_slug}/answer/coding/{str(coding_question_id)}/'
     
     def test_no_existing_answer_obj_happy_path(self):
         requesting_user_id = self.user.id
@@ -24,7 +24,7 @@ class SubmitCodingAnswerTests(TestCasesWithUserAuth):
         
         assessment_submission = create_assessment_submission(
             user_id=requesting_user_id,
-            assessment_id=assessment.id
+            assessment_slug=assessment.id
         )
         
         coding_question = db.CodingQuestion.objects.create(
@@ -46,7 +46,7 @@ class SubmitCodingAnswerTests(TestCasesWithUserAuth):
         
         response = self.client.post(
             self.get_api_endpoint(
-                assessment_id=assessment.id,
+                assessment_slug=assessment.id,
                 coding_question_id=coding_question.id
             ), data=data
         )
@@ -67,7 +67,7 @@ class SubmitCodingAnswerTests(TestCasesWithUserAuth):
         
         assessment_submission = create_assessment_submission(
             user_id=requesting_user_id,
-            assessment_id=assessment.id
+            assessment_slug=assessment.id
         )
         
         coding_question = db.CodingQuestion.objects.create(
@@ -91,7 +91,7 @@ class SubmitCodingAnswerTests(TestCasesWithUserAuth):
         
         response = self.client.post(
             self.get_api_endpoint(
-                assessment_id=assessment.id,
+                assessment_slug=assessment.id,
                 coding_question_id=coding_question.id
             ), data=data
         )
@@ -109,7 +109,7 @@ class SubmitCodingAnswerTests(TestCasesWithUserAuth):
         
         create_assessment_submission(
             user_id=requesting_user_id,
-            assessment_id=assessment.id
+            assessment_slug=assessment.id
         )
         
         data = {
@@ -118,7 +118,7 @@ class SubmitCodingAnswerTests(TestCasesWithUserAuth):
 
         response = self.client.post(
             self.get_api_endpoint(
-                assessment_id=assessment.id,
+                assessment_slug=assessment.id,
                 coding_question_id=uuid4()
             ), data=data
         )
@@ -135,7 +135,7 @@ class SubmitCodingAnswerTests(TestCasesWithUserAuth):
 
         create_assessment_submission(
             user_id=other_user_id,
-            assessment_id=assessment.id
+            assessment_slug=assessment.id
         )
         
         coding_question = db.CodingQuestion.objects.create(
@@ -152,7 +152,7 @@ class SubmitCodingAnswerTests(TestCasesWithUserAuth):
         
         response = self.client.post(
             self.get_api_endpoint(
-                assessment_id=assessment.id,
+                assessment_slug=assessment.id,
                 coding_question_id=coding_question.id
             ), data=data
         )
@@ -169,7 +169,7 @@ class SubmitCodingAnswerTests(TestCasesWithUserAuth):
         
         assessment_submission = create_assessment_submission(
             user_id=requesting_user_id,
-            assessment_id=assessment.id
+            assessment_slug=assessment.id
         )
         
         coding_question = db.CodingQuestion.objects.create(
@@ -196,7 +196,7 @@ class SubmitCodingAnswerTests(TestCasesWithUserAuth):
         
         response = self.client.post(
             self.get_api_endpoint(
-                assessment_id=assessment.id,
+                assessment_slug=assessment.id,
                 coding_question_id=coding_question.id
             ), data=data
         )

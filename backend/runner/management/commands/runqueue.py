@@ -1,3 +1,5 @@
+#This file is responsible for load balancing and task scheduling, and runs on settings.RUNNER_QUEUE_HOST
+
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 from django.db import close_old_connections

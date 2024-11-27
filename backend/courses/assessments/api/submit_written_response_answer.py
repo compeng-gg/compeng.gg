@@ -15,7 +15,7 @@ from courses.assessments.api.utils import (
 
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
-def submit_written_response_answer(request, assessment_id: UUID, written_response_question_id: UUID):
+def submit_written_response_answer(request, assessment_slug: str, written_response_question_id: UUID):
     request_at = timezone.now()
     
     serializer = AnswerWrittenResponseQuestionRequestSerializer(data=request.data)
@@ -26,7 +26,7 @@ def submit_written_response_answer(request, assessment_id: UUID, written_respons
     response = serializer.validated_data.get('response')
     
     assessment_submission_or_error_response = get_assessment_submission_or_error_response(
-        request_at=request_at, user_id=user_id, assessment_id=assessment_id
+        request_at=request_at, user_id=user_id, assessment_slug=assessment_slug
     )
     
     if isinstance(assessment_submission_or_error_response, Response):
@@ -44,7 +44,7 @@ def submit_written_response_answer(request, assessment_id: UUID, written_respons
     ### Validate selected checkbox indices are valid
     try:
         written_response_question = db.WrittenResponseQuestion.objects.get(
-            assessment_id=assessment_id,
+            assessment_slug=assessment_slug,
             id=written_response_question_id
         )
     except db.WrittenResponseQuestion.DoesNotExist:
