@@ -22,15 +22,14 @@ def get_dir(repo, path, ref):
 
     content = api.get_repository_content_raw_for_org(repo, path, ref=ref)
     data = json.loads(content)
-    # This shouldn't actually happen
-    if "status" in data and data["status"] == "404":
-        return None
 
     for entry in data:
         if entry["type"] == "file":
             get_file(repo, entry["path"], ref)
         elif entry["type"] == "dir":
-            get_dir(repo, entry["path"], ref)
+            path = entry["path"]
+            if not path in ["lab5/inputs", "lab5/outputs"]:
+                get_dir(repo, path, ref)
     return full_path
 
 def is_github_organization_member(user):
