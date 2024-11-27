@@ -341,8 +341,13 @@ class Assessment(models.Model):
     starts_at = models.DateTimeField() # TODO: validate ends_at > starts_at
     ends_at = models.DateTimeField()
     
+    def __str__( self):
+        return f"{self.title}({self.offering.slug})"
+    
     class Meta:
         unique_together = ['slug', 'offering']
+        verbose_name = "Assessment"
+        verbose_name_plural = "Assessments"
     
 
 class AssessmentSubmission(models.Model):
@@ -358,7 +363,7 @@ class AssessmentQuestionBaseModel(models.Model):
     prompt = models.TextField()
     points = models.PositiveIntegerField(default=1)
     order = models.PositiveIntegerField()
-
+    
     class Meta:
         abstract = True
 

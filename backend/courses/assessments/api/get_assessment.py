@@ -15,7 +15,7 @@ from django.utils import timezone
 
 def get_assessment_or_error_response(user_id: int, assessment_slug: str) -> db.Assessment:
     try:
-        assessment = db.Assessment.objects.get(id=assessment_slug)
+        assessment = db.Assessment.objects.get(slug=assessment_slug)
     except db.Role.DoesNotExist:
         raise ValidationError("Assessment does not exist")
     
@@ -107,10 +107,12 @@ def get_assessment(request, assessment_slug: str):
         multiple_choice_questions_prefetch,
         checkbox_questions_prefetch
     )
+    
+    assessment_id = assessment.id
 
     try:
         assessment_submission = db.AssessmentSubmission.objects.get(
-            assessment_slug=assessment_slug,
+            id=assessment_id,
             user_id=user_id,
         )
 
@@ -123,7 +125,7 @@ def get_assessment(request, assessment_slug: str):
     except db.AssessmentSubmission.DoesNotExist:
         db.AssessmentSubmission.objects.create(
             user_id=user_id,
-            assessment_slug=assessment_slug,
+            assessment=assessment,
             started_at=request_at,
             completed_at=assessment.ends_at # Initialize this to the end datetime for the assessment
         )

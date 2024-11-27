@@ -2,11 +2,13 @@
 
 import Navbar from "@/app/components/navbar";
 import LoginRequired from "@/app/lib/login-required";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import ExamDisplay, { ExamProps } from "../exam-display";
-import { CodeQuestionData, QuestionData, QuestionProps, QuestionState } from "../question-models";
+import { BaseQuestionData, CodeQuestionData, QuestionData, QuestionProps, QuestionState } from "../question-models";
 import { Card } from "primereact/card";
 import { QuestionDisplay } from "../question-display";
+import { fetchApi } from "@/app/lib/api";
+import { JwtContext } from "@/app/lib/jwt-provider";
 
 const now = new Date()
 const oneHourBefore = new Date(now.getTime() - 1 * 60 * 60 * 1000);
@@ -61,14 +63,43 @@ const testQuestionData: QuestionData[] = [
 
 export default function Page({ params }: { params: { slug: string, exam_slug: string } }) {
   const { slug, exam_slug } = params;
-
+  const [jwt, setAndStoreJwt] = useContext(JwtContext);
   const [exam, setExam] = useState<ExamProps | undefined>(undefined);
 
   const [loaded, setLoaded] = useState<boolean>(false);
-  const questions = useInitializeQuestionStates(testQuestionData);
+  const [questionData, setQuestionData] = useState<QuestionData[]>([]);
+  const [questionStates, setQuestionStates] = useState<QuestionState[]>([]);
+
+  async function fetchExam() {
+    try {
+      const res = await fetchApi(jwt, setAndStoreJwt, `assessments/${exam_slug}`, "GET");
+      const data = await res.json();
+      console.log(JSON.stringify(data, null, 2));
+      const retExam : ExamProps = {
+        startTime: new Date(data.start_unix_timestamp*1000),
+        endTime: new Date(data.end_unix_timestamp*1000),
+        slug: exam_slug,
+        name: data.title,
+        courseSlug: slug
+      }
+      const qData = data.questions.map(())
+      const questionStates =  data.questions.map((questionData) => {
+        const [value, setValue] = useState(() => getDefaultStateValue(questionData));
+    
+        return {
+          value,
+          setValue,
+        };
+      });
+
+    } catch (error) {
+      console.error("Failed to retrieve exam", error);
+    }
+  }
 
   useEffect(() => {
     if (!loaded) {
+      fetchExam();
       setExam(testExam);
       setLoaded(true);
     }
@@ -108,6 +139,35 @@ export default function Page({ params }: { params: { slug: string, exam_slug: st
   );
 }
 
+export function getQuestionState(questionData: QuestionData) {
+  const [value, setValue] = useState(() => getDefaultStateValue(questionData));
+
+  return {
+    value,
+    setValue,
+  };
+}
+
+
+function getQuestionDataFromRaw(rawData: any): any {
+  const questionData : BaseQuestionData = {
+    prompt: rawData.prompt,
+    questionType: rawData.question_type,
+    isMutable: true,
+    totalMarks: rawData.points
+  }
+  switch (questionData.questionType) {
+    case "CODE":
+        return (questionData as CodeQuestionData).starterCode || "";
+    case "SELECT":
+        return -1; // Default to no option selected
+    case "TEXT":
+        return "";
+    default:
+        throw new Error(`Unsupported question type: ${JSON.stringify(questionData)}`);
+  }
+}
+
 function getDefaultStateValue(questionData: QuestionData): any {
   switch (questionData.questionType) {
       case "CODE":
@@ -122,13 +182,3 @@ function getDefaultStateValue(questionData: QuestionData): any {
 }
 
 
-export function useInitializeQuestionStates(questionDataList: QuestionData[]) {
-  return questionDataList.map((questionData) => {
-    const [value, setValue] = useState(() => getDefaultStateValue(questionData));
-
-    return {
-      value,
-      setValue,
-    };
-  });
-}

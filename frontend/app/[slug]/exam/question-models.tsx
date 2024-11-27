@@ -1,7 +1,7 @@
 // Base Data Classes
-interface BaseQuestionData {
+export interface BaseQuestionData {
     title?: string;
-    text: string;
+    prompt: string;
     totalMarks: number;
     isMutable: boolean;
     questionType: "CODE" | "SELECT" | "TEXT";

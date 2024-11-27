@@ -10,7 +10,7 @@ import SelectEditor from "./components/select-editor";
 //Display of the question inside a container
 export function QuestionDisplay(props: QuestionProps){
 
-    const {title, text, totalMarks, isMutable, questionType} = props;
+    const {title, prompt, totalMarks, isMutable, questionType} = props;
 
 
     //To-do
@@ -35,7 +35,7 @@ export function QuestionDisplay(props: QuestionProps){
     return (
         <Card
             title={title ?? "Question"}
-            subTitle={text}
+            subTitle={prompt}
             header={header}
             footer={footer}
         >
