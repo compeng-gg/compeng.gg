@@ -14,8 +14,8 @@ from uuid import (
 
 
 class SubmitMultipleChoiceAnswerTests(TestCasesWithUserAuth):
-    def get_api_endpoint(self, assessment_id: UUID, multiple_choice_question_id: UUID) -> str:
-        return f'/api/v0/assessments/{assessment_id}/answer/multiple_choice/{str(multiple_choice_question_id)}/'
+    def get_api_endpoint(self, assessment_slug: str, multiple_choice_question_id: UUID) -> str:
+        return f'/api/v0/assessments/{assessment_slug}/answer/multiple_choice/{str(multiple_choice_question_id)}/'
     
     def test_no_existing_answer_obj_happy_path(self):
         requesting_user_id = self.user.id
@@ -24,7 +24,7 @@ class SubmitMultipleChoiceAnswerTests(TestCasesWithUserAuth):
         
         assessment_submission = create_assessment_submission(
             user_id=requesting_user_id,
-            assessment_id=assessment.id
+            assessment_slug=assessment.id
         )
         
         multiple_choice_question = db.MultipleChoiceQuestion.objects.create(
@@ -51,7 +51,7 @@ class SubmitMultipleChoiceAnswerTests(TestCasesWithUserAuth):
         
         response = self.client.post(
             self.get_api_endpoint(
-                assessment_id=assessment.id,
+                assessment_slug=assessment.id,
                 multiple_choice_question_id=multiple_choice_question.id
             ), data=data
         )
@@ -72,7 +72,7 @@ class SubmitMultipleChoiceAnswerTests(TestCasesWithUserAuth):
         
         assessment_submission = create_assessment_submission(
             user_id=requesting_user_id,
-            assessment_id=assessment.id
+            assessment_slug=assessment.id
         )
         
         multiple_choice_question = db.MultipleChoiceQuestion.objects.create(
@@ -101,7 +101,7 @@ class SubmitMultipleChoiceAnswerTests(TestCasesWithUserAuth):
 
         response = self.client.post(
             self.get_api_endpoint(
-                assessment_id=assessment.id,
+                assessment_slug=assessment.id,
                 multiple_choice_question_id=multiple_choice_question.id
             ), data=data
         )
@@ -136,7 +136,7 @@ class SubmitMultipleChoiceAnswerTests(TestCasesWithUserAuth):
 
         response = self.client.post(
             self.get_api_endpoint(
-                assessment_id=assessment.id,
+                assessment_slug=assessment.id,
                 multiple_choice_question_id=multiple_choice_question.id
             ), data=data
         )
@@ -153,7 +153,7 @@ class SubmitMultipleChoiceAnswerTests(TestCasesWithUserAuth):
         
         create_assessment_submission(
             user_id=requesting_user_id,
-            assessment_id=assessment.id
+            assessment_slug=assessment.id
         )
         
         multiple_choice_question = db.MultipleChoiceQuestion.objects.create(
@@ -175,7 +175,7 @@ class SubmitMultipleChoiceAnswerTests(TestCasesWithUserAuth):
         
         response = self.client.post(
             self.get_api_endpoint(
-                assessment_id=assessment.id,
+                assessment_slug=assessment.id,
                 multiple_choice_question_id=multiple_choice_question.id
             ), data=data
         )
@@ -192,7 +192,7 @@ class SubmitMultipleChoiceAnswerTests(TestCasesWithUserAuth):
         
         create_assessment_submission(
             user_id=requesting_user_id,
-            assessment_id=assessment.id
+            assessment_slug=assessment.id
         )
         
         data = {
@@ -201,7 +201,7 @@ class SubmitMultipleChoiceAnswerTests(TestCasesWithUserAuth):
         
         response = self.client.post(
             self.get_api_endpoint(
-                assessment_id=assessment.id,
+                assessment_slug=assessment.id,
                 multiple_choice_question_id=uuid4()
             ), data=data
         )
@@ -218,7 +218,7 @@ class SubmitMultipleChoiceAnswerTests(TestCasesWithUserAuth):
 
         create_assessment_submission(
             user_id=other_user_id,
-            assessment_id=assessment.id
+            assessment_slug=assessment.id
         )
         
         multiple_choice_question = db.MultipleChoiceQuestion.objects.create(
@@ -240,7 +240,7 @@ class SubmitMultipleChoiceAnswerTests(TestCasesWithUserAuth):
         
         response = self.client.post(
             self.get_api_endpoint(
-                assessment_id=assessment.id,
+                assessment_slug=assessment.id,
                 multiple_choice_question_id=multiple_choice_question.id
             ), data=data
         )
@@ -257,7 +257,7 @@ class SubmitMultipleChoiceAnswerTests(TestCasesWithUserAuth):
         
         assessment_submission = create_assessment_submission(
             user_id=requesting_user_id,
-            assessment_id=assessment.id
+            assessment_slug=assessment.id
         )
         
         multiple_choice_question = db.MultipleChoiceQuestion.objects.create(
@@ -289,7 +289,7 @@ class SubmitMultipleChoiceAnswerTests(TestCasesWithUserAuth):
 
         response = self.client.post(
             self.get_api_endpoint(
-                assessment_id=assessment.id,
+                assessment_slug=assessment.id,
                 multiple_choice_question_id=multiple_choice_question.id
             ), data=data
         )

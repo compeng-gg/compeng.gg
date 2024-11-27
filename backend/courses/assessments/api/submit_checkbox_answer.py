@@ -16,7 +16,7 @@ from courses.assessments.api.utils import (
 
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
-def submit_checkbox_answer(request, assessment_id: UUID, checkbox_question_id: UUID):
+def submit_checkbox_answer(request, assessment_slug: str, checkbox_question_id: UUID):
     request_at = timezone.now()
     
     serializer = AnswerCheckboxQuestionRequestSerializer(data=request.data)
@@ -27,7 +27,7 @@ def submit_checkbox_answer(request, assessment_id: UUID, checkbox_question_id: U
     selected_answer_indices = serializer.validated_data.get('selected_answer_indices')
     
     assessment_submission_or_error_response = get_assessment_submission_or_error_response(
-        request_at=request_at, user_id=user_id, assessment_id=assessment_id
+        request_at=request_at, user_id=user_id, assessment_slug=assessment_slug
     )
     
     if isinstance(assessment_submission_or_error_response, Response):
@@ -45,7 +45,7 @@ def submit_checkbox_answer(request, assessment_id: UUID, checkbox_question_id: U
     ### Validate selected checkbox indices are valid
     try:
         checkbox_question = db.CheckboxQuestion.objects.get(
-            assessment_id=assessment_id,
+            assessment_slug=assessment_slug,
             id=checkbox_question_id
         )
     except db.CheckboxQuestion.DoesNotExist:
