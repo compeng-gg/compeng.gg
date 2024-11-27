@@ -14,8 +14,8 @@ from uuid import (
 
 
 class SubmitCheckboxAnswerTests(TestCasesWithUserAuth):
-    def get_api_endpoint(self, assessment_id: UUID, checkbox_question_id: UUID) -> str:
-        return f'/api/v0/assessments/{assessment_id}/answer/checkbox/{str(checkbox_question_id)}/'
+    def get_api_endpoint(self, assessment_slug: str, checkbox_question_id: UUID) -> str:
+        return f'/api/v0/assessments/{assessment_slug}/answer/checkbox/{str(checkbox_question_id)}/'
     
     def test_no_existing_answer_obj_happy_path(self):
         requesting_user_id = self.user.id
@@ -24,7 +24,7 @@ class SubmitCheckboxAnswerTests(TestCasesWithUserAuth):
         
         assessment_submission = create_assessment_submission(
             user_id=requesting_user_id,
-            assessment_id=assessment.id
+            assessment_slug=assessment.id
         )
         
         checkbox_question = db.CheckboxQuestion.objects.create(
@@ -47,7 +47,7 @@ class SubmitCheckboxAnswerTests(TestCasesWithUserAuth):
         
         response = self.client.post(
             self.get_api_endpoint(
-                assessment_id=assessment.id,
+                assessment_slug=assessment.id,
                 checkbox_question_id=checkbox_question.id
             ), data=data
         )
@@ -68,7 +68,7 @@ class SubmitCheckboxAnswerTests(TestCasesWithUserAuth):
         
         assessment_submission = create_assessment_submission(
             user_id=requesting_user_id,
-            assessment_id=assessment.id
+            assessment_slug=assessment.id
         )
         
         checkbox_question = db.CheckboxQuestion.objects.create(
@@ -93,7 +93,7 @@ class SubmitCheckboxAnswerTests(TestCasesWithUserAuth):
 
         response = self.client.post(
             self.get_api_endpoint(
-                assessment_id=assessment.id,
+                assessment_slug=assessment.id,
                 checkbox_question_id=checkbox_question.id
             ), data=data
         )
@@ -111,7 +111,7 @@ class SubmitCheckboxAnswerTests(TestCasesWithUserAuth):
         
         assessment_submission = create_assessment_submission(
             user_id=requesting_user_id,
-            assessment_id=assessment.id
+            assessment_slug=assessment.id
         )
         
         checkbox_question = db.CheckboxQuestion.objects.create(
@@ -136,7 +136,7 @@ class SubmitCheckboxAnswerTests(TestCasesWithUserAuth):
         
         response = self.client.post(
             self.get_api_endpoint(
-                assessment_id=assessment.id,
+                assessment_slug=assessment.id,
                 checkbox_question_id=checkbox_question.id
             ), data=data
         )
@@ -167,7 +167,7 @@ class SubmitCheckboxAnswerTests(TestCasesWithUserAuth):
 
         response = self.client.post(
             self.get_api_endpoint(
-                assessment_id=assessment.id,
+                assessment_slug=assessment.id,
                 checkbox_question_id=checkbox_question.id
             ), data=data
         )
@@ -184,7 +184,7 @@ class SubmitCheckboxAnswerTests(TestCasesWithUserAuth):
         
         assessment_submission = create_assessment_submission(
             user_id=requesting_user_id,
-            assessment_id=assessment.id
+            assessment_slug=assessment.id
         )
         
         checkbox_question = db.CheckboxQuestion.objects.create(
@@ -202,7 +202,7 @@ class SubmitCheckboxAnswerTests(TestCasesWithUserAuth):
 
         response = self.client.post(
             self.get_api_endpoint(
-                assessment_id=assessment.id,
+                assessment_slug=assessment.id,
                 checkbox_question_id=checkbox_question.id
             ), data=data
         )
@@ -219,7 +219,7 @@ class SubmitCheckboxAnswerTests(TestCasesWithUserAuth):
         
         assessment_submission = create_assessment_submission(
             user_id=requesting_user_id,
-            assessment_id=assessment.id
+            assessment_slug=assessment.id
         )
         
         checkbox_question = db.CheckboxQuestion.objects.create(
@@ -237,7 +237,7 @@ class SubmitCheckboxAnswerTests(TestCasesWithUserAuth):
 
         response = self.client.post(
             self.get_api_endpoint(
-                assessment_id=assessment.id,
+                assessment_slug=assessment.id,
                 checkbox_question_id=checkbox_question.id
             ), data=data
         )
@@ -254,7 +254,7 @@ class SubmitCheckboxAnswerTests(TestCasesWithUserAuth):
         
         create_assessment_submission(
             user_id=requesting_user_id,
-            assessment_id=assessment.id
+            assessment_slug=assessment.id
         )
         
         data = {
@@ -263,7 +263,7 @@ class SubmitCheckboxAnswerTests(TestCasesWithUserAuth):
         
         response = self.client.post(
             self.get_api_endpoint(
-                assessment_id=assessment.id,
+                assessment_slug=assessment.id,
                 checkbox_question_id=uuid4()
             ), data=data
         )
@@ -280,7 +280,7 @@ class SubmitCheckboxAnswerTests(TestCasesWithUserAuth):
 
         create_assessment_submission(
             user_id=other_user_id,
-            assessment_id=assessment.id
+            assessment_slug=assessment.id
         )
         
         checkbox_question = db.CheckboxQuestion.objects.create(
@@ -298,7 +298,7 @@ class SubmitCheckboxAnswerTests(TestCasesWithUserAuth):
         
         response = self.client.post(
             self.get_api_endpoint(
-                assessment_id=assessment.id,
+                assessment_slug=assessment.id,
                 checkbox_question_id=checkbox_question.id
             ), data=data
         )
@@ -315,7 +315,7 @@ class SubmitCheckboxAnswerTests(TestCasesWithUserAuth):
         
         assessment_submission = create_assessment_submission(
             user_id=requesting_user_id,
-            assessment_id=assessment.id
+            assessment_slug=assessment.id
         )
         
         checkbox_question = db.CheckboxQuestion.objects.create(
@@ -343,7 +343,7 @@ class SubmitCheckboxAnswerTests(TestCasesWithUserAuth):
 
         response = self.client.post(
             self.get_api_endpoint(
-                assessment_id=assessment.id,
+                assessment_slug=assessment.id,
                 checkbox_question_id=checkbox_question.id
             ), data=data
         )

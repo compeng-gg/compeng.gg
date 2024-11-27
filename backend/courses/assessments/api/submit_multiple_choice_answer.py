@@ -15,7 +15,7 @@ from courses.assessments.api.utils import (
 
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
-def submit_multiple_choice_answer(request, assessment_id: UUID, multiple_choice_question_id: UUID):
+def submit_multiple_choice_answer(request, assessment_slug: str, multiple_choice_question_id: UUID):
     request_at = timezone.now()
     
     serializer = AnswerMultipleChoiceQuestionRequestSerializer(data=request.data)
@@ -27,7 +27,7 @@ def submit_multiple_choice_answer(request, assessment_id: UUID, multiple_choice_
     selected_answer_index = serializer.validated_data.get('selected_answer_index')
     
     assessment_submission_or_error_response = get_assessment_submission_or_error_response(
-        request_at=request_at, user_id=user_id, assessment_id=assessment_id
+        request_at=request_at, user_id=user_id, assessment_slug=assessment_slug
     )
     
     if isinstance(assessment_submission_or_error_response, Response):

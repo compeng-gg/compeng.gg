@@ -38,11 +38,11 @@ def get_existing_answer_object(
 
 
 def get_assessment_submission_or_error_response(
-    request_at: datetime, user_id: int, assessment_id: UUID
+    request_at: datetime, user_id: int, assessment_slug: str
 ) -> Union[db.AssessmentSubmission, Response]:
     try:
         assessment_submission = db.AssessmentSubmission.objects.get(
-            assessment_id=assessment_id,
+            assessment_slug=assessment_slug,
             user_id=user_id,
         )
     except db.AssessmentSubmission.DoesNotExist:

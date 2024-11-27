@@ -37,5 +37,4 @@ def list_assessments_for_course(request, course_slug: str) -> Response:
 
     filter_params = Q(offering__course__slug=course_slug)
     course_assessments = query_assessments(user_id=user_id, filter_params=filter_params)
-
     return Response(data=CourseAssessmentsListSerializer(course_assessments, many=True).data)
