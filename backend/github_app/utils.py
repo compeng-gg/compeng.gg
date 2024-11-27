@@ -15,6 +15,8 @@ def get_file(repo, path, ref):
 
 def get_dir(repo, path, ref):
     api = GitHubRestAPI()
+    if path.endswith('/'):
+        path = path[:-1]
     full_path = settings.GITHUB_CONTENT_DIR / repo / ref / path
     os.makedirs(full_path.parent, exist_ok=True)
 
