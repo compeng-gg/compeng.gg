@@ -3,6 +3,7 @@ from uuid import UUID
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
 from django.db.models import Prefetch, prefetch_related_objects
+from django.db import transaction
 from rest_framework import (
     permissions,
     status
@@ -107,27 +108,26 @@ def get_assessment(request, assessment_slug: str):
         multiple_choice_questions_prefetch,
         checkbox_questions_prefetch
     )
-    
-    assessment_id = assessment.id
 
-    try:
-        assessment_submission = db.AssessmentSubmission.objects.get(
-            assessment = assessment,
-            user_id=user_id,
-        )
-
-        if (not assessment.content_viewable_after_submission
-            and assessment_submission.completed_at <= timezone.now()):
-            return Response(
-                {'error': 'Assessment content cannot be viewed after submission'},
-                status=status.HTTP_403_FORBIDDEN
+    with transaction.atomic():
+        try:
+            assessment_submission = db.AssessmentSubmission.objects.get(
+                assessment=assessment,
+                user_id=user_id,
             )
-    except db.AssessmentSubmission.DoesNotExist:
-        db.AssessmentSubmission.objects.create(
-            user_id=user_id,
-            assessment=assessment,
-            started_at=request_at,
-            completed_at=assessment.ends_at # Initialize this to the end datetime for the assessment
-        )
+
+            if (not assessment.content_viewable_after_submission
+                and assessment_submission.completed_at <= timezone.now()):
+                return Response(
+                    {'error': 'Assessment content cannot be viewed after submission'},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+        except db.AssessmentSubmission.DoesNotExist:
+            db.AssessmentSubmission.objects.create(
+                user_id=user_id,
+                assessment=assessment,
+                started_at=request_at,
+                completed_at=assessment.ends_at # Initialize this to the end datetime for the assessment
+            )
 
     return Response(data=AssessmentSerializer(assessment).data)
