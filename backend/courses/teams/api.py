@@ -104,7 +104,7 @@ def request_to_join_team(request):
         
         if formation_deadline < timezone.now():
             raise Response({'detail': 'Team formation deadline has passed.'}, status=status.HTTP_400_BAD_REQUEST)
-
+            
         db.TeamMember.objects.create(
             team_id=team_id,
             enrollment=enrollment,
