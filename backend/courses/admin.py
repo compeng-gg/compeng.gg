@@ -45,3 +45,7 @@ class TeamMemberAdmin(admin.ModelAdmin):
     list_display_links = ('enrollment', 'team')
     
     pass
+
+@admin.register(models.OfferingTeamsSettings)
+class OfferingTeamsSettingsAdmin(admin.ModelAdmin):
+    pass
