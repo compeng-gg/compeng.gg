@@ -99,10 +99,6 @@ export default function StudentTeamViewTab(props: StudentTeamViewTabProps) {
     }
   };
 
-  const memberColumnTemplate = (team: Team) => {
-    return <TeamMemberList showLabel={false} members={team.members} />;
-  };
-
   const joinTeam = ({ team }: { team: Team }) => {
     fetchApi(jwt, setAndStoreJwt, `teams/join/request/`, "PATCH", {
       team_id: team.id,
@@ -188,6 +184,20 @@ export default function StudentTeamViewTab(props: StudentTeamViewTabProps) {
     });
   };
 
+  const memberColumnTemplate = (team: Team) => {
+    // Extract member names and join them with commas
+    const memberNames = team.members
+      .filter((member) => member.role !== TeamMembershipRole.Requested) // Optional: Exclude requested members
+      .map((member) => {
+        if (member.role === TeamMembershipRole.Leader) {
+          return <b key={member.name}>{member.name}</b>; // Bold for leaders
+        }
+        return member.name;
+      });
+
+    return <div>{memberNames.join(", ")}</div>; // Ensure proper joining with commas
+  };
+
   const header = renderHeader();
 
   return (
@@ -199,21 +209,29 @@ export default function StudentTeamViewTab(props: StudentTeamViewTabProps) {
       />
       <DataTable
         value={teams}
-        tableStyle={{ minWidth: "50rem" }}
-        sortField="name"
-        resizableColumns
-        header={header}
+        globalFilterFields={["name", "members"]}
         filters={filters}
         filterDisplay="row"
-        globalFilterFields={["name", "members"]}
+        header={header}
       >
-        <Column field="name" header="Name"></Column>
+        <Column field="name" header="Name" />
+        <Column field="members" header="Members" body={memberColumnTemplate} />
         <Column
-          field="members"
-          header="Members"
-          body={memberColumnTemplate}
-        ></Column>
-        <Column header="Actions" body={actionsColumnTemplate}></Column>
+          header="Actions"
+          body={(team) => (
+            <Button
+              size="small"
+              label={
+                team.id === userMembership?.team.id ? "Leave Team" : "Join Team"
+              }
+              onClick={() =>
+                team.id === userMembership?.team.id
+                  ? leaveTeam()
+                  : joinTeam({ team })
+              }
+            />
+          )}
+        />
       </DataTable>
     </div>
   );
