@@ -11,19 +11,26 @@ import { PrimeIcons } from 'primereact/api';
 
 import { Avatar } from 'primereact/avatar';
 
-import { useContext, SyntheticEvent } from "react";
-
+import { useContext, SyntheticEvent, useState, useEffect } from "react";
 import { JwtContext } from '@/app/lib/jwt-provider';
 import PrimeWrapper from './primeWrapper';
+import { fetchUserName } from '@/app/lib/getUser';
 
 export interface NavbarProps {
-  username?: string;
   offerings?: object[];
 }
 
 export default function Navbar(props: NavbarProps) {
-  const {username, offerings} = props;
+  const { offerings} = props;
   const [jwt, setAndStoreJwt] = useContext(JwtContext);
+  const [username, setUserName] = useState("");
+
+    useEffect(() => {
+        // Fetch username on component mount
+        fetchUserName(jwt, setAndStoreJwt)
+            .then((fetchedUserName) => setUserName(fetchedUserName))
+            .catch((error) => console.error("Failed to fetch username:", error));
+    }, [jwt, setAndStoreJwt]);
 
   //const router = useRouter();
   const startingIcon = (<Image src='/favicon.ico' width='25px' />)

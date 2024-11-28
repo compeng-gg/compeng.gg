@@ -18,7 +18,7 @@ from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from uuid import UUID
 from django.utils import timezone
-from courses.models import Offering, TeamMember
+from courses.models import Offering, TeamMember, Team
 
 from dataclasses import dataclass
 from courses.teams.utils import IsInstructorOrTA
@@ -120,7 +120,6 @@ def request_to_join_team(request):
 @api_view(['PATCH'])
 @permission_classes([permissions.IsAuthenticated])
 def manage_join_team_request(request):
-    from courses.models import TeamMember
     serializer = ManageTeamMemberRequestSerializer(data=request.data)
     
     if serializer.is_valid():
@@ -236,7 +235,6 @@ def leave_team(request):
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
 def teams(request, slug):
-    from courses.models import Team, Offering
     try:
         offering = Offering.objects.get(course__slug=slug)
     except Offering.DoesNotExist:
@@ -262,7 +260,6 @@ def teams(request, slug):
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
 def create_team(request):
-    from courses.models import Offering
     serializer = CreateTeamRequestSerializer(data=request.data)
 
     if serializer.is_valid():
@@ -316,7 +313,6 @@ def create_team(request):
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
 def get_team_settings_for_offering(request, slug):
-    from courses.models import Team, Offering
     try:
         offering = Offering.objects.get(course__slug=slug)
         team_settings = db.OfferingTeamsSettings.objects.get(offering=offering)
@@ -385,7 +381,6 @@ def update_team_settings_for_offering(request):
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
 def get_team_settings_for_offering(request, slug):
-    from courses.models import Team, Offering
     try:
         offering = Offering.objects.get(course__slug=slug)
         team_settings = db.OfferingTeamsSettings.objects.get(offering=offering)
@@ -465,7 +460,6 @@ def delete_team_as_admin(request):
 @api_view(['POST'])
 @permission_classes([IsInstructorOrTA])
 def create_team_with_leader(request):
-    from courses.models import Offering
     serializer = createTeamWithLeaderRequestSerializer(data=request.data)
     
     if serializer.is_valid():
