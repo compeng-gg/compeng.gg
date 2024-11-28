@@ -5,6 +5,7 @@ import PrimeWrapper from "../components/primeWrapper";
 import 'primeicons/primeicons.css';
 import { Button } from "primereact/button";
 import StudentTeamViewTab from "../studentView/components/student-team-view-tab";
+import StaffTeamViewTab from "./components/staff-team-view-tab";
 
 
 export interface StaffViewProps {
@@ -14,7 +15,7 @@ export interface StaffViewProps {
 }
 
 export default function StaffView(props: StaffViewProps){
-    const {courseName, labs, courseSlug, offeringSlug} = props;
+    const {courseName, labs, courseSlug} = props;
 
     const [idx, setIdx] = useState<number>(0);
 
@@ -45,7 +46,7 @@ export default function StaffView(props: StaffViewProps){
 function DisplayCourseTab({idx, labs, courseSlug}){
     
     if(idx == 3){
-        return <StudentTeamViewTab  courseSlug={courseSlug}/>
+        return <StaffTeamViewTab  courseSlug={courseSlug}/>
     }
 
     return (
