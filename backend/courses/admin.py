@@ -46,6 +46,11 @@ class TeamMemberAdmin(admin.ModelAdmin):
     
     pass
 
+@admin.register(models.OfferingTeamsSettings)
+class OfferingTeamsSettingsAdmin(admin.ModelAdmin):
+    list_display = ('offering', 'max_team_size', 'formation_deadline')
+    list_display_links = ('offering', 'max_team_size', 'formation_deadline')
+
 @admin.register(models.Assessment)
 class AssessmentAdmin(admin.ModelAdmin):
     pass
