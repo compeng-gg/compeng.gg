@@ -15,6 +15,8 @@ class CodeRunConsumer(AsyncWebsocketConsumer):
         data = json.loads(text_data)
         solution = data['solution']
 
+        
+        print("RECEIVED DATA")
         # TODO: actually run code
 
         time.sleep(5)
