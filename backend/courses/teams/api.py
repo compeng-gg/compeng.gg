@@ -18,11 +18,7 @@ from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from uuid import UUID
 from django.utils import timezone
-from github_app.utils import create_student_team_and_fork, add_student_to_github_team
-from slugify import slugify
 from courses.models import Offering, TeamMember, Team
-from github_app.utils import create_student_team_and_fork, add_student_to_github_team
-from slugify import slugify
 
 from dataclasses import dataclass
 from courses.teams.utils import IsInstructorOrTA
@@ -104,6 +100,8 @@ def request_to_join_team(request):
         
         if formation_deadline < timezone.now():
             raise Response({'detail': 'Team formation deadline has passed.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        
 
         db.TeamMember.objects.create(
             team_id=team_id,
