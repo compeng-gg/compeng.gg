@@ -89,7 +89,7 @@ export default function Page({ params }: { params: { slug: string, exam_slug: st
       setQuestionData(qData);
       console.log("qdata:", JSON.stringify(qData, null, 2));
       const questionStates = qData.map((questionData, idx) => ({
-        value: getDefaultStateValue(questionData),
+        value: getStartingStateValue(questionData, data.questions[idx]),
         setValue: (newValue) => {
           setQuestionStates((questionStates) => 
             questionStates.map((state, currIdx) => currIdx == idx ? {...state, value: newValue} : state)
@@ -106,7 +106,6 @@ export default function Page({ params }: { params: { slug: string, exam_slug: st
   useEffect(() => {
     if (!loaded) {
       fetchExam();
-      setExam(testExam);
       setLoaded(true);
     }
   }, [loaded]);
@@ -175,14 +174,14 @@ function getQuestionDataFromRaw(rawData: any, assessment_slug: string): any {
   }
 }
 
-function getDefaultStateValue(questionData: QuestionData): any {
+function getStartingStateValue(questionData: QuestionData, rawData: any): any {
   switch (questionData.questionType) {
     case "CODE":
-      return (questionData as CodeQuestionData).starterCode || "";
+      return (rawData.solution) ?? ((questionData as CodeQuestionData).starterCode || "");
     case "SELECT":
-      return -1; // Default to no option selected
+      return (rawData.selected_answer_index) ?? -1; // Default to no option selected
     case "TEXT":
-      return "";
+      return (rawData.response) ?? "";
     default:
       throw new Error(`Unsupported question type: ${JSON.stringify(questionData)}`);
   }
