@@ -15,6 +15,7 @@ import { Divider } from "primereact/divider";
 import { Panel } from "primereact/panel";
 import { fetchApi } from "@/app/lib/api";
 import { JwtContext } from "@/app/lib/jwt-provider";
+import { fetchUserName } from "@/app/lib/getUser";
 import { Dialog } from "primereact/dialog";
 
 
@@ -48,39 +49,51 @@ export interface Team {
 
 export default function StudentTeamViewTab(props: StudentTeamViewTabProps){
     const [jwt, setAndStoreJwt] = useContext(JwtContext);
-
-    const userName = "seb";
     const {courseSlug} = props;
     const [teams, setTeams] = useState<Team[]>([]);
-
     const [userMembership, setUserMembership] = useState<UserMembership | undefined>(undefined);
+    const [userName, setUserName] = useState<string>("");
 
-    async function fetchTeams() {
+    // Fetch username on component mount
+    useEffect(() => {
+        fetchUserName(jwt, setAndStoreJwt)
+            .then((fetchedUserName) => {
+                setUserName(fetchedUserName); // Set the username in state
+            })
+            .catch((error) => console.error("Failed to fetch username:", error));
+    }, [jwt, setAndStoreJwt]);
+
+    // Fetch teams whenever userName is set
+    useEffect(() => {
+        if (userName) {
+            fetchTeams();
+        }
+    }, [userName]);
+
+    // Fetch teams function, accessible to all parts of the file
+    const fetchTeams = async () => {
         try {
-            //eventually call API here
             const res = await fetchApi(jwt, setAndStoreJwt, `teams/get/${courseSlug}`, "GET");
             const data = await res.json();
-            const returnedTeams : Team[] = [];
-            setUserMembership(undefined);
-            data.forEach(team => {
-                const newTeam = team as Team;
-                const userMember = newTeam.members.find(m => m.name == userName);
-                if(userMember != undefined){
-                    setUserMembership({team: newTeam, role: userMember.role});
+            const returnedTeams = [];
+            let foundMembership = false;
+
+            data.forEach((team) => {
+                const userMember = team.members.find((m) => m.name === userName);
+                if (userMember) {
+                    setUserMembership({ team, role: userMember.role });
+                    foundMembership = true;
                 }
-                returnedTeams.push(team as Team);
-            })
-            console.log(JSON.stringify(returnedTeams, null, 2));
+                returnedTeams.push(team);
+            });
+
+            if (!foundMembership) setUserMembership(undefined); // Reset membership if none found
+
             setTeams(returnedTeams);
-
         } catch (error) {
-            console.error("Failed to retrieve teams", error)
+            console.error("Failed to retrieve teams", error);
         }
-    }
-
-    useEffect(() => {
-        fetchTeams()
-    }, [courseSlug])
+    };
 
     const memberColumnTemplate = (team : Team) => {
         return (
