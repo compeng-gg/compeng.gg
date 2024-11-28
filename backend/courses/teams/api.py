@@ -554,3 +554,29 @@ def get_user_team_status(request, slug):
         team_data = None
 
     return Response({'user_id': request.user.id, 'team': team_data})
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def get_user_role(request, slug):
+    try:
+        # Find the offering using the provided slug
+        offering = db.Offering.objects.get(course__slug=slug, active=True)
+    except db.Offering.DoesNotExist:
+        return Response({'detail': 'Offering not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+    try:
+        # Fetch the role for the user in the offering
+        enrollment = db.Enrollment.objects.get(
+            user=request.user,
+            role__offering=offering,
+        )
+        role = enrollment.role
+    except db.Enrollment.DoesNotExist:
+        return Response({'detail': 'Enrollment not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+    # Return the role information
+    return Response({
+        'user_id': request.user.id,
+        'offering': offering.name,
+        'role': role.kind,  # This will return the role enum value (e.g., 'STUDENT')
+    })

@@ -56,6 +56,8 @@ urlpatterns = [
     path('teams/admin/delete/', teams_api.delete_team_as_admin),
     path('teams/user/status/<slug:slug>/', teams_api.get_user_team_status),
     
+    path('offering/role/<slug:slug>/', teams_api.get_user_role),
+    
 
     path('quizzes/list/all/', quizzes_api.list_all),
     path('quizzes/list/<slug:course_slug>/', quizzes_api.list_for_course),
