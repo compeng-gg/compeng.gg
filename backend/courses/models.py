@@ -206,7 +206,6 @@ class Team(models.Model):
     name = models.CharField(max_length=255, blank=False, null=False)
     created_at = models.DateTimeField(default=timezone.now)
     offering = models.ForeignKey(Offering, on_delete=models.CASCADE, related_name='teams')
-    github_team_slug = models.CharField(max_length=255, blank=False, null=False)
 
     class Meta:
         constraints = [

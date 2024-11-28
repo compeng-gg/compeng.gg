@@ -178,11 +178,9 @@ def dashboard(request):
     print(request.user)
     offerings = []
     for enrollment in user.enrollment_set.all():
-        print(enrollment)
-        print(enrollment.role)
+        print("hi")
         if(enrollment.role):    
             offering = enrollment.role.offering
-            print(offering)
             offerings.append({
                 'name': str(offering),
                 'slug': offering.course.slug,
