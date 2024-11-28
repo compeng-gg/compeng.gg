@@ -50,30 +50,13 @@ class AccommodationAdmin(admin.ModelAdmin):
 class ExamAdmin(admin.ModelAdmin):
     pass
 
-@admin.register(models.WrittenResponseQuestion)
-class WrittenResponseQuestionAdmn(admin.ModelAdmin):
+@admin.register(models.TeamMember)
+class TeamMemberAdmin(admin.ModelAdmin):
+    list_display = ('enrollment', 'team')
+    list_display_links = ('enrollment', 'team')
+    
     pass
 
-@admin.register(models.CodingQuestion)
-class CodingQuestionAdmn(admin.ModelAdmin):
-    pass
-
-@admin.register(models.MultipleChoiceQuestion)
-class MultipleChoiceQuestionAdmn(admin.ModelAdmin):
-    pass
-
-@admin.register(models.CheckboxQuestion)
-class CheckboxQuestionAdmin(admin.ModelAdmin):
-    pass
-
-@admin.register(models.ExamSubmission)
-class ExamSubmissionAdmin(admin.ModelAdmin):
-    pass
-
-@admin.register(models.CheckboxAnswer)
-class CheckboxAnswerAdmin(admin.ModelAdmin):
-    pass
-
-@admin.register(models.MultipleChoiceAnswer)
-class MultipleChoiceAdmin(admin.ModelAdmin):
+@admin.register(models.OfferingTeamsSettings)
+class OfferingTeamsSettingsAdmin(admin.ModelAdmin):
     pass

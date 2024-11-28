@@ -12,6 +12,8 @@ from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from uuid import UUID
 from django.utils import timezone
+from github_app.utils import create_student_team_and_fork, add_student_to_github_team
+from slugify import slugify
 
 from dataclasses import dataclass
 
@@ -30,7 +32,6 @@ def get_student_enrollment_for_team(team_id: UUID, user_id: int) -> TeamEnrollme
         raise ValidationError()
     
     course_slug = team.offering.course.slug
-    
     try:
         offering = db.Offering.objects.get(
             course__slug=course_slug,
@@ -75,35 +76,28 @@ def request_to_join_team(request):
     if serializer.is_valid():
         team_id = serializer.validated_data.get('team_id')
         user_id = request.user.id
-
         team_enrollment_data = get_student_enrollment_for_team(
             team_id=team_id,
             user_id=user_id,
         )
-        
         team = team_enrollment_data.team
         enrollment = team_enrollment_data.enrollment
         
-        
+        # Validate user does not break membership conditions
         if db.TeamMember.objects.filter(enrollment=enrollment).count() > 0:
             raise ValidationError()
-        
         max_team_size = team_enrollment_data.team_settings.max_team_size
         formation_deadline = team_enrollment_data.team_settings.formation_deadline
         if db.TeamMember.objects.filter(team=team).count() >= max_team_size:
             raise ValidationError()
-        
         if formation_deadline < timezone.now():
             raise ValidationError()
-
-        
 
         db.TeamMember.objects.create(
             team_id=team_id,
             enrollment=enrollment,
             membership_type=db.TeamMember.MembershipType.REQUESTED_TO_JOIN,
         )
-
         return Response(status=status.HTTP_204_NO_CONTENT)
     
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -120,11 +114,14 @@ def manage_join_team_request(request):
         joiner_name = serializer.validated_data.get('joiner_name')
         approved = serializer.validated_data.get('approved')
         request_id = request.user.id
-        
+        try:
+            team = db.Team.objects.get(id=team_id)
+        except db.Team.DoesNotExist:
+            raise ValidationError()
+    
         teamMembers = db.TeamMember.objects.filter(
             team_id=team_id
         )
-        
         
         leader = None
         approvedJoiner = None
@@ -142,6 +139,7 @@ def manage_join_team_request(request):
             raise ValidationError()
         
         if approved:
+            add_student_to_github_team(request.user, team.github_team_slug)
             approvedJoiner.membership_type = db.TeamMember.MembershipType.MEMBER
             approvedJoiner.save()
         else:
@@ -257,22 +255,19 @@ def create_team(request):
     serializer = CreateTeamRequestSerializer(data=request.data)
 
     if serializer.is_valid():
+        # Validations
         team_name = serializer.validated_data.get('team_name')
         course_slug = serializer.validated_data.get('course_slug')
-
         try:
             offering = Offering.objects.get(course__slug=course_slug)
         except Offering.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
-        
         try:
             team_settings = db.OfferingTeamsSettings.objects.get(offering=offering)
         except db.OfferingTeamsSettings.DoesNotExist:
             raise ValidationError()
-        
         if team_settings.formation_deadline < timezone.now():
                 raise ValidationError()
-
         try:
             role = db.Role.objects.get(
                 kind=db.Role.Kind.STUDENT,
@@ -280,7 +275,6 @@ def create_team(request):
             )
         except db.Role.DoesNotExist:
             return Response({'detail': 'Role not found.'}, status=status.HTTP_404_NOT_FOUND)
-
         try:
             enrollment = db.Enrollment.objects.get(
                 role=role,
@@ -289,11 +283,14 @@ def create_team(request):
         except db.Enrollment.DoesNotExist:
             return Response({'detail': 'Enrollment not found.'}, status=status.HTTP_404_NOT_FOUND)
 
+        # Create team models
+        create_student_team_and_fork(offering, team_name, request.user)
         team = db.Team.objects.create(
             name=team_name,
             offering=offering,
+            created_at=timezone.now(),
+            github_team_slug=slugify(team_name)
         )
-
         db.TeamMember.objects.create(
             team=team,
             enrollment=enrollment,
