@@ -40,11 +40,13 @@ def submit_written_response_answer(request, assessment_slug: str, written_respon
         question_id=written_response_question_id,
         user_id=user_id,
     )
-            
+
+    
+
     ### Validate selected checkbox indices are valid
     try:
         written_response_question = db.WrittenResponseQuestion.objects.get(
-            assessment_slug=assessment_slug,
+            assessment__slug=assessment_slug,
             id=written_response_question_id
         )
     except db.WrittenResponseQuestion.DoesNotExist:

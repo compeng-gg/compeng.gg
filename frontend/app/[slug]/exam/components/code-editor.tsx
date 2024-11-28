@@ -18,7 +18,7 @@ ace.config.setModuleUrl('ace/theme/monokai', '/ace/theme-monokai.js');
 ace.config.setModuleUrl('ace/ext/language_tools', '/ace/ext-language_tools.js');
 
 
-export default function CodeEditor(props: CodeQuestionProps) {
+export default function CodeEditor({props, save} : {props: CodeQuestionProps, save: (newValue: any) => void}) {
   const [loaded, setLoaded] = useState<boolean>(false);
 
   useEffect(() => {

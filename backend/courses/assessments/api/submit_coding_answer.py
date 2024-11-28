@@ -35,7 +35,7 @@ def submit_coding_answer(request, assessment_slug: str, coding_question_id: UUID
     assessment_submission = assessment_submission_or_error_response
     
     if not db.CodingQuestion.objects.filter(
-        assessment_slug=assessment_slug,
+        assessment__slug=assessment_slug,
         id=coding_question_id
     ).exists():
         return Response(

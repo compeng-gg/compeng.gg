@@ -33,7 +33,7 @@ def get_existing_answer_object(
     try:
         answer_object = answer_model.objects.get(
             question_id=question_id,
-            user_id=user_id
+            assessment_submission__user_id=user_id
         )
         return answer_object
     except answer_model.DoesNotExist:

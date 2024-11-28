@@ -112,7 +112,7 @@ def get_assessment(request, assessment_slug: str):
 
     try:
         assessment_submission = db.AssessmentSubmission.objects.get(
-            id=assessment_id,
+            assessment = assessment,
             user_id=user_id,
         )
 

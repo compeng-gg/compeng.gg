@@ -77,3 +77,14 @@ export const isSelectQuestion = (props: QuestionProps): props is SelectQuestionP
 
 export const isTextQuestion = (props: QuestionProps): props is TextQuestionProps =>
     props.questionType === "TEXT";
+
+export const isAnswered = (props: QuestionProps) => {
+    switch(props.questionType){
+        case "TEXT":
+            return props.state.value.length;
+        case "CODE":
+            return props.state.value != props.starterCode;
+        case "SELECT":
+            return props.state.value != -1;
+    }
+}
