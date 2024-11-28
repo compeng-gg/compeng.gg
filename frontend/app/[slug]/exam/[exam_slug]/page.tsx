@@ -4,7 +4,7 @@ import Navbar from "@/app/components/navbar";
 import LoginRequired from "@/app/lib/login-required";
 import { useContext, useEffect, useState } from "react";
 import ExamDisplay, { ExamProps } from "../exam-display";
-import { BaseQuestionData, CodeQuestionData, QuestionData, QuestionProps, QuestionState } from "../question-models";
+import { BaseQuestionData, CodeQuestionData, QuestionData, QuestionProps, QuestionState, QuestionType, SelectQuestionData, ServerToLocal, TextQuestionData } from "../question-models";
 import { Card } from "primereact/card";
 import { QuestionDisplay } from "../question-display";
 import { fetchApi } from "@/app/lib/api";
@@ -70,27 +70,33 @@ export default function Page({ params }: { params: { slug: string, exam_slug: st
   const [questionData, setQuestionData] = useState<QuestionData[]>([]);
   const [questionStates, setQuestionStates] = useState<QuestionState[]>([]);
 
+  
+
   async function fetchExam() {
     try {
       const res = await fetchApi(jwt, setAndStoreJwt, `assessments/${exam_slug}`, "GET");
       const data = await res.json();
       console.log(JSON.stringify(data, null, 2));
-      const retExam : ExamProps = {
-        startTime: new Date(data.start_unix_timestamp*1000),
-        endTime: new Date(data.end_unix_timestamp*1000),
+      const retExam: ExamProps = {
+        startTime: new Date(data.start_unix_timestamp * 1000),
+        endTime: new Date(data.end_unix_timestamp * 1000),
         slug: exam_slug,
         name: data.title,
         courseSlug: slug
       }
-      const qData = data.questions.map(())
-      const questionStates =  data.questions.map((questionData) => {
-        const [value, setValue] = useState(() => getDefaultStateValue(questionData));
-    
-        return {
-          value,
-          setValue,
-        };
-      });
+      setExam(retExam);
+      const qData = data.questions.map((rawData) =>  getQuestionDataFromRaw(rawData, exam_slug));
+      setQuestionData(qData);
+      console.log("qdata:", JSON.stringify(qData, null, 2));
+      const questionStates = qData.map((questionData, idx) => ({
+        value: getDefaultStateValue(questionData),
+        setValue: (newValue) => {
+          setQuestionStates((questionStates) => 
+            questionStates.map((state, currIdx) => currIdx == idx ? {...state, value: newValue} : state)
+          )
+        }
+      }));
+      setQuestionStates(questionStates);
 
     } catch (error) {
       console.error("Failed to retrieve exam", error);
@@ -130,8 +136,8 @@ export default function Page({ params }: { params: { slug: string, exam_slug: st
       <Navbar />
       <h2>{exam.name}</h2>
       <div style={{ display: "flex", gap: "10px", width: "100%", flexDirection: "column" }}>
-        {questions.map((state, idx) => (
-          <QuestionDisplay {...testQuestionData[idx]} state={state}/>
+        {questionStates.map((state, idx) => (
+          <QuestionDisplay {...questionData[idx]} state={state} idx={idx}/>
         ))}
       </div>
 
@@ -139,45 +145,46 @@ export default function Page({ params }: { params: { slug: string, exam_slug: st
   );
 }
 
-export function getQuestionState(questionData: QuestionData) {
-  const [value, setValue] = useState(() => getDefaultStateValue(questionData));
-
-  return {
-    value,
-    setValue,
-  };
-}
-
-
-function getQuestionDataFromRaw(rawData: any): any {
-  const questionData : BaseQuestionData = {
+function getQuestionDataFromRaw(rawData: any, assessment_slug: string): any {
+  const baseData: BaseQuestionData = {
+    id: rawData.id,
+    assessment_slug: assessment_slug,
     prompt: rawData.prompt,
-    questionType: rawData.question_type,
+    serverQuestionType: rawData.question_type,
+    questionType: ServerToLocal.get(rawData.question_type) as QuestionType  ?? "TEXT",
     isMutable: true,
     totalMarks: rawData.points
   }
-  switch (questionData.questionType) {
+  switch (baseData.questionType) {
     case "CODE":
-        return (questionData as CodeQuestionData).starterCode || "";
+      return {
+        ...baseData,
+        starterCode: rawData.starter_code, programmingLanguage: rawData.programming_language
+      } as CodeQuestionData
     case "SELECT":
-        return -1; // Default to no option selected
+      return {
+        ...baseData,
+        options: rawData.options
+      } as SelectQuestionData
     case "TEXT":
-        return "";
+      return {
+        ...baseData,
+      } as TextQuestionData
     default:
-        throw new Error(`Unsupported question type: ${JSON.stringify(questionData)}`);
+      throw new Error(`Unsupported question type: ${JSON.stringify(questionData)}`);
   }
 }
 
 function getDefaultStateValue(questionData: QuestionData): any {
   switch (questionData.questionType) {
-      case "CODE":
-          return (questionData as CodeQuestionData).starterCode || "";
-      case "SELECT":
-          return -1; // Default to no option selected
-      case "TEXT":
-          return "";
-      default:
-          throw new Error(`Unsupported question type: ${JSON.stringify(questionData)}`);
+    case "CODE":
+      return (questionData as CodeQuestionData).starterCode || "";
+    case "SELECT":
+      return -1; // Default to no option selected
+    case "TEXT":
+      return "";
+    default:
+      throw new Error(`Unsupported question type: ${JSON.stringify(questionData)}`);
   }
 }
 

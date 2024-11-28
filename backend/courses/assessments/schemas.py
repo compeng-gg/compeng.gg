@@ -14,7 +14,7 @@ class MultipleChoiceQuestionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = db.MultipleChoiceQuestion
-        fields = ['order', 'prompt', 'question_type', 'points', 'options', 'selected_answer_index']
+        fields = ['order', 'prompt', 'question_type', 'points', 'options', 'selected_answer_index', 'id']
 
     def get_selected_answer_index(self, multiple_choice_question: db.MultipleChoiceQuestion) -> int:
         if (answer := multiple_choice_question.answers.first()) is None:
@@ -29,7 +29,7 @@ class CheckboxQuestionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = db.CheckboxQuestion
-        fields = ['order', 'prompt', 'question_type', 'points', 'options', 'selected_answer_indices']
+        fields = ['order', 'prompt', 'question_type', 'points', 'options', 'selected_answer_indices', 'id']
 
     def get_selected_answer_indices(self, checkbox_question: db.CheckboxQuestion) -> List[int]:
         if (answer := checkbox_question.answers.first()) is None:
@@ -44,7 +44,7 @@ class WrittenResponseQuestionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = db.WrittenResponseQuestion
-        fields = ['order', 'prompt', 'question_type', 'points', 'max_length', 'question_type', 'response']
+        fields = ['order', 'prompt', 'question_type', 'points', 'max_length', 'question_type', 'response', 'id']
 
     def get_response(self, written_response_question: db.WrittenResponseQuestion) -> str:
         if (answer := written_response_question.answers.first()) is None:
@@ -59,7 +59,7 @@ class CodingQuestionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = db.CodingQuestion
-        fields = ['order', 'prompt', 'points', 'programming_language', 'question_type', 'starter_code', 'solution']
+        fields = ['order', 'prompt', 'points', 'programming_language', 'question_type', 'starter_code', 'solution', 'id']
 
     def get_solution(self, coding_question: db.CodingQuestion) -> str:
         if (answer := coding_question.answers.first()) is None:

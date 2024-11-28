@@ -77,3 +77,15 @@ class MultipleChoiceQuestionAdmn(admin.ModelAdmin):
 @admin.register(models.CheckboxQuestion)
 class CheckboxQuestionAdmin(admin.ModelAdmin):
     pass
+
+@admin.register(models.AssessmentSubmission)
+class AssessmentSubmissionAdmin(admin.ModelAdmin):
+    pass
+
+@admin.register(models.CheckboxAnswer)
+class CheckboxAnswerAdmin(admin.ModelAdmin):
+    pass
+
+@admin.register(models.MultipleChoiceAnswer)
+class MultipleChoiceAdmin(admin.ModelAdmin):
+    pass
