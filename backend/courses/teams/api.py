@@ -18,6 +18,8 @@ from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from uuid import UUID
 from django.utils import timezone
+from github_app.utils import create_student_team_and_fork, add_student_to_github_team
+from slugify import slugify
 from courses.models import Offering, TeamMember, Team
 from github_app.utils import create_student_team_and_fork, add_student_to_github_team
 from slugify import slugify
