@@ -185,18 +185,43 @@ export default function StudentTeamViewTab(props: StudentTeamViewTabProps) {
   };
 
   const memberColumnTemplate = (team: Team) => {
-    // Extract member names and join them with commas
+    // Extract member names and handle bold formatting for leaders
     const memberNames = team.members
-      .filter((member) => member.role !== TeamMembershipRole.Requested) // Optional: Exclude requested members
-      .map((member) => {
-        if (member.role === TeamMembershipRole.Leader) {
-          return <b key={member.name}>{member.name}</b>; // Bold for leaders
-        }
-        return member.name;
-      });
+        .filter((member) => member.role !== TeamMembershipRole.Requested) // Exclude requested members
+        .map((member) => {
+            if (member.role === TeamMembershipRole.Leader) {
+                // Return a string with special formatting for leaders
+                return `**${member.name}**`; // Mark leaders with special characters for now
+            }
+            return member.name; // Return the name as a string for non-leaders
+        })
+        .join(", "); // Join all names with commas
 
-    return <div>{memberNames.join(", ")}</div>; // Ensure proper joining with commas
-  };
+    // Replace special markers (e.g., `**`) with bold formatting in JSX
+    return (
+        <span>
+            {memberNames.split(", ").map((name, index) => {
+                if (name.startsWith("**") && name.endsWith("**")) {
+                    // Render leaders with bold formatting
+                    const leaderName = name.slice(2, -2); // Remove `**`
+                    return (
+                        <b key={index}>
+                            {leaderName}
+                            {index < memberNames.split(", ").length - 1 && ", "}
+                        </b>
+                    );
+                }
+                return (
+                    <span key={index}>
+                        {name}
+                        {index < memberNames.split(", ").length - 1 && ", "}
+                    </span>
+                );
+            })}
+        </span>
+    );
+};
+
 
   const header = renderHeader();
 
