@@ -8,6 +8,9 @@ from typing import (
     Union,
     Type
 )
+from rest_framework.exceptions import ValidationError
+from django.utils import timezone
+
 
 
 def get_existing_answer_object(
@@ -30,7 +33,7 @@ def get_existing_answer_object(
     try:
         answer_object = answer_model.objects.get(
             question_id=question_id,
-            assessment_submission__user_id=user_id
+            user_id=user_id
         )
         return answer_object
     except answer_model.DoesNotExist:
@@ -40,9 +43,19 @@ def get_existing_answer_object(
 def get_assessment_submission_or_error_response(
     request_at: datetime, user_id: int, assessment_slug: str
 ) -> Union[db.AssessmentSubmission, Response]:
+    
+        
+    assessment_or_error_response = get_assessment_or_error_response(user_id=user_id, assessment_slug=assessment_slug)
+
+    if isinstance(assessment_or_error_response, Response):
+        error_response = assessment_or_error_response
+        return error_response
+    
+    assessment = assessment_or_error_response
+    
     try:
         assessment_submission = db.AssessmentSubmission.objects.get(
-            assessment_slug=assessment_slug,
+            assessment=assessment,
             user_id=user_id,
         )
     except db.AssessmentSubmission.DoesNotExist:
@@ -58,3 +71,26 @@ def get_assessment_submission_or_error_response(
         )
         
     return assessment_submission
+
+def get_assessment_or_error_response(user_id: int, assessment_slug: str) -> db.Assessment:
+    try:
+        assessment = db.Assessment.objects.get(slug=assessment_slug)
+    except db.Role.DoesNotExist:
+        raise ValidationError("Assessment does not exist")
+    
+    try:
+        db.Enrollment.objects.get(
+            role__kind=db.Role.Kind.STUDENT,
+            role__offering=assessment.offering,
+            user_id=user_id,
+        )
+    except db.Enrollment.DoesNotExist:
+        raise ValidationError("Student is not enrolled in this course")
+    
+    if assessment.starts_at > timezone.now():
+        return Response(
+            {'error': 'Assessment has not started yet'},
+            status=status.HTTP_403_FORBIDDEN
+        )
+    
+    return assessment
