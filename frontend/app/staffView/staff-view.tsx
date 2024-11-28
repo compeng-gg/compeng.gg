@@ -4,13 +4,13 @@ import { useState } from 'react';
 import PrimeWrapper from "../components/primeWrapper";
 import 'primeicons/primeicons.css';
 import { Button } from "primereact/button";
-import StaffCourseSettingsTab from "./components/staff-course-settings-tab";
+import StudentTeamViewTab from "../studentView/components/student-team-view-tab";
+
 
 export interface StaffViewProps {
     courseName: string;
     labs: Lab[];
     courseSlug: string;
-    offeringSlug: string;
 }
 
 export default function StaffView(props: StaffViewProps){
@@ -36,15 +36,16 @@ export default function StaffView(props: StaffViewProps){
                     activeIndex={idx}
                     onTabChange={(e) => setIdx(e.index)}
                 />
-                <DisplayCourseTab idx={idx} courseSlug={courseSlug} offeringSlug={offeringSlug}/>
+                <DisplayCourseTab idx={idx} labs={labs} courseSlug={courseSlug}/>
             </PrimeWrapper>
         </>
     )
 }
 
-function DisplayCourseTab({idx, courseSlug, offeringSlug}){
-    if(idx == 0){
-        return <StaffCourseSettingsTab courseSlug={courseSlug} offeringSlug={offeringSlug}/>
+function DisplayCourseTab({idx, labs, courseSlug}){
+    
+    if(idx == 3){
+        return <StudentTeamViewTab  courseSlug={courseSlug}/>
     }
 
     return (

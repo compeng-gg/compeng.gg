@@ -110,18 +110,18 @@ export default function StudentTeamViewTab(props: StudentTeamViewTabProps) {
   };
 
   const actionsColumnTemplate = (team: Team) => {
-    if (team.id === userMembership?.team.id) {
-      return (
-        <LeaveTeamButton membership={userMembership} leaveTeam={leaveTeam} />
-      );
+    // If the user is already part of a team, don't show "Join Team" for other teams
+    if (userMembership && team.id !== userMembership.team.id) {
+      return null;
     }
+
     return (
       <Button
         size="small"
-        label="Join Team"
-        raised
-        text
-        onClick={() => joinTeam({ team })}
+        label={team.id === userMembership?.team.id ? "Leave Team" : "Join Team"}
+        onClick={() =>
+          team.id === userMembership?.team.id ? leaveTeam() : joinTeam({ team })
+        }
       />
     );
   };
@@ -187,41 +187,40 @@ export default function StudentTeamViewTab(props: StudentTeamViewTabProps) {
   const memberColumnTemplate = (team: Team) => {
     // Extract member names and handle bold formatting for leaders
     const memberNames = team.members
-        .filter((member) => member.role !== TeamMembershipRole.Requested) // Exclude requested members
-        .map((member) => {
-            if (member.role === TeamMembershipRole.Leader) {
-                // Return a string with special formatting for leaders
-                return `**${member.name}**`; // Mark leaders with special characters for now
-            }
-            return member.name; // Return the name as a string for non-leaders
-        })
-        .join(", "); // Join all names with commas
+      .filter((member) => member.role !== TeamMembershipRole.Requested) // Exclude requested members
+      .map((member) => {
+        if (member.role === TeamMembershipRole.Leader) {
+          // Return a string with special formatting for leaders
+          return `**${member.name}**`; // Mark leaders with special characters for now
+        }
+        return member.name; // Return the name as a string for non-leaders
+      })
+      .join(", "); // Join all names with commas
 
     // Replace special markers (e.g., `**`) with bold formatting in JSX
     return (
-        <span>
-            {memberNames.split(", ").map((name, index) => {
-                if (name.startsWith("**") && name.endsWith("**")) {
-                    // Render leaders with bold formatting
-                    const leaderName = name.slice(2, -2); // Remove `**`
-                    return (
-                        <b key={index}>
-                            {leaderName}
-                            {index < memberNames.split(", ").length - 1 && ", "}
-                        </b>
-                    );
-                }
-                return (
-                    <span key={index}>
-                        {name}
-                        {index < memberNames.split(", ").length - 1 && ", "}
-                    </span>
-                );
-            })}
-        </span>
+      <span>
+        {memberNames.split(", ").map((name, index) => {
+          if (name.startsWith("**") && name.endsWith("**")) {
+            // Render leaders with bold formatting
+            const leaderName = name.slice(2, -2); // Remove `**`
+            return (
+              <b key={index}>
+                {leaderName}
+                {index < memberNames.split(", ").length - 1 && ", "}
+              </b>
+            );
+          }
+          return (
+            <span key={index}>
+              {name}
+              {index < memberNames.split(", ").length - 1 && ", "}
+            </span>
+          );
+        })}
+      </span>
     );
-};
-
+  };
 
   const header = renderHeader();
 
@@ -241,22 +240,7 @@ export default function StudentTeamViewTab(props: StudentTeamViewTabProps) {
       >
         <Column field="name" header="Name" />
         <Column field="members" header="Members" body={memberColumnTemplate} />
-        <Column
-          header="Actions"
-          body={(team) => (
-            <Button
-              size="small"
-              label={
-                team.id === userMembership?.team.id ? "Leave Team" : "Join Team"
-              }
-              onClick={() =>
-                team.id === userMembership?.team.id
-                  ? leaveTeam()
-                  : joinTeam({ team })
-              }
-            />
-          )}
-        />
+        <Column header="Actions" body={actionsColumnTemplate} />
       </DataTable>
     </div>
   );
