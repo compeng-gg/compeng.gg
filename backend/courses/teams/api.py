@@ -399,21 +399,33 @@ def add_member_to_team(request):
         member_id = serializer.validated_data.get('member_id')
         
         try:
+            # Retrieve the target team
             team = db.Team.objects.get(id=team_id)
         except db.Team.DoesNotExist:
             return Response({'detail': 'Team not found.'}, status=status.HTTP_404_NOT_FOUND)
         
         try:
+            # Retrieve the member
             member = db.TeamMember.objects.get(id=member_id)
         except db.TeamMember.DoesNotExist:
             return Response({'detail': 'Member not found.'}, status=status.HTTP_404_NOT_FOUND)
         
+        # Check if the member is already in a team
+        if member.team is not None:
+            return Response(
+                {'detail': f'Member is already in team {member.team.name}.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Add the member to the target team
         member.team = team
         member.save()
         
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response({'detail': 'Member added to the team successfully.'}, status=status.HTTP_204_NO_CONTENT)
     
-    return Response(status=status.HTTP_204_NO_CONTENT)
+    # Return validation errors
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 @api_view(['DELETE'])
 @permission_classes([IsInstructorOrTA])
@@ -570,3 +582,33 @@ def get_user_role(request, slug):
         'offering': offering.name,
         'role': role.kind,  # This will return the role enum value (e.g., 'STUDENT')
     })
+    
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def get_enrolled_students(request, slug):
+    """
+    Retrieve a list of enrolled students for a given offering.
+    """
+    try:
+        # Retrieve the offering based on the slug
+        offering = db.Offering.objects.get(course__slug=slug, active=True)
+    except db.Offering.DoesNotExist:
+        return Response({'detail': 'Offering not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+    # Filter enrollments for students in the offering
+    student_enrollments = db.Enrollment.objects.filter(
+        role__kind=db.Role.Kind.STUDENT,  # Filter by student role
+        role__offering=offering
+    ).select_related('user')  # Optimize query by prefetching user details
+
+    # Serialize the data
+    students = [
+        {
+            'id': enrollment.user.id,
+            'name': enrollment.user.name,
+            'email': enrollment.user.email,  # Assuming email is a field in the user model
+        }
+        for enrollment in student_enrollments
+    ]
+
+    return Response(students, status=status.HTTP_200_OK)

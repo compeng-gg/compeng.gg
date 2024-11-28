@@ -118,7 +118,7 @@ function Course({ params }: { params: { slug: string } }) {
         {role === 'STUDENT' ? (
           <StudentView courseName={name} labs={labs} courseSlug={params.slug} />
         ) : role === 'INSTRUCTOR' || role === 'TA' ? (
-          <StaffView courseName={name} labs={labs} />
+          <StaffView courseName={name} labs={labs} courseSlug={params.slug}/>
         ) : (
           <div>Unknown role: {role}</div>
         )}
