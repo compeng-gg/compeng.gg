@@ -17,9 +17,19 @@ ace.config.setModuleUrl('ace/mode/c_cpp', '/ace/mode-c_cpp.js');
 ace.config.setModuleUrl('ace/theme/monokai', '/ace/theme-monokai.js');
 ace.config.setModuleUrl('ace/ext/language_tools', '/ace/ext-language_tools.js');
 
+enum TestRunStatus {
+  NOT_RUN = "Idle",
+  ERROR = "Error",
+  RUNNING = "Running",
+  COMPLETE = "Complete"
+}
 
-export default function CodeEditor({props, save} : {props: CodeQuestionProps, save: (newValue: any) => void}) {
+export default function CodeEditor({ props, save }: { props: CodeQuestionProps, save: (newValue: any) => void }) {
   const [loaded, setLoaded] = useState<boolean>(false);
+  const [socket, setSocket] = useState<WebSocket | undefined>(undefined);
+  const [message, setMessage] = useState<string>("");
+  const [jwt, setAndStoreJwt] = useContext(JwtContext);
+  const [testStatus, setTestStatus] = useState<TestRunStatus>(TestRunStatus.NOT_RUN);
 
   useEffect(() => {
     ace.config.setModuleUrl('ace/mode/c_cpp', '/ace/mode-c_cpp.js');
@@ -33,6 +43,44 @@ export default function CodeEditor({props, save} : {props: CodeQuestionProps, sa
 
     setLoaded(true);
   }, []);
+
+  useEffect(() => {
+    // Create a WebSocket connection
+    const localUrl = 'http://localhost:8000/'
+    const ws = new WebSocket(localUrl+`api/ws/v0/assessments/${props.assessment_slug}/run_code/${props.id}/?token=${jwt.token}`);
+    setSocket(ws);
+
+    ws.onopen = () => {
+      console.log('WebSocket connection opened.');
+    };
+
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      setTestStatus(TestRunStatus.COMPLETE);
+      console.log('Message from server:', data);
+      setMessage(JSON.stringify(data, null, 2));
+    };
+
+    ws.onclose = () => {
+      console.log('WebSocket connection closed.');
+    };
+
+    ws.onerror = (error) => {
+      console.error('WebSocket error:', error);
+    };
+
+    // Cleanup the WebSocket connection
+    return () => {
+      ws.close();
+    };
+  }, []);
+
+  async function runTests() {
+    if(socket){
+      setTestStatus(TestRunStatus.RUNNING)
+      socket.send(JSON.stringify({solution: props.state.value, questionId: props.id}));
+    }
+  }
 
   return (
     <div style={{ display: "flex", "flexDirection": "column", gap: "10px" }}>
@@ -56,10 +104,13 @@ export default function CodeEditor({props, save} : {props: CodeQuestionProps, sa
           }}
         />
       )}
+      <div>{`Socket Response:${message}`}</div>
+      <div>{`Test Status: ${testStatus}`}</div>
       {props.isMutable ? (
+
         <div style={{ position: 'relative', display: "flex", flexDirection: "row-reverse" }}>
           <span></span>
-          <Button label="Submit" size="small" />
+          <Button label="Run Tests" size="small" onClick={runTests}/>
         </div>
       ) : null}
     </div>
