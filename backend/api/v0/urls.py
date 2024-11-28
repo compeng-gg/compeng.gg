@@ -47,6 +47,15 @@ urlpatterns = [
     path('teams/leave/', teams_api.leave_team),
     path('teams/get/<slug:slug>', teams_api.teams),
     path('teams/create/', teams_api.create_team),
+    path('teams/settings/get/', teams_api.get_team_settings_for_offering),
+    path('teams/settings/create/', teams_api.create_team_settings_for_offering),
+    path('teams/settings/update/', teams_api.update_team_settings_for_offering),
+    path('teams/admin/create/', teams_api.create_team_with_leader),
+    path('teams/admin/add/', teams_api.add_member_to_team),
+    path('teams/admin/remove/', teams_api.remove_member_from_team),
+    path('teams/admin/delete/', teams_api.delete_team_as_admin),
+    path('teams/user/status/<slug:slug>/', teams_api.get_user_team_status),
+    
 
     path('assessments/list/all/', assessments_api.list_all_assessments),
     path('assessments/list/<slug:course_slug>/', assessments_api.list_assessments_for_course),
