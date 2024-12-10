@@ -18,6 +18,7 @@ COPY requirements.txt requirements.txt
 RUN pip install daphne "psycopg[binary]"
 RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
+RUN python mananage.py collectstatic
 
 EXPOSE 8000
 CMD ["daphne", "-b", "0.0.0.0", "compeng_gg.asgi:application"]

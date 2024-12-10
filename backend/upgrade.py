@@ -30,6 +30,7 @@ def update_requirements():
         'djangorestframework-simplejwt[crypto]',
         'discord',
         'social-auth-app-django',
+        'whitenoise',
     ])
     p = run_venv(['pip', 'freeze'], capture_output=True)
     with open(BASE_DIR / 'requirements.txt', 'w') as f:

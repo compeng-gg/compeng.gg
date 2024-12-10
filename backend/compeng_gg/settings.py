@@ -48,6 +48,7 @@ USE_TZ = True
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     # 'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     # 'django.middleware.csrf.CsrfViewMiddleware',
@@ -261,3 +262,4 @@ if BUILTIN_FRONTEND:
         'django.contrib.messages.middleware.MessageMiddleware',
     ]
     STATIC_URL = '/static/'
+    STATIC_ROOT = os.environ.setdefault("STATIC_ROOT", str(BASE_DIR / 'static'))
