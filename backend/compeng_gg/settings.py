@@ -83,7 +83,7 @@ INSTALLED_APPS = [
 ]
 
 ## Security
-CSRF_TRUSTED_ORIGINS = json.loads(environ.setdefault("CSRF_TRUSTED_ORIGINS",
+CSRF_TRUSTED_ORIGINS = json.loads(os.environ.setdefault("CSRF_TRUSTED_ORIGINS",
     "[]"
 ))
 SECRET_KEY = os.environ.setdefault('SECRET_KEY',
