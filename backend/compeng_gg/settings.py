@@ -83,7 +83,9 @@ INSTALLED_APPS = [
 ]
 
 ## Security
-
+CSRF_TRUSTED_ORIGINS = json.loads(environ.setdefault("CSRF_TRUSTED_ORIGINS",
+    "[]"
+))
 SECRET_KEY = os.environ.setdefault('SECRET_KEY',
     'django-insecure-i%y%&uud=jfqzakf!ee5+j12hv=q)r9v*(569c5%%gh9n2#7fg'
 )
