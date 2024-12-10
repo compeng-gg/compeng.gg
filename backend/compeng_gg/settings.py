@@ -261,5 +261,5 @@ if BUILTIN_FRONTEND:
         'django.contrib.auth.middleware.AuthenticationMiddleware',
         'django.contrib.messages.middleware.MessageMiddleware',
     ]
-    STATIC_URL = '/static/'
+    STATIC_URL = '/api/static/'
     STATIC_ROOT = os.environ.setdefault("STATIC_ROOT", str(BASE_DIR / 'static'))
