@@ -1,4 +1,5 @@
 from django.contrib.auth.models import User
+from django.views.decorators.csrf import csrf_exempt
 
 from social_core.exceptions import (
     AuthAlreadyAssociated,
@@ -37,6 +38,7 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAdminUser]
 
+@csrf_exempt
 @api_view(['POST'])
 @permission_classes([permissions.AllowAny])
 def auth_common(request, provider, allow_create_user=False):
@@ -89,6 +91,7 @@ def auth_google(request):
 def auth_laforge(request):
     return auth_common(request, 'laforge', allow_create_user=True)
 
+@csrf_exempt
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
 def connect_common(request, provider):
@@ -138,6 +141,7 @@ def connect_google(request):
 def connect_laforge(request):
     return connect_common(request, 'laforge')
 
+@csrf_exempt
 @api_view(['DELETE'])
 @permission_classes([permissions.IsAuthenticated])
 def disconnect_common(request, provider):
