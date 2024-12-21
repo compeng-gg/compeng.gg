@@ -249,6 +249,27 @@ class GitHubRestAPI(RestAPI):
 
     def create_team_for_org(self, name):
         return self.create_team(self.ORGANIZATION, name)
+    
+    def create_child_team(self, org, team_name, parent_team_name):
+        parent_team = self.get_with_ghs(f'/orgs/{org}/teams/{parent_team_name}')
+        data  = {
+            "name": team_name,
+            "description": "",
+            "permission": "push",
+            "notification_setting": "notifications_enabled",
+            "parent_team_id": parent_team['id']
+        }
+        print("Creating subteam")
+        return self.post_with_ghs(f'/orgs/{org}/teams', data)
+    
+    def create_child_team_for_org(self, team_name, parent_team_name):
+        return self.create_child_team(self.ORGANIZATION, team_name, parent_team_name)
+    
+    def get_all_teams(self, org):
+        return self.get_with_ghs(f'/orgs/{org}/teams')
+    
+    def get_all_teams_for_org(self):
+        return self.get_all_teams(self.ORGANIZATION)
 
     def create_org_repo(self, org, name):
         data = {
@@ -276,6 +297,7 @@ class GitHubRestAPI(RestAPI):
 
     def create_fork_for_org(self, repo, **kwargs):
         kwargs['organization'] = self.ORGANIZATION
+        print(kwargs, repo)
         return self.create_fork(self.ORGANIZATION, repo, **kwargs)
 
     def list_repository_collaborators(self, owner, repo, **kwargs):
