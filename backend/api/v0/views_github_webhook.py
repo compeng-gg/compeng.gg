@@ -14,7 +14,9 @@ from github_app.models import Push
 from runner.models import Task
 from runner.socket import send_task
 
+from compeng_gg.django.github.models import Push
 from compeng_gg.django.github.utils import get_or_create_delivery
+from runner.utils import create_build_runner
 
 def create_tasks(push):
     data = get_data_for_push(push)
@@ -38,6 +40,17 @@ def create_tasks(push):
         except:
             pass
 
+# New style deliveries
+def handle_delivery(delivery):
+    try:
+        push = delivery.push
+    except Push.DoesNotExist:
+        return
+
+    repository = push.repository
+    if repository.offering_runner.exists() :
+        create_build_runner(push)
+
 @api_view(['POST'])
 @permission_classes([permissions.AllowAny])
 def github_webhook(request):
@@ -58,11 +71,6 @@ def github_webhook(request):
     hook_id = request.headers["X-GitHub-Hook-ID"]
     event = request.headers['X-GitHub-Event']
     payload = json.loads(request.body)
-
-    try:
-        get_or_create_delivery(hook_id, delivery_uuid, event, payload)
-    except ObjectDoesNotExist:
-        pass
 
     if event == 'push':
         push, created = Push.objects.get_or_create(
@@ -88,5 +96,13 @@ def github_webhook(request):
                 from github_app.rest_api import GitHubRestAPI # TODO
                 api = GitHubRestAPI()
                 api.add_repository_collaborator_for_org(repo_name, github_username, permissions='push')
+
+    # New style objects
+    try:
+        delivery = get_or_create_delivery(hook_id, delivery_uuid, event, payload)
+    except ObjectDoesNotExist:
+        delivery = None
+    if delivery:
+        handle_delivery(delivery)
 
     return Response()

@@ -3,6 +3,7 @@ from django.db import models
 from django.urls import reverse, NoReverseMatch
 from django.utils.translation import gettext_lazy as _
 
+from compeng_gg.django.github.models import Repository
 from runner.models import Runner, Task
 
 class Institution(models.Model):
@@ -67,6 +68,13 @@ class Offering(models.Model):
     end = models.DateField()
     active = models.BooleanField()
     external_id = models.BigIntegerField(blank=True, null=True)
+    runner_repo = models.ForeignKey(
+        Repository,
+        on_delete=models.SET_NULL,
+        related_name="offering_runner",
+        blank=True,
+        null=True,
+    )
 
     def __str__(self):
         return f'{self.name} {self.course}'
