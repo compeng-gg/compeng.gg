@@ -245,6 +245,7 @@ GITHUB_API_URL = "https://api.github.com"
 RUNNER_QUEUE_HOST = os.environ.setdefault('RUNNER_QUEUE_HOST', 'localhost')
 RUNNER_QUEUE_PORT = int(os.environ.setdefault('RUNNER_QUEUE_PORT', '8002'))
 RUNNER_HOSTS = json.loads(os.getenv('RUNNER_HOSTS', '["localhost"]'))
+RUNNER_USE_K8S = json.loads(os.environ.setdefault('RUNNER_USE_K8S', 'false'))
 
 # Custom
 
