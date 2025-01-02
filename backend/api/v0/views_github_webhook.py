@@ -73,6 +73,14 @@ def github_webhook(request):
     event = request.headers['X-GitHub-Event']
     payload = json.loads(request.body)
 
+    # New style objects
+    try:
+        delivery = get_or_create_delivery(hook_id, delivery_uuid, event, payload)
+    except ObjectDoesNotExist:
+        delivery = None
+    if delivery:
+        handle_delivery(delivery)
+
     if event == 'push':
         push, created = Push.objects.get_or_create(
             delivery=delivery_uuid,
@@ -97,13 +105,5 @@ def github_webhook(request):
                 from github_app.rest_api import GitHubRestAPI # TODO
                 api = GitHubRestAPI()
                 api.add_repository_collaborator_for_org(repo_name, github_username, permissions='push')
-
-    # New style objects
-    try:
-        delivery = get_or_create_delivery(hook_id, delivery_uuid, event, payload)
-    except ObjectDoesNotExist:
-        delivery = None
-    if delivery:
-        handle_delivery(delivery)
 
     return Response()
