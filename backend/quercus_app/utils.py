@@ -14,6 +14,9 @@ def update_courses_from_quercus():
     for offering in Offering.objects.all():
         if offering.external_id is None:
             continue
+
+        if not offering.active:
+            continue
         
         # Look for an instructor Quercus token
         instructor = None
