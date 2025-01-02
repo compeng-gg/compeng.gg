@@ -14,7 +14,6 @@ from github_app.models import Push
 from runner.models import Task
 from runner.socket import send_task
 
-from compeng_gg.django.github.models import Push
 from compeng_gg.django.github.utils import get_or_create_delivery
 from runner.utils import create_build_runner
 
@@ -42,6 +41,8 @@ def create_tasks(push):
 
 # New style deliveries
 def handle_delivery(delivery):
+    from compeng_gg.django.github.models import Push
+
     try:
         push = delivery.push
     except Push.DoesNotExist:
