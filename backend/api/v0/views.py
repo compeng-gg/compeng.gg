@@ -131,8 +131,8 @@ def connect_github(request):
         from github_app.utils import add_github_team_membership, create_fork
         user = request.user
         add_github_team_membership(user)
-        create_fork('ece344', user)
-        create_fork('ece454', user)
+        create_fork('aps105', user)
+        create_fork('ece353', user)
     return response
 
 def connect_google(request):

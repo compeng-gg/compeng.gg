@@ -80,7 +80,8 @@ def create_fork(course_slug, user):
     from courses.models import Enrollment, Role
     from compeng_gg.auth import get_uid
     from django.core.exceptions import ObjectDoesNotExist
-    role = Role.objects.get(kind=Role.Kind.STUDENT, offering__course__slug=course_slug)
+    offering = Offering.objects.get(course__slug=course_slug, active=True)
+    role = Role.objects.get(kind=Role.Kind.STUDENT, offering=offering)
     try:
         enrollment = Enrollment.objects.get(user=user, role=role)
     except Enrollment.DoesNotExist:
