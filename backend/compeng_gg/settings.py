@@ -73,6 +73,8 @@ INSTALLED_APPS = [
 
     'runner',
 
+    'compeng_gg.django.github',
+
     'corsheaders',
     'social_django',
     'rest_framework',
@@ -233,6 +235,10 @@ GITHUB_CONTENT_DIR = BASE_DIR / 'github_content'
 GITHUB_ORGANIZATION = os.environ.setdefault('GITHUB_ORGANIZATION', '')
 GITHUB_PRIVATE_KEY_B64 = os.environ.setdefault('GITHUB_PRIVATE_KEY_B64', '')
 GITHUB_WEBHOOK_TOKEN = os.environ.setdefault('GITHUB_WEBHOOK_TOKEN', '')
+
+## New GitHub module
+GITHUB_WEBHOOK_SECRET = GITHUB_WEBHOOK_TOKEN # New name
+GITHUB_API_URL = "https://api.github.com"
 
 # Runner
 

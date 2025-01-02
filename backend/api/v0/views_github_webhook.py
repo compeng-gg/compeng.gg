@@ -14,6 +14,8 @@ from github_app.models import Push
 from runner.models import Task
 from runner.socket import send_task
 
+from compeng_gg.django.github.utils import get_or_create_delivery
+
 def create_tasks(push):
     data = get_data_for_push(push)
     if not 'assignments' in data:
@@ -52,12 +54,19 @@ def github_webhook(request):
     if not hmac.compare_digest(expected_signature, signature_header):
         return Response(status=status.HTTP_403_FORBIDDEN)
 
-    delivery = request.headers['X-GitHub-Delivery']
+    delivery_uuid = request.headers['X-GitHub-Delivery']
+    hook_id = request.headers["X-GitHub-Hook-ID"]
     event = request.headers['X-GitHub-Event']
     payload = json.loads(request.body)
+
+    try:
+        get_or_create_delivery(hook_id, delivery_uuid, event, payload)
+    except ObjectDoesNotExist:
+        pass
+
     if event == 'push':
         push, created = Push.objects.get_or_create(
-            delivery=delivery,
+            delivery=delivery_uuid,
             defaults={'payload': payload},
         )
         if created:
