@@ -1,3 +1,4 @@
+import pathlib
 import subprocess
 
 from compeng_gg.django.github.models import Push
@@ -13,6 +14,14 @@ class Command(BaseCommand):
         try:
             push = Push.objects.get(id=push_id)
         except Push.DoesNotExist:
-            raise CommandError(f'Push {push_id} does not exist')
+            raise CommandError(f"Push {push_id} does not exist")
 
-        print("Got", push_id)
+        repository = push.repository
+
+        tmp_dir = pathlib.Path("/tmp")
+        subprocess.run(["git", "clone", "--depth", "1", f"git@github.com:{repository.full_name}"], cwd=tmp_dir)
+
+        repo_dir = tmp_dir / repository.name
+        tag = f"gitea.eyl.io/jon/{repository.name}:latest"
+        subprocess.run(["podman", "build", "-t", tag, "."], cwd=repo_dir)
+        subprocess.run(["podman", "push", tag])

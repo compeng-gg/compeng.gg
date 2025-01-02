@@ -1,3 +1,6 @@
+import json
+import subprocess
+
 from django.conf import settings
 
 def create_build_runner(push):
@@ -34,6 +37,13 @@ def create_build_runner(push):
                         ],
                     },
                 },
+                {
+                    "name": "ssh-volume",
+                    "secret": {
+                        "secretName": "deploy-ssh",
+                        "defaultMode": 256,
+                    },
+                },
             ],
             "containers": [
                 {
@@ -46,6 +56,11 @@ def create_build_runner(push):
                             "name": "docker-volume",
                             "readOnly": True,
                             "mountPath": "/root/.docker/",
+                        },
+                        {
+                            "name": "ssh-volume",
+                            "readOnly": True,
+                            "mountPath": "/root/.ssh",
                         },
                     ],
                     "securityContext": {
