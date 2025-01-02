@@ -74,11 +74,8 @@ def github_webhook(request):
     payload = json.loads(request.body)
 
     # New style objects
-    try:
-        delivery = get_or_create_delivery(hook_id, delivery_uuid, event, payload)
-    except ObjectDoesNotExist:
-        delivery = None
-    if delivery:
+    delivery, created = get_or_create_delivery(hook_id, delivery_uuid, event, payload)
+    if created:
         handle_delivery(delivery)
 
     if event == 'push':

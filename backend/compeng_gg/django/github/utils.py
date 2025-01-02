@@ -222,7 +222,8 @@ def get_or_create_delivery(hook_id, delivery_uuid, event, payload):
             raise
 
     try:
-        return Delivery.objects.get(hook=hook, uuid=delivery_uuid)
+        delivery = Delivery.objects.get(hook=hook, uuid=delivery_uuid)
+        return (delivery, False)
     except Delivery.DoesNotExist:
         pass
 
@@ -237,10 +238,11 @@ def get_or_create_delivery(hook_id, delivery_uuid, event, payload):
     elif event == "membership":
         _sync_membership(payload)
 
-    Delivery.objects.create(
+    delivery = Delivery.objects.create(
         hook=hook,
         uuid=delivery_uuid,
         event=event,
         payload=payload,
         content_object=content_object,
     )
+    return (delivery, True)
