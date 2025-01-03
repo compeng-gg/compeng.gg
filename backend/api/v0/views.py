@@ -128,11 +128,10 @@ def connect_discord(request):
 def connect_github(request):
     response = connect_common(request, 'github')
     if response.status_code == 200:
-        from github_app.utils import add_github_team_membership, create_fork
+        from github_app.utils import add_github_team_membership, create_forks
         user = request.user
         add_github_team_membership(user)
-        create_fork('aps105', user)
-        create_fork('ece353', user)
+        create_forks(user)
     return response
 
 def connect_google(request):
@@ -206,14 +205,30 @@ def tasks(request):
         push = task.push
         result = get_task_result(task)
         grade = result['grade'] if result and 'grade' in result else None
-        data.append({
+
+        task_data = {
             'id': task.id,
             'status': task.get_status_display(),
             'grade': grade,
-            'repo': push.payload['repository']['name'],
-            'commit': push.payload['after'],
-            'received': push.received,
-        })
+        }
+        # Old style
+        if task.push:
+            push = task.push
+            received = push.received
+            task_data['repo'] = push.payload['repository']['name']
+            task_data['commit'] = push.payload['after']
+            task_data['received'] = received
+        # New style
+        if task.head_commit:
+            head_commit = task.head_commit
+            repository = head_commit.repository
+            # TODO: check if this every returns more than one
+            received = head_commit.pushes_head.all()[0].delivery.received
+            task_data['repo'] = repository.name
+            task_data['commit'] = head_commit.sha1
+            task_data['received'] = received
+
+        data.append(task_data)
     return Response(data)
 
 @api_view(['GET'])
@@ -245,17 +260,30 @@ def course(request, slug):
             user=request.user, assignment=assignment
         ).order_by('-task__created'):
             task = assignment_task.task
-            push = task.push
             result = get_task_result(task)
             grade = result['grade'] if result and 'grade' in result else None
             task_data = {
                 'id': task.id,
                 'status': task.get_status_display(),
-                'repo': push.payload['repository']['name'],
-                'commit': push.payload['after'],
-                'received': push.received,
                 'result': result,
             }
+            # Old style
+            if task.push:
+                push = task.push
+                received = push.received
+                task_data['repo'] = push.payload['repository']['name']
+                task_data['commit'] = push.payload['after']
+                task_data['received'] = received
+            # New style
+            if task.head_commit:
+                head_commit = task.head_commit
+                repository = head_commit.repository
+                # TODO: check if this every returns more than one
+                received = head_commit.pushes_head.all()[0].delivery.received
+                task_data['repo'] = repository.name
+                task_data['commit'] = head_commit.sha1
+                task_data['received'] = received
+
             if assignment.kind == Assignment.Kind.TESTS:
                 task_data['grade'] = grade
             elif assignment.kind == Assignment.Kind.LEADERBOARD:
@@ -263,10 +291,10 @@ def course(request, slug):
                 if speedup:
                     task_data['speedup'] = speedup
             tasks.append(task_data)
-            on_time = push.received <= due_date
+            on_time = received <= due_date
             max_grade = 100 # TODO: This should probably come from the assign.
             if accommodation and not on_time:
-                if push.received > accommodation.due_date:
+                if received > accommodation.due_date:
                     continue
                 if accommodation.max_grade:
                     max_grade = accommodation.max_grade

@@ -173,6 +173,13 @@ class Enrollment(models.Model):
         Role,
         on_delete=models.CASCADE,
     )
+    student_repo = models.OneToOneField(
+        Repository,
+        on_delete=models.SET_NULL,
+        related_name="enrollment",
+        blank=True,
+        null=True,
+    )
 
     def __str__(self):
         return f'{self.user} - {self.role}'

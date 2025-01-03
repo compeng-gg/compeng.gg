@@ -1,8 +1,65 @@
+from courses.models import Enrollment, Role, Accommodation, Assignment, AssignmentTask
+from django.conf import settings
 from django.contrib.auth.models import User
-from courses.models import Enrollment, Role, Accommodation, Assignment
-from github_app.models import Push
+from django.core.exceptions import ObjectDoesNotExist
+from runner.models import Runner, Task
+from runner.utils import create_k8s_task
 
-def get_data_for_push(push):
+def has_change_for_assignment(push, assignment):
+    raw_files = list(assignment.files)
+    files = list(filter(lambda x: not x.endswith('/'), raw_files))
+    dirs = list(filter(lambda x: x.endswith('/'), raw_files))
+    for commit in push.commits.all():
+        for path in commit.paths_added.all():
+            if path.relative in files:
+                return True
+            for d in dirs:
+                if path.relative.startswith(d):
+                    return True
+        for path in commit.paths_modified.all():
+            if path.relative in files:
+                return True
+            for d in dirs:
+                if path.relative.startswith(d):
+                    return True
+    return False
+
+def create_course_tasks(push):
+    if not settings.RUNNER_USE_K8S:
+        return
+
+    repository = push.repository
+    try:
+        enrollment = repository.enrollment
+    except ObjectDoesNotExist:
+        return
+    user = enrollment.user
+    role = enrollment.role
+    offering = role.offering
+
+    assignments = []
+    for assignment in offering.assignment_set.all():
+        if not has_change_for_assignment(push, assignment):
+            continue
+
+        image = f"{offering.runner_repo.name}:latest"
+        command = f"/workspace/{assignment.slug}/grade.py"
+        runner, _ = Runner.objects.get_or_create(image=image, command=command)
+
+        task = Task.objects.create(
+            runner=runner,
+            status=Task.Status.QUEUED,
+            head_commit=push.head_commit,
+        )
+        assignment_task = AssignmentTask.objects.create(
+            user=user,
+            assignment=assignment,
+            task=task,
+        )
+
+        create_k8s_task(task)
+
+def get_data_for_old_push(push):
     data = {}
 
     name = push.payload['repository']['name']

@@ -7,7 +7,8 @@ import hmac
 import json
 
 from courses.models import AssignmentTask
-from courses.utils import get_data_for_push
+from courses.utils import get_data_for_old_push
+from django.core.exceptions import ObjectDoesNotExist
 from django.conf import settings
 from django.contrib.auth.models import User
 from github_app.models import Push
@@ -15,10 +16,15 @@ from runner.models import Task
 from runner.socket import send_task
 
 from compeng_gg.django.github.utils import get_or_create_delivery
+
+from courses.utils import create_course_tasks
 from runner.utils import create_build_runner
 
 def create_tasks(push):
-    data = get_data_for_push(push)
+    if settings.RUNNER_USE_K8S:
+        return
+
+    data = get_data_for_old_push(push)
     if not 'assignments' in data:
         return
     user = data['user']
@@ -48,9 +54,8 @@ def handle_delivery(delivery):
     except Push.DoesNotExist:
         return
 
-    repository = push.repository
-    if repository.offering_runner.exists() :
-        create_build_runner(push)
+    create_build_runner(push)
+    create_course_tasks(push)
 
 @api_view(['POST'])
 @permission_classes([permissions.AllowAny])
