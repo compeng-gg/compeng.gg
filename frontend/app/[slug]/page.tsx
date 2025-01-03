@@ -109,7 +109,7 @@ function Course({ params }: { params: { slug: string } }) {
                       task.status
                     )}
                   </p>
-                  {task.grade && (
+                  {"grade" in task && (
                     <p>
                       <strong>Grade:</strong> {task.grade}
                     </p>
