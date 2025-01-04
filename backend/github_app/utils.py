@@ -72,6 +72,7 @@ def remove_github_fork(enrollment):
     offering = enrollment.role.offering
     offering_full_slug = offering.full_slug()
     repo_name = f'{offering_full_slug}-{user.username}'
+    # TODO: Need to remove the new style GitHub Repo database entry
     api = GitHubRestAPI()
     api.remove_repository_for_org(repo_name)
 
