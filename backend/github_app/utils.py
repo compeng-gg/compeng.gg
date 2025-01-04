@@ -4,7 +4,7 @@ import os
 from compeng_gg.auth import get_uid
 from compeng_gg.django.github.models import Repository
 from compeng_gg.django.github.utils import _get_or_create_repository
-from courses.models import Enrollment, Role
+from courses.models import Enrollment, Role, Offering
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from github_app.rest_api import GitHubRestAPI
@@ -125,7 +125,7 @@ def create_fork_for_enrollment(enrollment):
     )
 
     # Students need to have their repositories readable by instructors/TAs
-    if role == Role.Kind.STUDENT:
+    if role.kind == Role.Kind.STUDENT:
         api.add_team_repository_permissions_for_org(
             instructor_role.github_team_slug,
             repo_name,

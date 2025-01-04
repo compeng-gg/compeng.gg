@@ -87,9 +87,7 @@ def update_courses_from_quercus():
             try:
                 get_uid('github', user)
                 add_github_team_membership_for_enrollment(enrollment)
-                offering = enrollment.role.offering
-                from github_app.utils import create_fork
-                create_fork(offering.slug, user)
+                create_fork_for_enrollment(enrollment)
             except ObjectDoesNotExist:
                 pass
 
