@@ -240,6 +240,8 @@ def course(request, slug):
         offering = Offering.objects.get(course__slug=slug)
     except Offering.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
+    except Offering.MultipleObjectsReturned:
+        offering = Offering.objects.get(course__slug=slug, active=True)
 
     data = {
         'name': str(offering),

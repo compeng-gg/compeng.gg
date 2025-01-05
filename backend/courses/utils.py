@@ -1,9 +1,13 @@
+from compeng_gg.auth import get_uid
 from courses.models import Enrollment, Role, Accommodation, Assignment, AssignmentTask
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from runner.models import Runner, Task
 from runner.utils import create_k8s_task
+
+from discord_app.utils import add_discord_role_for_enrollment
+from github_app.utils import add_github_team_membership_for_enrollment, create_fork_for_enrollment
 
 def has_change_for_assignment(push, assignment):
     raw_files = list(assignment.files)
@@ -58,6 +62,29 @@ def create_course_tasks(push):
         )
 
         create_k8s_task(task)
+
+def add_enrollment(user, offering, role_kind):
+    role = Role.objects.get(offering=offering, kind=role_kind)
+    enrollment, created = Enrollment.objects.get_or_create(user=user, role=role)
+
+    # If they're already in Discord, give them the roles
+    try:
+        get_uid('discord', user)
+        try:
+            add_discord_role_for_enrollment(enrollment)
+        except:
+            # Likely they left the server, handle this later
+            pass
+    except ObjectDoesNotExist:
+        pass
+
+    # If they're already connected to GitHub, add them
+    try:
+        get_uid('github', user)
+        add_github_team_membership_for_enrollment(enrollment)
+        create_fork_for_enrollment(enrollment)
+    except ObjectDoesNotExist:
+        pass
 
 def get_data_for_old_push(push):
     data = {}
