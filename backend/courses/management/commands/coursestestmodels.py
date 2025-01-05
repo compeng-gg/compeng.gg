@@ -252,6 +252,15 @@ class Command(BaseCommand):
         )
         create_github_teams(ece353_offering)
 
+        ece419 = create_utoronto_course('ECE419', 'Distributed Systems')
+        ece419_offering = create_2025_winter_offering(ece419)
+        create_default_roles(ece419_offering)
+        create_discord_roles(
+            ece419_offering,
+            student_color=DiscordRestAPI.COLOR_BLUE
+        )
+        create_github_teams(ece419_offering)
+
         ece344 = create_utoronto_course('ECE344', 'Operating Systems')
         ece454 = create_utoronto_course('ECE454', 'Computer Systems Programming')
         ece344_offering = create_2024_fall_offering(ece344)
