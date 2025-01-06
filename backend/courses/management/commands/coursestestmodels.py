@@ -175,8 +175,8 @@ def create_github_teams(offering):
         except:
             response = api.create_team_for_org(name)
             assert slug == response['slug']
-            offering.github_team_slug = slug
-            offering.save()
+            role.github_team_slug = slug
+            role.save()
 
 def create_utoronto_roles():
     api = DiscordRestAPI()
