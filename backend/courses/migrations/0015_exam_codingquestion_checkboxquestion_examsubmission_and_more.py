@@ -14,6 +14,12 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.AddField(
+            model_name='team',
+            name='github_team_slug',
+            field=models.CharField(default='default-student-team', max_length=255),
+            preserve_default=False,
+        ),
         migrations.CreateModel(
             name="Exam",
             fields=[
