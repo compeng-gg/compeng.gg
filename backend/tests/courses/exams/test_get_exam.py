@@ -2,59 +2,59 @@ from tests.utils import TestCasesWithUserAuth
 import courses.models as db
 from django.utils import timezone
 from tests.utils import (
-    create_assessment,
-    create_assessment_submission
+    create_exam,
+    create_exam_submission
 )
 from rest_framework import status
 from datetime import timedelta
 
 
-class GetAssessmentTests(TestCasesWithUserAuth):
+class GetExamTests(TestCasesWithUserAuth):
     def test_creates_new_submission_on_first_request_happy_path(self):
         requesting_user_id = self.user.id
         
-        assessment = create_assessment(user_id=requesting_user_id)
+        exam = create_exam(user_id=requesting_user_id)
 
         # Initially no submission should exist
-        self.assertFalse(db.AssessmentSubmission.objects.filter(
+        self.assertFalse(db.ExamSubmission.objects.filter(
             user_id=requesting_user_id,
-            assessment=assessment
+            exam=exam
         ).exists())
 
         response = self.client.get(
-            f"/api/v0/assessments/{assessment.id}/",
+            f"/api/v0/exams/{exam.id}/",
         )
 
         self.assertEqual(
             response.status_code, status.HTTP_200_OK
         )
 
-        # After retrieving assessment for the first time, AssessmentSubmission object should be created
-        self.assertTrue(db.AssessmentSubmission.objects.filter(
+        # After retrieving exam for the first time, ExamSubmission object should be created
+        self.assertTrue(db.ExamSubmission.objects.filter(
             user_id=requesting_user_id,
-            assessment=assessment
+            exam=exam
         ).exists())
 
 
     def test_request_after_viewable_exam_completed_happy_path(self):
         requesting_user_id = self.user.id
         
-        assessment = create_assessment(
+        exam = create_exam(
             user_id=requesting_user_id,
             content_viewable_after_submission=True
         )
 
-        # Create a assessment that is nonviewable after submission
-        assessment_submission = create_assessment_submission(
+        # Create a exam that is nonviewable after submission
+        exam_submission = create_exam_submission(
             user_id=requesting_user_id,
-            assessment_slug=assessment.id,
+            exam_slug=exam.id,
         )
-        # Mark assessment as completed now
-        assessment_submission.completed_at = timezone.now()
-        assessment_submission.save()
+        # Mark exam as completed now
+        exam_submission.completed_at = timezone.now()
+        exam_submission.save()
 
         response = self.client.get(
-            f"/api/v0/assessments/{assessment.id}/",
+            f"/api/v0/exams/{exam.id}/",
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -63,43 +63,43 @@ class GetAssessmentTests(TestCasesWithUserAuth):
     def test_request_after_nonviewable_exam_completed_throws_error(self):
         requesting_user_id = self.user.id
         
-        assessment = create_assessment(
+        exam = create_exam(
             user_id=requesting_user_id,
             content_viewable_after_submission=False
         )
 
-        # Create a assessment that is nonviewable after submission
-        assessment_submission = create_assessment_submission(
+        # Create a exam that is nonviewable after submission
+        exam_submission = create_exam_submission(
             user_id=requesting_user_id,
-            assessment_slug=assessment.id,
+            exam_slug=exam.id,
         )
-        # Mark assessment as completed now
-        assessment_submission.completed_at = timezone.now()
-        assessment_submission.save()
+        # Mark exam as completed now
+        exam_submission.completed_at = timezone.now()
+        exam_submission.save()
 
         response = self.client.get(
-            f"/api/v0/assessments/{assessment.id}/",
+            f"/api/v0/exams/{exam.id}/",
         )
 
-        expected_body = {'error': 'Assessment content cannot be viewed after submission'}
+        expected_body = {'error': 'Exam content cannot be viewed after submission'}
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(response.json(), expected_body)
 
     
-    def test_request_before_assessment_started_throws_error(self):
+    def test_request_before_exam_started_throws_error(self):
         requesting_user_id = self.user.id
         
-        assessment = create_assessment(
+        exam = create_exam(
             user_id=requesting_user_id,
             starts_at=timezone.now() + timedelta(days=1)
         )
 
         response = self.client.get(
-            f"/api/v0/assessments/{assessment.id}/",
+            f"/api/v0/exams/{exam.id}/",
         )
 
-        expected_body = {'error': 'Assessment has not started yet'}
+        expected_body = {'error': 'Exam has not started yet'}
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(response.json(), expected_body)
@@ -108,10 +108,10 @@ class GetAssessmentTests(TestCasesWithUserAuth):
     def test_returns_starter_code(self):
         requesting_user_id = self.user.id
         
-        assessment = create_assessment(user_id=requesting_user_id)
+        exam = create_exam(user_id=requesting_user_id)
 
         coding_question = db.CodingQuestion.objects.create(
-            assessment=assessment,
+            exam=exam,
             prompt='Write a function that prints "Hello World!" in Python',
             order=1,
             points=20,
@@ -120,14 +120,14 @@ class GetAssessmentTests(TestCasesWithUserAuth):
         )
         
         response = self.client.get(
-            f"/api/v0/assessments/{assessment.id}/",
+            f"/api/v0/exams/{exam.id}/",
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         
         expected_body = {
-            'title': assessment.title,
-            'end_unix_timestamp': int(assessment.ends_at.timestamp()),
+            'title': exam.title,
+            'end_unix_timestamp': int(exam.ends_at.timestamp()),
             'questions': [
                 {
                     'prompt': coding_question.prompt,
@@ -147,15 +147,15 @@ class GetAssessmentTests(TestCasesWithUserAuth):
     def test_returns_saved_coding_solution(self):
         requesting_user_id = self.user.id
         
-        assessment = create_assessment(user_id=requesting_user_id)
+        exam = create_exam(user_id=requesting_user_id)
         
-        assessment_submission = create_assessment_submission(
+        exam_submission = create_exam_submission(
             user_id=requesting_user_id,
-            assessment_slug=assessment.id
+            exam_slug=exam.id
         )
 
         coding_question = db.CodingQuestion.objects.create(
-            assessment=assessment,
+            exam=exam,
             prompt='Write a function that prints "Hello World!" in Python',
             order=1,
             points=20,
@@ -163,21 +163,21 @@ class GetAssessmentTests(TestCasesWithUserAuth):
         )
         
         coding_answer = db.CodingAnswer.objects.create(
-            assessment_submission=assessment_submission,
+            exam_submission=exam_submission,
             question=coding_question,
             solution='print("Hello World!")',
             last_updated_at=timezone.now()
         )
         
         response = self.client.get(
-            f"/api/v0/assessments/{assessment.id}/",
+            f"/api/v0/exams/{exam.id}/",
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         
         expected_body = {
-            'title': assessment.title,
-            'end_unix_timestamp': int(assessment.ends_at.timestamp()),
+            'title': exam.title,
+            'end_unix_timestamp': int(exam.ends_at.timestamp()),
             'questions': [
                 {
                     'prompt': coding_question.prompt,
@@ -197,15 +197,15 @@ class GetAssessmentTests(TestCasesWithUserAuth):
     def test_returns_saved_multiple_choice_solution(self):
         requesting_user_id = self.user.id
         
-        assessment = create_assessment(user_id=requesting_user_id)
+        exam = create_exam(user_id=requesting_user_id)
         
-        assessment_submission = create_assessment_submission(
+        exam_submission = create_exam_submission(
             user_id=requesting_user_id,
-            assessment_slug=assessment.id
+            exam_slug=exam.id
         )
 
         multiple_choice_question = db.MultipleChoiceQuestion.objects.create(
-            assessment=assessment,
+            exam=exam,
             prompt='Choose the animal that flies',
             order=1,
             points=3,
@@ -218,21 +218,21 @@ class GetAssessmentTests(TestCasesWithUserAuth):
         )
         
         multiple_choice_answer = db.MultipleChoiceAnswer.objects.create(
-            assessment_submission=assessment_submission,
+            exam_submission=exam_submission,
             question=multiple_choice_question,
             selected_answer_index=0,
             last_updated_at=timezone.now()
         )
         
         response = self.client.get(
-            f"/api/v0/assessments/{assessment.id}/",
+            f"/api/v0/exams/{exam.id}/",
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         
         expected_body = {
-            'title': assessment.title,
-            'end_unix_timestamp': int(assessment.ends_at.timestamp()),
+            'title': exam.title,
+            'end_unix_timestamp': int(exam.ends_at.timestamp()),
             'questions': [
                 {
                     'prompt': multiple_choice_question.prompt,
@@ -251,15 +251,15 @@ class GetAssessmentTests(TestCasesWithUserAuth):
     def test_returns_saved_checkbox_solution(self):
         requesting_user_id = self.user.id
         
-        assessment = create_assessment(user_id=requesting_user_id)
+        exam = create_exam(user_id=requesting_user_id)
         
-        assessment_submission = create_assessment_submission(
+        exam_submission = create_exam_submission(
             user_id=requesting_user_id,
-            assessment_slug=assessment.id
+            exam_slug=exam.id
         )
 
         checkbox_question = db.CheckboxQuestion.objects.create(
-            assessment=assessment,
+            exam=exam,
             prompt='Choose all positive numbers',
             order=2,
             points=4,
@@ -268,21 +268,21 @@ class GetAssessmentTests(TestCasesWithUserAuth):
         )
         
         checkbox_answer = db.CheckboxAnswer.objects.create(
-            assessment_submission=assessment_submission,
+            exam_submission=exam_submission,
             question=checkbox_question,
             selected_answer_indices=[0, 1, 2],
             last_updated_at=timezone.now()
         )
         
         response = self.client.get(
-            f"/api/v0/assessments/{assessment.id}/",
+            f"/api/v0/exams/{exam.id}/",
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         
         expected_body = {
-            'title': assessment.title,
-            'end_unix_timestamp': int(assessment.ends_at.timestamp()),
+            'title': exam.title,
+            'end_unix_timestamp': int(exam.ends_at.timestamp()),
             'questions': [
                 {
                     'prompt': checkbox_question.prompt,
@@ -301,15 +301,15 @@ class GetAssessmentTests(TestCasesWithUserAuth):
     def test_returns_saved_written_response_solution(self):
         requesting_user_id = self.user.id
         
-        assessment = create_assessment(user_id=requesting_user_id)
+        exam = create_exam(user_id=requesting_user_id)
         
-        assessment_submission = create_assessment_submission(
+        exam_submission = create_exam_submission(
             user_id=requesting_user_id,
-            assessment_slug=assessment.id
+            exam_slug=exam.id
         )
 
         written_response_question = db.WrittenResponseQuestion.objects.create(
-            assessment=assessment,
+            exam=exam,
             prompt="Write a poem",
             order=1,
             points=5,
@@ -317,21 +317,21 @@ class GetAssessmentTests(TestCasesWithUserAuth):
         )
         
         written_response_answer = db.WrittenResponseAnswer.objects.create(
-            assessment_submission=assessment_submission,
+            exam_submission=exam_submission,
             question=written_response_question,
             response="Noooooo",
             last_updated_at=timezone.now()
         )
         
         response = self.client.get(
-            f"/api/v0/assessments/{assessment.id}/",
+            f"/api/v0/exams/{exam.id}/",
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         
         expected_body = {
-            'title': assessment.title,
-            'end_unix_timestamp': int(assessment.ends_at.timestamp()),
+            'title': exam.title,
+            'end_unix_timestamp': int(exam.ends_at.timestamp()),
             'questions': [
                 {
                     'prompt': written_response_question.prompt,
@@ -350,10 +350,10 @@ class GetAssessmentTests(TestCasesWithUserAuth):
     def test_returns_question_types_in_order_happy_path(self):
         requesting_user_id = self.user.id
         
-        assessment = create_assessment(user_id=requesting_user_id)
+        exam = create_exam(user_id=requesting_user_id)
 
         coding_question = db.CodingQuestion.objects.create(
-            assessment=assessment,
+            exam=exam,
             prompt='Write a function that prints "Hello World!" in Python',
             order=4,
             points=20,
@@ -361,7 +361,7 @@ class GetAssessmentTests(TestCasesWithUserAuth):
         )
 
         multiple_choice_question = db.MultipleChoiceQuestion.objects.create(
-            assessment=assessment,
+            exam=exam,
             prompt='Choose the animal that flies',
             order=1,
             points=3,
@@ -374,7 +374,7 @@ class GetAssessmentTests(TestCasesWithUserAuth):
         )
 
         written_response_question = db.WrittenResponseQuestion.objects.create(
-            assessment=assessment,
+            exam=exam,
             prompt="Write a poem",
             order=3,
             points=5,
@@ -382,7 +382,7 @@ class GetAssessmentTests(TestCasesWithUserAuth):
         )
         
         checkbox_question = db.CheckboxQuestion.objects.create(
-            assessment=assessment,
+            exam=exam,
             prompt='Choose all positive numbers',
             order=2,
             points=4,
@@ -391,14 +391,14 @@ class GetAssessmentTests(TestCasesWithUserAuth):
         )
 
         response = self.client.get(
-            f"/api/v0/assessments/{assessment.id}/",
+            f"/api/v0/exams/{exam.id}/",
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         expected_body = {
-            'title': assessment.title,
-            'end_unix_timestamp': int(assessment.ends_at.timestamp()),
+            'title': exam.title,
+            'end_unix_timestamp': int(exam.ends_at.timestamp()),
             'questions': [
                 {
                     'prompt': multiple_choice_question.prompt,

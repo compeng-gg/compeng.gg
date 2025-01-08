@@ -1,6 +1,6 @@
 import pytest
 from channels.testing import WebsocketCommunicator
-from courses.assessments.api.websockets import CodeRunConsumer
+from courses.exams.api.websockets import CodeRunConsumer
 from channels.routing import URLRouter
 from django.urls import path
 
@@ -8,16 +8,16 @@ from django.urls import path
 @pytest.mark.asyncio
 async def test_code_run_consumer_happy_path():
     # Define test parameters
-    test_assessment_slug = '123e4567-e89b-12d3-a456-426614174000'
+    test_exam_slug = '123e4567-e89b-12d3-a456-426614174000'
     test_coding_question_id = '987e6543-e21b-45c6-b123-426614174000'
 
     # Define WebSocket application for testing
     application = URLRouter([
-        path('api/v0/ws/assessments/<uuid:assessment_slug>/run_code/<uuid:coding_question_id>/', CodeRunConsumer.as_asgi()),
+        path('api/v0/ws/exams/<uuid:exam_slug>/run_code/<uuid:coding_question_id>/', CodeRunConsumer.as_asgi()),
     ])
 
     # Define the WebSocket URL with the parameters
-    url = f'api/v0/ws/assessments/{test_assessment_slug}/run_code/{test_coding_question_id}/'
+    url = f'api/v0/ws/exams/{test_exam_slug}/run_code/{test_coding_question_id}/'
 
     # Create a WebSocket communicator for testing
     communicator = WebsocketCommunicator(application, url)

@@ -34,20 +34,8 @@ class AssignmentTaskAdmin(admin.ModelAdmin):
 class AccommodationAdmin(admin.ModelAdmin):
     pass
 
-@admin.register(models.Team)
-class TeamAdmin(admin.ModelAdmin):
-    list_display = ('name', 'id')
-    pass
-
-@admin.register(models.TeamMember)
-class TeamMemberAdmin(admin.ModelAdmin):
-    list_display = ('enrollment', 'team')
-    list_display_links = ('enrollment', 'team')
-    
-    pass
-
-@admin.register(models.Assessment)
-class AssessmentAdmin(admin.ModelAdmin):
+@admin.register(models.Exam)
+class ExamAdmin(admin.ModelAdmin):
     pass
 
 @admin.register(models.WrittenResponseQuestion)
@@ -66,8 +54,8 @@ class MultipleChoiceQuestionAdmn(admin.ModelAdmin):
 class CheckboxQuestionAdmin(admin.ModelAdmin):
     pass
 
-@admin.register(models.AssessmentSubmission)
-class AssessmentSubmissionAdmin(admin.ModelAdmin):
+@admin.register(models.ExamSubmission)
+class ExamSubmissionAdmin(admin.ModelAdmin):
     pass
 
 @admin.register(models.CheckboxAnswer)

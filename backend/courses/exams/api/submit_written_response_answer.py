@@ -5,9 +5,9 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework import permissions
 from rest_framework.decorators import api_view, permission_classes
-from courses.assessments.schemas import AnswerWrittenResponseQuestionRequestSerializer
-from courses.assessments.api.utils import (
-    get_assessment_submission_or_error_response,
+from courses.exams.schemas import AnswerWrittenResponseQuestionRequestSerializer
+from courses.exams.api.utils import (
+    get_exam_submission_or_error_response,
     get_existing_answer_object
 )
 
@@ -15,7 +15,7 @@ from courses.assessments.api.utils import (
 
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
-def submit_written_response_answer(request, assessment_slug: str, written_response_question_id: UUID):
+def submit_written_response_answer(request, exam_slug: str, written_response_question_id: UUID):
     request_at = timezone.now()
     
     serializer = AnswerWrittenResponseQuestionRequestSerializer(data=request.data)
@@ -25,15 +25,15 @@ def submit_written_response_answer(request, assessment_slug: str, written_respon
     user_id = request.user.id
     response = serializer.validated_data.get('response')
     
-    assessment_submission_or_error_response = get_assessment_submission_or_error_response(
-        request_at=request_at, user_id=user_id, assessment_slug=assessment_slug
+    exam_submission_or_error_response = get_exam_submission_or_error_response(
+        request_at=request_at, user_id=user_id, exam_slug=exam_slug
     )
     
-    if isinstance(assessment_submission_or_error_response, Response):
-        error_response = assessment_submission_or_error_response
+    if isinstance(exam_submission_or_error_response, Response):
+        error_response = exam_submission_or_error_response
         return error_response
     
-    assessment_submission = assessment_submission_or_error_response
+    exam_submission = exam_submission_or_error_response
     
     written_response_answer = get_existing_answer_object(
         answer_model=db.WrittenResponseAnswer,
@@ -46,7 +46,7 @@ def submit_written_response_answer(request, assessment_slug: str, written_respon
     ### Validate selected checkbox indices are valid
     try:
         written_response_question = db.WrittenResponseQuestion.objects.get(
-            assessment__slug=assessment_slug,
+            exam__slug=exam_slug,
             id=written_response_question_id
         )
     except db.WrittenResponseQuestion.DoesNotExist:
@@ -63,7 +63,7 @@ def submit_written_response_answer(request, assessment_slug: str, written_respon
     
     if written_response_answer is None:
         db.WrittenResponseAnswer.objects.create(
-            assessment_submission=assessment_submission,
+            exam_submission=exam_submission,
             question_id=written_response_question_id,
             response=response,
             last_updated_at=timezone.now()

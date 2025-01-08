@@ -71,7 +71,7 @@ export function QuestionDisplay(props: QuestionProps) {
                     return;
                 }
             }
-            const res = await fetchApi(jwt, setAndStoreJwt, `assessments/${props.assessment_slug}/answer/${props.serverQuestionType.toLowerCase()}/${props.id}/`, "POST", getAnswerBody(props, newValue));
+            const res = await fetchApi(jwt, setAndStoreJwt, `exams/${props.exam_slug}/answer/${props.serverQuestionType.toLowerCase()}/${props.id}/`, "POST", getAnswerBody(props, newValue));
             if(res.ok){
                 lastSavedRef.current = newValue;
                 setStatus(QuestionSaveStatus.AUTOSAVED);
