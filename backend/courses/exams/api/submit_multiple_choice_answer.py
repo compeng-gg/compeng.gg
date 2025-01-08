@@ -5,9 +5,9 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework import permissions
 from rest_framework.decorators import api_view, permission_classes
-from courses.assessments.schemas import AnswerMultipleChoiceQuestionRequestSerializer
-from courses.assessments.api.utils import (
-    get_assessment_submission_or_error_response,
+from courses.exams.schemas import AnswerMultipleChoiceQuestionRequestSerializer
+from courses.exams.api.utils import (
+    get_exam_submission_or_error_response,
     get_existing_answer_object
 )
 
@@ -15,7 +15,7 @@ from courses.assessments.api.utils import (
 
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
-def submit_multiple_choice_answer(request, assessment_slug: str, multiple_choice_question_id: UUID):
+def submit_multiple_choice_answer(request, exam_slug: str, multiple_choice_question_id: UUID):
     request_at = timezone.now()
     
     serializer = AnswerMultipleChoiceQuestionRequestSerializer(data=request.data)
@@ -26,15 +26,15 @@ def submit_multiple_choice_answer(request, assessment_slug: str, multiple_choice
     user_id = request.user.id
     selected_answer_index = serializer.validated_data.get('selected_answer_index')
     
-    assessment_submission_or_error_response = get_assessment_submission_or_error_response(
-        request_at=request_at, user_id=user_id, assessment_slug=assessment_slug
+    exam_submission_or_error_response = get_exam_submission_or_error_response(
+        request_at=request_at, user_id=user_id, exam_slug=exam_slug
     )
     
-    if isinstance(assessment_submission_or_error_response, Response):
-        error_response = assessment_submission_or_error_response
+    if isinstance(exam_submission_or_error_response, Response):
+        error_response = exam_submission_or_error_response
         return error_response
     
-    assessment_submission = assessment_submission_or_error_response
+    exam_submission = exam_submission_or_error_response
     
     multiple_choice_answer = get_existing_answer_object(
         answer_model=db.MultipleChoiceAnswer,
@@ -63,7 +63,7 @@ def submit_multiple_choice_answer(request, assessment_slug: str, multiple_choice
     
     if multiple_choice_answer is None:
         db.MultipleChoiceAnswer.objects.create(
-            assessment_submission=assessment_submission,
+            exam_submission=exam_submission,
             question_id=multiple_choice_question_id,
             selected_answer_index=selected_answer_index,
             last_updated_at=timezone.now()

@@ -17,7 +17,7 @@ export default function StudentExamViewTab(props: StudentExamViewProps){
     const [exams, setExams] = useState<ExamProps[]>([]);
     async function fetchExams() {
         try {
-            const res = await fetchApi(jwt, setAndStoreJwt, `assessments/list/${props.courseSlug}`, "GET");
+            const res = await fetchApi(jwt, setAndStoreJwt, `exams/list/${props.courseSlug}`, "GET");
             const data = await res.json();
             const retExams : ExamProps[] = [];
             data.forEach(exam => {

@@ -10,48 +10,48 @@ from rest_framework import (
 )
 from rest_framework.decorators import api_view, permission_classes
 from datetime import datetime
-from courses.assessments.schemas import AssessmentSerializer
+from courses.exams.schemas import ExamSerializer
 from django.utils import timezone
 
 
-def get_assessment_or_error_response(user_id: int, assessment_slug: str) -> db.Assessment:
+def get_exam_or_error_response(user_id: int, exam_slug: str) -> db.Exam:
     try:
-        assessment = db.Assessment.objects.get(slug=assessment_slug)
+        exam = db.Exam.objects.get(slug=exam_slug)
     except db.Role.DoesNotExist:
-        raise ValidationError("Assessment does not exist")
+        raise ValidationError("Exam does not exist")
     
     try:
         db.Enrollment.objects.get(
             role__kind=db.Role.Kind.STUDENT,
-            role__offering=assessment.offering,
+            role__offering=exam.offering,
             user_id=user_id,
         )
     except db.Enrollment.DoesNotExist:
         raise ValidationError("Student is not enrolled in this course")
     
-    if assessment.starts_at > timezone.now():
+    if exam.starts_at > timezone.now():
         return Response(
-            {'error': 'Assessment has not started yet'},
+            {'error': 'Exam has not started yet'},
             status=status.HTTP_403_FORBIDDEN
         )
     
-    return assessment
+    return exam
 
 
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
-def get_assessment(request, assessment_slug: str):
+def get_exam(request, exam_slug: str):
     request_at = timezone.now()
 
     user_id = request.user.id
 
-    assessment_or_error_response = get_assessment_or_error_response(user_id=user_id, assessment_slug=assessment_slug)
+    exam_or_error_response = get_exam_or_error_response(user_id=user_id, exam_slug=exam_slug)
 
-    if isinstance(assessment_or_error_response, Response):
-        error_response = assessment_or_error_response
+    if isinstance(exam_or_error_response, Response):
+        error_response = exam_or_error_response
         return error_response
     
-    assessment = assessment_or_error_response
+    exam = exam_or_error_response
     
     written_response_questions_prefetch = Prefetch(
         'written_response_questions',
@@ -59,7 +59,7 @@ def get_assessment(request, assessment_slug: str):
             Prefetch(
                 "answers",
                 queryset=db.WrittenResponseAnswer.objects.filter(
-                    assessment_submission__user_id=user_id
+                    exam_submission__user_id=user_id
                 )
             )
         )
@@ -71,7 +71,7 @@ def get_assessment(request, assessment_slug: str):
             Prefetch(
                 "answers",
                 queryset=db.CodingAnswer.objects.filter(
-                    assessment_submission__user_id=user_id
+                    exam_submission__user_id=user_id
                 )
             )
         )
@@ -83,7 +83,7 @@ def get_assessment(request, assessment_slug: str):
             Prefetch(
                 "answers",
                 queryset=db.MultipleChoiceAnswer.objects.filter(
-                    assessment_submission__user_id=user_id
+                    exam_submission__user_id=user_id
                 )
             )
         )
@@ -95,14 +95,14 @@ def get_assessment(request, assessment_slug: str):
             Prefetch(
                 "answers",
                 queryset=db.CheckboxAnswer.objects.filter(
-                    assessment_submission__user_id=user_id
+                    exam_submission__user_id=user_id
                 )
             )
         )
     )
 
     prefetch_related_objects(
-        [assessment],
+        [exam],
         written_response_questions_prefetch,
         coding_questions_prefetch,
         multiple_choice_questions_prefetch,
@@ -111,23 +111,23 @@ def get_assessment(request, assessment_slug: str):
 
     with transaction.atomic():
         try:
-            assessment_submission = db.AssessmentSubmission.objects.get(
-                assessment=assessment,
+            exam_submission = db.ExamSubmission.objects.get(
+                exam=exam,
                 user_id=user_id,
             )
 
-            if (not assessment.content_viewable_after_submission
-                and assessment_submission.completed_at <= timezone.now()):
+            if (not exam.content_viewable_after_submission
+                and exam_submission.completed_at <= timezone.now()):
                 return Response(
-                    {'error': 'Assessment content cannot be viewed after submission'},
+                    {'error': 'Exam content cannot be viewed after submission'},
                     status=status.HTTP_403_FORBIDDEN
                 )
-        except db.AssessmentSubmission.DoesNotExist:
-            db.AssessmentSubmission.objects.create(
+        except db.ExamSubmission.DoesNotExist:
+            db.ExamSubmission.objects.create(
                 user_id=user_id,
-                assessment=assessment,
+                exam=exam,
                 started_at=request_at,
-                completed_at=assessment.ends_at # Initialize this to the end datetime for the assessment
+                completed_at=exam.ends_at # Initialize this to the end datetime for the exam
             )
 
-    return Response(data=AssessmentSerializer(assessment).data)
+    return Response(data=ExamSerializer(exam).data)

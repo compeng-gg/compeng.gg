@@ -74,7 +74,7 @@ export default function Page({ params }: { params: { slug: string, exam_slug: st
 
   async function fetchExam() {
     try {
-      const res = await fetchApi(jwt, setAndStoreJwt, `assessments/${exam_slug}`, "GET");
+      const res = await fetchApi(jwt, setAndStoreJwt, `exams/${exam_slug}`, "GET");
       const data = await res.json();
       console.log(JSON.stringify(data, null, 2));
       const retExam: ExamProps = {
@@ -144,10 +144,10 @@ export default function Page({ params }: { params: { slug: string, exam_slug: st
   );
 }
 
-function getQuestionDataFromRaw(rawData: any, assessment_slug: string): any {
+function getQuestionDataFromRaw(rawData: any, exam_slug: string): any {
   const baseData: BaseQuestionData = {
     id: rawData.id,
-    assessment_slug: assessment_slug,
+    exam_slug: exam_slug,
     prompt: rawData.prompt,
     serverQuestionType: rawData.question_type,
     questionType: ServerToLocal.get(rawData.question_type) as QuestionType  ?? "TEXT",

@@ -68,20 +68,20 @@ class CodingQuestionSerializer(serializers.ModelSerializer):
         return answer.solution
 
 
-class AssessmentSerializer(serializers.ModelSerializer):
+class ExamSerializer(serializers.ModelSerializer):
     questions = serializers.SerializerMethodField()
     end_unix_timestamp = serializers.SerializerMethodField()
     start_unix_timestamp = serializers.SerializerMethodField()
 
     class Meta:
-        model = db.Assessment
+        model = db.Exam
         fields = ['title', 'end_unix_timestamp', 'start_unix_timestamp', 'questions']
 
-    def get_questions(self, assessment: db.Assessment) -> List[Dict[str, Any]]:
-        checkbox_questions = assessment.checkbox_questions
-        multiple_choice_questions = assessment.multiple_choice_questions
-        written_response_questions = assessment.written_response_questions
-        coding_questions = assessment.coding_questions
+    def get_questions(self, exam: db.Exam) -> List[Dict[str, Any]]:
+        checkbox_questions = exam.checkbox_questions
+        multiple_choice_questions = exam.multiple_choice_questions
+        written_response_questions = exam.written_response_questions
+        coding_questions = exam.coding_questions
        
         serialized_multiple_choice_questions = MultipleChoiceQuestionSerializer(
             multiple_choice_questions,
@@ -112,11 +112,11 @@ class AssessmentSerializer(serializers.ModelSerializer):
 
         return sorted_questions
     
-    def get_end_unix_timestamp(self, assessment: db.Assessment) -> int:
-        return int(assessment.ends_at.timestamp())
+    def get_end_unix_timestamp(self, exam: db.Exam) -> int:
+        return int(exam.ends_at.timestamp())
     
-    def get_start_unix_timestamp(self, assessment: db.Assessment) -> int:
-        return int(assessment.starts_at.timestamp())
+    def get_start_unix_timestamp(self, exam: db.Exam) -> int:
+        return int(exam.starts_at.timestamp())
 
 
 class AnswerMultipleChoiceQuestionRequestSerializer(serializers.Serializer):
@@ -155,12 +155,12 @@ class AnswerCheckboxQuestionRequestSerializer(serializers.Serializer):
     )
 
 
-class CourseAssessmentsListSerializer(serializers.ModelSerializer):
+class CourseExamsListSerializer(serializers.ModelSerializer):
     start_unix_timestamp = serializers.SerializerMethodField()
     end_unix_timestamp = serializers.SerializerMethodField()
 
     class Meta:
-        model = db.Assessment
+        model = db.Exam
         fields = [
             'title', 
             'slug',
@@ -168,15 +168,15 @@ class CourseAssessmentsListSerializer(serializers.ModelSerializer):
             'end_unix_timestamp'
         ]
 
-    def get_start_unix_timestamp(self, assessment: db.Assessment) -> int:
-        return int(assessment.starts_at.timestamp())
+    def get_start_unix_timestamp(self, exam: db.Exam) -> int:
+        return int(exam.starts_at.timestamp())
 
-    def get_end_unix_timestamp(self, assessment: db.Assessment) -> int:
-        return int(assessment.ends_at.timestamp())
+    def get_end_unix_timestamp(self, exam: db.Exam) -> int:
+        return int(exam.ends_at.timestamp())
     
 
-class AllAssessmentsListSerializer(CourseAssessmentsListSerializer):
+class AllExamsListSerializer(CourseExamsListSerializer):
     course_slug = serializers.CharField(source='offering.course.slug', read_only=True)
     
-    class Meta(CourseAssessmentsListSerializer.Meta):
-        fields = CourseAssessmentsListSerializer.Meta.fields + ['course_slug']
+    class Meta(CourseExamsListSerializer.Meta):
+        fields = CourseExamsListSerializer.Meta.fields + ['course_slug']

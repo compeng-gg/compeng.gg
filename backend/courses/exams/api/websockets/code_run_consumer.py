@@ -74,7 +74,7 @@ class CodeRunConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         kwargs = self.scope['url_route']['kwargs']
 
-        self.assessment_slug = kwargs.get('assessment_slug')
+        self.exam_slug = kwargs.get('exam_slug')
         self.coding_question_id = str(kwargs.get('coding_question_id'))
         print(f"Coding question id is {self.coding_question_id}")
         
