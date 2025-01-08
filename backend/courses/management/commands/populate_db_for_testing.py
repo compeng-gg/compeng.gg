@@ -2,6 +2,7 @@ from django.core.management.base import BaseCommand
 import courses.models as db
 from django.contrib.auth.models import User
 from datetime import datetime, timedelta
+from django.utils import timezone
 
 class Command(BaseCommand):
     help = 'Populates the database with test data'
@@ -28,7 +29,7 @@ class Command(BaseCommand):
             title="The Course Title"
         )
 
-        now_datetime = datetime.now()
+        now_datetime = timezone.now()
 
         mock_offering = db.Offering.objects.create(
             course=mock_course,
