@@ -80,13 +80,57 @@ class Command(BaseCommand):
             role=mock_ta_role
         )
 
-        db.Exam.objects.create(
+        mock_exam = db.Exam.objects.create(
             slug="exam-slug",
             offering=mock_offering,
             title="Exam Title",
             visible_at=now_datetime,
             starts_at=now_datetime,
             ends_at=now_datetime + timedelta(days=365)
+        )
+
+        db.CheckboxQuestion.objects.create(
+            prompt="Answer the checkbox question",
+            points=20,
+            order=1,
+            exam=mock_exam,
+            options=['1', '2', '3'],
+            correct_option_indices=[0, 1]
+        )
+
+        db.MultipleChoiceQuestion.objects.create(
+            prompt="Prompt for a multiple choice question",
+            points=20,
+            order=2,
+            exam=mock_exam,
+            options=['Correct Option', 'Incorrect Option 1', 'Incorrect Option 2'],
+            correct_option_index=0,
+        )
+
+        db.CodingQuestion.objects.create(
+            prompt="Prompt for a C++ coding question",
+            points=15,
+            order=3,
+            exam=mock_exam,
+            starter_code=None,
+            programming_language=db.CodingQuestion.ProgrammingLanguage.C_PP
+        )
+
+        db.CodingQuestion.objects.create(
+            prompt="Prompt for a Python coding question",
+            points=25,
+            order=4,
+            exam=mock_exam,
+            starter_code=None,
+            programming_language=db.CodingQuestion.ProgrammingLanguage.PYTHON
+        )
+
+        db.WrittenResponseQuestion.objects.create(
+            prompt="Prompt for a written response question",
+            points=25,
+            order=5,
+            exam=mock_exam,
+            max_length=200,
         )
 
         print("Populated DB with mock data!")

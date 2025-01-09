@@ -41,18 +41,19 @@ def get_existing_answer_object(
 
 
 def get_exam_submission_or_error_response(
-    request_at: datetime, user_id: int, exam_slug: str
+    request_at: datetime, user_id: int, course_slug: str, exam_slug: str
 ) -> Union[db.ExamSubmission, Response]:
+    print("getting submission")
     
         
-    exam_or_error_response = get_exam_or_error_response(user_id=user_id, exam_slug=exam_slug)
+    exam_or_error_response = get_exam_or_error_response(user_id=user_id, course_slug=course_slug, exam_slug=exam_slug)
 
     if isinstance(exam_or_error_response, Response):
         error_response = exam_or_error_response
         return error_response
     
     exam = exam_or_error_response
-    
+
     try:
         exam_submission = db.ExamSubmission.objects.get(
             exam=exam,
@@ -72,10 +73,10 @@ def get_exam_submission_or_error_response(
         
     return exam_submission
 
-def get_exam_or_error_response(user_id: int, exam_slug: str) -> db.Exam:
+def get_exam_or_error_response(user_id: int, course_slug: str, exam_slug: str) -> db.Exam:
     try:
-        exam = db.Exam.objects.get(slug=exam_slug)
-    except db.Role.DoesNotExist:
+        exam = db.Exam.objects.get(offering__course__slug=course_slug, slug=exam_slug)
+    except db.Exam.DoesNotExist:
         raise ValidationError("Exam does not exist")
     
     try:

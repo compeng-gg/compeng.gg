@@ -334,8 +334,8 @@ class Accommodation(models.Model):
 class Assessment(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
-    slug = models.SlugField(max_length=50, default="default")
-    offering = models.ForeignKey(Offering, on_delete=models.CASCADE, related_name='assessments')
+    slug = models.SlugField(max_length=50)
+    offering = models.ForeignKey(Offering, on_delete=models.CASCADE, related_name='exams')
     title = models.TextField()
     content_viewable_after_submission = models.BooleanField(default=False)
     visible_at = models.DateTimeField()

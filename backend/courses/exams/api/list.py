@@ -22,7 +22,7 @@ def query_exams(user_id: int, filter_params: Optional[Q]=Q()) -> QuerySet[db.Exa
 
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
-def list_all_exams(request) -> Response:
+def list_all(request) -> Response:
     user_id = request.user.id
 
     all_exams = query_exams(user_id=user_id)
@@ -32,7 +32,7 @@ def list_all_exams(request) -> Response:
 
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
-def list_exams_for_course(request, course_slug: str) -> Response:
+def list_for_course(request, course_slug: str) -> Response:
     user_id = request.user.id
 
     filter_params = Q(offering__course__slug=course_slug)

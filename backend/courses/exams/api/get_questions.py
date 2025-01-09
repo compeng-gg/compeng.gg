@@ -9,14 +9,14 @@ from rest_framework import (
     status
 )
 from rest_framework.decorators import api_view, permission_classes
-from datetime import datetime
 from courses.exams.schemas import ExamSerializer
 from django.utils import timezone
+from typing import Optional
 
 
-def get_exam_or_error_response(user_id: int, exam_slug: str) -> db.Exam:
+def get_exam(user_id: int, course_slug: str, exam_slug: str) -> Optional[db.Exam]:
     try:
-        exam = db.Exam.objects.get(slug=exam_slug)
+        exam = db.Exam.objects.get(slug=exam_slug, offering__course__slug=course_slug)
     except db.Role.DoesNotExist:
         raise ValidationError("Exam does not exist")
     
@@ -37,21 +37,20 @@ def get_exam_or_error_response(user_id: int, exam_slug: str) -> db.Exam:
     
     return exam
 
-
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
-def get_exam(request, exam_slug: str):
+def get_questions(request, course_slug: str, exam_slug: str):
     request_at = timezone.now()
 
     user_id = request.user.id
 
-    exam_or_error_response = get_exam_or_error_response(user_id=user_id, exam_slug=exam_slug)
+    exam = get_exam(user_id, course_slug, exam_slug)
 
-    if isinstance(exam_or_error_response, Response):
-        error_response = exam_or_error_response
-        return error_response
-    
-    exam = exam_or_error_response
+    if exam is None:
+        return Response(
+            data={'error': f'Exam not found'},
+            status=status.HTTP_404_NOT_FOUND
+        )
     
     written_response_questions_prefetch = Prefetch(
         'written_response_questions',
@@ -109,6 +108,7 @@ def get_exam(request, exam_slug: str):
         checkbox_questions_prefetch
     )
 
+    print("HELLO")
     with transaction.atomic():
         try:
             exam_submission = db.ExamSubmission.objects.get(
@@ -130,4 +130,5 @@ def get_exam(request, exam_slug: str):
                 completed_at=exam.ends_at # Initialize this to the end datetime for the exam
             )
 
+    print("HELLO")
     return Response(data=ExamSerializer(exam).data)
