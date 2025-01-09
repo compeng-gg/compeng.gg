@@ -24,7 +24,7 @@ export default function StudentQuizViewTab(props: StudentQuizViewProps){
                 retQuizs.push({
                     name: quiz.title,
                     grade: undefined,
-                    slug: quiz.slug,
+                    quizSlug: quiz.slug,
                     courseSlug: props.courseSlug,
                     startTime: new Date(quiz.start_unix_timestamp*1000),
                     endTime: new Date(quiz.end_unix_timestamp*1000)
@@ -45,7 +45,7 @@ export default function StudentQuizViewTab(props: StudentQuizViewProps){
     return (
         <div style={{display: "flex", gap: "10px", width: "100%", flexDirection: "column"}}>
             {quizzes.map((quiz) => (
-                <QuizDisplay {...quiz} key={quiz.slug}/>
+                <QuizDisplay {...quiz} key={quiz.quizSlug}/>
             ))}
         </div>
     )
