@@ -7,16 +7,16 @@ from rest_framework import (
     permissions
 )
 from rest_framework.decorators import api_view, permission_classes
-from courses.exams.schemas import AnswerCheckboxQuestionRequestSerializer
-from courses.exams.api.utils import (
-    get_exam_submission_or_error_response,
+from courses.quizzes.schemas import AnswerCheckboxQuestionRequestSerializer
+from courses.quizzes.api.utils import (
+    get_quiz_submission_or_error_response,
     get_existing_answer_object
 )
 
 
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
-def submit_checkbox_answer(request, course_slug: str, exam_slug: str, checkbox_question_id: UUID):
+def submit_checkbox_answer(request, course_slug: str, quiz_slug: str, checkbox_question_id: UUID):
     request_at = timezone.now()
     
     serializer = AnswerCheckboxQuestionRequestSerializer(data=request.data)
@@ -26,15 +26,15 @@ def submit_checkbox_answer(request, course_slug: str, exam_slug: str, checkbox_q
     user_id = request.user.id
     selected_answer_indices = serializer.validated_data.get('selected_answer_indices')
     
-    exam_submission_or_error_response = get_exam_submission_or_error_response(
-        request_at=request_at, user_id=user_id, course_slug=course_slug, exam_slug=exam_slug
+    quiz_submission_or_error_response = get_quiz_submission_or_error_response(
+        request_at=request_at, user_id=user_id, course_slug=course_slug, quiz_slug=quiz_slug
     )
     
-    if isinstance(exam_submission_or_error_response, Response):
-        error_response = exam_submission_or_error_response
+    if isinstance(quiz_submission_or_error_response, Response):
+        error_response = quiz_submission_or_error_response
         return error_response
     
-    exam_submission = exam_submission_or_error_response
+    quiz_submission = quiz_submission_or_error_response
     
     checkbox_answer = get_existing_answer_object(
         answer_model=db.CheckboxAnswer,
@@ -45,7 +45,7 @@ def submit_checkbox_answer(request, course_slug: str, exam_slug: str, checkbox_q
     ### Validate selected checkbox indices are valid
     try:
         checkbox_question = db.CheckboxQuestion.objects.get(
-            exam_slug=exam_slug,
+            quiz_slug=quiz_slug,
             id=checkbox_question_id
         )
     except db.CheckboxQuestion.DoesNotExist:
@@ -66,7 +66,7 @@ def submit_checkbox_answer(request, course_slug: str, exam_slug: str, checkbox_q
             
     if checkbox_answer is None:
         db.CheckboxAnswer.objects.create(
-            exam_submission=exam_submission,
+            quiz_submission=quiz_submission,
             question_id=checkbox_question_id,
             selected_answer_indices=selected_answer_indices,
             last_updated_at=timezone.now()

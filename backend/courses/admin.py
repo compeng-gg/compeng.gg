@@ -34,8 +34,8 @@ class AssignmentTaskAdmin(admin.ModelAdmin):
 class AccommodationAdmin(admin.ModelAdmin):
     pass
 
-@admin.register(models.Exam)
-class ExamAdmin(admin.ModelAdmin):
+@admin.register(models.Quiz)
+class QuizAdmin(admin.ModelAdmin):
     pass
 
 @admin.register(models.WrittenResponseQuestion)
@@ -54,8 +54,8 @@ class MultipleChoiceQuestionAdmn(admin.ModelAdmin):
 class CheckboxQuestionAdmin(admin.ModelAdmin):
     pass
 
-@admin.register(models.ExamSubmission)
-class ExamSubmissionAdmin(admin.ModelAdmin):
+@admin.register(models.QuizSubmission)
+class QuizSubmissionAdmin(admin.ModelAdmin):
     pass
 
 @admin.register(models.CheckboxAnswer)

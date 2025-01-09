@@ -2,8 +2,8 @@ from tests.utils import TestCasesWithUserAuth
 import courses.models as db
 from django.utils import timezone
 from tests.utils import (
-    create_exam,
-    create_exam_submission,
+    create_quiz,
+    create_quiz_submission,
     create_offering
 )
 from rest_framework import status
@@ -13,79 +13,79 @@ from uuid import (
 )
 
 
-class CompleteExamTests(TestCasesWithUserAuth):
-    def get_api_endpoint(self, course_slug: str, exam_slug: str) -> str:
-        return f'/api/v0/exams/{course_slug}/{exam_slug}/complete/'
+class CompleteQuizTests(TestCasesWithUserAuth):
+    def get_api_endpoint(self, course_slug: str, quiz_slug: str) -> str:
+        return f'/api/v0/quizzes/{course_slug}/{quiz_slug}/complete/'
 
     def test_happy_path(self):
         requesting_user_id = self.user.id
         
-        exam = create_exam(user_id=requesting_user_id)
+        quiz = create_quiz(user_id=requesting_user_id)
 
         # There should be no submission objects
-        self.assertEqual(db.ExamSubmission.objects.count(), 0)
+        self.assertEqual(db.QuizSubmission.objects.count(), 0)
         
-        # Create a submission object by retrieving the exam for the first time
+        # Create a submission object by retrieving the quiz for the first time
         response = self.client.get(
-            f"/api/v0/exams/{exam.offering.course.slug}/{exam.slug}/",
+            f"/api/v0/quizzes/{quiz.offering.course.slug}/{quiz.slug}/",
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-        exam_submission = db.ExamSubmission.objects.get(
-            exam=exam,
+        quiz_submission = db.QuizSubmission.objects.get(
+            quiz=quiz,
             user_id=requesting_user_id
         )
 
-        initial_completed_at = exam_submission.completed_at
+        initial_completed_at = quiz_submission.completed_at
 
-        self.assertEqual(exam.ends_at, initial_completed_at)
+        self.assertEqual(quiz.ends_at, initial_completed_at)
 
         # Complete the assignment
         response = self.client.post(
-            self.get_api_endpoint(course_slug=exam.offering.course.slug, exam_slug=exam.slug)
+            self.get_api_endpoint(course_slug=quiz.offering.course.slug, quiz_slug=quiz.slug)
         )
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
-        exam_submission.refresh_from_db()
+        quiz_submission.refresh_from_db()
 
-        # Exam should be marked as completed before the current datetime
-        self.assertGreater(timezone.now(), exam_submission.completed_at)
+        # Quiz should be marked as completed before the current datetime
+        self.assertGreater(timezone.now(), quiz_submission.completed_at)
 
-        # Exam should be marked as completed before the initial completed_at
-        self.assertGreater(initial_completed_at, exam_submission.completed_at)
+        # Quiz should be marked as completed before the initial completed_at
+        self.assertGreater(initial_completed_at, quiz_submission.completed_at)
         
-    def test_request_after_exam_completed_throws_error(self):
+    def test_request_after_quiz_completed_throws_error(self):
         requesting_user_id = self.user.id
 
-        exam = create_exam(user_id=requesting_user_id)
+        quiz = create_quiz(user_id=requesting_user_id)
         
-        exam_submission = create_exam_submission(
+        quiz_submission = create_quiz_submission(
             user_id=requesting_user_id,
-            exam_slug=exam.id
+            quiz_slug=quiz.id
         )
 
-        exam_submission.completed_at = timezone.now()
-        exam_submission.save()
+        quiz_submission.completed_at = timezone.now()
+        quiz_submission.save()
 
         response = self.client.post(
-            self.get_api_endpoint(exam_slug=exam.id)
+            self.get_api_endpoint(quiz_slug=quiz.id)
         )
 
-        expected_body = {'error': 'The exam has already been completed'}
+        expected_body = {'error': 'The quiz has already been completed'}
         
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertDictEqual(response.json(), expected_body)
 
-    def test_nonexistent_exam_throws_error(self):
+    def test_nonexistent_quiz_throws_error(self):
         offering = create_offering()
 
         response = self.client.post(
-            self.get_api_endpoint(course_slug=offering.course.slug, exam_slug=uuid4())
+            self.get_api_endpoint(course_slug=offering.course.slug, quiz_slug=uuid4())
         )
 
-        expected_body = {'error': 'Exam submission not found'}
+        expected_body = {'error': 'Quiz submission not found'}
         
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertDictEqual(response.json(), expected_body)

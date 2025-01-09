@@ -80,10 +80,10 @@ class Command(BaseCommand):
             role=mock_ta_role
         )
 
-        mock_exam = db.Exam.objects.create(
-            slug="exam-slug",
+        mock_quiz = db.Quiz.objects.create(
+            slug="quiz-slug",
             offering=mock_offering,
-            title="Exam Title",
+            title="Quiz Title",
             visible_at=now_datetime,
             starts_at=now_datetime,
             ends_at=now_datetime + timedelta(days=365)
@@ -93,7 +93,7 @@ class Command(BaseCommand):
             prompt="Answer the checkbox question",
             points=20,
             order=1,
-            exam=mock_exam,
+            quiz=mock_quiz,
             options=['1', '2', '3'],
             correct_option_indices=[0, 1]
         )
@@ -102,7 +102,7 @@ class Command(BaseCommand):
             prompt="Prompt for a multiple choice question",
             points=20,
             order=2,
-            exam=mock_exam,
+            quiz=mock_quiz,
             options=['Correct Option', 'Incorrect Option 1', 'Incorrect Option 2'],
             correct_option_index=0,
         )
@@ -111,7 +111,7 @@ class Command(BaseCommand):
             prompt="Prompt for a C++ coding question",
             points=15,
             order=3,
-            exam=mock_exam,
+            quiz=mock_quiz,
             starter_code=None,
             programming_language=db.CodingQuestion.ProgrammingLanguage.C_PP
         )
@@ -120,7 +120,7 @@ class Command(BaseCommand):
             prompt="Prompt for a Python coding question",
             points=25,
             order=4,
-            exam=mock_exam,
+            quiz=mock_quiz,
             starter_code=None,
             programming_language=db.CodingQuestion.ProgrammingLanguage.PYTHON
         )
@@ -129,7 +129,7 @@ class Command(BaseCommand):
             prompt="Prompt for a written response question",
             points=25,
             order=5,
-            exam=mock_exam,
+            quiz=mock_quiz,
             max_length=200,
         )
 

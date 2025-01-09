@@ -245,11 +245,11 @@ class Accommodation(models.Model):
         unique_together = ['user', 'assignment']
 
 
-class Exam(models.Model):
+class Quiz(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
     slug = models.SlugField(max_length=50)
-    offering = models.ForeignKey(Offering, on_delete=models.CASCADE, related_name='exams')
+    offering = models.ForeignKey(Offering, on_delete=models.CASCADE, related_name='quizzes')
     title = models.TextField()
     content_viewable_after_submission = models.BooleanField(default=False)
     visible_at = models.DateTimeField()
@@ -261,19 +261,19 @@ class Exam(models.Model):
     
     class Meta:
         unique_together = ['slug', 'offering']
-        verbose_name = "Exam"
-        verbose_name_plural = "Exams"
+        verbose_name = "Quiz"
+        verbose_name_plural = "Quizzes"
     
 
-class ExamSubmission(models.Model):
+class QuizSubmission(models.Model):
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    exam = models.ForeignKey(Exam, on_delete=models.CASCADE, related_name='exam_submissions')
+    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name='quiz_submissions')
     started_at = models.DateTimeField()
     completed_at = models.DateTimeField()
     
 
-class ExamQuestionBaseModel(models.Model):
+class QuizQuestionBaseModel(models.Model):
 
     prompt = models.TextField()
     points = models.PositiveIntegerField(default=1)
@@ -283,7 +283,7 @@ class ExamQuestionBaseModel(models.Model):
         abstract = True
 
 
-class ExamAnswerBaseModel(models.Model):
+class QuizAnswerBaseModel(models.Model):
 
     last_updated_at = models.DateTimeField()
 
@@ -291,30 +291,30 @@ class ExamAnswerBaseModel(models.Model):
         abstract = True
 
 
-class WrittenResponseQuestion(ExamQuestionBaseModel):
+class WrittenResponseQuestion(QuizQuestionBaseModel):
 
     id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
-    exam = models.ForeignKey(Exam, on_delete=models.CASCADE, related_name='written_response_questions')
+    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name='written_response_questions')
     
     max_length = models.PositiveIntegerField(default=1, null=True)
 
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=['exam', 'order'], name='unique_order_written_response_question'
+                fields=['quiz', 'order'], name='unique_order_written_response_question'
             )
         ]
     
 
-class WrittenResponseAnswer(ExamAnswerBaseModel):
+class WrittenResponseAnswer(QuizAnswerBaseModel):
 
-    exam_submission = models.ForeignKey(ExamSubmission, on_delete=models.CASCADE, related_name='written_response_answers')
+    quiz_submission = models.ForeignKey(QuizSubmission, on_delete=models.CASCADE, related_name='written_response_answers')
     question = models.ForeignKey(WrittenResponseQuestion, on_delete=models.CASCADE, related_name='answers')
     
     response = models.TextField()
 
 
-class CodingQuestion(ExamQuestionBaseModel):
+class CodingQuestion(QuizQuestionBaseModel):
 
     class ProgrammingLanguage(models.TextChoices):
         C_PP = "C_PP", _("C++")
@@ -322,7 +322,7 @@ class CodingQuestion(ExamQuestionBaseModel):
         PYTHON = "PYTHON", _("Python")
 
     id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
-    exam = models.ForeignKey(Exam, on_delete=models.CASCADE, related_name="coding_questions")
+    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name="coding_questions")
 
     starter_code = models.TextField(blank=True, null=True)
     programming_language = models.CharField(
@@ -335,23 +335,23 @@ class CodingQuestion(ExamQuestionBaseModel):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=['exam', 'order'], name='unique_order_coding_question'
+                fields=['quiz', 'order'], name='unique_order_coding_question'
             )
         ]
 
 
-class CodingAnswer(ExamAnswerBaseModel):
+class CodingAnswer(QuizAnswerBaseModel):
 
-    exam_submission = models.ForeignKey(ExamSubmission, on_delete=models.CASCADE, related_name="coding_question_answers")
+    quiz_submission = models.ForeignKey(QuizSubmission, on_delete=models.CASCADE, related_name="coding_question_answers")
     question = models.ForeignKey(CodingQuestion, on_delete=models.CASCADE, related_name="answers")
     
     solution = models.TextField()
 
 
-class MultipleChoiceQuestion(ExamQuestionBaseModel):
+class MultipleChoiceQuestion(QuizQuestionBaseModel):
 
     id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
-    exam = models.ForeignKey(Exam, on_delete=models.CASCADE, related_name='multiple_choice_questions')
+    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name='multiple_choice_questions')
 
     options = models.JSONField() # TODO: validate this is an array
     correct_option_index = models.PositiveIntegerField()
@@ -359,22 +359,22 @@ class MultipleChoiceQuestion(ExamQuestionBaseModel):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=['exam', 'order'], name='unique_order_multiple_choice_question'
+                fields=['quiz', 'order'], name='unique_order_multiple_choice_question'
             )
         ]
 
 
-class MultipleChoiceAnswer(ExamAnswerBaseModel):
+class MultipleChoiceAnswer(QuizAnswerBaseModel):
 
-    exam_submission = models.ForeignKey(ExamSubmission, on_delete=models.CASCADE, related_name='multiple_choice_answers')
+    quiz_submission = models.ForeignKey(QuizSubmission, on_delete=models.CASCADE, related_name='multiple_choice_answers')
     question = models.ForeignKey(MultipleChoiceQuestion, on_delete=models.CASCADE, related_name='answers')
     selected_answer_index = models.PositiveIntegerField()
 
 
-class CheckboxQuestion(ExamQuestionBaseModel):
+class CheckboxQuestion(QuizQuestionBaseModel):
 
     id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
-    exam = models.ForeignKey(Exam, on_delete=models.CASCADE, related_name='checkbox_questions')
+    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name='checkbox_questions')
 
     options = models.JSONField() # TODO: validate this is an array
     correct_option_indices = models.JSONField(null=True) # TODO: validate this is an array
@@ -382,14 +382,14 @@ class CheckboxQuestion(ExamQuestionBaseModel):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=['exam', 'order'], name='unique_order_checkbox_question'
+                fields=['quiz', 'order'], name='unique_order_checkbox_question'
             )
         ]
 
 
-class CheckboxAnswer(ExamAnswerBaseModel):
+class CheckboxAnswer(QuizAnswerBaseModel):
 
-    exam_submission = models.ForeignKey(ExamSubmission, on_delete=models.CASCADE, related_name='checkbox_answers')
+    quiz_submission = models.ForeignKey(QuizSubmission, on_delete=models.CASCADE, related_name='checkbox_answers')
     question = models.ForeignKey(CheckboxQuestion, on_delete=models.CASCADE, related_name='answers')
     
     selected_answer_indices = models.JSONField(null=True) # TODO: validate this is an array

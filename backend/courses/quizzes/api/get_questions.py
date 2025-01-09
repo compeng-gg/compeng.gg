@@ -9,46 +9,46 @@ from rest_framework import (
     status
 )
 from rest_framework.decorators import api_view, permission_classes
-from courses.exams.schemas import ExamSerializer
+from courses.quizzes.schemas import QuizSerializer
 from django.utils import timezone
 from typing import Optional
 
 
-def get_exam(user_id: int, course_slug: str, exam_slug: str) -> Optional[db.Exam]:
+def get_quiz(user_id: int, course_slug: str, quiz_slug: str) -> Optional[db.Quiz]:
     try:
-        exam = db.Exam.objects.get(slug=exam_slug, offering__course__slug=course_slug)
+        quiz = db.Quiz.objects.get(slug=quiz_slug, offering__course__slug=course_slug)
     except db.Role.DoesNotExist:
-        raise ValidationError("Exam does not exist")
+        raise ValidationError("Quiz does not exist")
     
     try:
         db.Enrollment.objects.get(
             role__kind=db.Role.Kind.STUDENT,
-            role__offering=exam.offering,
+            role__offering=quiz.offering,
             user_id=user_id,
         )
     except db.Enrollment.DoesNotExist:
         raise ValidationError("Student is not enrolled in this course")
     
-    if exam.starts_at > timezone.now():
+    if quiz.starts_at > timezone.now():
         return Response(
-            {'error': 'Exam has not started yet'},
+            {'error': 'Quiz has not started yet'},
             status=status.HTTP_403_FORBIDDEN
         )
     
-    return exam
+    return quiz
 
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
-def get_questions(request, course_slug: str, exam_slug: str):
+def get_questions(request, course_slug: str, quiz_slug: str):
     request_at = timezone.now()
 
     user_id = request.user.id
 
-    exam = get_exam(user_id, course_slug, exam_slug)
+    quiz = get_quiz(user_id, course_slug, quiz_slug)
 
-    if exam is None:
+    if quiz is None:
         return Response(
-            data={'error': f'Exam not found'},
+            data={'error': f'Quiz not found'},
             status=status.HTTP_404_NOT_FOUND
         )
     
@@ -58,7 +58,7 @@ def get_questions(request, course_slug: str, exam_slug: str):
             Prefetch(
                 "answers",
                 queryset=db.WrittenResponseAnswer.objects.filter(
-                    exam_submission__user_id=user_id
+                    quiz_submission__user_id=user_id
                 )
             )
         )
@@ -70,7 +70,7 @@ def get_questions(request, course_slug: str, exam_slug: str):
             Prefetch(
                 "answers",
                 queryset=db.CodingAnswer.objects.filter(
-                    exam_submission__user_id=user_id
+                    quiz_submission__user_id=user_id
                 )
             )
         )
@@ -82,7 +82,7 @@ def get_questions(request, course_slug: str, exam_slug: str):
             Prefetch(
                 "answers",
                 queryset=db.MultipleChoiceAnswer.objects.filter(
-                    exam_submission__user_id=user_id
+                    quiz_submission__user_id=user_id
                 )
             )
         )
@@ -94,14 +94,14 @@ def get_questions(request, course_slug: str, exam_slug: str):
             Prefetch(
                 "answers",
                 queryset=db.CheckboxAnswer.objects.filter(
-                    exam_submission__user_id=user_id
+                    quiz_submission__user_id=user_id
                 )
             )
         )
     )
 
     prefetch_related_objects(
-        [exam],
+        [quiz],
         written_response_questions_prefetch,
         coding_questions_prefetch,
         multiple_choice_questions_prefetch,
@@ -111,24 +111,24 @@ def get_questions(request, course_slug: str, exam_slug: str):
     print("HELLO")
     with transaction.atomic():
         try:
-            exam_submission = db.ExamSubmission.objects.get(
-                exam=exam,
+            quiz_submission = db.QuizSubmission.objects.get(
+                quiz=quiz,
                 user_id=user_id,
             )
 
-            if (not exam.content_viewable_after_submission
-                and exam_submission.completed_at <= timezone.now()):
+            if (not quiz.content_viewable_after_submission
+                and quiz_submission.completed_at <= timezone.now()):
                 return Response(
-                    {'error': 'Exam content cannot be viewed after submission'},
+                    {'error': 'Quiz content cannot be viewed after submission'},
                     status=status.HTTP_403_FORBIDDEN
                 )
-        except db.ExamSubmission.DoesNotExist:
-            db.ExamSubmission.objects.create(
+        except db.QuizSubmission.DoesNotExist:
+            db.QuizSubmission.objects.create(
                 user_id=user_id,
-                exam=exam,
+                quiz=quiz,
                 started_at=request_at,
-                completed_at=exam.ends_at # Initialize this to the end datetime for the exam
+                completed_at=quiz.ends_at # Initialize this to the end datetime for the quiz
             )
 
     print("HELLO")
-    return Response(data=ExamSerializer(exam).data)
+    return Response(data=QuizSerializer(quiz).data)

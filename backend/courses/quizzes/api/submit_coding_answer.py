@@ -5,16 +5,16 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework import permissions
 from rest_framework.decorators import api_view, permission_classes
-from courses.exams.schemas import AnswerCodingQuestionRequestSerializer
-from courses.exams.api.utils import (
-    get_exam_submission_or_error_response,
+from courses.quizzes.schemas import AnswerCodingQuestionRequestSerializer
+from courses.quizzes.api.utils import (
+    get_quiz_submission_or_error_response,
     get_existing_answer_object
 )
 
 
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
-def submit_coding_answer(request, course_slug: str, exam_slug: str, coding_question_id: UUID):
+def submit_coding_answer(request, course_slug: str, quiz_slug: str, coding_question_id: UUID):
     request_at = timezone.now()
     
     serializer = AnswerCodingQuestionRequestSerializer(data=request.data)
@@ -24,18 +24,18 @@ def submit_coding_answer(request, course_slug: str, exam_slug: str, coding_quest
     user_id = request.user.id
     solution = serializer.validated_data.get('solution')
     
-    exam_submission_or_error_response = get_exam_submission_or_error_response(
-        request_at=request_at, user_id=user_id, course_slug=course_slug, exam_slug=exam_slug
+    quiz_submission_or_error_response = get_quiz_submission_or_error_response(
+        request_at=request_at, user_id=user_id, course_slug=course_slug, quiz_slug=quiz_slug
     )
     
-    if isinstance(exam_submission_or_error_response, Response):
-        error_response = exam_submission_or_error_response
+    if isinstance(quiz_submission_or_error_response, Response):
+        error_response = quiz_submission_or_error_response
         return error_response
     
-    exam_submission = exam_submission_or_error_response
+    quiz_submission = quiz_submission_or_error_response
     
     if not db.CodingQuestion.objects.filter(
-        exam__slug=exam_slug,
+        quiz__slug=quiz_slug,
         id=coding_question_id
     ).exists():
         return Response(
@@ -51,7 +51,7 @@ def submit_coding_answer(request, course_slug: str, exam_slug: str, coding_quest
     
     if coding_answer is None:
         db.CodingAnswer.objects.create(
-            exam_submission=exam_submission,
+            quiz_submission=quiz_submission,
             question_id=coding_question_id,
             solution=solution,
             last_updated_at=timezone.now()

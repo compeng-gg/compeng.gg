@@ -1,7 +1,7 @@
 from tests.utils import (
     TestCasesWithUserAuth,
-    create_exam,
-    create_exam_submission
+    create_quiz,
+    create_quiz_submission
 )
 from django.contrib.auth.models import User
 import courses.models as db
@@ -14,21 +14,21 @@ from uuid import (
 
 
 class SubmitMultipleChoiceAnswerTests(TestCasesWithUserAuth):
-    def get_api_endpoint(self, exam_slug: str, multiple_choice_question_id: UUID) -> str:
-        return f'/api/v0/exams/{exam_slug}/answer/multiple_choice/{str(multiple_choice_question_id)}/'
+    def get_api_endpoint(self, quiz_slug: str, multiple_choice_question_id: UUID) -> str:
+        return f'/api/v0/quizzes/{quiz_slug}/answer/multiple_choice/{str(multiple_choice_question_id)}/'
     
     def test_no_existing_answer_obj_happy_path(self):
         requesting_user_id = self.user.id
         
-        exam = create_exam(user_id=requesting_user_id)
+        quiz = create_quiz(user_id=requesting_user_id)
         
-        exam_submission = create_exam_submission(
+        quiz_submission = create_quiz_submission(
             user_id=requesting_user_id,
-            exam_slug=exam.id
+            quiz_slug=quiz.id
         )
         
         multiple_choice_question = db.MultipleChoiceQuestion.objects.create(
-            exam=exam,
+            quiz=quiz,
             prompt='Choose the animal that flies',
             order=1,
             points=3,
@@ -45,13 +45,13 @@ class SubmitMultipleChoiceAnswerTests(TestCasesWithUserAuth):
         }
         
         self.assertFalse(db.MultipleChoiceAnswer.objects.filter(
-            exam_submission=exam_submission,
+            quiz_submission=quiz_submission,
             question=multiple_choice_question
         ).exists())
         
         response = self.client.post(
             self.get_api_endpoint(
-                exam_slug=exam.id,
+                quiz_slug=quiz.id,
                 multiple_choice_question_id=multiple_choice_question.id
             ), data=data
         )
@@ -59,7 +59,7 @@ class SubmitMultipleChoiceAnswerTests(TestCasesWithUserAuth):
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         
         multiple_choice_answer = db.MultipleChoiceAnswer.objects.get(
-            exam_submission=exam_submission,
+            quiz_submission=quiz_submission,
             question=multiple_choice_question
         )
         
@@ -68,15 +68,15 @@ class SubmitMultipleChoiceAnswerTests(TestCasesWithUserAuth):
     def test_existing_answer_obj_happy_path(self):
         requesting_user_id = self.user.id
         
-        exam = create_exam(user_id=requesting_user_id)
+        quiz = create_quiz(user_id=requesting_user_id)
         
-        exam_submission = create_exam_submission(
+        quiz_submission = create_quiz_submission(
             user_id=requesting_user_id,
-            exam_slug=exam.id
+            quiz_slug=quiz.id
         )
         
         multiple_choice_question = db.MultipleChoiceQuestion.objects.create(
-            exam=exam,
+            quiz=quiz,
             prompt='Choose the animal that flies',
             order=1,
             points=3,
@@ -89,7 +89,7 @@ class SubmitMultipleChoiceAnswerTests(TestCasesWithUserAuth):
         )
         
         multiple_choice_answer = db.MultipleChoiceAnswer.objects.create(
-            exam_submission=exam_submission,
+            quiz_submission=quiz_submission,
             question=multiple_choice_question,
             selected_answer_index=0,
             last_updated_at=timezone.now()
@@ -101,7 +101,7 @@ class SubmitMultipleChoiceAnswerTests(TestCasesWithUserAuth):
 
         response = self.client.post(
             self.get_api_endpoint(
-                exam_slug=exam.id,
+                quiz_slug=quiz.id,
                 multiple_choice_question_id=multiple_choice_question.id
             ), data=data
         )
@@ -115,10 +115,10 @@ class SubmitMultipleChoiceAnswerTests(TestCasesWithUserAuth):
     def test_negative_answer_index_throws_error(self):
         requesting_user_id = self.user.id
         
-        exam = create_exam(user_id=requesting_user_id)
+        quiz = create_quiz(user_id=requesting_user_id)
         
         multiple_choice_question = db.MultipleChoiceQuestion.objects.create(
-            exam=exam,
+            quiz=quiz,
             prompt='Choose the animal that flies',
             order=1,
             points=3,
@@ -136,7 +136,7 @@ class SubmitMultipleChoiceAnswerTests(TestCasesWithUserAuth):
 
         response = self.client.post(
             self.get_api_endpoint(
-                exam_slug=exam.id,
+                quiz_slug=quiz.id,
                 multiple_choice_question_id=multiple_choice_question.id
             ), data=data
         )
@@ -149,15 +149,15 @@ class SubmitMultipleChoiceAnswerTests(TestCasesWithUserAuth):
     def test_answer_index_out_of_bounds_throws_error(self):
         requesting_user_id = self.user.id
         
-        exam = create_exam(user_id=requesting_user_id)
+        quiz = create_quiz(user_id=requesting_user_id)
         
-        create_exam_submission(
+        create_quiz_submission(
             user_id=requesting_user_id,
-            exam_slug=exam.id
+            quiz_slug=quiz.id
         )
         
         multiple_choice_question = db.MultipleChoiceQuestion.objects.create(
-            exam=exam,
+            quiz=quiz,
             prompt='Choose the animal that flies',
             order=1,
             points=3,
@@ -175,7 +175,7 @@ class SubmitMultipleChoiceAnswerTests(TestCasesWithUserAuth):
         
         response = self.client.post(
             self.get_api_endpoint(
-                exam_slug=exam.id,
+                quiz_slug=quiz.id,
                 multiple_choice_question_id=multiple_choice_question.id
             ), data=data
         )
@@ -188,11 +188,11 @@ class SubmitMultipleChoiceAnswerTests(TestCasesWithUserAuth):
     def test_nonexistent_question_id_throws_error(self):
         requesting_user_id = self.user.id
         
-        exam = create_exam(user_id=requesting_user_id)
+        quiz = create_quiz(user_id=requesting_user_id)
         
-        create_exam_submission(
+        create_quiz_submission(
             user_id=requesting_user_id,
-            exam_slug=exam.id
+            quiz_slug=quiz.id
         )
         
         data = {
@@ -201,7 +201,7 @@ class SubmitMultipleChoiceAnswerTests(TestCasesWithUserAuth):
         
         response = self.client.post(
             self.get_api_endpoint(
-                exam_slug=exam.id,
+                quiz_slug=quiz.id,
                 multiple_choice_question_id=uuid4()
             ), data=data
         )
@@ -211,18 +211,18 @@ class SubmitMultipleChoiceAnswerTests(TestCasesWithUserAuth):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertDictEqual(response.json(), expected_body)
         
-    def test_exam_in_different_offering_throws_error(self):
+    def test_quiz_in_different_offering_throws_error(self):
         other_user_id = User.objects.create().id
         
-        exam = create_exam(user_id=other_user_id)
+        quiz = create_quiz(user_id=other_user_id)
 
-        create_exam_submission(
+        create_quiz_submission(
             user_id=other_user_id,
-            exam_slug=exam.id
+            quiz_slug=quiz.id
         )
         
         multiple_choice_question = db.MultipleChoiceQuestion.objects.create(
-            exam=exam,
+            quiz=quiz,
             prompt='Choose the animal that flies',
             order=1,
             points=3,
@@ -240,28 +240,28 @@ class SubmitMultipleChoiceAnswerTests(TestCasesWithUserAuth):
         
         response = self.client.post(
             self.get_api_endpoint(
-                exam_slug=exam.id,
+                quiz_slug=quiz.id,
                 multiple_choice_question_id=multiple_choice_question.id
             ), data=data
         )
         
-        expected_body = {'error': 'Exam submission not found'}
+        expected_body = {'error': 'Quiz submission not found'}
         
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertDictEqual(response.json(), expected_body)
 
-    def test_submission_after_exam_completed_throws_error(self):
+    def test_submission_after_quiz_completed_throws_error(self):
         requesting_user_id = self.user.id
         
-        exam = create_exam(user_id=requesting_user_id)
+        quiz = create_quiz(user_id=requesting_user_id)
         
-        exam_submission = create_exam_submission(
+        quiz_submission = create_quiz_submission(
             user_id=requesting_user_id,
-            exam_slug=exam.id
+            quiz_slug=quiz.id
         )
         
         multiple_choice_question = db.MultipleChoiceQuestion.objects.create(
-            exam=exam,
+            quiz=quiz,
             prompt='Choose the animal that flies',
             order=1,
             points=3,
@@ -274,14 +274,14 @@ class SubmitMultipleChoiceAnswerTests(TestCasesWithUserAuth):
         )
         
         multiple_choice_answer = db.MultipleChoiceAnswer.objects.create(
-            exam_submission=exam_submission,
+            quiz_submission=quiz_submission,
             question=multiple_choice_question,
             selected_answer_index=0,
             last_updated_at=timezone.now()
         )
         
-        exam_submission.completed_at = timezone.now()
-        exam_submission.save()
+        quiz_submission.completed_at = timezone.now()
+        quiz_submission.save()
 
         data = {
             'selected_answer_index': 1
@@ -289,12 +289,12 @@ class SubmitMultipleChoiceAnswerTests(TestCasesWithUserAuth):
 
         response = self.client.post(
             self.get_api_endpoint(
-                exam_slug=exam.id,
+                quiz_slug=quiz.id,
                 multiple_choice_question_id=multiple_choice_question.id
             ), data=data
         )
         
-        expected_body = {'error': 'The exam has already been completed'}
+        expected_body = {'error': 'The quiz has already been completed'}
         
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertDictEqual(response.json(), expected_body)

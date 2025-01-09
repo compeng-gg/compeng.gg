@@ -33,65 +33,65 @@ def get_existing_answer_object(
     try:
         answer_object = answer_model.objects.get(
             question_id=question_id,
-            exam_submission__user_id=user_id
+            quiz_submission__user_id=user_id
         )
         return answer_object
     except answer_model.DoesNotExist:
         return None
 
 
-def get_exam_submission_or_error_response(
-    request_at: datetime, user_id: int, course_slug: str, exam_slug: str
-) -> Union[db.ExamSubmission, Response]:
+def get_quiz_submission_or_error_response(
+    request_at: datetime, user_id: int, course_slug: str, quiz_slug: str
+) -> Union[db.QuizSubmission, Response]:
     print("getting submission")
     
         
-    exam_or_error_response = get_exam_or_error_response(user_id=user_id, course_slug=course_slug, exam_slug=exam_slug)
+    quiz_or_error_response = get_quiz_or_error_response(user_id=user_id, course_slug=course_slug, quiz_slug=quiz_slug)
 
-    if isinstance(exam_or_error_response, Response):
-        error_response = exam_or_error_response
+    if isinstance(quiz_or_error_response, Response):
+        error_response = quiz_or_error_response
         return error_response
     
-    exam = exam_or_error_response
+    quiz = quiz_or_error_response
 
     try:
-        exam_submission = db.ExamSubmission.objects.get(
-            exam=exam,
+        quiz_submission = db.QuizSubmission.objects.get(
+            quiz=quiz,
             user_id=user_id,
         )
-    except db.ExamSubmission.DoesNotExist:
+    except db.QuizSubmission.DoesNotExist:
         return Response(
-            {'error': 'Exam submission not found'},
+            {'error': 'Quiz submission not found'},
             status=status.HTTP_404_NOT_FOUND
         )
     
-    if request_at > exam_submission.completed_at:
+    if request_at > quiz_submission.completed_at:
         return Response(
-            {'error': 'The exam has already been completed'},
+            {'error': 'The quiz has already been completed'},
             status=status.HTTP_403_FORBIDDEN
         )
         
-    return exam_submission
+    return quiz_submission
 
-def get_exam_or_error_response(user_id: int, course_slug: str, exam_slug: str) -> db.Exam:
+def get_quiz_or_error_response(user_id: int, course_slug: str, quiz_slug: str) -> db.Quiz:
     try:
-        exam = db.Exam.objects.get(offering__course__slug=course_slug, slug=exam_slug)
-    except db.Exam.DoesNotExist:
-        raise ValidationError("Exam does not exist")
+        quiz = db.Quiz.objects.get(offering__course__slug=course_slug, slug=quiz_slug)
+    except db.Quiz.DoesNotExist:
+        raise ValidationError("Quiz does not exist")
     
     try:
         db.Enrollment.objects.get(
             role__kind=db.Role.Kind.STUDENT,
-            role__offering=exam.offering,
+            role__offering=quiz.offering,
             user_id=user_id,
         )
     except db.Enrollment.DoesNotExist:
         raise ValidationError("Student is not enrolled in this course")
     
-    if exam.starts_at > timezone.now():
+    if quiz.starts_at > timezone.now():
         return Response(
-            {'error': 'Exam has not started yet'},
+            {'error': 'Quiz has not started yet'},
             status=status.HTTP_403_FORBIDDEN
         )
     
-    return exam
+    return quiz
