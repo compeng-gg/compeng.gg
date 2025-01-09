@@ -3,7 +3,7 @@
 import Navbar from "@/app/components/navbar";
 import LoginRequired from "@/app/lib/login-required";
 import { useContext, useEffect, useState } from "react";
-import ExamDisplay, { ExamProps } from "../exam-display";
+import QuizDisplay, { QuizProps } from "../quiz-display";
 import { BaseQuestionData, CodeQuestionData, QuestionData, QuestionProps, QuestionState, QuestionType, SelectQuestionData, ServerToLocal, TextQuestionData } from "../question-models";
 import { Card } from "primereact/card";
 import { QuestionDisplay } from "../question-display";
@@ -20,7 +20,7 @@ export default function Page({ params }: { params: { courseSlug: string, examSlu
   const { courseSlug, examSlug } = params;
   console.log(courseSlug, examSlug)
   const [jwt, setAndStoreJwt] = useContext(JwtContext);
-  const [exam, setExam] = useState<ExamProps | undefined>(undefined);
+  const [quiz, setQuiz] = useState<QuizProps | undefined>(undefined);
 
   const [loaded, setLoaded] = useState<boolean>(false);
   const [questionData, setQuestionData] = useState<QuestionData[]>([]);
@@ -28,19 +28,19 @@ export default function Page({ params }: { params: { courseSlug: string, examSlu
 
   
 
-  async function fetchExam() {
+  async function fetchQuiz() {
     try {
-      const res = await fetchApi(jwt, setAndStoreJwt, `${courseSlug}/exam/${examSlug}`, "GET");
+      const res = await fetchApi(jwt, setAndStoreJwt, `${courseSlug}/quiz/${examSlug}`, "GET");
       const data = await res.json();
       console.log(JSON.stringify(data, null, 2));
-      const retExam: ExamProps = {
+      const retQuiz: QuizProps = {
         startTime: new Date(data.start_unix_timestamp * 1000),
         endTime: new Date(data.end_unix_timestamp * 1000),
         examSlug: examSlug,
         name: data.title,
         courseSlug: courseSlug
       }
-      setExam(retExam);
+      setQuiz(retQuiz);
       const qData = data.questions.map((rawData) =>  getQuestionDataFromRaw(rawData, examSlug, courseSlug));
       setQuestionData(qData);
       console.log("qdata:", JSON.stringify(qData, null, 2));
@@ -55,33 +55,33 @@ export default function Page({ params }: { params: { courseSlug: string, examSlu
       setQuestionStates(questionStates);
 
     } catch (error) {
-      console.error("Failed to retrieve exam", error);
+      console.error("Failed to retrieve quiz", error);
     }
   }
 
   useEffect(() => {
     if (!loaded) {
-      fetchExam();
+      fetchQuiz();
       setLoaded(true);
     }
   }, [loaded]);
-  //If exam not found
-  if (!exam) {
+  //If quiz not found
+  if (!quiz) {
     return (
       <LoginRequired>
         <Navbar />
 
-        <h3 style={{ color: "red" }}>{`Exam ${examSlug} not found for course ${courseSlug}`}</h3>
+        <h3 style={{ color: "red" }}>{`quiz ${examSlug} not found for course ${courseSlug}`}</h3>
       </LoginRequired>
     )
   }
 
-  //If exam in future
-  if (exam.startTime > now) {
+  //If quiz in future
+  if (quiz.startTime > now) {
     return (
       <LoginRequired>
         <Navbar />
-        <ExamDisplay {...exam} />
+        <QuizDisplay {...quiz} />
       </LoginRequired>
     )
   }
@@ -89,7 +89,7 @@ export default function Page({ params }: { params: { courseSlug: string, examSlu
   return (
     <LoginRequired>
       <Navbar />
-      <h2>{exam.name}</h2>
+      <h2>{quiz.name}</h2>
       <div style={{ display: "flex", gap: "10px", width: "100%", flexDirection: "column" }}>
         {questionStates.map((state, idx) => (
           <QuestionDisplay {...questionData[idx]} state={state} idx={idx}/>

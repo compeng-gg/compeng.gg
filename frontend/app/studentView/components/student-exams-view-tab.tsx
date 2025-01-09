@@ -1,4 +1,4 @@
-import ExamDisplay, { ExamProps } from "@/app/[courseSlug]/exam/exam-display";
+import QuizDisplay, { QuizProps } from "@/app/[courseSlug]/quiz/quiz-display";
 import { fetchApi } from "@/app/lib/api";
 import { JwtContext } from "@/app/lib/jwt-provider";
 import { useContext, useEffect, useState } from "react";
@@ -7,32 +7,32 @@ const now = new Date()
 const oneHourBefore = new Date(now.getTime() - 1*60*60*1000);
 const twoHoursLater = new Date(now.getTime() + 2 * 60 * 60 * 1000); // Add 2 hours in milliseconds
 
-export interface StudentExamViewProps {
+export interface StudentQuizViewProps {
     courseSlug: string;
 }
 
-export default function StudentExamViewTab(props: StudentExamViewProps){
+export default function StudentQuizViewTab(props: StudentQuizViewProps){
     const [jwt, setAndStoreJwt] = useContext(JwtContext);
 
-    const [exams, setExams] = useState<ExamProps[]>([]);
-    async function fetchExams() {
+    const [quizzes, setQuizs] = useState<QuizProps[]>([]);
+    async function fetchQuizs() {
         try {
-            const res = await fetchApi(jwt, setAndStoreJwt, `exams/list/${props.courseSlug}`, "GET");
+            const res = await fetchApi(jwt, setAndStoreJwt, `quizzes/list/${props.courseSlug}`, "GET");
             const data = await res.json();
-            const retExams : ExamProps[] = [];
-            data.forEach(exam => {
-                retExams.push({
-                    name: exam.title,
+            const retQuizs : QuizProps[] = [];
+            data.forEach(quiz => {
+                retQuizs.push({
+                    name: quiz.title,
                     grade: undefined,
-                    slug: exam.slug,
+                    slug: quiz.slug,
                     courseSlug: props.courseSlug,
-                    startTime: new Date(exam.start_unix_timestamp*1000),
-                    endTime: new Date(exam.end_unix_timestamp*1000)
+                    startTime: new Date(quiz.start_unix_timestamp*1000),
+                    endTime: new Date(quiz.end_unix_timestamp*1000)
                 })
             });
             console.log(JSON.stringify(data, null, 2));
-            setExams(retExams);
-            console.log(JSON.stringify(retExams, null, 2));
+            setQuizs(retQuizs);
+            console.log(JSON.stringify(retQuizs, null, 2));
 
         } catch (error) {
             console.error("Failed to retrieve teams", error);
@@ -40,12 +40,12 @@ export default function StudentExamViewTab(props: StudentExamViewProps){
     }
 
     useEffect(() => {
-        fetchExams()
+        fetchQuizs()
     }, [props.courseSlug])
     return (
         <div style={{display: "flex", gap: "10px", width: "100%", flexDirection: "column"}}>
-            {exams.map((exam) => (
-                <ExamDisplay {...exam} key={exam.slug}/>
+            {quizzes.map((quiz) => (
+                <QuizDisplay {...quiz} key={quiz.slug}/>
             ))}
         </div>
     )

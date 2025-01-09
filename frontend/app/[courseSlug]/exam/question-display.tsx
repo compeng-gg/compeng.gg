@@ -8,7 +8,7 @@ import SelectEditor from "./components/select-editor";
 import { useContext, useEffect, useRef, useState } from "react";
 import { JwtContext } from "@/app/lib/jwt-provider";
 import { fetchApi } from "@/app/lib/api";
-import { ExamProps } from "./exam-display";
+import { QuizProps } from "./quiz-display";
 
 enum QuestionSaveStatus {
     NOT_ANSWERED = "Not Answered",
@@ -89,8 +89,8 @@ export function QuestionDisplay(props: QuestionProps) {
             // Print the course slug each time we save
             console.log("Course slug is:", props.courseSlug);
 
-            // Example: Construct an API URL using courseSlug
-            const apiUrl = `${props.courseSlug}/exam/${props.examSlug}/answer/${props.serverQuestionType.toLowerCase()}/${props.id}/?courseSlug=${props.courseSlug}`;
+            // Quizple: Construct an API URL using courseSlug
+            const apiUrl = `${props.courseSlug}/quiz/${props.examSlug}/answer/${props.serverQuestionType.toLowerCase()}/${props.id}/?courseSlug=${props.courseSlug}`;
 
             const res = await fetchApi(
                 jwt,
