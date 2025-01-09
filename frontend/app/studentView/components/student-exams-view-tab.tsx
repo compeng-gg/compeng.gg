@@ -1,4 +1,4 @@
-import ExamDisplay, { ExamProps } from "@/app/[slug]/exam/exam-display";
+import ExamDisplay, { ExamProps } from "@/app/[courseSlug]/exam/exam-display";
 import { fetchApi } from "@/app/lib/api";
 import { JwtContext } from "@/app/lib/jwt-provider";
 import { useContext, useEffect, useState } from "react";

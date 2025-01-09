@@ -15,54 +15,10 @@ const oneHourBefore = new Date(now.getTime() - 1 * 60 * 60 * 1000);
 const twoHoursLater = new Date(now.getTime() + 2 * 60 * 60 * 1000); // Add 2 hours in milliseconds
 
 
-const testExam: ExamProps = {
-  name: "Term Test 2",
-  courseSlug: "ece344",
-  examSlug: "termTest2",
-  startTime: oneHourBefore,
-  endTime: twoHoursLater,
-  grade: -1
-}
-
-const testQuestionData: QuestionData[] = [
-  {
-    questionType: "CODE",
-    title: "Print Pyramid",
-    text: "Implement the outlined function pyramid(int n) which prints n layers of the character *.",
-    starterCode: "void pyramid(int n){\n\n}",
-    totalMarks: 3,
-    isMutable: true
-  },
-  {
-    questionType: "CODE",
-    title: "Acyclic Linked List",
-    text: "Given the node struct below, create an algorithm that returns true if the linked list is acyclic.",
-    starterCode: "struct Node{\n\tstruct Node* next\n\tint val\n\n\tstruct Node(int input_val){\n\t\tval=input_val;\n\t\tnext=NULL\n\t}\n};\n\nbool isAcyclic(struct Node* head){\n\n}",
-    totalMarks: 5,
-    isMutable: true
-  },
-  {
-    questionType: "TEXT",
-    title: "Segmentation Fault",
-    text: "Explain what could cause a segmentation fault",
-    totalMarks: 2,
-    isMutable: true
-  },
-  {
-    questionType: "SELECT",
-    title: "Compilation",
-    text: "Of the following options, which one will break compilation if added to a struct",
-    totalMarks: 1,
-    isMutable: true,
-    options: [
-      "int a", "int* a", "int& a"
-    ]
-  }
-]
-
-
-export default function Page({ params }: { params: { slug: string, exam_slug: string } }) {
-  const { slug, exam_slug } = params;
+export default function Page({ params }: { params: { courseSlug: string, examSlug: string } }) {
+  console.log("params", params)
+  const { courseSlug, examSlug } = params;
+  console.log(courseSlug, examSlug)
   const [jwt, setAndStoreJwt] = useContext(JwtContext);
   const [exam, setExam] = useState<ExamProps | undefined>(undefined);
 
@@ -74,18 +30,18 @@ export default function Page({ params }: { params: { slug: string, exam_slug: st
 
   async function fetchExam() {
     try {
-      const res = await fetchApi(jwt, setAndStoreJwt, `exams/${exam_slug}`, "GET");
+      const res = await fetchApi(jwt, setAndStoreJwt, `${courseSlug}/exam/${examSlug}`, "GET");
       const data = await res.json();
       console.log(JSON.stringify(data, null, 2));
       const retExam: ExamProps = {
         startTime: new Date(data.start_unix_timestamp * 1000),
         endTime: new Date(data.end_unix_timestamp * 1000),
-        slug: exam_slug,
+        examSlug: examSlug,
         name: data.title,
-        courseSlug: slug
+        courseSlug: courseSlug
       }
       setExam(retExam);
-      const qData = data.questions.map((rawData) =>  getQuestionDataFromRaw(rawData, exam_slug));
+      const qData = data.questions.map((rawData) =>  getQuestionDataFromRaw(rawData, examSlug, courseSlug));
       setQuestionData(qData);
       console.log("qdata:", JSON.stringify(qData, null, 2));
       const questionStates = qData.map((questionData, idx) => ({
@@ -115,7 +71,7 @@ export default function Page({ params }: { params: { slug: string, exam_slug: st
       <LoginRequired>
         <Navbar />
 
-        <h3 style={{ color: "red" }}>{`Exam ${exam_slug} not found for course ${slug}`}</h3>
+        <h3 style={{ color: "red" }}>{`Exam ${examSlug} not found for course ${courseSlug}`}</h3>
       </LoginRequired>
     )
   }
@@ -144,10 +100,11 @@ export default function Page({ params }: { params: { slug: string, exam_slug: st
   );
 }
 
-function getQuestionDataFromRaw(rawData: any, exam_slug: string): any {
+function getQuestionDataFromRaw(rawData: any, examSlug: string, courseSlug: string): any {
   const baseData: BaseQuestionData = {
     id: rawData.id,
-    exam_slug: exam_slug,
+    examSlug: examSlug,
+    courseSlug: courseSlug,
     prompt: rawData.prompt,
     serverQuestionType: rawData.question_type,
     questionType: ServerToLocal.get(rawData.question_type) as QuestionType  ?? "TEXT",

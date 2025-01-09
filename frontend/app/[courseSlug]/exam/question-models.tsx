@@ -13,7 +13,8 @@ export type ServerQuestionType = "CODING" | "MULTIPLE_CHOICE" | "WRITTEN_RESPONS
 export interface BaseQuestionData {
     title?: string;
     id: string;
-    exam_slug: string;
+    examSlug: string;
+    courseSlug: string;
     prompt: string;
     totalMarks: number;
     isMutable: boolean;
