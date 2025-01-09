@@ -44,13 +44,13 @@ def create_offering_teams_settings(offering: db.Offering, max_team_size=3,format
     )
 
 
-def create_assessment(
+def create_quiz(
     user_id: int,
-    assessment_title: Optional[str]='Final Exam',
+    quiz_title: Optional[str]='Final Quiz',
     course_slug: Optional[str]='ECE454',
     starts_at: Optional[datetime]=timezone.now(),
     content_viewable_after_submission: Optional[bool]=True
-) -> db.Assessment:
+) -> db.Quiz:
     offering = create_offering(course_slug=course_slug)
         
     student_role = db.Role.objects.create(kind=db.Role.Kind.STUDENT, offering=offering)
@@ -63,8 +63,8 @@ def create_assessment(
     ends_at = starts_at + timedelta(hours=1)
     visible_at = starts_at - timedelta(hours=1)
 
-    assessment = db.Assessment.objects.create(
-        title=assessment_title,
+    quiz = db.Quiz.objects.create(
+        title=quiz_title,
         starts_at=starts_at,
         slug="slug",
         ends_at=ends_at,
@@ -73,14 +73,14 @@ def create_assessment(
         content_viewable_after_submission=content_viewable_after_submission
     )
     
-    return assessment
+    return quiz
 
 
-def create_exam_submission(user_id: int, course_slug: str, exam_slug: str) -> db.ExamSubmission:
+def create_quiz_submission(user_id: int, course_slug: str, quiz_slug: str) -> db.QuizSubmission:
     started_at = timezone.now()
-    return db.AssessmentSubmission.objects.create(
+    return db.QuizSubmission.objects.create(
         user_id=user_id,
-        assessment_slug=assessment_slug,
+        quiz_slug=quiz_slug,
         started_at=started_at,
         completed_at=started_at + timedelta(hours=1)
     )

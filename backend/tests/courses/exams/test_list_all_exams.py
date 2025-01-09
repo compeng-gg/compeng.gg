@@ -1,13 +1,13 @@
 from tests.utils import TestCasesWithUserAuth
 from django.utils import timezone
-from tests.utils import create_exam
+from tests.utils import create_quiz
 from rest_framework import status
 from django.contrib.auth.models import User
 from datetime import timedelta
 
 
-class ListAllExamsTests(TestCasesWithUserAuth):
-    API_ENDPOINT = '/api/v0/exams/list/all/'
+class ListAllQuizsTests(TestCasesWithUserAuth):
+    API_ENDPOINT = '/api/v0/quizzes/list/all/'
 
     def test_happy_path(self):
         requesting_user_id = self.user.id
@@ -15,49 +15,49 @@ class ListAllExamsTests(TestCasesWithUserAuth):
 
         now = timezone.now()
 
-        exam_1_starts_at = now + timedelta(hours=1)
-        exam_1 = create_exam(
+        quiz_1_starts_at = now + timedelta(hours=1)
+        quiz_1 = create_quiz(
             user_id=requesting_user_id,
-            exam_title='final exam',
+            quiz_title='final quiz',
             course_slug='ece344',
-            starts_at=exam_1_starts_at
+            starts_at=quiz_1_starts_at
         )
-        exam_1.visible_at = now - timedelta(days=1)
-        exam_1.save()
+        quiz_1.visible_at = now - timedelta(days=1)
+        quiz_1.save()
 
-        exam_2_starts_at = now + timedelta(hours=2)
-        exam_2 = create_exam(
+        quiz_2_starts_at = now + timedelta(hours=2)
+        quiz_2 = create_quiz(
             user_id=requesting_user_id,
-            exam_title='midterm',
+            quiz_title='midterm',
             course_slug='ece454',
-            starts_at=exam_2_starts_at
+            starts_at=quiz_2_starts_at
         )
-        exam_2.visible_at = now - timedelta(days=1)
-        exam_2.save()
+        quiz_2.visible_at = now - timedelta(days=1)
+        quiz_2.save()
 
-        exam_3_starts_at = now + timedelta(hours=2)
-        exam_3 = create_exam(
+        quiz_3_starts_at = now + timedelta(hours=2)
+        quiz_3 = create_quiz(
             user_id=other_user_id,
-            exam_title='midterm',
+            quiz_title='midterm',
             course_slug='aps105',
-            starts_at=exam_3_starts_at
+            starts_at=quiz_3_starts_at
         )
-        exam_3.visible_at = now - timedelta(days=1)
-        exam_3.save()
+        quiz_3.visible_at = now - timedelta(days=1)
+        quiz_3.save()
 
         response = self.client.get(self.API_ENDPOINT)
 
         expected_body = [
             {
-                'title': 'final exam', 
-                'start_unix_timestamp': int(exam_1.starts_at.timestamp()),
-                'end_unix_timestamp': int(exam_1.ends_at.timestamp()),
+                'title': 'final quiz', 
+                'start_unix_timestamp': int(quiz_1.starts_at.timestamp()),
+                'end_unix_timestamp': int(quiz_1.ends_at.timestamp()),
                 'course_slug': 'ece344'
             },
             {   
                 'title': 'midterm',
-                'start_unix_timestamp': int(exam_2.starts_at.timestamp()),
-                'end_unix_timestamp': int(exam_2.ends_at.timestamp()),
+                'start_unix_timestamp': int(quiz_2.starts_at.timestamp()),
+                'end_unix_timestamp': int(quiz_2.ends_at.timestamp()),
                 'course_slug': 'ece454'
             }
         ]

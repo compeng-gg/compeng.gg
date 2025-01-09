@@ -46,8 +46,8 @@ class AssignmentGradeAdmin(admin.ModelAdmin):
 class AccommodationAdmin(admin.ModelAdmin):
     pass
 
-@admin.register(models.Exam)
-class ExamAdmin(admin.ModelAdmin):
+@admin.register(models.Quiz)
+class QuizAdmin(admin.ModelAdmin):
     pass
 
 @admin.register(models.TeamMember)
@@ -80,4 +80,16 @@ class MultipleChoiceQuestionAdmn(admin.ModelAdmin):
 
 @admin.register(models.CheckboxQuestion)
 class CheckboxQuestionAdmin(admin.ModelAdmin):
+    pass
+
+@admin.register(models.QuizSubmission)
+class QuizSubmissionAdmin(admin.ModelAdmin):
+    pass
+
+@admin.register(models.CheckboxAnswer)
+class CheckboxAnswerAdmin(admin.ModelAdmin):
+    pass
+
+@admin.register(models.MultipleChoiceAnswer)
+class MultipleChoiceAdmin(admin.ModelAdmin):
     pass
