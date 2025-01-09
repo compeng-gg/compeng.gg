@@ -66,6 +66,7 @@ def create_exam(
     exam = db.Exam.objects.create(
         title=exam_title,
         starts_at=starts_at,
+        slug="slug",
         ends_at=ends_at,
         visible_at=visible_at,
         offering=offering,
@@ -75,7 +76,7 @@ def create_exam(
     return exam
 
 
-def create_exam_submission(user_id: int, exam_slug: str) -> db.ExamSubmission:
+def create_exam_submission(user_id: int, course_slug: str, exam_slug: str) -> db.ExamSubmission:
     started_at = timezone.now()
     return db.ExamSubmission.objects.create(
         user_id=user_id,

@@ -10,7 +10,7 @@ from courses.exams.api.utils import get_exam_submission_or_error_response
 
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
-def complete_exam(request, exam_slug: str):
+def complete_exam(request, course_slug: str, exam_slug: str):
     request_at = timezone.now()
 
     user_id = request.user.id
@@ -18,6 +18,8 @@ def complete_exam(request, exam_slug: str):
     exam_submission_or_error_response = get_exam_submission_or_error_response(
         request_at=request_at, user_id=user_id, exam_slug=exam_slug
     )
+
+    print(exam_submission_or_error_response)
     
     if isinstance(exam_submission_or_error_response, Response):
         error_response = exam_submission_or_error_response

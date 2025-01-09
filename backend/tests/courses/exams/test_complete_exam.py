@@ -3,7 +3,8 @@ import courses.models as db
 from django.utils import timezone
 from tests.utils import (
     create_exam,
-    create_exam_submission
+    create_exam_submission,
+    create_offering
 )
 from rest_framework import status
 from uuid import (
@@ -13,8 +14,8 @@ from uuid import (
 
 
 class CompleteExamTests(TestCasesWithUserAuth):
-    def get_api_endpoint(self, exam_slug: str) -> str:
-        return f'/api/v0/exams/{exam_slug}/complete/'
+    def get_api_endpoint(self, course_slug: str, exam_slug: str) -> str:
+        return f'/api/v0/exams/{course_slug}/{exam_slug}/complete/'
 
     def test_happy_path(self):
         requesting_user_id = self.user.id
@@ -26,8 +27,10 @@ class CompleteExamTests(TestCasesWithUserAuth):
         
         # Create a submission object by retrieving the exam for the first time
         response = self.client.get(
-            f"/api/v0/exams/{exam.id}/",
+            f"/api/v0/exams/{exam.offering.course.slug}/{exam.slug}/",
         )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         exam_submission = db.ExamSubmission.objects.get(
             exam=exam,
@@ -40,7 +43,7 @@ class CompleteExamTests(TestCasesWithUserAuth):
 
         # Complete the assignment
         response = self.client.post(
-            self.get_api_endpoint(exam_slug=exam.id)
+            self.get_api_endpoint(course_slug=exam.offering.course.slug, exam_slug=exam.slug)
         )
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
@@ -76,8 +79,10 @@ class CompleteExamTests(TestCasesWithUserAuth):
         self.assertDictEqual(response.json(), expected_body)
 
     def test_nonexistent_exam_throws_error(self):
+        offering = create_offering()
+
         response = self.client.post(
-            self.get_api_endpoint(exam_slug=uuid4())
+            self.get_api_endpoint(course_slug=offering.course.slug, exam_slug=uuid4())
         )
 
         expected_body = {'error': 'Exam submission not found'}

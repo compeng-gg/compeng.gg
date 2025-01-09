@@ -14,7 +14,7 @@ from courses.exams.api.utils import (
 
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
-def submit_coding_answer(request, exam_slug: str, coding_question_id: UUID):
+def submit_coding_answer(request, course_slug: str, exam_slug: str, coding_question_id: UUID):
     request_at = timezone.now()
     
     serializer = AnswerCodingQuestionRequestSerializer(data=request.data)
@@ -25,7 +25,7 @@ def submit_coding_answer(request, exam_slug: str, coding_question_id: UUID):
     solution = serializer.validated_data.get('solution')
     
     exam_submission_or_error_response = get_exam_submission_or_error_response(
-        request_at=request_at, user_id=user_id, exam_slug=exam_slug
+        request_at=request_at, user_id=user_id, course_slug=course_slug, exam_slug=exam_slug
     )
     
     if isinstance(exam_submission_or_error_response, Response):

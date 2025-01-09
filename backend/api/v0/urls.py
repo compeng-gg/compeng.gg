@@ -57,14 +57,14 @@ urlpatterns = [
     path('teams/user/status/<slug:slug>/', teams_api.get_user_team_status),
     
 
-    path('exams/list/all/', exams_api.list_all_exams),
-    path('exams/list/<slug:course_slug>/', exams_api.list_exams_for_course),
-    path('exams/<slug:exam_slug>/', exams_api.get_exam),
-    path('exams/<slug:exam_slug>/answer/checkbox/<uuid:checkbox_question_id>/', exams_api.submit_checkbox_answer),
-    path('exams/<slug:exam_slug>/answer/multiple_choice/<uuid:multiple_choice_question_id>/', exams_api.submit_multiple_choice_answer),
-    path('exams/<slug:exam_slug>/answer/written_response/<uuid:written_response_question_id>/', exams_api.submit_written_response_answer),
-    path('exams/<slug:exam_slug>/answer/coding/<uuid:coding_question_id>/', exams_api.submit_coding_answer),
-    path('exams/<slug:exam_slug>/complete/', exams_api.complete_exam),
+    path('exams/list/all/', exams_api.list_all),
+    path('exams/list/<slug:course_slug>/', exams_api.list_for_course),
+    path('<slug:course_slug>/exam/<slug:exam_slug>/', exams_api.get_questions),
+    path('<slug:course_slug>/exam/<slug:exam_slug>/answer/checkbox/<uuid:checkbox_question_id>/', exams_api.submit_checkbox_answer),
+    path('<slug:course_slug>/exam/<slug:exam_slug>/answer/multiple_choice/<uuid:multiple_choice_question_id>/', exams_api.submit_multiple_choice_answer),
+    path('<slug:course_slug>/exam/<slug:exam_slug>/answer/written_response/<uuid:written_response_question_id>/', exams_api.submit_written_response_answer),
+    path('<slug:course_slug>/exam/<slug:exam_slug>/answer/coding/<uuid:coding_question_id>/', exams_api.submit_coding_answer),
+    path('<slug:course_slug>/exam/<slug:exam_slug>/complete/', exams_api.complete_exam),
 
     path('github/webhook/', github_webhook),
 

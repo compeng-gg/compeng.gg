@@ -73,6 +73,7 @@ def run_python_test_cases(test_cases, runner_function, solution):
 class CodeRunConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         kwargs = self.scope['url_route']['kwargs']
+        print(f"KWARGS are {kwargs}")
 
         self.exam_slug = kwargs.get('exam_slug')
         self.coding_question_id = str(kwargs.get('coding_question_id'))

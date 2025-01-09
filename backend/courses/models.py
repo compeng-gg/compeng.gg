@@ -248,7 +248,7 @@ class Accommodation(models.Model):
 class Exam(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
-    slug = models.SlugField(max_length=50, default="default")
+    slug = models.SlugField(max_length=50)
     offering = models.ForeignKey(Offering, on_delete=models.CASCADE, related_name='exams')
     title = models.TextField()
     content_viewable_after_submission = models.BooleanField(default=False)
