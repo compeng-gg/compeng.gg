@@ -31,6 +31,44 @@ export default function CodeEditor(props: CodeState) {
     setLoaded(true);
   }, []);
 
+  useEffect(() => {
+    // Create a WebSocket connection
+    const localUrl = 'http://localhost:8000/'
+    const ws = new WebSocket(localUrl+`api/ws/v0/${props.courseSlug}/exam/${props.examSlug}/run_code/${props.id}/?token=${jwt.token}`);
+    setSocket(ws);
+
+    ws.onopen = () => {
+      console.log('WebSocket connection opened.');
+    };
+
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      setTestStatus(TestRunStatus.COMPLETE);
+      console.log('Message from server:', data);
+      setMessage(JSON.stringify(data, null, 2));
+    };
+
+    ws.onclose = () => {
+      console.log('WebSocket connection closed.');
+    };
+
+    ws.onerror = (error) => {
+      console.error('WebSocket error:', error);
+    };
+
+    // Cleanup the WebSocket connection
+    return () => {
+      ws.close();
+    };
+  }, []);
+
+  async function runTests() {
+    if(socket){
+      setTestStatus(TestRunStatus.RUNNING)
+      socket.send(JSON.stringify({solution: props.state.value, questionId: props.id}));
+    }
+  }
+
   return (
     <>
       {loaded && (

@@ -1,7 +1,10 @@
 // Base Data Classes
 interface BaseQuestionData {
     title?: string;
-    text: string;
+    id: string;
+    examSlug: string;
+    courseSlug: string;
+    prompt: string;
     totalMarks: number;
     isMutable: boolean;
     questionType: "CODE" | "SELECT" | "TEXT";
