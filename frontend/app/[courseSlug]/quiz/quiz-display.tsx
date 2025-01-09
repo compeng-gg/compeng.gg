@@ -9,7 +9,7 @@ import Link from "next/link";
 export interface QuizProps {
     name: string;
     courseSlug: string;
-    examSlug: string;
+    quizSlug: string;
     startTime: Date;
     endTime: Date;
     grade: number;
@@ -31,11 +31,11 @@ function QuizDisplayBadges(props: QuizProps){
     );
 }
 
-function QuizVisitButton({buttonText, examProps}: {buttonText: string, examProps: QuizProps}){
+function QuizVisitButton({buttonText, quizProps}: {buttonText: string, quizProps: QuizProps}){
     return (
         <div style={{ position: 'relative', display: "flex", flexDirection: "row-reverse", }}>
             <span></span>
-            <Link href={`/${examProps.courseSlug}/quiz/${examProps.examSlug}`}>
+            <Link href={`/${quizProps.courseSlug}/quiz/${quizProps.quizSlug}`}>
                 <Button label={buttonText} size="small"/>
             </Link>
         </div>
@@ -74,7 +74,7 @@ function OngoingQuizDisplay(props: QuizProps){
     return (
         <Card
             header={<QuizDisplayBadges {...props} />}
-            footer={<QuizVisitButton examProps={props} buttonText={"Write quiz"}/>}
+            footer={<QuizVisitButton quizProps={props} buttonText={"Write quiz"}/>}
             title={props.name}
             subTitle={`Started at: ${props.startTime}`}
             className="bg-green-50 dark:white shadow-md rounded-lg"
@@ -86,7 +86,7 @@ function PastQuizDisplay(props: QuizProps){
     return (
         <Card
             header={<QuizDisplayBadges {...props} />}
-            footer={<QuizVisitButton examProps={props} buttonText={"View Submission"}/>}
+            footer={<QuizVisitButton quizProps={props} buttonText={"View Submission"}/>}
             title={props.name}
             subTitle={`Ended on: ${props.endTime}`}
             className="bg-gray-50 dark:white shadow-md rounded-lg"

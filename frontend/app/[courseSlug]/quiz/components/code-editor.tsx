@@ -34,7 +34,7 @@ export default function CodeEditor(props: CodeState) {
   useEffect(() => {
     // Create a WebSocket connection
     const localUrl = 'http://localhost:8000/'
-    const ws = new WebSocket(localUrl+`api/ws/v0/${props.courseSlug}/quiz/${props.examSlug}/run_code/${props.id}/?token=${jwt.token}`);
+    const ws = new WebSocket(localUrl+`api/ws/v0/${props.courseSlug}/quiz/${props.quizSlug}/run_code/${props.id}/?token=${jwt.token}`);
     setSocket(ws);
 
     ws.onopen = () => {

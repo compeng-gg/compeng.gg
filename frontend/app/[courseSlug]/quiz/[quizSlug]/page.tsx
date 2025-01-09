@@ -13,10 +13,10 @@ const oneHourBefore = new Date(now.getTime() - 1 * 60 * 60 * 1000);
 const twoHoursLater = new Date(now.getTime() + 2 * 60 * 60 * 1000); // Add 2 hours in milliseconds
 
 
-export default function Page({ params }: { params: { courseSlug: string, examSlug: string } }) {
+export default function Page({ params }: { params: { courseSlug: string, quizSlug: string } }) {
   console.log("params", params)
-  const { courseSlug, examSlug } = params;
-  console.log(courseSlug, examSlug)
+  const { courseSlug, quizSlug } = params;
+  console.log(courseSlug, quizSlug)
   const [jwt, setAndStoreJwt] = useContext(JwtContext);
   const [quiz, setQuiz] = useState<QuizProps | undefined>(undefined);
 
@@ -28,18 +28,18 @@ export default function Page({ params }: { params: { courseSlug: string, examSlu
 
   async function fetchQuiz() {
     try {
-      const res = await fetchApi(jwt, setAndStoreJwt, `${courseSlug}/quiz/${examSlug}`, "GET");
+      const res = await fetchApi(jwt, setAndStoreJwt, `${courseSlug}/quiz/${quizSlug}`, "GET");
       const data = await res.json();
       console.log(JSON.stringify(data, null, 2));
       const retQuiz: QuizProps = {
         startTime: new Date(data.start_unix_timestamp * 1000),
         endTime: new Date(data.end_unix_timestamp * 1000),
-        examSlug: examSlug,
+        quizSlug: quizSlug,
         name: data.title,
         courseSlug: courseSlug
       }
       setQuiz(retQuiz);
-      const qData = data.questions.map((rawData) =>  getQuestionDataFromRaw(rawData, examSlug, courseSlug));
+      const qData = data.questions.map((rawData) =>  getQuestionDataFromRaw(rawData, quizSlug, courseSlug));
       setQuestionData(qData);
       console.log("qdata:", JSON.stringify(qData, null, 2));
       const questionStates = qData.map((questionData, idx) => ({
@@ -69,7 +69,7 @@ export default function Page({ params }: { params: { courseSlug: string, examSlu
       <LoginRequired>
         <Navbar />
 
-        <h3 style={{ color: "red" }}>{`quiz ${examSlug} not found for course ${courseSlug}`}</h3>
+        <h3 style={{ color: "red" }}>{`quiz ${quizSlug} not found for course ${courseSlug}`}</h3>
       </LoginRequired>
     )
   }
@@ -98,10 +98,10 @@ export default function Page({ params }: { params: { courseSlug: string, examSlu
   );
 }
 
-function getQuestionDataFromRaw(rawData: any, examSlug: string, courseSlug: string): any {
+function getQuestionDataFromRaw(rawData: any, quizSlug: string, courseSlug: string): any {
   const baseData: BaseQuestionData = {
     id: rawData.id,
-    examSlug: examSlug,
+    quizSlug: quizSlug,
     courseSlug: courseSlug,
     prompt: rawData.prompt,
     serverQuestionType: rawData.question_type,

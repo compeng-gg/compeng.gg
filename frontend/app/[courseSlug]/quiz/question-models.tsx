@@ -2,7 +2,7 @@
 interface BaseQuestionData {
     title?: string;
     id: string;
-    examSlug: string;
+    quizSlug: string;
     courseSlug: string;
     prompt: string;
     totalMarks: number;

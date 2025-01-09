@@ -23,7 +23,8 @@ const taskFields: [string, string][] = [
   ['speedup', 'Speedup'],
 ]
 
-function Course({ params }: { params: { slug: string } }) {
+function Course({ params }: { params: { courseSlug: string } }) {
+  console.log("Course is ", params.courseSlug)
   const [jwt, setAndStoreJwt] = useContext(JwtContext);
   const [name, setName] = useState();
   const [labs, setLabs] = useState([] as Lab[]);
@@ -32,7 +33,7 @@ function Course({ params }: { params: { slug: string } }) {
     async function fetchLabs() {
       try {
         //To do: include role in this API
-        const response = await fetchApi(jwt, setAndStoreJwt, `courses/${params.slug}/`, "GET");
+        const response = await fetchApi(jwt, setAndStoreJwt, `courses/${params.courseSlug}/`, "GET");
         const data = await response.json();
         setName(data.name);
         setLabs(data.assignments);
@@ -42,9 +43,9 @@ function Course({ params }: { params: { slug: string } }) {
     }
 
     fetchLabs();
-  }, [params.slug, jwt, setAndStoreJwt]);
+  }, [params.courseSlug, jwt, setAndStoreJwt]);
 
-  console.log(params.slug);
+  console.log(params.courseSlug);
   if (!name) {
     return (
       <>
@@ -71,7 +72,7 @@ function Course({ params }: { params: { slug: string } }) {
       <Navbar />
       <Card>
         {(role == "Student")
-        ? <StudentView courseName={name} labs={labs} courseSlug={params.slug}/>
+        ? <StudentView courseName={name} labs={labs} courseSlug={params.courseSlug}/>
         : <StaffView courseName={name} labs={labs} />}
       </Card>
     </>
@@ -240,4 +241,10 @@ function Course({ params }: { params: { slug: string } }) {
         )
 }
 
-export default Assignment;
+export default function Page({ params }: { params: { courseSlug: string } }) {
+  return (
+    <LoginRequired>
+      <Course params={params} />
+    </LoginRequired>
+  );
+}

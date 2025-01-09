@@ -23,7 +23,7 @@ export function QuestionDisplay(props: QuestionProps){
 
     // Notice we now focus on using the courseSlug:
     //   props.courseSlug
-    //   props.examSlug
+    //   props.quizSlug
     // from the question props
     const { title, prompt, totalMarks, isMutable, questionType, idx } = props;
 
@@ -89,7 +89,7 @@ export function QuestionDisplay(props: QuestionProps){
             console.log("Course slug is:", props.courseSlug);
 
             // Quizple: Construct an API URL using courseSlug
-            const apiUrl = `${props.courseSlug}/quiz/${props.examSlug}/answer/${props.serverQuestionType.toLowerCase()}/${props.id}/?courseSlug=${props.courseSlug}`;
+            const apiUrl = `${props.courseSlug}/quiz/${props.quizSlug}/answer/${props.serverQuestionType.toLowerCase()}/${props.id}/?courseSlug=${props.courseSlug}`;
 
             const res = await fetchApi(
                 jwt,
