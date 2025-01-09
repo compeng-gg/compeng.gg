@@ -6,7 +6,7 @@ import { Button } from "primereact/button";
 import { Router } from "next/router";
 import Link from "next/link";
 
-export interface ExamProps {
+export interface QuizProps {
     name: string;
     courseSlug: string;
     examSlug: string;
@@ -15,7 +15,7 @@ export interface ExamProps {
     grade: number;
 }
 
-function ExamDisplayBadges(props: ExamProps){
+function QuizDisplayBadges(props: QuizProps){
     const {grade} = props;
     const duration = Math.abs(differenceInMinutes(props.endTime, props.startTime));
 
@@ -31,11 +31,11 @@ function ExamDisplayBadges(props: ExamProps){
     );
 }
 
-function ExamVisitButton({buttonText, examProps}: {buttonText: string, examProps: ExamProps}){
+function QuizVisitButton({buttonText, examProps}: {buttonText: string, examProps: QuizProps}){
     return (
         <div style={{ position: 'relative', display: "flex", flexDirection: "row-reverse", }}>
             <span></span>
-            <Link href={`/${examProps.courseSlug}/exam/${examProps.examSlug}`}>
+            <Link href={`/${examProps.courseSlug}/quiz/${examProps.examSlug}`}>
                 <Button label={buttonText} size="small"/>
             </Link>
         </div>
@@ -43,26 +43,26 @@ function ExamVisitButton({buttonText, examProps}: {buttonText: string, examProps
     
 }
 
-export default function ExamDisplay(props: ExamProps){
+export default function QuizDisplay(props: QuizProps){
 
     const now = new Date();
 
-    //Determine if exam is past, present or future
+    //Determine if quiz is past, present or future
 
     if(now <= props.startTime){
-        return UpcomingExamDisplay(props);
+        return UpcomingQuizDisplay(props);
     } else if (now <= props.endTime){
-        return OngoingExamDisplay(props);
+        return OngoingQuizDisplay(props);
     } else {
-        return PastExamDisplay(props);
+        return PastQuizDisplay(props);
     }
 }
 
 
-function UpcomingExamDisplay(props: ExamProps){
+function UpcomingQuizDisplay(props: QuizProps){
     return (
         <Card
-            header={<ExamDisplayBadges {...props} />}
+            header={<QuizDisplayBadges {...props} />}
             title={props.name}
             subTitle={`Start Time: ${props.startTime}`}
             className="bg-gray-50 dark:white shadow-md rounded-lg"
@@ -70,11 +70,11 @@ function UpcomingExamDisplay(props: ExamProps){
     )
 }
 
-function OngoingExamDisplay(props: ExamProps){
+function OngoingQuizDisplay(props: QuizProps){
     return (
         <Card
-            header={<ExamDisplayBadges {...props} />}
-            footer={<ExamVisitButton examProps={props} buttonText={"Write Exam"}/>}
+            header={<QuizDisplayBadges {...props} />}
+            footer={<QuizVisitButton examProps={props} buttonText={"Write quiz"}/>}
             title={props.name}
             subTitle={`Started at: ${props.startTime}`}
             className="bg-green-50 dark:white shadow-md rounded-lg"
@@ -82,11 +82,11 @@ function OngoingExamDisplay(props: ExamProps){
     )
 }
 
-function PastExamDisplay(props: ExamProps){
+function PastQuizDisplay(props: QuizProps){
     return (
         <Card
-            header={<ExamDisplayBadges {...props} />}
-            footer={<ExamVisitButton examProps={props} buttonText={"View Submission"}/>}
+            header={<QuizDisplayBadges {...props} />}
+            footer={<QuizVisitButton examProps={props} buttonText={"View Submission"}/>}
             title={props.name}
             subTitle={`Ended on: ${props.endTime}`}
             className="bg-gray-50 dark:white shadow-md rounded-lg"

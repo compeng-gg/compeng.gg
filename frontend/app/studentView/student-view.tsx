@@ -6,7 +6,7 @@ import 'primeicons/primeicons.css';
 import { Button } from "primereact/button";
 import StudentAssignmentTab from "./components/student-assignment-tab";
 import StudentTeamViewTab from "./components/student-team-view-tab";
-import StudentExamViewTab from "./components/student-exams-view-tab";
+import StudentQuizViewTab from "./components/student-quizzes-view-tab";
 
 
 
@@ -48,7 +48,7 @@ function DisplayCourseTab({idx, labs, courseSlug}){
         return <StudentAssignmentTab labs={labs}/>
     }
     if(idx == 2){
-        return <StudentExamViewTab courseSlug={courseSlug}/>
+        return <StudentQuizViewTab courseSlug={courseSlug}/>
     }
     if(idx == 3){
         return <StudentTeamViewTab  courseSlug={courseSlug}/>
