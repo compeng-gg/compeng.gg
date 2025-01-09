@@ -7,7 +7,7 @@ from rest_framework_simplejwt.views import (
 from . import views
 from .views_github_webhook import github_webhook
 import courses.teams.api as teams_api
-import courses.assessments.api as assessments_api
+import courses.quizzes.api as quizzes_api
 
 from django.conf import settings
 from django.urls import include, path
@@ -57,14 +57,14 @@ urlpatterns = [
     path('teams/user/status/<slug:slug>/', teams_api.get_user_team_status),
     
 
-    path('assessments/list/all/', assessments_api.list_all_assessments),
-    path('assessments/list/<slug:course_slug>/', assessments_api.list_assessments_for_course),
-    path('assessments/<slug:assessment_slug>/', assessments_api.get_assessment),
-    path('assessments/<slug:assessment_slug>/answer/checkbox/<uuid:checkbox_question_id>/', assessments_api.submit_checkbox_answer),
-    path('assessments/<slug:assessment_slug>/answer/multiple_choice/<uuid:multiple_choice_question_id>/', assessments_api.submit_multiple_choice_answer),
-    path('assessments/<slug:assessment_slug>/answer/written_response/<uuid:written_response_question_id>/', assessments_api.submit_written_response_answer),
-    path('assessments/<slug:assessment_slug>/answer/coding/<uuid:coding_question_id>/', assessments_api.submit_coding_answer),
-    path('assessments/<slug:assessment_slug>/complete/', assessments_api.complete_assessment),
+    path('quizzes/list/all/', quizzes_api.list_all),
+    path('quizzes/list/<slug:course_slug>/', quizzes_api.list_for_course),
+    path('<slug:course_slug>/quiz/<slug:quiz_slug>/', quizzes_api.get_questions),
+    path('<slug:course_slug>/quiz/<slug:quiz_slug>/answer/checkbox/<uuid:checkbox_question_id>/', quizzes_api.submit_checkbox_answer),
+    path('<slug:course_slug>/quiz/<slug:quiz_slug>/answer/multiple_choice/<uuid:multiple_choice_question_id>/', quizzes_api.submit_multiple_choice_answer),
+    path('<slug:course_slug>/quiz/<slug:quiz_slug>/answer/written_response/<uuid:written_response_question_id>/', quizzes_api.submit_written_response_answer),
+    path('<slug:course_slug>/quiz/<slug:quiz_slug>/answer/coding/<uuid:coding_question_id>/', quizzes_api.submit_coding_answer),
+    path('<slug:course_slug>/quiz/<slug:quiz_slug>/complete/', quizzes_api.complete_quiz),
 
     path('github/webhook/', github_webhook),
 

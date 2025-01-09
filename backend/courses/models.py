@@ -245,40 +245,45 @@ class Accommodation(models.Model):
         unique_together = ['user', 'assignment']
 
 
-class Assessment(models.Model):
+class Quiz(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
-    slug = models.SlugField(max_length=50, default="default")
-    offering = models.ForeignKey(Offering, on_delete=models.CASCADE, related_name='assessments')
+    slug = models.SlugField(max_length=50)
+    offering = models.ForeignKey(Offering, on_delete=models.CASCADE, related_name='quizzes')
     title = models.TextField()
     content_viewable_after_submission = models.BooleanField(default=False)
     visible_at = models.DateTimeField()
     starts_at = models.DateTimeField() # TODO: validate ends_at > starts_at
     ends_at = models.DateTimeField()
     
+    def __str__( self):
+        return f"{self.title}({self.offering.slug})"
+    
     class Meta:
         unique_together = ['slug', 'offering']
+        verbose_name = "Quiz"
+        verbose_name_plural = "Quizzes"
     
 
-class AssessmentSubmission(models.Model):
+class QuizSubmission(models.Model):
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    assessment = models.ForeignKey(Assessment, on_delete=models.CASCADE, related_name='assessment_submissions')
+    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name='quiz_submissions')
     started_at = models.DateTimeField()
     completed_at = models.DateTimeField()
     
 
-class AssessmentQuestionBaseModel(models.Model):
+class QuizQuestionBaseModel(models.Model):
 
     prompt = models.TextField()
     points = models.PositiveIntegerField(default=1)
     order = models.PositiveIntegerField()
-
+    
     class Meta:
         abstract = True
 
 
-class AssessmentAnswerBaseModel(models.Model):
+class QuizAnswerBaseModel(models.Model):
 
     last_updated_at = models.DateTimeField()
 
@@ -286,30 +291,30 @@ class AssessmentAnswerBaseModel(models.Model):
         abstract = True
 
 
-class WrittenResponseQuestion(AssessmentQuestionBaseModel):
+class WrittenResponseQuestion(QuizQuestionBaseModel):
 
     id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
-    assessment = models.ForeignKey(Assessment, on_delete=models.CASCADE, related_name='written_response_questions')
+    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name='written_response_questions')
     
     max_length = models.PositiveIntegerField(default=1, null=True)
 
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=['assessment', 'order'], name='unique_order_written_response_question'
+                fields=['quiz', 'order'], name='unique_order_written_response_question'
             )
         ]
     
 
-class WrittenResponseAnswer(AssessmentAnswerBaseModel):
+class WrittenResponseAnswer(QuizAnswerBaseModel):
 
-    assessment_submission = models.ForeignKey(AssessmentSubmission, on_delete=models.CASCADE, related_name='written_response_answers')
+    quiz_submission = models.ForeignKey(QuizSubmission, on_delete=models.CASCADE, related_name='written_response_answers')
     question = models.ForeignKey(WrittenResponseQuestion, on_delete=models.CASCADE, related_name='answers')
     
     response = models.TextField()
 
 
-class CodingQuestion(AssessmentQuestionBaseModel):
+class CodingQuestion(QuizQuestionBaseModel):
 
     class ProgrammingLanguage(models.TextChoices):
         C_PP = "C_PP", _("C++")
@@ -317,7 +322,7 @@ class CodingQuestion(AssessmentQuestionBaseModel):
         PYTHON = "PYTHON", _("Python")
 
     id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
-    assessment = models.ForeignKey(Assessment, on_delete=models.CASCADE, related_name="coding_questions")
+    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name="coding_questions")
 
     starter_code = models.TextField(blank=True, null=True)
     programming_language = models.CharField(
@@ -330,23 +335,23 @@ class CodingQuestion(AssessmentQuestionBaseModel):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=['assessment', 'order'], name='unique_order_coding_question'
+                fields=['quiz', 'order'], name='unique_order_coding_question'
             )
         ]
 
 
-class CodingAnswer(AssessmentAnswerBaseModel):
+class CodingAnswer(QuizAnswerBaseModel):
 
-    assessment_submission = models.ForeignKey(AssessmentSubmission, on_delete=models.CASCADE, related_name="coding_question_answers")
+    quiz_submission = models.ForeignKey(QuizSubmission, on_delete=models.CASCADE, related_name="coding_question_answers")
     question = models.ForeignKey(CodingQuestion, on_delete=models.CASCADE, related_name="answers")
     
     solution = models.TextField()
 
 
-class MultipleChoiceQuestion(AssessmentQuestionBaseModel):
+class MultipleChoiceQuestion(QuizQuestionBaseModel):
 
     id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
-    assessment = models.ForeignKey(Assessment, on_delete=models.CASCADE, related_name='multiple_choice_questions')
+    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name='multiple_choice_questions')
 
     options = models.JSONField() # TODO: validate this is an array
     correct_option_index = models.PositiveIntegerField()
@@ -354,22 +359,22 @@ class MultipleChoiceQuestion(AssessmentQuestionBaseModel):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=['assessment', 'order'], name='unique_order_multiple_choice_question'
+                fields=['quiz', 'order'], name='unique_order_multiple_choice_question'
             )
         ]
 
 
-class MultipleChoiceAnswer(AssessmentAnswerBaseModel):
+class MultipleChoiceAnswer(QuizAnswerBaseModel):
 
-    assessment_submission = models.ForeignKey(AssessmentSubmission, on_delete=models.CASCADE, related_name='multiple_choice_answers')
+    quiz_submission = models.ForeignKey(QuizSubmission, on_delete=models.CASCADE, related_name='multiple_choice_answers')
     question = models.ForeignKey(MultipleChoiceQuestion, on_delete=models.CASCADE, related_name='answers')
     selected_answer_index = models.PositiveIntegerField()
 
 
-class CheckboxQuestion(AssessmentQuestionBaseModel):
+class CheckboxQuestion(QuizQuestionBaseModel):
 
     id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
-    assessment = models.ForeignKey(Assessment, on_delete=models.CASCADE, related_name='checkbox_questions')
+    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name='checkbox_questions')
 
     options = models.JSONField() # TODO: validate this is an array
     correct_option_indices = models.JSONField(null=True) # TODO: validate this is an array
@@ -377,14 +382,14 @@ class CheckboxQuestion(AssessmentQuestionBaseModel):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=['assessment', 'order'], name='unique_order_checkbox_question'
+                fields=['quiz', 'order'], name='unique_order_checkbox_question'
             )
         ]
 
 
-class CheckboxAnswer(AssessmentAnswerBaseModel):
+class CheckboxAnswer(QuizAnswerBaseModel):
 
-    assessment_submission = models.ForeignKey(AssessmentSubmission, on_delete=models.CASCADE, related_name='checkbox_answers')
+    quiz_submission = models.ForeignKey(QuizSubmission, on_delete=models.CASCADE, related_name='checkbox_answers')
     question = models.ForeignKey(CheckboxQuestion, on_delete=models.CASCADE, related_name='answers')
     
     selected_answer_indices = models.JSONField(null=True) # TODO: validate this is an array
