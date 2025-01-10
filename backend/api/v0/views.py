@@ -209,8 +209,9 @@ def tasks(request):
         task_data = {
             'id': task.id,
             'status': task.get_status_display(),
-            'grade': grade,
         }
+        if not grade is None:
+            task['grade'] = grade
         # Old style
         if task.push:
             push = task.push
@@ -287,7 +288,8 @@ def course(request, slug):
                 task_data['received'] = received
 
             if assignment.kind == Assignment.Kind.TESTS:
-                task_data['grade'] = grade
+                if not grade is None:
+                    task_data['grade'] = grade
             elif assignment.kind == Assignment.Kind.LEADERBOARD:
                 speedup = result['speedup'] if result and 'speedup' in result else None
                 if speedup:

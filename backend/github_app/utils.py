@@ -13,6 +13,8 @@ def get_file(repo, path, ref):
     api = GitHubRestAPI()
     full_path = settings.GITHUB_CONTENT_DIR / repo / ref / path
     content = api.get_repository_content_raw_for_org(repo, path, ref=ref)
+    if not content:
+        return None
     os.makedirs(full_path.parent, exist_ok=True)
     with open(full_path, 'w') as f:
         f.write(content)

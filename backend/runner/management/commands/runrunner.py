@@ -43,6 +43,9 @@ class Command(BaseCommand):
                 full_path = get_file(
                     repository.name, file_path, head_commit.sha1,
                 )
+                # The file could not be in the repository
+                if not full_path:
+                    continue
             else:
                 full_path = get_dir(
                     repository.name, file_path, head_commit.sha1,
@@ -83,7 +86,7 @@ class Command(BaseCommand):
 
         p = subprocess.run(
             [
-                "kubectl", "run", pod_name, "-q", "-i", "--rm",
+                "kubectl", "run", pod_name, "-q", "-i", "-t", "--rm",
                 "--image", image, "--restart=Never",
                 f"--overrides={json.dumps(overrides)}",
             ],

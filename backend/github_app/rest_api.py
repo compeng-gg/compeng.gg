@@ -124,6 +124,8 @@ class GitHubRestAPI(RestAPI):
                 f'{self.API_URL}{endpoint}',
                 headers=headers,
             )
+        if r.status_code != 200:
+            return None
         return r.text
 
     def put_with_jwt(self, endpoint, data=None):
@@ -364,7 +366,7 @@ class GitHubRestAPI(RestAPI):
             f'/repos/{owner}/{repo}/contents/{path}',
             data=kwargs if kwargs else None,
         )
-    
+
     def get_repository_content_raw_for_org(self, repo, path, **kwargs):
         return self.get_repository_content_raw(
             self.ORGANIZATION, repo, path, **kwargs
