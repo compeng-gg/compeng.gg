@@ -10,7 +10,7 @@ function Table({ data, fields }: TableProps) {
   const hasData = Array.isArray(data) && data.length !== 0;
   return (
     <table className="table-auto">
-      <thead className="bg-slate-700">
+      <thead className="bg-slate-300 dark:bg-slate-700">
         <tr>
           {fields.map((field, index) => (
             <th
@@ -24,7 +24,7 @@ function Table({ data, fields }: TableProps) {
       </thead>
       <tbody>
         {hasData && data.map((row, rowIndex) => (
-          <tr key={rowIndex}>
+          <tr key={rowIndex} {...(row.highlight ? { className: "bg-green-200 dark:bg-green-800" } : {})}>
             {fields.map((field, fieldIndex) => (
               <td
                 key={fieldIndex}

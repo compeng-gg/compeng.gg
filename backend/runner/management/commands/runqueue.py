@@ -32,8 +32,41 @@ class Manager:
 
 class Command(BaseCommand):
 
+    def update_leaderboard(self, task):
+        for assignment_task in task.assignmenttask_set.all():
+            if not task.result:
+                continue
+            # TODO, this not a great way to get the result...
+            from api.v0.views import get_task_result
+            result = get_task_result(task)
+            if not 'kind' in result:
+                continue
+            if not result['kind'] == 'benchmark':
+                continue
+            if not 'speedup' in result:
+                continue
+            from courses.models import AssignmentLeaderboardEntry
+            user = assignment_task.user
+            assignment = assignment_task.assignment
+            speedup = result['speedup']
+            try:
+                entry = AssignmentLeaderboardEntry.objects.get(
+                    user=user,
+                    assignment=assignment,
+                )
+                if speedup > entry.speedup:
+                    entry.speedup = speedup
+                    entry.save()
+            except AssignmentLeaderboardEntry.DoesNotExist:
+                AssignmentLeaderboardEntry.objects.create(
+                    user=user,
+                    assignment=assignment,
+                    speedup=speedup,
+                )
+
     def run_task(self, task):
         self.stdout.write(f'{task} received')
+        close_old_connections()
 
         host, lock = self.manager.next_host()
         with lock:
@@ -58,6 +91,9 @@ class Command(BaseCommand):
             task.status = Task.Status.FAILURE
             self.stdout.write(f'{task} failure')
         task.save()
+
+        self.update_leaderboard(task)
+
         close_old_connections()
 
     def run(self, conn):
@@ -73,7 +109,7 @@ class Command(BaseCommand):
 
     def _socket_listen(self):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.bind((settings.RUNNER_QUEUE_HOST, settings.RUNNER_QUEUE_PORT))
+        s.bind(('', settings.RUNNER_QUEUE_PORT))
         s.listen()
         return s
 
@@ -87,8 +123,7 @@ class Command(BaseCommand):
         try:
             s = self._socket_listen()
             self.stdout.write(self.style.SUCCESS(
-                f'Listening on {settings.RUNNER_QUEUE_HOST}' \
-                f':{settings.RUNNER_QUEUE_PORT}'
+                f'Listening on *:{settings.RUNNER_QUEUE_PORT}'
             ))
         except OSError as err:
             raise CommandError(f'Socket failed: {err}')

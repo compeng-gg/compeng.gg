@@ -25,5 +25,5 @@ urlpatterns = [
 if settings.BUILTIN_FRONTEND:
     from django.contrib import admin
     urlpatterns += [
-        path("admin/", admin.site.urls),
+        path("api/admin/", admin.site.urls),
     ]

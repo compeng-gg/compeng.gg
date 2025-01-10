@@ -28,6 +28,22 @@ def create_utoronto_course(name, title):
     )
     return course
 
+def create_2025_winter_offering(course):
+    name = '2025 Winter'
+    start = date(2025, 1, 6)
+    end = date(2025, 4, 30)
+    offering, _ = Offering.objects.get_or_create(
+        course=course,
+        slug=slugify(name),
+        defaults={
+            'name': name,
+            'start': start,
+            'end': end,
+            'active': False,
+        }
+    )
+    return offering
+
 def create_2024_fall_offering(course):
     name = '2024 Fall'
     start = date(2024, 9, 3)
@@ -159,8 +175,8 @@ def create_github_teams(offering):
         except:
             response = api.create_team_for_org(name)
             assert slug == response['slug']
-            offering.github_team_slug = slug
-            offering.save()
+            role.github_team_slug = slug
+            role.save()
 
 def create_utoronto_roles():
     api = DiscordRestAPI()
@@ -216,14 +232,35 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        # create_utoronto_roles()
+        create_utoronto_roles()
+
+        aps105 = create_utoronto_course('APS105', 'Computer Fundamentals')
+        aps105_offering = create_2025_winter_offering(aps105)
+        create_default_roles(aps105_offering)
+        create_discord_roles(
+            aps105_offering,
+            student_color=DiscordRestAPI.COLOR_MAGENTA
+        )
+        create_github_teams(aps105_offering)
+
         ece353 = create_utoronto_course('ECE353', 'Systems Software')
-        ece353_offering = create_2024_winter_offering(ece353)
+        ece353_offering = create_2025_winter_offering(ece353)
         create_default_roles(ece353_offering)
-        # create_discord_roles(
-        #     ece353_offering,
-        #     student_color=DiscordRestAPI.COLOR_BLUE
-        # )
+        create_discord_roles(
+            ece353_offering,
+            student_color=DiscordRestAPI.COLOR_BLUE
+        )
+        create_github_teams(ece353_offering)
+
+        ece419 = create_utoronto_course('ECE419', 'Distributed Systems')
+        ece419_offering = create_2025_winter_offering(ece419)
+        create_default_roles(ece419_offering)
+        create_discord_roles(
+            ece419_offering,
+            student_color=DiscordRestAPI.COLOR_BLUE
+        )
+        create_github_teams(ece419_offering)
+
         ece344 = create_utoronto_course('ECE344', 'Operating Systems')
         ece454 = create_utoronto_course('ECE454', 'Computer Systems Programming')
         ece344_offering = create_2024_fall_offering(ece344)

@@ -1,5 +1,6 @@
 from django.db import models
 from github_app.models import Push
+from compeng_gg.django.github.models import Commit
 
 class Runner(models.Model):
 
@@ -19,7 +20,8 @@ class Task(models.Model):
 
     status = models.IntegerField(choices=Status.choices)
     created = models.DateTimeField(auto_now_add=True)
-    push = models.ForeignKey(Push, on_delete=models.CASCADE)
+    push = models.ForeignKey(Push, on_delete=models.SET_NULL, blank=True, null=True)
+    head_commit = models.ForeignKey(Commit, on_delete=models.SET_NULL, blank=True, null=True)
     runner = models.ForeignKey(Runner, on_delete=models.CASCADE)
     result = models.JSONField(blank=True, null=True)
 
