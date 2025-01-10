@@ -5,6 +5,7 @@ from django.urls import reverse, NoReverseMatch
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 
+from compeng_gg.django.github.models import Repository
 from runner.models import Runner, Task
 
 
@@ -69,6 +70,13 @@ class Offering(models.Model):
     end = models.DateField()
     active = models.BooleanField()
     external_id = models.BigIntegerField(blank=True, null=True)
+    runner_repo = models.ForeignKey(
+        Repository,
+        on_delete=models.SET_NULL,
+        related_name="offering_runner",
+        blank=True,
+        null=True,
+    )
 
     def __str__(self):
         return f'{self.name} {self.course}'
@@ -101,10 +109,15 @@ class OfferingTeamsSettings(models.Model):
 
 class Assignment(models.Model):
 
+    class Kind(models.IntegerChoices):
+        TESTS = 1
+        LEADERBOARD = 2
+
     offering = models.ForeignKey(
         Offering,
         on_delete=models.CASCADE,
     )
+    kind = models.IntegerField(choices=Kind)
     runner = models.ForeignKey(
         Runner,
         on_delete=models.CASCADE,
@@ -173,6 +186,13 @@ class Enrollment(models.Model):
         Role,
         on_delete=models.CASCADE,
     )
+    student_repo = models.OneToOneField(
+        Repository,
+        on_delete=models.SET_NULL,
+        related_name="enrollment",
+        blank=True,
+        null=True,
+    )
 
     def __str__(self):
         return f'{self.user} - {self.role}'
@@ -224,6 +244,42 @@ class AssignmentTask(models.Model):
 
     def __str__(self):
         return f'{self.user} - {self.assignment} - {self.task}'
+
+class AssignmentLeaderboardEntry(models.Model):
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+    )
+    assignment = models.ForeignKey(
+        Assignment,
+        on_delete=models.CASCADE,
+    )
+    speedup = models.IntegerField()
+
+    def __str__(self):
+        return f'{self.user} - {self.assignment} - {self.speedup}'
+
+    class Meta:
+        unique_together = ['user', 'assignment']
+
+class AssignmentGrade(models.Model):
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+    )
+    assignment = models.ForeignKey(
+        Assignment,
+        on_delete=models.CASCADE,
+    )
+    grade = models.IntegerField()
+
+    def __str__(self):
+        return f'{self.user} - {self.assignment} - Grade: {self.grade}'
+
+    class Meta:
+        unique_together = ['user', 'assignment']
 
 class Accommodation(models.Model):
 

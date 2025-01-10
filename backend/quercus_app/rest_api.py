@@ -24,8 +24,22 @@ class QuercusRestAPI(RestAPI):
             return None
         return r.json()
 
+    def list_users(self, course_id, enrollment_type):
+        data = []
+        page = 1
+        per_page = 100
+        while True:
+            response = self.get(f'/courses/{course_id}/users?enrollment_type={enrollment_type}&page={page}&per_page={per_page}')
+            data += response
+            if len(response) != per_page:
+                return data
+            page += 1
+
+    def list_tas(self, course_id):
+        return self.list_users(course_id, "ta")
+
     def list_students(self, course_id):
-        return self.get(f'/courses/{course_id}/students')
+        return self.list_users(course_id, "student")
 
     # Required to get the `primary_email` of a user
     def get_user_profile(self, user_id):

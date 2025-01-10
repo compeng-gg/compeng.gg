@@ -1,4 +1,5 @@
 from django.contrib.auth.models import User
+from django.views.decorators.csrf import csrf_exempt
 
 from social_core.exceptions import (
     AuthAlreadyAssociated,
@@ -20,6 +21,8 @@ from compeng_gg.auth.serializers import CodeSerializer
 
 from .serializers import UserSerializer
 
+from courses.utils import get_grade_for_assignment
+
 # TODO: with sqlite task.result is a dict, with postgres it's a str
 def get_task_result(task):
     if type(task.result) is str and task.result != '':
@@ -35,6 +38,7 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAdminUser]
 
+@csrf_exempt
 @api_view(['POST'])
 @permission_classes([permissions.AllowAny])
 def auth_common(request, provider, allow_create_user=False):
@@ -87,6 +91,7 @@ def auth_google(request):
 def auth_laforge(request):
     return auth_common(request, 'laforge', allow_create_user=True)
 
+@csrf_exempt
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
 def connect_common(request, provider):
@@ -123,11 +128,10 @@ def connect_discord(request):
 def connect_github(request):
     response = connect_common(request, 'github')
     if response.status_code == 200:
-        from github_app.utils import add_github_team_membership, create_fork
+        from github_app.utils import add_github_team_membership, create_forks
         user = request.user
         add_github_team_membership(user)
-        create_fork('ece344', user)
-        create_fork('ece454', user)
+        create_forks(user)
     return response
 
 def connect_google(request):
@@ -136,6 +140,7 @@ def connect_google(request):
 def connect_laforge(request):
     return connect_common(request, 'laforge')
 
+@csrf_exempt
 @api_view(['DELETE'])
 @permission_classes([permissions.IsAuthenticated])
 def disconnect_common(request, provider):
@@ -208,25 +213,44 @@ def tasks(request):
         push = task.push
         result = get_task_result(task)
         grade = result['grade'] if result and 'grade' in result else None
-        data.append({
+
+        task_data = {
             'id': task.id,
             'status': task.get_status_display(),
-            'grade': grade,
-            'repo': push.payload['repository']['name'],
-            'commit': push.payload['after'],
-            'received': push.received,
-        })
+        }
+        if not grade is None:
+            task['grade'] = grade
+        # Old style
+        if task.push:
+            push = task.push
+            received = push.received
+            task_data['repo'] = push.payload['repository']['name']
+            task_data['commit'] = push.payload['after']
+            task_data['received'] = received
+        # New style
+        if task.head_commit:
+            head_commit = task.head_commit
+            repository = head_commit.repository
+            # TODO: check if this every returns more than one
+            received = head_commit.pushes_head.all()[0].delivery.received
+            task_data['repo'] = repository.name
+            task_data['commit'] = head_commit.sha1
+            task_data['received'] = received
+
+        data.append(task_data)
     return Response(data)
 
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
 def course(request, slug):
-    from courses.models import Accommodation, Offering
+    from courses.models import Accommodation, Assignment, AssignmentLeaderboardEntry, Offering, AssignmentGrade
     user = request.user
     try:
         offering = Offering.objects.get(course__slug=slug)
     except Offering.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
+    except Offering.MultipleObjectsReturned:
+        offering = Offering.objects.get(course__slug=slug, active=True)
 
     data = {
         'name': str(offering),
@@ -247,22 +271,42 @@ def course(request, slug):
             user=request.user, assignment=assignment
         ).order_by('-task__created'):
             task = assignment_task.task
-            push = task.push
             result = get_task_result(task)
             grade = result['grade'] if result and 'grade' in result else None
-            tasks.append({
+            task_data = {
                 'id': task.id,
                 'status': task.get_status_display(),
-                'grade': grade,
-                'repo': push.payload['repository']['name'],
-                'commit': push.payload['after'],
-                'received': push.received,
                 'result': result,
-            })
-            on_time = push.received <= due_date
+            }
+            # Old style
+            if task.push:
+                push = task.push
+                received = push.received
+                task_data['repo'] = push.payload['repository']['name']
+                task_data['commit'] = push.payload['after']
+                task_data['received'] = received
+            # New style
+            if task.head_commit:
+                head_commit = task.head_commit
+                repository = head_commit.repository
+                # TODO: check if this every returns more than one
+                received = head_commit.pushes_head.all()[0].delivery.received
+                task_data['repo'] = repository.name
+                task_data['commit'] = head_commit.sha1
+                task_data['received'] = received
+
+            if assignment.kind == Assignment.Kind.TESTS:
+                if not grade is None:
+                    task_data['grade'] = grade
+            elif assignment.kind == Assignment.Kind.LEADERBOARD:
+                speedup = result['speedup'] if result and 'speedup' in result else None
+                if speedup:
+                    task_data['speedup'] = speedup
+            tasks.append(task_data)
+            on_time = received <= due_date
             max_grade = 100 # TODO: This should probably come from the assign.
             if accommodation and not on_time:
-                if push.received > accommodation.due_date:
+                if received > accommodation.due_date:
                     continue
                 if accommodation.max_grade:
                     max_grade = accommodation.max_grade
@@ -273,13 +317,31 @@ def course(request, slug):
             grade = min(grade, max_grade)
             if grade > assignment_grade:
                 assignment_grade = grade
-        assignments.append({
+        assignment_data = {
             'slug': assignment.slug,
             'name': assignment.name,
+            'kind': assignment.kind,
             'due_date': due_date,
-            'grade': assignment_grade,
             'tasks': tasks,
-        })
+        }
+        try:
+            ag = AssignmentGrade.objects.get(user=user, assignment=assignment)
+            if ag.grade > assignment_grade:
+                assignment_grade = ag.grade
+                assignment_data['grade'] = assignment_grade
+        except AssignmentGrade.DoesNotExist:
+            pass
+        if assignment.kind == Assignment.Kind.TESTS:
+            assignment_data['grade'] = assignment_grade
+        elif assignment.kind == Assignment.Kind.LEADERBOARD:
+            leaderboard = []
+            for entry in AssignmentLeaderboardEntry.objects.filter(assignment=assignment).order_by('-speedup'):
+                entry_data = {'id': entry.user.id, 'speedup': entry.speedup}
+                if entry.user.id == request.user.id:
+                    entry_data['highlight'] = True
+                leaderboard.append(entry_data)
+            assignment_data['leaderboard'] = leaderboard
+        assignments.append(assignment_data)
     data['assignments'] = assignments
     return Response(data)
 

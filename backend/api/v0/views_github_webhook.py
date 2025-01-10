@@ -7,15 +7,24 @@ import hmac
 import json
 
 from courses.models import AssignmentTask
-from courses.utils import get_data_for_push
+from courses.utils import get_data_for_old_push
+from django.core.exceptions import ObjectDoesNotExist
 from django.conf import settings
 from django.contrib.auth.models import User
 from github_app.models import Push
 from runner.models import Task
 from runner.socket import send_task
 
+from compeng_gg.django.github.utils import get_or_create_delivery
+
+from courses.utils import create_course_tasks
+from runner.utils import create_build_runner
+
 def create_tasks(push):
-    data = get_data_for_push(push)
+    if settings.RUNNER_USE_K8S:
+        return
+
+    data = get_data_for_old_push(push)
     if not 'assignments' in data:
         return
     user = data['user']
@@ -36,6 +45,18 @@ def create_tasks(push):
         except:
             pass
 
+# New style deliveries
+def handle_delivery(delivery):
+    from compeng_gg.django.github.models import Push
+
+    try:
+        push = delivery.push
+    except Push.DoesNotExist:
+        return
+
+    create_build_runner(push)
+    create_course_tasks(push)
+
 @api_view(['POST'])
 @permission_classes([permissions.AllowAny])
 def github_webhook(request):
@@ -52,12 +73,19 @@ def github_webhook(request):
     if not hmac.compare_digest(expected_signature, signature_header):
         return Response(status=status.HTTP_403_FORBIDDEN)
 
-    delivery = request.headers['X-GitHub-Delivery']
+    delivery_uuid = request.headers['X-GitHub-Delivery']
+    hook_id = request.headers["X-GitHub-Hook-ID"]
     event = request.headers['X-GitHub-Event']
     payload = json.loads(request.body)
+
+    # New style objects
+    delivery, created = get_or_create_delivery(hook_id, delivery_uuid, event, payload)
+    if created:
+        handle_delivery(delivery)
+
     if event == 'push':
         push, created = Push.objects.get_or_create(
-            delivery=delivery,
+            delivery=delivery_uuid,
             defaults={'payload': payload},
         )
         if created:

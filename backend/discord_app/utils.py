@@ -37,6 +37,13 @@ def add_discord_role_for_enrollment(enrollment):
                 discord_user_id, utoronto.fourth_year_discord_role_id
             )
 
+def remove_discord_role_for_enrollment(enrollment):
+    discord_user_id = get_uid('discord', enrollment.user)
+    role = enrollment.role
+    discord_role_id = role.discord_role_id
+    api = DiscordRestAPI()
+    api.remove_guild_member_role_for_guild(discord_user_id, discord_role_id)
+
 def add_discord_roles(user):
     discord_user_id = get_uid('discord', user)
     utoronto = Institution.objects.get(slug='utoronto')
