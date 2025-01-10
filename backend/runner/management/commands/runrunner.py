@@ -1,6 +1,7 @@
 import json
 import shlex
 import subprocess
+import sys
 
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
@@ -92,7 +93,14 @@ class Command(BaseCommand):
         try:
             task.result = json.loads(p.stdout)
         except:
-            task.result = {"error": "contact-ta"}
+            task.result = {"error": "contact-jon"}
+
+            self.stdout.write(f'stdout: {p.stdout}')
+            self.stdout.write(f'stderr: {p.stderr}')
+            task.status = Task.Status.FAILURE
+            self.stdout.write(f'{task} failure')
+            task.save()
+            sys.exit(1)
 
         if p.stderr != '':
             self.stderr.write(p.stderr)
