@@ -2,6 +2,7 @@ import json
 import shlex
 import subprocess
 import sys
+import time
 
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
@@ -57,22 +58,30 @@ class Command(BaseCommand):
                 "mountPath": f"/workspace/{file_path}",
             })
 
-        overrides = {
+
+        data = {
+            "apiVersion": "v1",
+            "kind": "Pod",
+            "metadata": {
+                "name": pod_name,
+                "namespace": namespace,
+            },
             "spec": {
+                "containers": [
+                    {
+                        "image": image,
+                        "imagePullPolicy": "Always",
+                        "name": container_name,
+                        "command": command,
+                        "volumeMounts": volume_mounts,
+                    },
+                ],
                 "imagePullSecrets": [
                     {
                         "name": "docker",
                     },
                 ],
-                "containers": [
-                    {
-                        "image": image,
-                        "imagePullPolicy": "Always",
-                        "name": "runner",
-                        "command": command,
-                        "volumeMounts": volume_mounts,
-                    },
-                ],
+                "restartPolicy": "Never",
                 "volumes": [
                     {
                         "name": "github-content",
@@ -81,16 +90,31 @@ class Command(BaseCommand):
                         },
                     },
                 ],
-            }
+            },
         }
 
         p = subprocess.run(
-            [
-                "kubectl", "run", pod_name, "-q", "-i", "-t", "--rm",
-                "--image", image, "--restart=Never",
-                f"--overrides={json.dumps(overrides)}",
-            ],
+            ["kubectl", "create", "-f", "-"], input=json.dumps(data), text=True
+        )
+        while True:
+            p = subprocess.run(
+                ["kubectl", "get", "pod", pod_name, "-o", "json"],
+                capture_output=True, text=True,
+            )
+            output = json.loads(p.stdout)
+            state = output["status"]["containerStatuses"][0]["state"]
+            if "terminated" in state:
+                exit_code = state["terminated"]["exitCode"]
+                break
+            time.sleep(0.1)
+
+        p = subprocess.run(
+            ["kubectl", "logs", pod_name],
             capture_output=True, text=True,
+        )
+        subprocess.run(
+            ["kubectl", "delete", "pod", pod_name],
+            check=True,
         )
 
         try:
@@ -108,7 +132,7 @@ class Command(BaseCommand):
         if p.stderr != '':
             self.stderr.write(p.stderr)
 
-        if p.returncode == 0:
+        if exit_code == 0:
             task.status = Task.Status.SUCCESS
             self.stdout.write(f'{task} success')
         else:
