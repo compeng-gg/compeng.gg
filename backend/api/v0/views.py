@@ -265,6 +265,18 @@ def course(request, slug):
             task = assignment_task.task
             result = get_task_result(task)
             grade = result['grade'] if result and 'grade' in result else None
+
+            # Hide non-public test cases
+            if not result is None and "tests" in result:
+                before = len(result["tests"])
+                result["tests"] = list(filter(lambda test: not "kind" in test or test["kind"] == "public", result["tests"]))
+                after = len(result["tests"])
+                if before != after:
+                    grade = 0
+                    for test in result["tests"]:
+                        grade += test["weight"]
+                    result["grade"] = grade # TODO: This isn't actually displayed
+
             task_data = {
                 'id': task.id,
                 'status': task.get_status_display(),
