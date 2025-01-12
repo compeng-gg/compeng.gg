@@ -102,7 +102,10 @@ class Command(BaseCommand):
                 capture_output=True, text=True,
             )
             output = json.loads(p.stdout)
-            state = output["status"]["containerStatuses"][0]["state"]
+            status = output["status"]
+            if not "containerStatuses" in status:
+                continue
+            state = status["containerStatuses"][0]["state"]
             if "terminated" in state:
                 exit_code = state["terminated"]["exitCode"]
                 break
