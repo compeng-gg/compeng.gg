@@ -41,6 +41,9 @@ def create_course_tasks(push):
     role = enrollment.role
     offering = role.offering
 
+    if not offering.runner_repo:
+        return
+
     assignments = []
     for assignment in offering.assignment_set.all():
         if not has_change_for_assignment(push, assignment):
