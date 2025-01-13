@@ -104,6 +104,7 @@ class Command(BaseCommand):
             output = json.loads(p.stdout)
             status = output["status"]
             if not "containerStatuses" in status:
+                time.sleep(0.1)
                 continue
             state = status["containerStatuses"][0]["state"]
             if "terminated" in state:
