@@ -48,6 +48,7 @@ class Command(BaseCommand):
         print(f"Repo dir is {repo_dir}")
         ### Replace a specifc file in the repo with the solution
 
+        # TODO: do this dynamically from models. Currently this only works for the single demo repo
         file_path_to_replace = "add.py"
 
         file_path = f"{repo_dir}/{file_path_to_replace}"
