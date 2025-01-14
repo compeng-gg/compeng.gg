@@ -103,7 +103,7 @@ def create_build_runner(push):
                 {
                     "name": "ssh-volume",
                     "secret": {
-                        "secretName": "deploy-ssh",
+                        "secretName": f"{repository.name}-deploy",
                         "defaultMode": 256,
                     },
                 },
