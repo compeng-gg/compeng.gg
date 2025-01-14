@@ -19,7 +19,10 @@ class Command(BaseCommand):
         repository = push.repository
 
         tmp_dir = pathlib.Path("/tmp")
-        subprocess.run(["git", "clone", "--depth", "1", f"git@github.com:{repository.full_name}"], cwd=tmp_dir)
+        subprocess.run(
+            ["git", "clone", "--depth", "1", f"git@github.com:{repository.full_name}"],
+            check=True, cwd=tmp_dir,
+        )
 
         repo_dir = tmp_dir / repository.name
         tag = f"gitea.eyl.io/jon/{repository.name}:latest"
