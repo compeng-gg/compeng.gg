@@ -78,6 +78,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'social_django',
     'rest_framework',
+    'rest_framework.authtoken',
     'rest_framework_simplejwt',
 
     'django.contrib.auth',
@@ -206,8 +207,8 @@ SOCIAL_AUTH_PROTECTED_USER_FIELDS = ['first_name', 'last_name']
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
         # 'rest_framework.authentication.SessionAuthentication',
-        # 'rest_framework.authentication.TokenAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',

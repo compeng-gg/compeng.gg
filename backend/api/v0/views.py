@@ -1,3 +1,5 @@
+import datetime
+
 from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_exempt
 
@@ -21,6 +23,7 @@ from compeng_gg.auth.serializers import CodeSerializer
 
 from .serializers import UserSerializer
 
+from courses.models import Enrollment, Offering, Role
 from courses.utils import get_grade_for_assignment
 
 # TODO: with sqlite task.result is a dict, with postgres it's a str
@@ -347,6 +350,75 @@ def course(request, slug):
             assignment_data['leaderboard'] = leaderboard
         assignments.append(assignment_data)
     data['assignments'] = assignments
+    return Response(data)
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def students(request, slug):
+    user = request.user
+    offering = Offering.objects.get(active=True, course__slug=slug)
+    instructor_role = Role.objects.get(offering=offering, kind=Role.Kind.INSTRUCTOR)
+    try:
+        Enrollment.objects.get(user=user, role=instructor_role)
+    except Enrollment.DoesNotExist:
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
+    student_role = Role.objects.get(offering=offering, kind=Role.Kind.STUDENT)
+    return Response([e.user.username for e in Enrollment.objects.filter(role=student_role)])
+
+from rest_framework import serializers
+
+class DateSerializer(serializers.Serializer):
+    date = serializers.DateField()
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def students_commits(request, slug):
+    import zoneinfo
+    from social_django.models import UserSocialAuth
+    from compeng_gg.django.github.models import Delivery, Push
+    from compeng_gg.django.github.models import User as GitHubUser
+    from django.contrib.contenttypes.models import ContentType
+
+    user = request.user
+    offering = Offering.objects.get(active=True, course__slug=slug)
+    instructor_role = Role.objects.get(offering=offering, kind=Role.Kind.INSTRUCTOR)
+    try:
+        Enrollment.objects.get(user=user, role=instructor_role)
+    except Enrollment.DoesNotExist:
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
+
+    serializer = DateSerializer(data=request.data)
+    if not serializer.is_valid():
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+    validated_data = serializer.validated_data
+    date = validated_data["date"]
+
+    toronto_tz = zoneinfo.ZoneInfo("America/Toronto")
+    cutoff = datetime.datetime.combine(
+        date, datetime.datetime.max.time(), tzinfo=toronto_tz
+    )
+    content_type = ContentType.objects.get_for_model(Push)
+
+    student_role = Role.objects.get(offering=offering, kind=Role.Kind.STUDENT)
+    data = []
+    for e in Enrollment.objects.filter(role=student_role):
+        user = e.user
+        received = None
+        sha1 = None
+        try:
+            social = UserSocialAuth.objects.get(user=user, provider='github')
+            login = social.extra_data["login"]
+            github_user = GitHubUser.objects.get(login=login)
+            latest_delivery = Delivery.objects.filter(received__lte=cutoff, content_type=content_type, object_id__in=github_user.pushes.all()).order_by('-received')[0]
+            received = latest_delivery.received.astimezone(toronto_tz)
+            sha1 = latest_delivery.push.head_commit.sha1
+        except:
+            pass
+        data.append({
+            "username": user.username,
+            "sha1": sha1,
+            "received": received,
+        })
     return Response(data)
 
 @api_view(['GET'])
