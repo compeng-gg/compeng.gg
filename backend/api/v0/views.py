@@ -277,7 +277,8 @@ def course(request, slug):
                 if before != after:
                     grade = 0
                     for test in result["tests"]:
-                        grade += test["weight"]
+                        if test["result"] == "OK":
+                            grade += test["weight"]
                     result["grade"] = grade # TODO: This isn't actually displayed
 
             task_data = {
