@@ -168,6 +168,7 @@ def delete_team(request):
     serializer = DeleteTeamRequestSerializer(data=request.data)
 
     if serializer.is_valid():
+        # Check for leader credentials
         team_id = serializer.validated_data.get('team_id')
         user_id = request.user.id
 
@@ -177,7 +178,6 @@ def delete_team(request):
         )
         enrollment = team_enrollment_data.enrollment
         team = team_enrollment_data.team
-
         try:
             team_member = db.TeamMember.objects.get(
                 team_id=team_id,
@@ -189,6 +189,8 @@ def delete_team(request):
         if team_member.membership_type != db.TeamMember.MembershipType.LEADER:
             raise Response({'detail': 'Only team leader can delete team.'}, status=status.HTTP_401_UNAUTHORIZED)
   
+        teamMembers = db.TeamMember.objects.filter(team=team)
+        teamMembers.delete()
         team.delete()
 
         return Response(status=status.HTTP_204_NO_CONTENT)
