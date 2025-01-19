@@ -224,7 +224,7 @@ def leave_team(request):
         
         team_empty = False
         
-        #Frontend only allows deletion by leader if team is empty
+        # Frontend only allows deletion by leader if team is empty
         if team_member.membership_type == db.TeamMember.MembershipType.LEADER:
             team_empty = True
         
@@ -338,6 +338,13 @@ def create_team_settings_for_offering(request):
             offering = db.Offering.objects.get(id=offering_id)
         except db.Offering.DoesNotExist:
             return Response({'detail': 'Offering not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        # Fail if teams settings already exists
+        try: 
+            offeringTeamsSettings = db.OfferingTeamsSettings.objects.get(offering=offering)
+            return Response({'detail': 'Team Settings already exists'}, status=status.HTTP_404_NOT_FOUND)
+        except db.OfferingTeamsSettings.DoesNotExist:
+            pass
 
         team = db.OfferingTeamsSettings.objects.create(
             offering=offering,

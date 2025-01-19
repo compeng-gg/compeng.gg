@@ -25,17 +25,17 @@ class Command(BaseCommand):
 
         mock_course = db.Course.objects.create(
             institution=mock_institution,
-            slug="course-slug",
-            name="The Course Name",
-            title="The Course Title"
+            slug="ece344",
+            name="ECE344",
+            title="Operating Systems"
         )
 
         now_datetime = timezone.now()
 
         mock_offering = db.Offering.objects.create(
             course=mock_course,
-            slug="offering-slug",
-            name="The Course Offering Name",
+            slug="2024-fall",
+            name="2024 Fall",
             start=now_datetime,
             end=now_datetime + timedelta(days=365),
             active=True
@@ -43,17 +43,20 @@ class Command(BaseCommand):
 
         mock_student_role = db.Role.objects.create(
             kind=db.Role.Kind.STUDENT,
-            offering=mock_offering
+            offering=mock_offering,
+            github_team_slug="2024-fall-ece344-student"
         )
 
         mock_instructor_role = db.Role.objects.create(
             kind=db.Role.Kind.INSTRUCTOR,
-            offering=mock_offering
+            offering=mock_offering,
+            github_team_slug="2024-fall-ece344-instructor"
         )
 
         mock_ta_role = db.Role.objects.create(
             kind=db.Role.Kind.TA,
-            offering=mock_offering
+            offering=mock_offering,
+            github_team_slug="2024-fall-ece344-ta"
         )
 
         # Superuser 
@@ -61,6 +64,7 @@ class Command(BaseCommand):
 
         # Normal student users
         mock_student_user_1 = User.objects.create_user(username="student_1", password="password")
+        mock_student_user_2 = User.objects.create_user(username="student_2", password="password")
 
         mock_instructor_user_1 = User.objects.create_user(username="instructor_1", password="password")
 
@@ -68,6 +72,10 @@ class Command(BaseCommand):
 
         mock_student_enrollment_1 = db.Enrollment.objects.create(
             user=mock_student_user_1,
+            role=mock_student_role
+        )
+        mock_student_enrollment_2 = db.Enrollment.objects.create(
+            user=mock_student_user_2,
             role=mock_student_role
         )
 
