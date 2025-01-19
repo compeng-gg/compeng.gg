@@ -117,6 +117,10 @@ class Assignment(models.Model):
     due_date = models.DateTimeField()
     files = models.JSONField()
 
+    public_total = models.FloatField(blank=True, null=True)
+    private_total = models.FloatField(blank=True, null=True)
+    overall_total = models.FloatField(blank=True, null=True)
+
     def __str__(self):
         return f'{self.offering} - {self.name}'
 
@@ -201,6 +205,9 @@ class AssignmentTask(models.Model):
         Task,
         on_delete=models.CASCADE,
     )
+    public_grade = models.FloatField(blank=True, null=True)
+    private_grade = models.FloatField(blank=True, null=True)
+    overall_grade = models.FloatField(blank=True, null=True)
 
     def __str__(self):
         return f'{self.user} - {self.assignment} - {self.task}'

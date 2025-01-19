@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useContext } from 'react';
+import { useParams } from 'next/navigation';
 
 import LoginRequired from '@/app/lib/login-required';
 import H1 from '@/app/ui/h1';
@@ -25,25 +26,28 @@ const leaderboardFields: [string, string][] = [
   ['speedup', 'Speedup'],
 ]
 
-function Course({ params }: { params: { slug: string } }) {
+function Course() {
+  const params = useParams<{ course_slug: string }>();
   const [jwt, setAndStoreJwt] = useContext(JwtContext);
   const [name, setName] = useState();
   const [labs, setLabs] = useState([] as Lab[]);
+  const [data, setData] = useState<any>({});
 
   useEffect(() => {
     async function fetchLabs() {
       try {
-        const response = await fetchApi(jwt, setAndStoreJwt, `courses/${params.slug}/`, "GET");
+        const response = await fetchApi(jwt, setAndStoreJwt, `courses/${params.course_slug}/`, "GET");
         const data = await response.json();
         setName(data.name);
         setLabs(data.assignments);
+        setData(data);
       } catch (error) {
         console.error('Error fetching labs:', error);
       }
     }
 
     fetchLabs();
-  }, [params.slug, jwt, setAndStoreJwt]);
+  }, [params.course_slug, jwt, setAndStoreJwt]);
 
   if (!name) {
     return (
@@ -61,6 +65,8 @@ function Course({ params }: { params: { slug: string } }) {
       <Navbar />
       <Main>
         <H1>{name}</H1>
+        { data.is_staff && <p><Link href={`/${params.course_slug}/staff`} className="text-yellow-500 hover:underline">Staff</Link></p>}
+
         {labs.map((assignment: any) => (
           <div
             key={assignment.slug}
@@ -151,13 +157,13 @@ function Course({ params }: { params: { slug: string } }) {
                     </div>
                   }
 
-                  {task.result && "stdout" in task.result  && (
+                  {task.result && "stdout" in task.result && task.result.stdout && (
                     <div className="bg-blue-100 font-xs text-blue-600 p-3 rounded mt-2">
                       <p className="mb-2"><strong>Standard Output</strong></p>
                       <pre className="text-sm">{task.result.stdout}</pre>
                     </div>
                   )}
-                  {task.result && "stderr" in task.result  && (
+                  {task.result && "stderr" in task.result && task.result.stderr && (
                     <div className="bg-red-100 font-xs text-red-600 p-3 rounded mt-2">
                       <p className="mb-2"><strong>Standard Error</strong></p>
                       <pre className="text-sm">{task.result.stderr}</pre>
@@ -221,10 +227,10 @@ function Course({ params }: { params: { slug: string } }) {
   );
 }
 
-export default function Page({ params }: { params: { slug: string } }) {
+export default function Page() {
   return (
     <LoginRequired>
-      <Course params={params} />
+      <Course />
     </LoginRequired>
   );
 }

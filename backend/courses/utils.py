@@ -1,5 +1,11 @@
 from compeng_gg.auth import get_uid
-from courses.models import Enrollment, Role, Accommodation, Assignment, AssignmentTask
+from courses.models import (
+    Accommodation,
+    Assignment,
+    AssignmentTask,
+    Enrollment,
+    Role,
+)
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
@@ -8,6 +14,15 @@ from runner.utils import create_k8s_task
 
 from discord_app.utils import add_discord_role_for_enrollment
 from github_app.utils import add_github_team_membership_for_enrollment, create_fork_for_enrollment
+
+def is_staff(user, offering):
+    instructor_role = Role.objects.get(offering=offering, kind=Role.Kind.INSTRUCTOR)
+    ta_role = Role.objects.get(offering=offering, kind=Role.Kind.TA)
+    try:
+        Enrollment.objects.get(user=user, role__in=[instructor_role, ta_role])
+        return True
+    except Enrollment.DoesNotExist:
+        return False
 
 def has_change_for_assignment(push, assignment):
     raw_files = list(assignment.files)

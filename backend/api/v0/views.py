@@ -23,8 +23,14 @@ from compeng_gg.auth.serializers import CodeSerializer
 
 from .serializers import UserSerializer
 
-from courses.models import Enrollment, Offering, Role
-from courses.utils import get_grade_for_assignment
+from courses.models import (
+    Assignment,
+    AssignmentTask,
+    Enrollment,
+    Offering,
+    Role,
+)
+from courses.utils import get_grade_for_assignment, is_staff
 
 # TODO: with sqlite task.result is a dict, with postgres it's a str
 def get_task_result(task):
@@ -249,6 +255,7 @@ def course(request, slug):
 
     data = {
         'name': str(offering),
+        "is_staff": is_staff(user, offering),
     }
     assignments = []
     for assignment in offering.assignment_set.all():
@@ -351,6 +358,79 @@ def course(request, slug):
             assignment_data['leaderboard'] = leaderboard
         assignments.append(assignment_data)
     data['assignments'] = assignments
+    return Response(data)
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def staff(request, course_slug):
+    user = request.user
+    try:
+        offering = Offering.objects.get(active=True, course__slug=course_slug)
+    except Offering.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    if not is_staff(user, offering):
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
+
+    student_role = Role.objects.get(offering=offering, kind=Role.Kind.STUDENT)
+    data = {
+        "offering": str(offering),
+    }
+    assignments = []
+    for assignment in offering.assignment_set.all():
+        assignment_data = {
+            "slug": assignment.slug,
+            "name": assignment.name,
+            "due_date": assignment.due_date,
+        }
+        assignments.append(assignment_data)
+    data["assignments"] = assignments
+    return Response(data)
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def staff_assignment(request, course_slug, assignment_slug):
+    user = request.user
+    try:
+        offering = Offering.objects.get(active=True, course__slug=course_slug)
+    except Offering.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    if not is_staff(user, offering):
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
+
+    try:
+        assignment = Assignment.objects.get(offering=offering, slug=assignment_slug)
+    except Assignment.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    student_role = Role.objects.get(offering=offering, kind=Role.Kind.STUDENT)
+    data = {
+        "offering": str(offering),
+        "slug": assignment.slug,
+        "name": assignment.name,
+    }
+    num_students_with_submissions = 0
+    num_students = 0
+
+    students_data = []
+    for enrollment in Enrollment.objects.filter(role=student_role).order_by("user__username"):
+        user = enrollment.user
+        repository = enrollment.student_repo
+        submissions = AssignmentTask.objects.filter(user=user, assignment=assignment).count()
+        if submissions > 0:
+            num_students_with_submissions += 1
+        num_students += 1
+        student_data = {
+            "username": user.username,
+            "repository_name": repository.name if repository else "",
+            "repository_url": f"https://github.com/{repository.full_name}" if repository else "",
+            "submissions": submissions,
+        }
+        students_data.append(student_data)
+    data["students"] = students_data
+    data["num_students_with_submissions"] = num_students_with_submissions
+    data["num_students"] = num_students
     return Response(data)
 
 @api_view(['GET'])
