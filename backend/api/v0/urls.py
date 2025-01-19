@@ -41,6 +41,7 @@ urlpatterns = [
     path('courses/<slug:slug>/', views.course),
     path('courses/<slug:course_slug>/staff/', views.staff),
     path('courses/<slug:course_slug>/staff/<slug:assignment_slug>/', views.staff_assignment),
+    path('courses/<slug:course_slug>/staff/<slug:assignment_slug>/accommodation/', views.staff_assignment_accommodation),
     path('courses/<slug:slug>/students/', views.students),
     path('courses/<slug:slug>/students/commits/', views.students_commits),
 

@@ -232,3 +232,31 @@ def get_grade_for_assignment(user, assignment):
         if grade > assignment_grade:
             assignment_grade = grade
     return assignment_grade
+
+def populate_assignment_grades(task):
+    from api.v0.views import get_task_result
+    assignment_task = task.assignmenttask_set.get() # TODO: This should be OneToOne
+    result = get_task_result(task)
+    if result is None or not "tests" in result:
+        return
+    public_grade = 0.0
+    private_grade = 0.0
+    for test in result["tests"]:
+        weight = test["weight"]
+        if test["result"] != "OK":
+            # Failing a weight of 0.0 invalidates the grade.
+            if weight == 0.0:
+                public_grade = 0.0
+                private_grade = 0.0
+                break
+            continue
+        if not "kind" in test or test["kind"] != "private":
+            public_grade += weight
+        else:
+            private_grade += weight
+    overall_grade = public_grade + private_grade
+    assert result["grade"] == overall_grade
+    assignment_task.public_grade = public_grade
+    assignment_task.private_grade = private_grade
+    assignment_task.overall_grade = overall_grade
+    assignment_task.save()

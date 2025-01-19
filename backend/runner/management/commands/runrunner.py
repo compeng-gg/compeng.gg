@@ -4,6 +4,7 @@ import subprocess
 import sys
 import time
 
+from courses.utils import populate_assignment_grades
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 from github_app.utils import get_dir, get_file
@@ -143,3 +144,6 @@ class Command(BaseCommand):
             task.status = Task.Status.FAILURE
             self.stdout.write(f'{task} failure')
         task.save()
+
+        if task.status == Task.Status.SUCCESS:
+            populate_assignment_grades(task)

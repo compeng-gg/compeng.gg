@@ -117,6 +117,7 @@ class Assignment(models.Model):
     due_date = models.DateTimeField()
     files = models.JSONField()
 
+    is_private_released = models.BooleanField(default=False)
     public_total = models.FloatField(blank=True, null=True)
     private_total = models.FloatField(blank=True, null=True)
     overall_total = models.FloatField(blank=True, null=True)

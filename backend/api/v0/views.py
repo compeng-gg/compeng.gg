@@ -260,6 +260,7 @@ def course(request, slug):
     assignments = []
     for assignment in offering.assignment_set.all():
         due_date = assignment.due_date
+        is_private_released = assignment.is_private_released
         # Look for accommodations
         try:
             accommodation = Accommodation.objects.get(
@@ -267,6 +268,7 @@ def course(request, slug):
             )
         except Accommodation.DoesNotExist:
             accommodation = None
+
         assignment_grade = 0
         tasks = []
         for assignment_task in assignment.assignmenttask_set.filter(
@@ -274,19 +276,19 @@ def course(request, slug):
         ).order_by('-task__created'):
             task = assignment_task.task
             result = get_task_result(task)
-            grade = result['grade'] if result and 'grade' in result else None
+            grade = None
 
-            # Hide non-public test cases
             if not result is None and "tests" in result:
-                before = len(result["tests"])
-                result["tests"] = list(filter(lambda test: not "kind" in test or test["kind"] == "public", result["tests"]))
-                after = len(result["tests"])
-                if before != after:
-                    grade = 0
-                    for test in result["tests"]:
-                        if test["result"] == "OK":
-                            grade += test["weight"]
-                    result["grade"] = grade # TODO: This isn't actually displayed
+                if not is_private_released:
+                    # Filter out the tests
+                    result["tests"] = list(filter(lambda test: not "kind" in test or test["kind"] == "public", result["tests"]))
+                    grade = f"{assignment_task.public_grade:.0f}/{assignment.public_total:.0f} ({assignment.private_total:.0f} hidden)"
+                    if assignment_task.public_grade > assignment_grade:
+                        assignment_grade = assignment_task.public_grade
+                else:
+                    grade = f"{assignment_task.overall_grade:.0f}/{assignment.overall_total:.0f}"
+                    if assignment_task.overall_grade > assignment_grade:
+                        assignment_grade = assignment_task.overall_grade
 
             task_data = {
                 'id': task.id,
@@ -318,20 +320,20 @@ def course(request, slug):
                 if speedup:
                     task_data['speedup'] = speedup
             tasks.append(task_data)
-            on_time = received <= due_date
-            max_grade = 100 # TODO: This should probably come from the assign.
-            if accommodation and not on_time:
-                if received > accommodation.due_date:
-                    continue
-                if accommodation.max_grade:
-                    max_grade = accommodation.max_grade
-            elif not on_time:
-                continue
-            if grade is None:
-                continue
-            grade = min(grade, max_grade)
-            if grade > assignment_grade:
-                assignment_grade = grade
+            # on_time = received <= due_date
+            # max_grade = 100 # TODO: This should probably come from the assign.
+            # if accommodation and not on_time:
+            #     if received > accommodation.due_date:
+            #         continue
+            #     if accommodation.max_grade:
+            #         max_grade = accommodation.max_grade
+            # elif not on_time:
+            #     continue
+            # if grade is None:
+            #     continue
+            # grade = min(grade, max_grade)
+            # if grade > assignment_grade:
+            #     assignment_grade = grade
         assignment_data = {
             'slug': assignment.slug,
             'name': assignment.name,
@@ -347,7 +349,10 @@ def course(request, slug):
         except AssignmentGrade.DoesNotExist:
             pass
         if assignment.kind == Assignment.Kind.TESTS:
-            assignment_data['grade'] = assignment_grade
+            if not is_private_released:
+                assignment_data["grade"] = f"{assignment_grade:.0f}/{assignment.public_total:.0f} ({assignment.private_total:.0f} hidden)"
+            else:
+                assignment_data["grade"] = f"{assignment_grade:.0f}/{assignment.overall_total:.0f}"
         elif assignment.kind == Assignment.Kind.LEADERBOARD:
             leaderboard = []
             for entry in AssignmentLeaderboardEntry.objects.filter(assignment=assignment).order_by('-speedup'):
@@ -413,6 +418,7 @@ def staff_assignment(request, course_slug, assignment_slug):
     num_students_with_submissions = 0
     num_students = 0
 
+    due_date = assignment.due_date
     students_data = []
     for enrollment in Enrollment.objects.filter(role=student_role).order_by("user__username"):
         user = enrollment.user
@@ -426,11 +432,49 @@ def staff_assignment(request, course_slug, assignment_slug):
             "repository_name": repository.name if repository else "",
             "repository_url": f"https://github.com/{repository.full_name}" if repository else "",
             "submissions": submissions,
+            "accommodation": 0,
         }
         students_data.append(student_data)
     data["students"] = students_data
     data["num_students_with_submissions"] = num_students_with_submissions
     data["num_students"] = num_students
+    return Response(data)
+
+class AccommodationSerializer(serializers.Serializer):
+    username = serializers.CharField()
+    days = serializers.IntegerField()
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def staff_assignment_accommodation(request, course_slug, assignment_slug):
+    user = request.user
+    try:
+        offering = Offering.objects.get(active=True, course__slug=course_slug)
+    except Offering.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    if not is_staff(user, offering):
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
+
+    try:
+        assignment = Assignment.objects.get(offering=offering, slug=assignment_slug)
+    except Assignment.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    serializer = AccommodationSerializer(data=request.data)
+    if not serializer.is_valid():
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+    validated_data = serializer.validated_data
+
+    try:
+        user = User.objects.get(username=validated_data["username"])
+    except User.DoesNotExist:
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
+    days = validated_data["days"]
+    print(user, days)
+
+    data = {}
     return Response(data)
 
 @api_view(['GET'])
@@ -445,8 +489,6 @@ def students(request, slug):
         return Response(status=status.HTTP_401_UNAUTHORIZED)
     student_role = Role.objects.get(offering=offering, kind=Role.Kind.STUDENT)
     return Response([e.user.username for e in Enrollment.objects.filter(role=student_role)])
-
-from rest_framework import serializers
 
 class DateSerializer(serializers.Serializer):
     date = serializers.DateField()
