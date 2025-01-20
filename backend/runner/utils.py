@@ -151,6 +151,20 @@ def create_build_runner(push):
     proc = subprocess.Popen(["kubectl", "create", "-f", "-"], stdin=subprocess.PIPE, text=True)
     proc.communicate(input=json.dumps(data))
 
+def create_quiz_task(coding_answer_execution):
+    """
+    Creates a Kubernetes Pod in Minikube to execute a quiz task based on a given CodingAnswerExecution.
+    """
+    def run_command(command, error_message):
+        try:
+            subprocess.run(command, check=True)
+        except subprocess.CalledProcessError as e:
+            print(f"{error_message}: {e}")
+            return False
+        return True
+    
+    run_command(["python", "manage.py", "quiz_buildrunner", str(coding_answer_execution.id)], "something broke")
+
 def create_quiz_build_runner(coding_answer_execution: course_models.CodingAnswerExecution) -> None:
     repository = coding_answer_execution.coding_question.repository
 

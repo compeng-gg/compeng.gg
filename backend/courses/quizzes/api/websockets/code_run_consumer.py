@@ -10,6 +10,7 @@ from django.contrib.auth.models import (
     AnonymousUser,
     User
 )
+from runner.utils import create_quiz_task
 from django.utils import timezone
 from pydantic import BaseModel
 
@@ -143,6 +144,8 @@ class CodeRunConsumer(AsyncWebsocketConsumer):
         solution = data['solution']
 
         coding_answer_execution = await create_coding_answer_execution(solution, self.coding_question_id)
+
+        await sync_to_async(create_quiz_task)(coding_answer_execution)
 
         response = await sync_to_async(get_result)(coding_answer_execution)
 
