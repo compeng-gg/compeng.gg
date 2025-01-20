@@ -4,7 +4,6 @@ from urllib.parse import parse_qs
 from typing import Optional
 from rest_framework_simplejwt.tokens import UntypedToken
 from asgiref.sync import sync_to_async
-from runner.utils import create_quiz_build_runner
 import courses.models as db
 from channels.db import database_sync_to_async
 from django.contrib.auth.models import (
@@ -64,49 +63,53 @@ def do_stuff(quiz_submission, coding_question_id, solution):
 def create_coding_answer_execution(solution: str, coding_question_id) -> db.CodingAnswerExecution:
     coding_answer_execution = db.CodingAnswerExecution.objects.create(
         coding_question_id=coding_question_id,
-        solution=solution
+        solution=solution,
+        status=db.CodingAnswerExecution.Status.IN_PROGRESS
     )
     print(f'Create execution {coding_answer_execution.id}')
     return coding_answer_execution
 
-def mark_execution(coding_answer_execution: db.CodingAnswerExecution) -> CodeRunResponse:
+def get_result(coding_answer_execution: db.CodingAnswerExecution):
     coding_answer_execution.refresh_from_db()
 
-    results = []
+    print(coding_answer_execution.result)
 
-    executions = coding_answer_execution.test_case_executions.all()
-
+    ### Hide private / hidden test cases of the returned result
     num_passed = 0
     num_failed = 0
-    
-    for execution in executions:
-        test_case = execution.test_case
-        expected = test_case.expected_stdout
 
-        actual = execution.stdout
+    if coding_answer_execution.result is not None:
+        tests = []
+        for test in coding_answer_execution.result['tests']:
+            kind = test['kind']
 
-        is_passed = expected == actual
+            if kind == 'hidden':
+                continue
 
-        if is_passed:
-            num_passed += 1
-        else:
-            num_failed += 1
+            test.pop('weight')
 
-        test_case_execution = TestCaseExecution(
-            is_public=test_case.is_public,
-            is_passed=is_passed,
-            input=test_case.command if test_case.is_public else None,
-            stdout=actual if test_case.is_public else None,
-            expected_stdout=expected if test_case.is_public else None,
-            stderr=execution.stderr if test_case.is_public else None
-        )
-        results.append(test_case_execution)
+            if kind == 'private':
+                test.pop("expected_result", None)
+                test.pop("actual_result", None)
+                tests.append(test)
 
-    return CodeRunResponse(
-        num_passed=num_passed,
-        num_failed=num_failed,
-        results=results
-    )
+            if test['result'] == 'OK':
+                num_passed += 1
+            else:
+                num_failed += 1
+
+            tests.append(test)
+    else:
+        tests=None
+            
+
+    return {
+        "status": coding_answer_execution.status,
+        "tests": tests,
+        "stderr": coding_answer_execution.stderr if coding_answer_execution.stderr != "" else None,
+        "num_passed": num_passed,
+        "num_failed": num_failed
+    }
 
 class CodeRunConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -139,14 +142,12 @@ class CodeRunConsumer(AsyncWebsocketConsumer):
         data = json.loads(text_data)
         solution = data['solution']
 
-        print("TEST")
-
         coding_answer_execution = await create_coding_answer_execution(solution, self.coding_question_id)
 
-        await sync_to_async(create_quiz_build_runner)(coding_answer_execution)
+        await sync_to_async(create_quiz_task)(coding_answer_execution)
 
-        response: CodeRunResponse = await sync_to_async(mark_execution)(coding_answer_execution)
+        response = await sync_to_async(get_result)(coding_answer_execution)
 
-        print(response.model_dump_json())
+        print(f"Response is {response}")
 
-        await self.send(text_data=response.model_dump_json())
+        await self.send(text_data=json.dumps(response))
