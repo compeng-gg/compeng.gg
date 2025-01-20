@@ -341,6 +341,7 @@ class Quiz(models.Model):
     visible_at = models.DateTimeField()
     starts_at = models.DateTimeField() # TODO: validate ends_at > starts_at
     ends_at = models.DateTimeField()
+    repository = models.ForeignKey(Repository, on_delete=models.DO_NOTHING, related_name='quizzes')
     
     class Meta:
         unique_together = ['slug', 'offering']
@@ -414,7 +415,8 @@ class CodingQuestion(QuizQuestionBaseModel):
         blank=False,
         null=False,
     )
-    repository = models.ForeignKey(Repository, on_delete=models.DO_NOTHING, related_name='quiz_coding_questions')
+
+    files = models.JSONField()
     file_to_replace = models.TextField()
 
     class Meta:
@@ -441,8 +443,23 @@ class CodingAnswer(QuizAnswerBaseModel):
 
 
 class CodingAnswerExecution(models.Model):
+    class Status(models.TextChoices):
+        QUEUED = "QUEUED", _("Queued")
+        IN_PROGRESS = "IN_PROGRESS", _("In Progress")
+        SUCCESS = "SUCCESS", _("Success")
+        FAILURE = "FAILURE", _("Failure")
+
     coding_question = models.ForeignKey(CodingQuestion, on_delete=models.CASCADE, related_name="executions")
     solution = models.TextField()
+    result = models.JSONField(blank=True, null=True)
+    stderr = models.TextField()
+
+    status = models.CharField(
+        choices=Status.choices,
+        max_length=max(len(choice.value) for choice in Status),
+        blank=False,
+        null=False,
+    )
 
 
 class CodingQuestionTestCaseExecution(models.Model):
