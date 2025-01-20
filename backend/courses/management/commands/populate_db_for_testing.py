@@ -99,6 +99,7 @@ class Command(BaseCommand):
             visible_at=now_datetime,
             starts_at=now_datetime,
             ends_at=now_datetime + timedelta(days=365),
+            repository=mock_repository
         )
 
         db.CheckboxQuestion.objects.create(
@@ -126,7 +127,8 @@ class Command(BaseCommand):
             quiz=mock_quiz,
             starter_code=None,
             programming_language=db.CodingQuestion.ProgrammingLanguage.C_PP,
-            repository=mock_repository
+            file_to_replace="add.py",
+            files=["TODO"]
         )
 
         python_coding_question = db.CodingQuestion.objects.create(
@@ -136,7 +138,8 @@ class Command(BaseCommand):
             quiz=mock_quiz,
             starter_code=None,
             programming_language=db.CodingQuestion.ProgrammingLanguage.PYTHON,
-            repository=mock_repository
+            file_to_replace="add.py",
+            files=["TODO"]
         )
 
         db.CodingQuestionTestCase.objects.create(
