@@ -6,7 +6,7 @@ import 'ace-builds/src-noconflict/ext-language_tools';
 import Head from 'next/head';
 import { CodeQuestionProps, CodeState } from '../question-models';
 import { Button } from 'primereact/button';
-import { fetchApi, jwtObtainPairEndpoint } from '@/app/lib/api';
+import { fetchApi, jwtObtainPairEndpoint, apiUrl} from '@/app/lib/api';
 import { JwtContext } from '@/app/lib/jwt-provider';
 
 // Set base path for other Ace dependencies
@@ -46,8 +46,7 @@ export default function CodeEditor({ props, save }: { props: CodeQuestionProps, 
 
   useEffect(() => {
     // Create a WebSocket connection
-    const localUrl = 'http://localhost:8000/'
-    const ws = new WebSocket(localUrl+`api/ws/v0/${props.courseSlug}/quiz/${props.quizSlug}/run_code/${props.id}/?token=${jwt.access}`);
+    const ws = new WebSocket(apiUrl+`ws/${props.courseSlug}/quiz/${props.quizSlug}/run_code/${props.id}/?token=${jwt.access}`);
     setSocket(ws);
 
     ws.onopen = () => {
