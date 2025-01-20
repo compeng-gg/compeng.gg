@@ -391,6 +391,7 @@ class CodingQuestion(QuizQuestionBaseModel):
 
     files = models.JSONField()
     file_to_replace = models.TextField()
+    grading_file_directory = models.TextField()
 
     class Meta:
         constraints = [
@@ -398,13 +399,6 @@ class CodingQuestion(QuizQuestionBaseModel):
                 fields=['quiz', 'order'], name='unique_order_coding_question'
             )
         ]
-
-
-class CodingQuestionTestCase(models.Model):
-    coding_question = models.ForeignKey(CodingQuestion, on_delete=models.CASCADE, related_name="test_cases")
-    command = models.TextField()
-    expected_stdout = models.TextField()
-    is_public = models.BooleanField()
 
 
 class CodingAnswer(QuizAnswerBaseModel):
@@ -433,13 +427,6 @@ class CodingAnswerExecution(models.Model):
         blank=False,
         null=False,
     )
-
-
-class CodingQuestionTestCaseExecution(models.Model):
-    stdout = models.TextField()
-    stderr = models.TextField()
-    test_case = models.ForeignKey(CodingQuestionTestCase, on_delete=models.CASCADE, related_name="executions")
-    coding_answer_execution = models.ForeignKey(CodingAnswerExecution, on_delete=models.CASCADE, related_name="test_case_executions")
 
 
 class MultipleChoiceQuestion(QuizQuestionBaseModel):

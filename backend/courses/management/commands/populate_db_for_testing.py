@@ -127,40 +127,21 @@ class Command(BaseCommand):
             quiz=mock_quiz,
             starter_code=None,
             programming_language=db.CodingQuestion.ProgrammingLanguage.C_PP,
-            file_to_replace="add.py",
+            file_to_replace="question1/add.py",
+            grading_file_directory="question1",
             files=["TODO"]
         )
 
         python_coding_question = db.CodingQuestion.objects.create(
-            prompt="Prompt for a Python coding question",
+            prompt="Write a Python function `add(num1, num2)` that adds two integers.",
             points=25,
             order=4,
             quiz=mock_quiz,
             starter_code=None,
             programming_language=db.CodingQuestion.ProgrammingLanguage.PYTHON,
-            file_to_replace="add.py",
+            file_to_replace="question1/add.py",
+            grading_file_directory="question1",
             files=["TODO"]
-        )
-
-        db.CodingQuestionTestCase.objects.create(
-            coding_question=python_coding_question,
-            command="python run_add.py 2 3",
-            expected_stdout="5",
-            is_public=True
-        )
-
-        db.CodingQuestionTestCase.objects.create(
-            coding_question=python_coding_question,
-            command="python run_add.py 6 7",
-            expected_stdout="13",
-            is_public=True
-        )
-
-        db.CodingQuestionTestCase.objects.create(
-            coding_question=python_coding_question,
-            command="python run_add.py 5 5",
-            expected_stdout="10",
-            is_public=False
         )
 
         db.WrittenResponseQuestion.objects.create(

@@ -41,6 +41,7 @@ class Command(BaseCommand):
         )
 
         file_path_to_replace = coding_answer_execution.coding_question.file_to_replace
+        grading_file_directory = coding_answer_execution.coding_question.grading_file_directory
 
         file_path = f"{repo_dir}/{file_path_to_replace}"
 
@@ -50,9 +51,9 @@ class Command(BaseCommand):
 
         # TODO: launch this in the quiz container
 
-        grade_file = repo_dir / "grade.py"
+        grading_file_path = repo_dir / grading_file_directory / "grade.py"
 
-        res2 = subprocess.run(['python', grade_file], capture_output=True, text=True)
+        res2 = subprocess.run(['python', grading_file_path], capture_output=True, text=True)
 
         actual_stdout = res2.stdout
 
