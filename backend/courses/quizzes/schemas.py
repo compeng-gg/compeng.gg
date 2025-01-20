@@ -155,7 +155,7 @@ class AnswerCheckboxQuestionRequestSerializer(serializers.Serializer):
     )
 
 
-class CourseQuizsListSerializer(serializers.ModelSerializer):
+class CourseQuizzesListSerializer(serializers.ModelSerializer):
     start_unix_timestamp = serializers.SerializerMethodField()
     end_unix_timestamp = serializers.SerializerMethodField()
 
@@ -175,8 +175,8 @@ class CourseQuizsListSerializer(serializers.ModelSerializer):
         return int(quiz.ends_at.timestamp())
     
 
-class AllQuizsListSerializer(CourseQuizsListSerializer):
+class AllQuizzesListSerializer(CourseQuizzesListSerializer):
     course_slug = serializers.CharField(source='offering.course.slug', read_only=True)
     
-    class Meta(CourseQuizsListSerializer.Meta):
-        fields = CourseQuizsListSerializer.Meta.fields + ['course_slug']
+    class Meta(CourseQuizzesListSerializer.Meta):
+        fields = CourseQuizzesListSerializer.Meta.fields + ['course_slug']
