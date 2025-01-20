@@ -5,7 +5,7 @@ from rest_framework import status
 from datetime import timedelta
 
 
-class ListQuizsForCourse(TestCasesWithUserAuth):
+class ListQuizzesForCourse(TestCasesWithUserAuth):
     def get_api_endpoint(self, course_slug: str) -> str:
         return f'/api/v0/quizzes/list/{course_slug}/'
 
