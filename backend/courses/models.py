@@ -311,6 +311,7 @@ class Quiz(models.Model):
     visible_at = models.DateTimeField()
     starts_at = models.DateTimeField() # TODO: validate ends_at > starts_at
     ends_at = models.DateTimeField()
+    repository = models.ForeignKey(Repository, on_delete=models.DO_NOTHING, related_name='quizzes')
     
     def __str__( self):
         return f"{self.title}({self.offering.slug})"
@@ -330,7 +331,7 @@ class QuizSubmission(models.Model):
     
 
 class QuizQuestionBaseModel(models.Model):
-
+    id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
     prompt = models.TextField()
     points = models.PositiveIntegerField(default=1)
     order = models.PositiveIntegerField()
@@ -388,6 +389,9 @@ class CodingQuestion(QuizQuestionBaseModel):
         null=False,
     )
 
+    files = models.JSONField()
+    file_to_replace = models.TextField()
+
     class Meta:
         constraints = [
             models.UniqueConstraint(
@@ -396,12 +400,46 @@ class CodingQuestion(QuizQuestionBaseModel):
         ]
 
 
+class CodingQuestionTestCase(models.Model):
+    coding_question = models.ForeignKey(CodingQuestion, on_delete=models.CASCADE, related_name="test_cases")
+    command = models.TextField()
+    expected_stdout = models.TextField()
+    is_public = models.BooleanField()
+
+
 class CodingAnswer(QuizAnswerBaseModel):
 
     quiz_submission = models.ForeignKey(QuizSubmission, on_delete=models.CASCADE, related_name="coding_question_answers")
     question = models.ForeignKey(CodingQuestion, on_delete=models.CASCADE, related_name="answers")
     
     solution = models.TextField()
+
+
+class CodingAnswerExecution(models.Model):
+    class Status(models.TextChoices):
+        QUEUED = "QUEUED", _("Queued")
+        IN_PROGRESS = "IN_PROGRESS", _("In Progress")
+        SUCCESS = "SUCCESS", _("Success")
+        FAILURE = "FAILURE", _("Failure")
+
+    coding_question = models.ForeignKey(CodingQuestion, on_delete=models.CASCADE, related_name="executions")
+    solution = models.TextField()
+    result = models.JSONField(blank=True, null=True)
+    stderr = models.TextField()
+
+    status = models.CharField(
+        choices=Status.choices,
+        max_length=max(len(choice.value) for choice in Status),
+        blank=False,
+        null=False,
+    )
+
+
+class CodingQuestionTestCaseExecution(models.Model):
+    stdout = models.TextField()
+    stderr = models.TextField()
+    test_case = models.ForeignKey(CodingQuestionTestCase, on_delete=models.CASCADE, related_name="executions")
+    coding_answer_execution = models.ForeignKey(CodingAnswerExecution, on_delete=models.CASCADE, related_name="test_case_executions")
 
 
 class MultipleChoiceQuestion(QuizQuestionBaseModel):

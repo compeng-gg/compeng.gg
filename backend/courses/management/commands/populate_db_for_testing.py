@@ -1,8 +1,9 @@
 from django.core.management.base import BaseCommand
 import courses.models as db
 from django.contrib.auth.models import User
-from datetime import datetime, timedelta
+from datetime import timedelta
 from django.utils import timezone
+from django.contrib.contenttypes.models import ContentType
 
 class Command(BaseCommand):
     help = 'Populates the database with test data'
@@ -80,13 +81,25 @@ class Command(BaseCommand):
             role=mock_ta_role
         )
 
+        mock_content_type = ContentType.objects.create(app_label="your_app", model="mock_model")
+
+        mock_repository = db.Repository.objects.create(
+            id=1,
+            name="reimagined-parakeet",
+            full_name="nickwood5/reimagined-parakeet",
+            owner_content_type=mock_content_type,
+            owner_id=1,
+        )
+
+
         mock_quiz = db.Quiz.objects.create(
             slug="quiz-slug",
             offering=mock_offering,
             title="Quiz Title",
             visible_at=now_datetime,
             starts_at=now_datetime,
-            ends_at=now_datetime + timedelta(days=365)
+            ends_at=now_datetime + timedelta(days=365),
+            repository=mock_repository
         )
 
         db.CheckboxQuestion.objects.create(
@@ -113,16 +126,41 @@ class Command(BaseCommand):
             order=3,
             quiz=mock_quiz,
             starter_code=None,
-            programming_language=db.CodingQuestion.ProgrammingLanguage.C_PP
+            programming_language=db.CodingQuestion.ProgrammingLanguage.C_PP,
+            file_to_replace="add.py",
+            files=["TODO"]
         )
 
-        db.CodingQuestion.objects.create(
+        python_coding_question = db.CodingQuestion.objects.create(
             prompt="Prompt for a Python coding question",
             points=25,
             order=4,
             quiz=mock_quiz,
             starter_code=None,
-            programming_language=db.CodingQuestion.ProgrammingLanguage.PYTHON
+            programming_language=db.CodingQuestion.ProgrammingLanguage.PYTHON,
+            file_to_replace="add.py",
+            files=["TODO"]
+        )
+
+        db.CodingQuestionTestCase.objects.create(
+            coding_question=python_coding_question,
+            command="python run_add.py 2 3",
+            expected_stdout="5",
+            is_public=True
+        )
+
+        db.CodingQuestionTestCase.objects.create(
+            coding_question=python_coding_question,
+            command="python run_add.py 6 7",
+            expected_stdout="13",
+            is_public=True
+        )
+
+        db.CodingQuestionTestCase.objects.create(
+            coding_question=python_coding_question,
+            command="python run_add.py 5 5",
+            expected_stdout="10",
+            is_public=False
         )
 
         db.WrittenResponseQuestion.objects.create(

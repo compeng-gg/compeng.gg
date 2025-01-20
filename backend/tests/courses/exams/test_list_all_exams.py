@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 from datetime import timedelta
 
 
-class ListAllQuizsTests(TestCasesWithUserAuth):
+class ListAllQuizzesTests(TestCasesWithUserAuth):
     API_ENDPOINT = '/api/v0/quizzes/list/all/'
 
     def test_happy_path(self):

@@ -5,7 +5,7 @@ from rest_framework import permissions
 from rest_framework.decorators import api_view, permission_classes
 from django.utils import timezone
 from django.db.models import Subquery, Q
-from courses.quizzes.schemas import AllQuizsListSerializer, CourseQuizsListSerializer
+from courses.quizzes.schemas import AllQuizzesListSerializer, CourseQuizzesListSerializer
 from typing import Optional
 
 
@@ -27,7 +27,7 @@ def list_all(request) -> Response:
 
     all_quizzes = query_quizzes(user_id=user_id)
 
-    return Response(data=AllQuizsListSerializer(all_quizzes, many=True).data)
+    return Response(data=AllQuizzesListSerializer(all_quizzes, many=True).data)
 
 
 @api_view(['GET'])
@@ -37,4 +37,4 @@ def list_for_course(request, course_slug: str) -> Response:
 
     filter_params = Q(offering__course__slug=course_slug)
     course_quizzes = query_quizzes(user_id=user_id, filter_params=filter_params)
-    return Response(data=CourseQuizsListSerializer(course_quizzes, many=True).data)
+    return Response(data=CourseQuizzesListSerializer(course_quizzes, many=True).data)
