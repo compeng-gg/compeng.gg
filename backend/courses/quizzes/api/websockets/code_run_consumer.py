@@ -144,8 +144,6 @@ class CodeRunConsumer(AsyncWebsocketConsumer):
 
         coding_answer_execution = await create_coding_answer_execution(solution, self.coding_question_id)
 
-        await sync_to_async(create_quiz_task)(coding_answer_execution)
-
         response = await sync_to_async(get_result)(coding_answer_execution)
 
         print(f"Response is {response}")
