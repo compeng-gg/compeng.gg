@@ -95,7 +95,8 @@ class Command(BaseCommand):
         }
 
         p = subprocess.run(
-            ["kubectl", "create", "-f", "-"], input=json.dumps(data), text=True
+            ["kubectl", "create", "-f", "-"],
+            check=True, input=json.dumps(data), text=True
         )
         while True:
             p = subprocess.run(
