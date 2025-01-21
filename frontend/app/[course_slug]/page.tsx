@@ -77,7 +77,7 @@ function Course() {
               Due: {`${new Date(assignment.due_date)}`}
             </p>
             {"grade" in assignment && (
-              <p>Current Grade: {assignment.grade}</p>
+              <p>Highest Grade: {assignment.grade}</p>
             )}
 
 

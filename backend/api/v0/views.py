@@ -24,13 +24,15 @@ from compeng_gg.auth.serializers import CodeSerializer
 from .serializers import UserSerializer
 
 from courses.models import (
+    Accommodation,
     Assignment,
+    AssignmentResult,
     AssignmentTask,
     Enrollment,
     Offering,
     Role,
 )
-from courses.utils import get_grade_for_assignment, is_staff
+from courses.utils import is_staff, sync_before_due_date
 
 # TODO: with sqlite task.result is a dict, with postgres it's a str
 def get_task_result(task):
@@ -244,7 +246,7 @@ def tasks(request):
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
 def course(request, slug):
-    from courses.models import Accommodation, Assignment, AssignmentLeaderboardEntry, Offering, AssignmentGrade
+    from courses.models import Assignment, AssignmentLeaderboardEntry, AssignmentGrade
     user = request.user
     try:
         offering = Offering.objects.get(course__slug=slug)
@@ -266,6 +268,7 @@ def course(request, slug):
             accommodation = Accommodation.objects.get(
                 user=user, assignment=assignment
             )
+            due_date = accommodation.due_date
         except Accommodation.DoesNotExist:
             accommodation = None
 
@@ -277,18 +280,7 @@ def course(request, slug):
             task = assignment_task.task
             result = get_task_result(task)
             grade = None
-
-            if not result is None and "tests" in result:
-                if not is_private_released:
-                    # Filter out the tests
-                    result["tests"] = list(filter(lambda test: not "kind" in test or test["kind"] == "public", result["tests"]))
-                    grade = f"{assignment_task.public_grade:.0f}/{assignment.public_total:.0f} ({assignment.private_total:.0f} hidden)"
-                    if assignment_task.public_grade > assignment_grade:
-                        assignment_grade = assignment_task.public_grade
-                else:
-                    grade = f"{assignment_task.overall_grade:.0f}/{assignment.overall_total:.0f}"
-                    if assignment_task.overall_grade > assignment_grade:
-                        assignment_grade = assignment_task.overall_grade
+            before_due_date = assignment_task.before_due_date
 
             task_data = {
                 'id': task.id,
@@ -311,6 +303,18 @@ def course(request, slug):
                 task_data['repo'] = repository.name
                 task_data['commit'] = head_commit.sha1
                 task_data['received'] = received
+
+            if not result is None and "tests" in result:
+                if not is_private_released:
+                    # Filter out the tests
+                    result["tests"] = list(filter(lambda test: not "kind" in test or test["kind"] == "public", result["tests"]))
+                    grade = f"{assignment_task.public_grade:.0f}/{assignment.public_total:.0f} ({assignment.private_total:.0f} hidden)"
+                    if before_due_date and assignment_task.public_grade > assignment_grade:
+                        assignment_grade = assignment_task.public_grade
+                else:
+                    grade = f"{assignment_task.overall_grade:.0f}/{assignment.overall_total:.0f}"
+                    if before_due_date and assignment_task.overall_grade > assignment_grade:
+                        assignment_grade = assignment_task.overall_grade
 
             if assignment.kind == Assignment.Kind.TESTS:
                 if not grade is None:
@@ -341,13 +345,13 @@ def course(request, slug):
             'due_date': due_date,
             'tasks': tasks,
         }
-        try:
-            ag = AssignmentGrade.objects.get(user=user, assignment=assignment)
-            if ag.grade > assignment_grade:
-                assignment_grade = ag.grade
-                assignment_data['grade'] = assignment_grade
-        except AssignmentGrade.DoesNotExist:
-            pass
+        # try:
+        #     ag = AssignmentGrade.objects.get(user=user, assignment=assignment)
+        #     if ag.grade > assignment_grade:
+        #         assignment_grade = ag.grade
+        #         assignment_data['grade'] = assignment_grade
+        # except AssignmentGrade.DoesNotExist:
+        #     pass
         if assignment.kind == Assignment.Kind.TESTS:
             if not is_private_released:
                 assignment_data["grade"] = f"{assignment_grade:.0f}/{assignment.public_total:.0f} ({assignment.private_total:.0f} hidden)"
@@ -392,6 +396,37 @@ def staff(request, course_slug):
     data["assignments"] = assignments
     return Response(data)
 
+def _staff_assignment_student_data(assignment, enrollment):
+    user = enrollment.user
+    repository = enrollment.student_repo
+    submissions = AssignmentTask.objects.filter(user=user, assignment=assignment, before_due_date=True).count()
+    late_submissions = AssignmentTask.objects.filter(user=user, assignment=assignment, before_due_date=False).count()
+    overall_grade = 0
+    graded_commit_url = ""
+    try:
+        assignment_result = AssignmentResult.objects.get(user=user, assignment=assignment)
+        task = assignment_result.task
+        graded_commit_url = f"https://github.com/{repository.full_name}/tree/{task.head_commit.sha1}"
+        overall_grade = assignment_result.overall_grade
+    except AssignmentResult.DoesNotExist:
+        pass
+    accommodation_days = 0
+    try:
+        accommodation = Accommodation.objects.get(user=user, assignment=assignment)
+        accommodation_days = (accommodation.due_date - assignment.due_date).days
+    except Accommodation.DoesNotExist:
+        pass
+    return {
+        "username": user.username,
+        "repository_name": repository.name if repository else "",
+        "repository_url": f"https://github.com/{repository.full_name}" if repository else "",
+        "overall_grade": overall_grade,
+        "graded_commit_url": graded_commit_url,
+        "submissions": submissions,
+        "late_submissions": late_submissions,
+        "accommodation": accommodation_days,
+    }
+
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
 def staff_assignment(request, course_slug, assignment_slug):
@@ -414,31 +449,52 @@ def staff_assignment(request, course_slug, assignment_slug):
         "offering": str(offering),
         "slug": assignment.slug,
         "name": assignment.name,
+        "is_private_released": assignment.is_private_released,
     }
-    num_students_with_submissions = 0
-    num_students = 0
 
-    due_date = assignment.due_date
+    students_with_submissions_count = 0
+    students_count = 0
     students_data = []
     for enrollment in Enrollment.objects.filter(role=student_role).order_by("user__username"):
-        user = enrollment.user
-        repository = enrollment.student_repo
-        submissions = AssignmentTask.objects.filter(user=user, assignment=assignment).count()
-        if submissions > 0:
-            num_students_with_submissions += 1
-        num_students += 1
-        student_data = {
-            "username": user.username,
-            "repository_name": repository.name if repository else "",
-            "repository_url": f"https://github.com/{repository.full_name}" if repository else "",
-            "submissions": submissions,
-            "accommodation": 0,
-        }
+        student_data = _staff_assignment_student_data(assignment, enrollment)
+        if student_data["submissions"] > 0:
+            students_with_submissions_count += 1
+        students_count += 1
         students_data.append(student_data)
     data["students"] = students_data
-    data["num_students_with_submissions"] = num_students_with_submissions
-    data["num_students"] = num_students
+    data["students_with_submissions_count"] = students_with_submissions_count
+    data["students_count"] = students_count
     return Response(data)
+
+class IsPrivateReleasedSerializer(serializers.Serializer):
+    is_private_released = serializers.BooleanField()
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def staff_assignment_private_release(request, course_slug, assignment_slug):
+    user = request.user
+    try:
+        offering = Offering.objects.get(active=True, course__slug=course_slug)
+    except Offering.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    if not is_staff(user, offering):
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
+
+    try:
+        assignment = Assignment.objects.get(offering=offering, slug=assignment_slug)
+    except Assignment.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    serializer = IsPrivateReleasedSerializer(data=request.data)
+    if not serializer.is_valid():
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+    validated_data = serializer.validated_data
+
+    assignment.is_private_released = validated_data["is_private_released"]
+    assignment.save()
+
+    return Response()
 
 class AccommodationSerializer(serializers.Serializer):
     username = serializers.CharField()
@@ -470,12 +526,36 @@ def staff_assignment_accommodation(request, course_slug, assignment_slug):
         user = User.objects.get(username=validated_data["username"])
     except User.DoesNotExist:
         return Response(status=status.HTTP_400_BAD_REQUEST)
-
     days = validated_data["days"]
-    print(user, days)
 
-    data = {}
-    return Response(data)
+    # TODO
+    if days > 0:
+        due_date = assignment.due_date + datetime.timedelta(days=days)
+        try:
+            accommodation = Accommodation.objects.get(user=user, assignment=assignment)
+            accommodation.due_date = due_date
+            accommodation.save()
+        except Accommodation.DoesNotExist:
+            Accommodation.objects.create(user=user, assignment=assignment, due_date=due_date)
+    elif days == 0:
+        try:
+            accommodation = Accommodation.objects.get(user=user, assignment=assignment)
+            accommodation.delete()
+        except Accommodation.DoesNotExist:
+            pass
+
+    student_role = Role.objects.get(offering=offering, kind=Role.Kind.STUDENT)
+    enrollment = Enrollment.objects.get(user=user, role__offering=offering)
+    # Reset the assignment result to re-compute
+    try:
+        assignment_result = AssignmentResult.objects.get(user=user, assignment=assignment)
+        assignment_result.delete()
+    except AssignmentResult.DoesNotExist:
+        pass
+    for assignment_task in AssignmentTask.objects.filter(user=user, assignment=assignment):
+        sync_before_due_date(assignment_task)
+
+    return Response(_staff_assignment_student_data(assignment, enrollment))
 
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
