@@ -32,7 +32,6 @@ export default function Page({ params }: { params: { courseSlug: string, quizSlu
     try {
       const res = await fetchApi(jwt, setAndStoreJwt, `${courseSlug}/quiz/${quizSlug}`, "GET");
       const data = await res.json();
-      console.log(JSON.stringify(data, null, 2));
       const retQuiz: QuizProps = {
         startTime: new Date(data.start_unix_timestamp * 1000),
         endTime: new Date(data.end_unix_timestamp * 1000),
@@ -43,7 +42,6 @@ export default function Page({ params }: { params: { courseSlug: string, quizSlu
       setQuiz(retQuiz);
       const qData = data.questions.map((rawData) =>  getQuestionDataFromRaw(rawData, quizSlug, courseSlug));
       setQuestionData(qData);
-      console.log("qdata:", JSON.stringify(qData, null, 2));
       const questionStates = qData.map((questionData, idx) => ({
         value: getStartingStateValue(questionData, data.questions[idx]),
         setValue: (newValue) => {

@@ -8,6 +8,8 @@ import { CodeQuestionProps, CodeState } from '../question-models';
 import { Button } from 'primereact/button';
 import { fetchApi, jwtObtainPairEndpoint, apiUrl} from '@/app/lib/api';
 import { JwtContext } from '@/app/lib/jwt-provider';
+import TestRun, { RawToTestRunProps, TestRunHeader, TestRunProps } from './test-run';
+import { Accordion, AccordionTab } from 'primereact/accordion';
 
 // Set base path for other Ace dependencies
 ace.config.set('basePath', '/ace');
@@ -17,6 +19,8 @@ ace.config.setModuleUrl('ace/mode/c_cpp', '/ace/mode-c_cpp.js');
 ace.config.setModuleUrl('ace/theme/monokai', '/ace/theme-monokai.js');
 ace.config.setModuleUrl('ace/ext/language_tools', '/ace/ext-language_tools.js');
 
+const testFail = { "status": "FAILURE", "tests": null, "stderr": "Traceback (most recent call last):\n File \"/tmp/1737508206--52/reimagined-parakeet/question1/grade.py\", line 32, in <module>\n result = add(num1, num2)\n ^^^^^^^^^^^^^^^\n File \"/tmp/1737508206--52/reimagined-parakeet/question1/add.py\", line 2, in add\n return num1num2\n ^^^^^^^^\nNameError: name 'num1num2' is not defined\n", "num_passed": 0, "num_failed": 0 }
+const testHalf = { "status": "SUCCESS", "tests": [ { "kind": "public", "result": "OK", "actual_result": 0, "expected_result": 0 }, { "kind": "public", "result": "FAIL", "actual_result": 3, "expected_result": 4 }, { "kind": "private", "result": "FAIL" }, { "kind": "private", "result": "FAIL" } ], "stderr": null, "num_passed": 1, "num_failed": 2 };
 enum TestRunStatus {
   NOT_RUN = "Idle",
   ERROR = "Error",
@@ -30,6 +34,7 @@ export default function CodeEditor({ props, save }: { props: CodeQuestionProps, 
   const [message, setMessage] = useState<string>("");
   const [jwt, setAndStoreJwt] = useContext(JwtContext);
   const [testStatus, setTestStatus] = useState<TestRunStatus>(TestRunStatus.NOT_RUN);
+  const [testRuns, setTestRuns] = useState<TestRunProps[]>([]);
 
   useEffect(() => {
     ace.config.setModuleUrl('ace/mode/c_cpp', '/ace/mode-c_cpp.js');
@@ -42,6 +47,10 @@ export default function CodeEditor({ props, save }: { props: CodeQuestionProps, 
     ace.require('ace/theme/monokai');
 
     setLoaded(true);
+
+    //setTestRuns((testRuns) => [RawToTestRunProps(JSON.stringify(testFail)), RawToTestRunProps(JSON.stringify(testHalf))]);
+
+    
   }, []);
 
   useEffect(() => {
@@ -58,6 +67,9 @@ export default function CodeEditor({ props, save }: { props: CodeQuestionProps, 
       setTestStatus(TestRunStatus.COMPLETE);
       console.log('Message from server:', data);
       setMessage(JSON.stringify(data, null, 2));
+      const newResult: TestRunProps = RawToTestRunProps(JSON.stringify(data));
+      setTestRuns((testRuns) => [...testRuns, newResult]);
+
     };
 
     ws.onclose = () => {
@@ -103,10 +115,14 @@ export default function CodeEditor({ props, save }: { props: CodeQuestionProps, 
           }}
         />
       )}
-      <div>{`Socket Response:${message}`}</div>
-      <div>{`Test Status: ${testStatus}`}</div>
+      <Accordion>
+        {testRuns.map((testRun: TestRunProps, index) => (
+          <AccordionTab header={TestRunHeader(testRun)} key={index}>
+            <TestRun {...testRun} />
+          </AccordionTab>
+        ))}
+      </Accordion>
       {props.isMutable ? (
-
         <div style={{ position: 'relative', display: "flex", flexDirection: "row-reverse" }}>
           <span></span>
           <Button label="Run Tests" size="small" onClick={runTests}/>
@@ -115,3 +131,4 @@ export default function CodeEditor({ props, save }: { props: CodeQuestionProps, 
     </div>
   );
 }
+
