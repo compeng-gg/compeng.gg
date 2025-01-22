@@ -75,6 +75,14 @@ class Command(BaseCommand):
                         "name": container_name,
                         "command": command,
                         "volumeMounts": volume_mounts,
+                        "resources": {
+                            "requests": {
+                                "memory": "100Mi",
+                            },
+                            "limits": {
+                                "memory": "200Mi"
+                            },
+                        },
                     },
                 ],
                 "imagePullSecrets": [
