@@ -30,10 +30,7 @@ export default function StudentQuizViewTab(props: StudentQuizViewProps){
                     endTime: new Date(quiz.end_unix_timestamp*1000)
                 })
             });
-            console.log(JSON.stringify(data, null, 2));
             setQuizs(retQuizs);
-            console.log(JSON.stringify(retQuizs, null, 2));
-
         } catch (error) {
             console.error("Failed to retrieve teams", error);
         }
