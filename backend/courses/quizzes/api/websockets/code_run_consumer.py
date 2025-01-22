@@ -92,7 +92,6 @@ def get_result(coding_answer_execution: db.CodingAnswerExecution):
             if kind == 'private':
                 test.pop("expected_result", None)
                 test.pop("actual_result", None)
-                tests.append(test)
 
             if test['result'] == 'OK':
                 num_passed += 1
