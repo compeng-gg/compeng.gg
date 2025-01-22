@@ -106,6 +106,7 @@ class Command(BaseCommand):
             ["kubectl", "create", "-f", "-"],
             check=True, input=json.dumps(data), text=True
         )
+        out_of_memory = False
         while True:
             p = subprocess.run(
                 ["kubectl", "get", "pod", pod_name, "-o", "json"],
@@ -118,7 +119,10 @@ class Command(BaseCommand):
                 continue
             state = status["containerStatuses"][0]["state"]
             if "terminated" in state:
-                exit_code = state["terminated"]["exitCode"]
+                terminated = state["terminated"]
+                if "reason" in terminated and terminated["reason"] == "OOMKilled":
+                    out_of_memory = True
+                exit_code = terminated["exitCode"]
                 break
             time.sleep(0.1)
 
@@ -130,6 +134,13 @@ class Command(BaseCommand):
             ["kubectl", "delete", "pod", pod_name],
             check=True,
         )
+
+        if out_of_memory:
+            task.result = {"error": "out-of-memory"}
+            task.status = Task.Status.FAILURE
+            task.save()
+            self.stdout.write(f'{task} failure (out-of-memory)')
+            sys.exit(0)
 
         try:
             task.result = json.loads(p.stdout)
