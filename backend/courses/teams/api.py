@@ -600,15 +600,27 @@ def get_enrolled_students(request, slug):
         role__kind=db.Role.Kind.STUDENT,  # Filter by student role
         role__offering=offering
     ).select_related('user')  # Optimize query by prefetching user details
+    
+    print(student_enrollments)
 
-    # Serialize the data
+    # Serialize the data, use 'username', 'first_name', and 'last_name' if 'name' doesn't exist
     students = [
-        {
-            'id': enrollment.user.id,
-            'name': enrollment.user.name,
-            'email': enrollment.user.email,  # Assuming email is a field in the user model
-        }
-        for enrollment in student_enrollments
-    ]
+    {
+        'id': enrollment.user.id,
+        'name': getattr(
+            enrollment.user,
+            'name',
+            getattr(
+                enrollment.user,
+                'username',  # Use username as a fallback if name, first_name, and last_name are missing
+                f"{getattr(enrollment.user, 'first_name', '')} {getattr(enrollment.user, 'last_name', '')}".strip()
+            )
+        ),
+        'email': getattr(enrollment.user, 'email', ''),  # Assuming 'email' exists in the user model
+    }
+    for enrollment in student_enrollments
+]
+    
+    print("Done:", students)
 
     return Response(students, status=status.HTTP_200_OK)
