@@ -113,51 +113,62 @@ export default function StaffTeamViewTab({ courseSlug }: { courseSlug: string })
     }
   };
 
-  const actionsTemplate = (team: Team) => (
-    <div>
-      <div style={{ marginBottom: "10px" }}>
-        <label>Select student to add:</label>
-        <Dropdown
-          value={selectedStudent}
-          options={students.map((s) => ({ label: s.name, value: s.id }))}
-          placeholder="Select student"
-          onChange={(e) => setSelectedStudent(e.value)}
-        />
+  const actionsTemplate = (team: Team) => {
+    // Filter students not in the team
+    console.log("team", team);
+    const availableStudents = students.filter(
+      (student) => !team.members.some((member) => member.id === student.id)
+    );
+  
+    return (
+      <div>
+        {/* Add Member Section */}
+        <div style={{ marginBottom: "10px" }}>
+          <label>Select student to add:</label>
+          <Dropdown
+            value={selectedStudent}
+            options={availableStudents.map((s) => ({ label: s.name, value: s.id }))}
+            placeholder="Select student"
+            onChange={(e) => setSelectedStudent(e.value)}
+          />
+          <Button
+            label="Add Member"
+            icon="pi pi-user-plus"
+            onClick={() => addTeamMember(team.id)}
+            disabled={!selectedStudent}
+            style={{ marginTop: "10px" }}
+          />
+        </div>
+  
+        {/* Remove Member Section */}
+        <div style={{ marginBottom: "10px" }}>
+          <label>Select member to remove:</label>
+          <Dropdown
+            value={selectedMember}
+            options={team.members.map((m) => ({ label: m.name, value: m.id }))}
+            placeholder="Select member"
+            onChange={(e) => setSelectedMember(e.value)}
+          />
+          <Button
+            label="Remove Member"
+            icon="pi pi-user-minus"
+            onClick={() => kickTeamMember(team.id)}
+            disabled={!selectedMember}
+            style={{ marginTop: "10px" }}
+          />
+        </div>
+  
+        {/* Delete Team Button */}
         <Button
-          label="Add Member"
-          icon="pi pi-user-plus"
-          onClick={() => addTeamMember(team.id)}
-          disabled={!selectedStudent}
+          label="Delete Team"
+          icon="pi pi-trash"
+          className="p-button-danger"
+          onClick={() => deleteTeam(team.id)}
           style={{ marginTop: "10px" }}
         />
       </div>
-
-      <div style={{ marginBottom: "10px" }}>
-        <label>Select member to remove:</label>
-        <Dropdown
-          value={selectedMember}
-          options={team.members.map((m) => ({ label: m.name, value: m.id }))}
-          placeholder="Select member"
-          onChange={(e) => setSelectedMember(e.value)}
-        />
-        <Button
-          label="Remove Member"
-          icon="pi pi-user-minus"
-          onClick={() => kickTeamMember(team.id)}
-          disabled={!selectedMember}
-          style={{ marginTop: "10px" }}
-        />
-      </div>
-
-      <Button
-        label="Delete Team"
-        icon="pi pi-trash"
-        className="p-button-danger"
-        onClick={() => deleteTeam(team.id)}
-        style={{ marginTop: "10px" }}
-      />
-    </div>
-  );
+    );
+  };
 
   return (
     <div>

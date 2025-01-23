@@ -245,6 +245,7 @@ def teams(request, slug):
         members = []
         for teamMember in team.members.all():
             members.append({
+                'id': teamMember.enrollment.user.id,
                 'role': teamMember.membership_type,
                 'name': teamMember.enrollment.user.username,
             })
@@ -389,41 +390,91 @@ def get_team_settings_for_offering(request, slug):
     
     return Response(team_settings)
 
+# @api_view(['POST'])
+# @permission_classes([IsInstructorOrTA])
+# def add_member_to_team(request):
+#     print("Adding member to team")
+#     serializer = addTeamMemberRequestSerializer(data=request.data)
+    
+#     if serializer.is_valid():
+#         team_id = serializer.validated_data.get('team_id')
+#         member_id = serializer.validated_data.get('member_id')
+        
+#         try:
+#             # Retrieve the target team
+#             team = db.Team.objects.get(id=team_id)
+#         except db.Team.DoesNotExist:
+#             return Response({'detail': 'Team not found.'}, status=status.HTTP_404_NOT_FOUND)
+        
+#         try:
+#             # Retrieve the member
+#             member = db.TeamMember.objects.get(id=member_id)
+#         except db.TeamMember.DoesNotExist:
+#             return Response({'detail': 'Member not found.'}, status=status.HTTP_404_NOT_FOUND)
+        
+#         # Check if the member is already in a team
+#         if member.team is not None:
+#             return Response(
+#                 {'detail': f'Member is already in team {member.team.name}.'},
+#                 status=status.HTTP_400_BAD_REQUEST
+#             )
+        
+#         # Add the member to the target team
+#         member.team = team
+#         member.save()
+        
+#         return Response({'detail': 'Member added to the team successfully.'}, status=status.HTTP_204_NO_CONTENT)
+    
+#     # Return validation errors
+#     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 @api_view(['POST'])
 @permission_classes([IsInstructorOrTA])
 def add_member_to_team(request):
+    print("Add member to team")
+    
     serializer = addTeamMemberRequestSerializer(data=request.data)
+    print("Serializer data:", request.data)
     
     if serializer.is_valid():
+        print("Serializer is valid")
         team_id = serializer.validated_data.get('team_id')
-        member_id = serializer.validated_data.get('member_id')
-        
+        member_id = serializer.validated_data.get('member_id')  # Assuming this is the enrollment ID
+        print("Team ID:", team_id, "Member ID (enrollment):", member_id)
+
         try:
-            # Retrieve the target team
+            # Retrieve the team
             team = db.Team.objects.get(id=team_id)
+            print("Team found:", team)
         except db.Team.DoesNotExist:
+            print("Team not found")
             return Response({'detail': 'Team not found.'}, status=status.HTTP_404_NOT_FOUND)
-        
+
         try:
-            # Retrieve the member
-            member = db.TeamMember.objects.get(id=member_id)
-        except db.TeamMember.DoesNotExist:
-            return Response({'detail': 'Member not found.'}, status=status.HTTP_404_NOT_FOUND)
-        
-        # Check if the member is already in a team
-        if member.team is not None:
+            # Retrieve the Enrollment to get the user
+            enrollment = db.Enrollment.objects.select_related('user').get(id=member_id)
+            print("Enrollment found:", enrollment)
+        except db.Enrollment.DoesNotExist:
+            print("Enrollment not found")
+            return Response({'detail': 'Enrollment not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        # Check if the enrollment is already linked to a team
+        existing_membership = db.TeamMember.objects.filter(enrollment=enrollment).first()
+        if existing_membership:
+            print("Enrollment already in a team:", existing_membership.team.name)
             return Response(
-                {'detail': f'Member is already in team {member.team.name}.'},
+                {'detail': f'This user is already in team {existing_membership.team.name}.'},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
-        # Add the member to the target team
-        member.team = team
-        member.save()
-        
-        return Response({'detail': 'Member added to the team successfully.'}, status=status.HTTP_204_NO_CONTENT)
-    
-    # Return validation errors
+
+        # Create a new TeamMember and link the enrollment to the team
+        new_member = db.TeamMember.objects.create(enrollment=enrollment, team=team, membership_type=db.TeamMember.MembershipType.MEMBER)
+        new_member.save()
+        print("User added successfully as a team member")
+        return Response({'detail': 'User added to the team successfully.'}, status=status.HTTP_204_NO_CONTENT)
+
+    print("Serializer invalid:", serializer.errors)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
