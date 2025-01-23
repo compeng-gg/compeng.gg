@@ -111,11 +111,11 @@ export default function StaffTeamViewTab({ courseSlug }: { courseSlug: string })
 
   // Actions for each team
   const actionsTemplate = (team: Team) => {
-    // Filter students not in the team
+    // Filter students who are not in any team
     const availableStudentsToAdd = students.filter(
-      (student) => !team.members.some((member) => member.id === student.id)
+      (student) => !teams.some((otherTeam) => otherTeam.members.some((member) => member.id === student.id))
     );
-
+  
     return (
       <div>
         {/* Add Member Section */}
@@ -135,7 +135,7 @@ export default function StaffTeamViewTab({ courseSlug }: { courseSlug: string })
             style={{ marginTop: "10px" }}
           />
         </div>
-
+  
         {/* Remove Member Section */}
         <div style={{ marginBottom: "10px" }}>
           <label>Select member to remove:</label>
@@ -153,7 +153,7 @@ export default function StaffTeamViewTab({ courseSlug }: { courseSlug: string })
             style={{ marginTop: "10px" }}
           />
         </div>
-
+  
         {/* Delete Team Button */}
         <Button
           label="Delete Team"
