@@ -29,23 +29,19 @@ export default function StaffTeamViewTab({ courseSlug }: { courseSlug: string })
   const [jwt, setAndStoreJwt] = React.useContext(JwtContext);
   const [teams, setTeams] = useState<Team[]>([]);
   const [students, setStudents] = useState<Student[]>([]);
-  const [selectedStudent, setSelectedStudent] = useState<string | null>(null);
-  const [selectedMember, setSelectedMember] = useState<string | null>(null);
+  const [selectedLeader, setSelectedLeader] = useState<string | null>(null); // For creating teams
+  const [selectedStudentToAdd, setSelectedStudentToAdd] = useState<string | null>(null); // For adding team members
+  const [selectedMemberToRemove, setSelectedMemberToRemove] = useState<string | null>(null); // For removing team members
 
   // Fetch teams and students
   const fetchTeamsAndStudents = async () => {
     try {
       const teamResponse = await fetchApi(jwt, setAndStoreJwt, `teams/get/${courseSlug}`, "GET");
       const teamData = await teamResponse.json();
-      console.log("teamData", teamData);
       setTeams(teamData);
 
       const studentResponse = await fetchApi(jwt, setAndStoreJwt, `offering/students/${courseSlug}`, "GET");
-
-      
       const studentData = await studentResponse.json();
-      console.log("studentData", studentData);
-
       setStudents(studentData);
     } catch (error) {
       console.error("Error fetching teams or students:", error);
@@ -59,105 +55,105 @@ export default function StaffTeamViewTab({ courseSlug }: { courseSlug: string })
 
   // Create a new team with a selected leader
   const createTeam = async () => {
-    if (!selectedStudent) return;
+    if (!selectedLeader) return;
     try {
-      await fetchApi(jwt, setAndStoreJwt, `teams/create/`, "POST", {
+      await fetchApi(jwt, setAndStoreJwt, `teams/admin/create/`, "POST", {
         team_name: `Team ${teams.length + 1}`,
-        leader_id: selectedStudent,
+        leader_id: selectedLeader,
         course_slug: courseSlug,
       });
-      setSelectedStudent(null);
+      setSelectedLeader(null);
       fetchTeamsAndStudents(); // Refresh data
     } catch (error) {
       console.error("Error creating team:", error);
     }
   };
 
-  // Add a member to the team
+  // Add a member to a team
   const addTeamMember = async (teamId: string) => {
-    if (!selectedStudent) return;
+    if (!selectedStudentToAdd) return;
     try {
       await fetchApi(jwt, setAndStoreJwt, `teams/admin/add/`, "POST", {
         team_id: teamId,
-        member_id: selectedStudent,
+        member_id: selectedStudentToAdd,
       });
-      setSelectedStudent(null);
+      setSelectedStudentToAdd(null);
       fetchTeamsAndStudents(); // Refresh data
     } catch (error) {
       console.error("Error adding team member:", error);
     }
   };
 
-  // Kick a member from the team
+  // Remove a member from a team
   const kickTeamMember = async (teamId: string) => {
-    if (!selectedMember) return;
+    if (!selectedMemberToRemove) return;
     try {
       await fetchApi(jwt, setAndStoreJwt, `teams/admin/remove/`, "DELETE", {
         team_id: teamId,
-        member_id: selectedMember,
+        member_id: selectedMemberToRemove,
       });
-      setSelectedMember(null);
+      setSelectedMemberToRemove(null);
       fetchTeamsAndStudents(); // Refresh data
     } catch (error) {
-      console.error("Error kicking team member:", error);
+      console.error("Error removing team member:", error);
     }
   };
 
   // Delete a team
   const deleteTeam = async (teamId: string) => {
     try {
-      await fetchApi(jwt, setAndStoreJwt, `teams/delete/`, "DELETE", { team_id: teamId });
+      await fetchApi(jwt, setAndStoreJwt, `teams/admin/delete/`, "DELETE", { team_id: teamId });
       fetchTeamsAndStudents(); // Refresh data
     } catch (error) {
       console.error("Error deleting team:", error);
     }
   };
 
+  // Actions for each team
   const actionsTemplate = (team: Team) => {
     // Filter students not in the team
-    console.log("team", team);
-    const availableStudents = students.filter(
+    const availableStudentsToAdd = students.filter(
       (student) => !team.members.some((member) => member.id === student.id)
     );
-  
+
     return (
       <div>
         {/* Add Member Section */}
         <div style={{ marginBottom: "10px" }}>
           <label>Select student to add:</label>
           <Dropdown
-            value={selectedStudent}
-            options={availableStudents.map((s) => ({ label: s.name, value: s.id }))}
+            value={selectedStudentToAdd}
+            options={availableStudentsToAdd.map((s) => ({ label: s.name, value: s.id }))}
             placeholder="Select student"
-            onChange={(e) => setSelectedStudent(e.value)}
+            onChange={(e) => setSelectedStudentToAdd(e.value)}
           />
           <Button
             label="Add Member"
             icon="pi pi-user-plus"
             onClick={() => addTeamMember(team.id)}
-            disabled={!selectedStudent}
+            disabled={!selectedStudentToAdd}
             style={{ marginTop: "10px" }}
           />
         </div>
-  
+
         {/* Remove Member Section */}
         <div style={{ marginBottom: "10px" }}>
           <label>Select member to remove:</label>
           <Dropdown
-            value={selectedMember}
+            value={selectedMemberToRemove}
             options={team.members.map((m) => ({ label: m.name, value: m.id }))}
             placeholder="Select member"
-            onChange={(e) => setSelectedMember(e.value)}
+            onChange={(e) => setSelectedMemberToRemove(e.value)}
           />
           <Button
             label="Remove Member"
             icon="pi pi-user-minus"
             onClick={() => kickTeamMember(team.id)}
-            disabled={!selectedMember}
+            disabled={!selectedMemberToRemove}
             style={{ marginTop: "10px" }}
           />
         </div>
-  
+
         {/* Delete Team Button */}
         <Button
           label="Delete Team"
@@ -170,22 +166,27 @@ export default function StaffTeamViewTab({ courseSlug }: { courseSlug: string })
     );
   };
 
+  // Dropdown for selecting a leader (exclude students already in teams)
+  const studentsNotInTeams = students.filter(
+    (student) => !teams.some((team) => team.members.some((member) => member.id === student.id))
+  );
+
   return (
     <div>
       <h2>Staff Team Management</h2>
       <div style={{ marginBottom: "20px" }}>
         <label>Select leader to create a team:</label>
         <Dropdown
-          value={selectedStudent}
-          options={students.map((s) => ({ label: s.name, value: s.id }))}
+          value={selectedLeader}
+          options={studentsNotInTeams.map((s) => ({ label: s.name, value: s.id }))}
           placeholder="Select leader"
-          onChange={(e) => setSelectedStudent(e.value)}
+          onChange={(e) => setSelectedLeader(e.value)}
         />
         <Button
           label="Create Team"
           icon="pi pi-plus"
           onClick={createTeam}
-          disabled={!selectedStudent}
+          disabled={!selectedLeader}
           style={{ marginTop: "10px" }}
         />
       </div>

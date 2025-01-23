@@ -555,23 +555,25 @@ def delete_team_as_admin(request):
 @api_view(['POST'])
 @permission_classes([IsInstructorOrTA])
 def create_team_with_leader(request):
+    print("Incoming request data:", request.data)  # Log request data
+
     serializer = createTeamWithLeaderRequestSerializer(data=request.data)
-    
+
     if serializer.is_valid():
         team_name = serializer.validated_data.get('team_name')
         course_slug = serializer.validated_data.get('course_slug')
-        leader_name = serializer.validated_data.get('leader_name')
-        
+        leader_id = serializer.validated_data.get('leader_id')
+
         try:
-            offering = Offering.objects.get(course__slug=course_slug)
-        except Offering.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        
+            offering = db.Offering.objects.get(course__slug=course_slug)
+        except db.Offering.DoesNotExist:
+            return Response({'detail': 'Offering not found.'}, status=status.HTTP_404_NOT_FOUND)
+
         try:
             team_settings = db.OfferingTeamsSettings.objects.get(offering=offering)
         except db.OfferingTeamsSettings.DoesNotExist:
-            raise Response({'detail': 'Team settings not found.'}, status=status.HTTP_404_NOT_FOUND)
-        
+            return Response({'detail': 'Team settings not found.'}, status=status.HTTP_404_NOT_FOUND)
+
         try:
             role = db.Role.objects.get(
                 kind=db.Role.Kind.STUDENT,
@@ -579,29 +581,30 @@ def create_team_with_leader(request):
             )
         except db.Role.DoesNotExist:
             return Response({'detail': 'Role not found.'}, status=status.HTTP_404_NOT_FOUND)
-        
+
         try:
-            leader = db.Enrollment.objects.get(
+            leader_enrollment = db.Enrollment.objects.get(
                 role=role,
-                user__username=leader_name,
+                user_id=leader_id,
             )
         except db.Enrollment.DoesNotExist:
             return Response({'detail': 'Leader not found.'}, status=status.HTTP_404_NOT_FOUND)
-        
+
         team = db.Team.objects.create(
             name=team_name,
             offering=offering,
         )
-        
+
         db.TeamMember.objects.create(
             team=team,
-            enrollment=leader,
+            enrollment=leader_enrollment,
             membership_type=db.TeamMember.MembershipType.LEADER,
         )
-        
+
         return Response({'id': team.id, 'name': team.name}, status=status.HTTP_201_CREATED)
-    
-    return Response(status=status.HTTP_201_CREATED)
+
+    print("Serializer validation errors:", serializer.errors)  # Log serializer errors
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET'])
