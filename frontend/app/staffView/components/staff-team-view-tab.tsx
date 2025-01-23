@@ -92,7 +92,7 @@ export default function StaffTeamViewTab({ courseSlug }: { courseSlug: string })
   const kickTeamMember = async (teamId: string) => {
     if (!selectedMember) return;
     try {
-      await fetchApi(jwt, setAndStoreJwt, `teams/admin/remove/`, "POST", {
+      await fetchApi(jwt, setAndStoreJwt, `teams/admin/remove/`, "DELETE", {
         team_id: teamId,
         member_id: selectedMember,
       });
@@ -106,7 +106,7 @@ export default function StaffTeamViewTab({ courseSlug }: { courseSlug: string })
   // Delete a team
   const deleteTeam = async (teamId: string) => {
     try {
-      await fetchApi(jwt, setAndStoreJwt, `teams/delete/`, "POST", { team_id: teamId });
+      await fetchApi(jwt, setAndStoreJwt, `teams/delete/`, "DELETE", { team_id: teamId });
       fetchTeamsAndStudents(); // Refresh data
     } catch (error) {
       console.error("Error deleting team:", error);

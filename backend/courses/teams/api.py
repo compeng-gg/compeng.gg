@@ -255,6 +255,8 @@ def teams(request, slug):
             'name': team.name,
             'members': members,
         })
+        
+    print("team data:", data)
     
     return Response(data)
 
@@ -481,25 +483,55 @@ def add_member_to_team(request):
 @api_view(['DELETE'])
 @permission_classes([IsInstructorOrTA])
 def remove_member_from_team(request):
+    print("Remove member from team initiated")
+
+    # Log the incoming request data for debugging
+    print("Request data:", request.data)
+
     serializer = removeTeamMemberRequestSerializer(data=request.data)
-    
+
     if serializer.is_valid():
         team_id = serializer.validated_data.get('team_id')
-        member_id = serializer.validated_data.get('member_id')
-        
+        member_id = serializer.validated_data.get('member_id')  # Assuming this is the enrollment ID
+
+        print(f"Valid serializer data: team_id={team_id}, member_id={member_id}")
+
         try:
+            # Retrieve the team
             team = db.Team.objects.get(id=team_id)
+            print(f"Team found: {team}")
         except db.Team.DoesNotExist:
-            return Response({'detail': 'Team not found.'}, status=status.HTTP_404_NOT_FOUND)
-        
+            print("Team not found")
+            return Response({'detail': 'Team not found. Please check the team_id.'}, status=status.HTTP_404_NOT_FOUND)
+
         try:
-            member = db.TeamMember.objects.get(id=member_id)
+            # Retrieve the Enrollment to get the member
+            enrollment = db.Enrollment.objects.get(id=member_id)
+            print(f"Enrollment found: {enrollment}")
+        except db.Enrollment.DoesNotExist:
+            print("Enrollment not found")
+            return Response({'detail': 'Enrollment not found. Please check the member_id.'}, status=status.HTTP_404_NOT_FOUND)
+
+        try:
+            # Check if the enrollment is linked to a TeamMember in the specified team
+            member = db.TeamMember.objects.get(enrollment=enrollment, team=team)
+            print(f"Team member found: {member}")
         except db.TeamMember.DoesNotExist:
-            return Response({'detail': 'Member not found.'}, status=status.HTTP_404_NOT_FOUND)
-        
+            print("Member not found in the specified team")
+            return Response(
+                {'detail': f'This member does not belong to the specified team {team.name}.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        # Perform the deletion
         member.delete()
-        
-    return Response(status=status.HTTP_204_NO_CONTENT)
+        print(f"Member {member} successfully removed from team {team}")
+        return Response({'detail': 'Member removed from the team successfully.'}, status=status.HTTP_204_NO_CONTENT)
+
+    # Log serializer errors for debugging
+    print("Invalid serializer data:", serializer.errors)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 @api_view(['DELETE'])
 @permission_classes([IsInstructorOrTA])
