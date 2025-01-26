@@ -24,6 +24,43 @@ class QuercusRestAPI(RestAPI):
             return None
         return r.json()
 
+    def post(self, endpoint, data):
+        token = self.TOKEN
+        headers = {
+            'Accept': 'application/json',
+            'Authorization': f'Bearer {token}',
+        }
+        r = requests.post(
+            f'{self.API_URL}{endpoint}',
+            headers=headers,
+            json=data,
+        )
+        r.raise_for_status()
+        if r.text == '':
+            return None
+        return r.json()
+
+    def list_assignments(self, course_id):
+        return self.get(f'/courses/{course_id}/assignments')
+
+    def create_assignment(self, course_id, name, points_possible):
+        data = {
+            "assignment": {
+                "name": name,
+                "submission_types": ["none"],
+                "notify_of_update": False,
+                "points_possible": points_possible,
+                "grading_type": "points",
+                "published": True,
+            }
+        }
+        assignment = self.post(f'/courses/{course_id}/assignments', data)
+        return assignment
+
+    def update_grades(self, course_id, assignment_id, data):
+        progress = self.post(f'/courses/{course_id}/assignments/{assignment_id}/submissions/update_grades', data)
+        return progress
+
     def list_users(self, course_id, enrollment_type):
         data = []
         page = 1

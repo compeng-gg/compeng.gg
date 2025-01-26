@@ -116,6 +116,7 @@ class Assignment(models.Model):
     name = models.CharField(max_length=50)
     due_date = models.DateTimeField()
     files = models.JSONField()
+    external_id = models.BigIntegerField(blank=True, null=True)
 
     is_private_released = models.BooleanField(default=False)
     public_total = models.FloatField(blank=True, null=True)

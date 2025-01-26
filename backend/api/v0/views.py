@@ -494,6 +494,9 @@ def staff_assignment_private_release(request, course_slug, assignment_slug):
     assignment.is_private_released = validated_data["is_private_released"]
     assignment.save()
 
+    from quercus_app.utils import sync_assignment_to_quercus
+    sync_assignment_to_quercus(assignment)
+
     return Response()
 
 class AccommodationSerializer(serializers.Serializer):

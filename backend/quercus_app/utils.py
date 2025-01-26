@@ -103,26 +103,59 @@ def _update(offering, quercus_users, role_kind):
             Accommodation.objects.filter(user=user, assignment=assignment).delete()
         enrollment.delete()
 
-def update_courses_from_quercus():
+def _get_instructor_with_token(offering):
+    instructor = None
+    instructor_role = offering.role_set.get(kind=Role.Kind.INSTRUCTOR)
+    for enrollment in instructor_role.enrollment_set.all():
+        try:
+            enrollment.user.quercus_token
+            instructor = enrollment.user
+            break
+        except User.quercus_token.RelatedObjectDoesNotExist:
+            pass
+    assert instructor is not None
+    return instructor
 
+def sync_assignment_to_quercus(assignment):
+    offering = assignment.offering
+    instructor = _get_instructor_with_token(offering)
+
+    api = QuercusRestAPI(instructor)
+    quercus_course_id = offering.external_id
+    assert not quercus_course_id is None
+
+    if assignment.external_id is None:
+        quercus_assignment = api.create_assignment(
+            quercus_course_id,
+            f"{assignment.name} Autograder",
+            assignment.overall_total
+        )
+        assignment.external_id = quercus_assignment["id"]
+        assignment.save()
+
+    data = {"grade_data": {}}
+    student_role = offering.role_set.get(kind=Role.Kind.STUDENT)
+    for enrollment in Enrollment.objects.filter(role=student_role):
+        user = enrollment.user
+        quercus_user = user.quercus_user
+        quercus_user_id = quercus_user.id
+        grade = 0.0
+        try:
+            assignment_result = AssignmentResult.objects.get(user=user, assignment=assignment)
+            grade = assignment_result.overall_grade
+        except AssignmentResult.DoesNotExist:
+            pass
+        data["grade_data"][str(quercus_user_id)] = {}
+        data["grade_data"][str(quercus_user_id)]["posted_grade"] = grade
+    api.update_grades(quercus_course_id, assignment.external_id, data)
+
+def update_courses_from_quercus():
     for offering in Offering.objects.all():
         if offering.external_id is None:
             continue
-
         if not offering.active:
             continue
-        
-        # Look for an instructor Quercus token
-        instructor = None
-        for enrollment in offering.role_set.get(kind=Role.Kind.INSTRUCTOR) \
-                                  .enrollment_set.all():
-            try:
-                enrollment.user.quercus_token
-                instructor = enrollment.user
-            except User.quercus_token.RelatedObjectDoesNotExist:
-                pass
-
-        assert instructor is not None
+        instructor = _get_instructor_with_token(offering)
         api = QuercusRestAPI(instructor)
         quercus_course_id = offering.external_id
         students = api.list_students(quercus_course_id)
