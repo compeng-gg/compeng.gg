@@ -402,17 +402,6 @@ def update_team_settings_for_offering(request, course_slug, offering_slug):
     
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-@api_view(['GET'])
-@permission_classes([permissions.IsAuthenticated])
-def get_team_settings_for_offering(request, slug):
-    try:
-        offering = Offering.objects.get(course__slug=slug)
-        team_settings = db.OfferingTeamsSettings.objects.get(offering=offering)
-    except (Offering.DoesNotExist, db.OfferingTeamsSettings.DoesNotExist) as e:
-        return Response(e, status=status.HTTP_404_NOT_FOUND)
-    
-    return Response(team_settings)
-
 # @api_view(['POST'])
 # @permission_classes([IsInstructorOrTA])
 # def add_member_to_team(request):
