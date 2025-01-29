@@ -247,6 +247,7 @@ def teams(request, slug):
         members = []
         for teamMember in team.members.all():
             members.append({
+                'id': teamMember.enrollment.user.id,
                 'role': teamMember.membership_type,
                 'name': teamMember.enrollment.user.username,
             })
@@ -256,6 +257,8 @@ def teams(request, slug):
             'name': team.name,
             'members': members,
         })
+        
+    print("team data:", data)
     
     return Response(data)
 
@@ -392,54 +395,146 @@ def get_team_settings_for_offering(request, slug):
     
     return Response(team_settings)
 
+# @api_view(['POST'])
+# @permission_classes([IsInstructorOrTA])
+# def add_member_to_team(request):
+#     print("Adding member to team")
+#     serializer = addTeamMemberRequestSerializer(data=request.data)
+    
+#     if serializer.is_valid():
+#         team_id = serializer.validated_data.get('team_id')
+#         member_id = serializer.validated_data.get('member_id')
+        
+#         try:
+#             # Retrieve the target team
+#             team = db.Team.objects.get(id=team_id)
+#         except db.Team.DoesNotExist:
+#             return Response({'detail': 'Team not found.'}, status=status.HTTP_404_NOT_FOUND)
+        
+#         try:
+#             # Retrieve the member
+#             member = db.TeamMember.objects.get(id=member_id)
+#         except db.TeamMember.DoesNotExist:
+#             return Response({'detail': 'Member not found.'}, status=status.HTTP_404_NOT_FOUND)
+        
+#         # Check if the member is already in a team
+#         if member.team is not None:
+#             return Response(
+#                 {'detail': f'Member is already in team {member.team.name}.'},
+#                 status=status.HTTP_400_BAD_REQUEST
+#             )
+        
+#         # Add the member to the target team
+#         member.team = team
+#         member.save()
+        
+#         return Response({'detail': 'Member added to the team successfully.'}, status=status.HTTP_204_NO_CONTENT)
+    
+#     # Return validation errors
+#     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 @api_view(['POST'])
 @permission_classes([IsInstructorOrTA])
 def add_member_to_team(request):
+    print("Add member to team")
+    
     serializer = addTeamMemberRequestSerializer(data=request.data)
+    print("Serializer data:", request.data)
     
     if serializer.is_valid():
+        print("Serializer is valid")
         team_id = serializer.validated_data.get('team_id')
-        member_id = serializer.validated_data.get('member_id')
-        
+        member_id = serializer.validated_data.get('member_id')  # Assuming this is the enrollment ID
+        print("Team ID:", team_id, "Member ID (enrollment):", member_id)
+
         try:
+            # Retrieve the team
             team = db.Team.objects.get(id=team_id)
+            print("Team found:", team)
         except db.Team.DoesNotExist:
+            print("Team not found")
             return Response({'detail': 'Team not found.'}, status=status.HTTP_404_NOT_FOUND)
-        
+
         try:
-            member = db.TeamMember.objects.get(id=member_id)
-        except db.TeamMember.DoesNotExist:
-            return Response({'detail': 'Member not found.'}, status=status.HTTP_404_NOT_FOUND)
-        
-        member.team = team
-        member.save()
-        
-        return Response(status=status.HTTP_204_NO_CONTENT)
-    
-    return Response(status=status.HTTP_204_NO_CONTENT)
+            # Retrieve the Enrollment to get the user
+            enrollment = db.Enrollment.objects.select_related('user').get(id=member_id)
+            print("Enrollment found:", enrollment)
+        except db.Enrollment.DoesNotExist:
+            print("Enrollment not found")
+            return Response({'detail': 'Enrollment not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        # Check if the enrollment is already linked to a team
+        existing_membership = db.TeamMember.objects.filter(enrollment=enrollment).first()
+        if existing_membership:
+            print("Enrollment already in a team:", existing_membership.team.name)
+            return Response(
+                {'detail': f'This user is already in team {existing_membership.team.name}.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Create a new TeamMember and link the enrollment to the team
+        new_member = db.TeamMember.objects.create(enrollment=enrollment, team=team, membership_type=db.TeamMember.MembershipType.MEMBER)
+        new_member.save()
+        print("User added successfully as a team member")
+        return Response({'detail': 'User added to the team successfully.'}, status=status.HTTP_204_NO_CONTENT)
+
+    print("Serializer invalid:", serializer.errors)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 @api_view(['DELETE'])
 @permission_classes([IsInstructorOrTA])
 def remove_member_from_team(request):
+    print("Remove member from team initiated")
+
+    # Log the incoming request data for debugging
+    print("Request data:", request.data)
+
     serializer = removeTeamMemberRequestSerializer(data=request.data)
-    
+
     if serializer.is_valid():
         team_id = serializer.validated_data.get('team_id')
-        member_id = serializer.validated_data.get('member_id')
-        
+        member_id = serializer.validated_data.get('member_id')  # Assuming this is the enrollment ID
+
+        print(f"Valid serializer data: team_id={team_id}, member_id={member_id}")
+
         try:
+            # Retrieve the team
             team = db.Team.objects.get(id=team_id)
+            print(f"Team found: {team}")
         except db.Team.DoesNotExist:
-            return Response({'detail': 'Team not found.'}, status=status.HTTP_404_NOT_FOUND)
-        
+            print("Team not found")
+            return Response({'detail': 'Team not found. Please check the team_id.'}, status=status.HTTP_404_NOT_FOUND)
+
         try:
-            member = db.TeamMember.objects.get(id=member_id)
+            # Retrieve the Enrollment to get the member
+            enrollment = db.Enrollment.objects.get(id=member_id)
+            print(f"Enrollment found: {enrollment}")
+        except db.Enrollment.DoesNotExist:
+            print("Enrollment not found")
+            return Response({'detail': 'Enrollment not found. Please check the member_id.'}, status=status.HTTP_404_NOT_FOUND)
+
+        try:
+            # Check if the enrollment is linked to a TeamMember in the specified team
+            member = db.TeamMember.objects.get(enrollment=enrollment, team=team)
+            print(f"Team member found: {member}")
         except db.TeamMember.DoesNotExist:
-            return Response({'detail': 'Member not found.'}, status=status.HTTP_404_NOT_FOUND)
-        
+            print("Member not found in the specified team")
+            return Response(
+                {'detail': f'This member does not belong to the specified team {team.name}.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        # Perform the deletion
         member.delete()
-        
-    return Response(status=status.HTTP_204_NO_CONTENT)
+        print(f"Member {member} successfully removed from team {team}")
+        return Response({'detail': 'Member removed from the team successfully.'}, status=status.HTTP_204_NO_CONTENT)
+
+    # Log serializer errors for debugging
+    print("Invalid serializer data:", serializer.errors)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 @api_view(['DELETE'])
 @permission_classes([IsInstructorOrTA])
@@ -463,23 +558,25 @@ def delete_team_as_admin(request):
 @api_view(['POST'])
 @permission_classes([IsInstructorOrTA])
 def create_team_with_leader(request):
+    print("Incoming request data:", request.data)  # Log request data
+
     serializer = createTeamWithLeaderRequestSerializer(data=request.data)
-    
+
     if serializer.is_valid():
         team_name = serializer.validated_data.get('team_name')
         course_slug = serializer.validated_data.get('course_slug')
-        leader_name = serializer.validated_data.get('leader_name')
-        
+        leader_id = serializer.validated_data.get('leader_id')
+
         try:
-            offering = Offering.objects.get(course__slug=course_slug)
-        except Offering.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        
+            offering = db.Offering.objects.get(course__slug=course_slug)
+        except db.Offering.DoesNotExist:
+            return Response({'detail': 'Offering not found.'}, status=status.HTTP_404_NOT_FOUND)
+
         try:
             team_settings = db.OfferingTeamsSettings.objects.get(offering=offering)
         except db.OfferingTeamsSettings.DoesNotExist:
-            raise Response({'detail': 'Team settings not found.'}, status=status.HTTP_404_NOT_FOUND)
-        
+            return Response({'detail': 'Team settings not found.'}, status=status.HTTP_404_NOT_FOUND)
+
         try:
             role = db.Role.objects.get(
                 kind=db.Role.Kind.STUDENT,
@@ -487,29 +584,30 @@ def create_team_with_leader(request):
             )
         except db.Role.DoesNotExist:
             return Response({'detail': 'Role not found.'}, status=status.HTTP_404_NOT_FOUND)
-        
+
         try:
-            leader = db.Enrollment.objects.get(
+            leader_enrollment = db.Enrollment.objects.get(
                 role=role,
-                user__username=leader_name,
+                user_id=leader_id,
             )
         except db.Enrollment.DoesNotExist:
             return Response({'detail': 'Leader not found.'}, status=status.HTTP_404_NOT_FOUND)
-        
+
         team = db.Team.objects.create(
             name=team_name,
             offering=offering,
         )
-        
+
         db.TeamMember.objects.create(
             team=team,
-            enrollment=leader,
+            enrollment=leader_enrollment,
             membership_type=db.TeamMember.MembershipType.LEADER,
         )
-        
+
         return Response({'id': team.id, 'name': team.name}, status=status.HTTP_201_CREATED)
-    
-    return Response(status=status.HTTP_201_CREATED)
+
+    print("Serializer validation errors:", serializer.errors)  # Log serializer errors
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET'])
@@ -547,3 +645,71 @@ def get_user_team_status(request, slug):
         team_data = None
 
     return Response({'user_id': request.user.id, 'team': team_data})
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def get_user_role(request, slug):
+    try:
+        # Find the offering using the provided slug
+        offering = db.Offering.objects.get(course__slug=slug, active=True)
+    except db.Offering.DoesNotExist:
+        return Response({'detail': 'Offering not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+    try:
+        # Fetch the role for the user in the offering
+        enrollment = db.Enrollment.objects.get(
+            user=request.user,
+            role__offering=offering,
+        )
+        role = enrollment.role
+    except db.Enrollment.DoesNotExist:
+        return Response({'detail': 'Enrollment not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+    # Return the role information
+    return Response({
+        'user_id': request.user.id,
+        'offering': offering.name,
+        'role': role.kind,  # This will return the role enum value (e.g., 'STUDENT')
+    })
+    
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def get_enrolled_students(request, slug):
+    """
+    Retrieve a list of enrolled students for a given offering.
+    """
+    try:
+        # Retrieve the offering based on the slug
+        offering = db.Offering.objects.get(course__slug=slug, active=True)
+    except db.Offering.DoesNotExist:
+        return Response({'detail': 'Offering not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+    # Filter enrollments for students in the offering
+    student_enrollments = db.Enrollment.objects.filter(
+        role__kind=db.Role.Kind.STUDENT,  # Filter by student role
+        role__offering=offering
+    ).select_related('user')  # Optimize query by prefetching user details
+    
+    print(student_enrollments)
+
+    # Serialize the data, use 'username', 'first_name', and 'last_name' if 'name' doesn't exist
+    students = [
+    {
+        'id': enrollment.user.id,
+        'name': getattr(
+            enrollment.user,
+            'name',
+            getattr(
+                enrollment.user,
+                'username',  # Use username as a fallback if name, first_name, and last_name are missing
+                f"{getattr(enrollment.user, 'first_name', '')} {getattr(enrollment.user, 'last_name', '')}".strip()
+            )
+        ),
+        'email': getattr(enrollment.user, 'email', ''),  # Assuming 'email' exists in the user model
+    }
+    for enrollment in student_enrollments
+]
+    
+    print("Done:", students)
+
+    return Response(students, status=status.HTTP_200_OK)
