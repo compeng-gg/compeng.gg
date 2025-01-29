@@ -11,7 +11,6 @@ from runner.models import Runner, Task
 
 
 class Institution(models.Model):
-
     slug = models.SlugField(max_length=50)
     name = models.CharField(max_length=50)
     verified_discord_role_id = models.BigIntegerField(blank=True, null=True)

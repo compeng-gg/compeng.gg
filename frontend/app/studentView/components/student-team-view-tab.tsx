@@ -144,6 +144,7 @@ export default function StudentTeamViewTab(props: StudentTeamViewTabProps){
             team_name: "Team " + (teams.length+1).toString(),
             course_slug: courseSlug
         }).then((response) => {
+            console.log(response)
             fetchTeams();
         })
     }

@@ -300,6 +300,7 @@ def create_team(request):
         # Create team models
         success = create_student_team_and_fork(offering, team_name, request.user)
         if not success:
+            print('Failed to create github team and fork')
             return Response({'detail': 'Failed to create github team and fork'}, status=status.HTTP_400_BAD_REQUEST)
         
         team = db.Team.objects.create(
