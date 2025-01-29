@@ -1,5 +1,5 @@
 import { TabMenu } from "primereact/tabmenu";
-import { Lab } from "../[slug]/page";
+import { Lab } from "../[courseSlug]/page";
 import { useState } from 'react';
 import PrimeWrapper from "../components/primeWrapper";
 import 'primeicons/primeicons.css';

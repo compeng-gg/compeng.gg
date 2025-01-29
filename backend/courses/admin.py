@@ -30,29 +30,20 @@ class AssignmentAdmin(admin.ModelAdmin):
 class AssignmentTaskAdmin(admin.ModelAdmin):
     pass
 
+@admin.register(models.AssignmentLeaderboardEntry)
+class AssignmentLeaderboardEntryAdmin(admin.ModelAdmin):
+    pass
+
+@admin.register(models.AssignmentGrade)
+class AssignmentGradeAdmin(admin.ModelAdmin):
+    pass
+
 @admin.register(models.Accommodation)
 class AccommodationAdmin(admin.ModelAdmin):
     pass
 
-@admin.register(models.Team)
-class TeamAdmin(admin.ModelAdmin):
-    list_display = ('name', 'id')
-    pass
-
-@admin.register(models.TeamMember)
-class TeamMemberAdmin(admin.ModelAdmin):
-    list_display = ('enrollment', 'team')
-    list_display_links = ('enrollment', 'team')
-    
-    pass
-
-@admin.register(models.OfferingTeamsSettings)
-class OfferingTeamsSettingsAdmin(admin.ModelAdmin):
-    list_display = ('offering', 'max_team_size', 'formation_deadline')
-    list_display_links = ('offering', 'max_team_size', 'formation_deadline')
-
-@admin.register(models.Assessment)
-class AssessmentAdmin(admin.ModelAdmin):
+@admin.register(models.Quiz)
+class QuizAdmin(admin.ModelAdmin):
     pass
 
 @admin.register(models.WrittenResponseQuestion)
@@ -69,4 +60,16 @@ class MultipleChoiceQuestionAdmn(admin.ModelAdmin):
 
 @admin.register(models.CheckboxQuestion)
 class CheckboxQuestionAdmin(admin.ModelAdmin):
+    pass
+
+@admin.register(models.QuizSubmission)
+class QuizSubmissionAdmin(admin.ModelAdmin):
+    pass
+
+@admin.register(models.CheckboxAnswer)
+class CheckboxAnswerAdmin(admin.ModelAdmin):
+    pass
+
+@admin.register(models.MultipleChoiceAnswer)
+class MultipleChoiceAdmin(admin.ModelAdmin):
     pass

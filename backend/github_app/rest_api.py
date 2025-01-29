@@ -87,10 +87,11 @@ class GitHubRestAPI(RestAPI):
             'Authorization': f'Bearer {token}',
         }
         if data is not None:
+            from urllib.parse import urlencode
+            query = urlencode(data)
             r = requests.get(
-                f'{self.API_URL}{endpoint}',
+                f'{self.API_URL}{endpoint}?{query}',
                 headers=headers,
-                json=data,
             )
         else:
             r = requests.get(
@@ -112,16 +113,19 @@ class GitHubRestAPI(RestAPI):
             'Authorization': f'Bearer {token}',
         }
         if data is not None:
+            from urllib.parse import urlencode
+            query = urlencode(data)
             r = requests.get(
-                f'{self.API_URL}{endpoint}',
+                f'{self.API_URL}{endpoint}?{query}',
                 headers=headers,
-                json=data,
             )
         else:
             r = requests.get(
                 f'{self.API_URL}{endpoint}',
                 headers=headers,
             )
+        if r.status_code != 200:
+            return None
         return r.text
 
     def put_with_jwt(self, endpoint, data=None):
@@ -249,6 +253,27 @@ class GitHubRestAPI(RestAPI):
 
     def create_team_for_org(self, name):
         return self.create_team(self.ORGANIZATION, name)
+    
+    def create_child_team(self, org, team_name, parent_team_name):
+        parent_team = self.get_with_ghs(f'/orgs/{org}/teams/{parent_team_name}')
+        data  = {
+            "name": team_name,
+            "description": "",
+            "permission": "push",
+            "notification_setting": "notifications_enabled",
+            "parent_team_id": parent_team['id']
+        }
+        print("Creating subteam")
+        return self.post_with_ghs(f'/orgs/{org}/teams', data)
+    
+    def create_child_team_for_org(self, team_name, parent_team_name):
+        return self.create_child_team(self.ORGANIZATION, team_name, parent_team_name)
+    
+    def get_all_teams(self, org):
+        return self.get_with_ghs(f'/orgs/{org}/teams')
+    
+    def get_all_teams_for_org(self):
+        return self.get_all_teams(self.ORGANIZATION)
 
     def create_org_repo(self, org, name):
         data = {
@@ -271,11 +296,24 @@ class GitHubRestAPI(RestAPI):
     def add_team_membership_for_org(self, team_slug, username):
         return self.add_team_membership(self.ORGANIZATION, team_slug, username)
 
+    def remove_team_membership(self, org, team_slug, username):
+        return self.delete_with_ghs(f'/orgs/{org}/teams/{team_slug}/memberships/{username}')
+
+    def remove_team_membership_for_org(self, team_slug, username):
+        return self.remove_team_membership(self.ORGANIZATION, team_slug, username)
+
+    def remove_repository(self, owner, repo):
+        return self.delete_with_ghs(f'/repos/{owner}/{repo}')
+
+    def remove_repository_for_org(self, repo):
+        return self.remove_repository(self.ORGANIZATION, repo)
+
     def create_fork(self, owner, repo, **kwargs):
         return self.post_with_ghs(f'/repos/{owner}/{repo}/forks', kwargs)
 
     def create_fork_for_org(self, repo, **kwargs):
         kwargs['organization'] = self.ORGANIZATION
+        print(kwargs, repo)
         return self.create_fork(self.ORGANIZATION, repo, **kwargs)
 
     def list_repository_collaborators(self, owner, repo, **kwargs):
@@ -350,7 +388,7 @@ class GitHubRestAPI(RestAPI):
             f'/repos/{owner}/{repo}/contents/{path}',
             data=kwargs if kwargs else None,
         )
-    
+
     def get_repository_content_raw_for_org(self, repo, path, **kwargs):
         return self.get_repository_content_raw(
             self.ORGANIZATION, repo, path, **kwargs

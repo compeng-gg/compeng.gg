@@ -1,6 +1,6 @@
 from django.urls import path
-import courses.assessments.api.websockets as assessments_websocket_api
+import courses.quizzes.api.websockets as quizzes_websocket_api
 
 websocket_urlpatterns = [
-    path('api/ws/v0/assessments/<slug:assessment_slug>/run_code/<uuid:coding_question_id>/', assessments_websocket_api.CodeRunConsumer.as_asgi()),
+    path('api/v0/ws/<slug:course_slug>/quiz/<slug:quiz_slug>/run_code/<uuid:coding_question_id>/', quizzes_websocket_api.CodeRunConsumer.as_asgi()),
 ]

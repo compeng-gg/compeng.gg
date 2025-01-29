@@ -48,6 +48,7 @@ USE_TZ = True
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     # 'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     # 'django.middleware.csrf.CsrfViewMiddleware',
@@ -72,6 +73,8 @@ INSTALLED_APPS = [
 
     'runner',
 
+    'compeng_gg.django.github',
+
     'corsheaders',
     'social_django',
     'rest_framework',
@@ -82,7 +85,9 @@ INSTALLED_APPS = [
 ]
 
 ## Security
-
+CSRF_TRUSTED_ORIGINS = json.loads(os.environ.setdefault("CSRF_TRUSTED_ORIGINS",
+    "[]"
+))
 SECRET_KEY = os.environ.setdefault('SECRET_KEY',
     'django-insecure-i%y%&uud=jfqzakf!ee5+j12hv=q)r9v*(569c5%%gh9n2#7fg'
 )
@@ -231,11 +236,19 @@ GITHUB_ORGANIZATION = os.environ.setdefault('GITHUB_ORGANIZATION', '')
 GITHUB_PRIVATE_KEY_B64 = os.environ.setdefault('GITHUB_PRIVATE_KEY_B64', '')
 GITHUB_WEBHOOK_TOKEN = os.environ.setdefault('GITHUB_WEBHOOK_TOKEN', '')
 
+# TODO: init this from environment
+RUN_LOCALLY = True
+
+## New GitHub module
+GITHUB_WEBHOOK_SECRET = GITHUB_WEBHOOK_TOKEN # New name
+GITHUB_API_URL = "https://api.github.com"
+
 # Runner
 
 RUNNER_QUEUE_HOST = os.environ.setdefault('RUNNER_QUEUE_HOST', 'localhost')
 RUNNER_QUEUE_PORT = int(os.environ.setdefault('RUNNER_QUEUE_PORT', '8002'))
 RUNNER_HOSTS = json.loads(os.getenv('RUNNER_HOSTS', '["localhost"]'))
+RUNNER_USE_K8S = json.loads(os.environ.setdefault('RUNNER_USE_K8S', 'false'))
 
 # Custom
 
@@ -257,7 +270,9 @@ if BUILTIN_FRONTEND:
     ]
     MIDDLEWARE += [
         'django.contrib.sessions.middleware.SessionMiddleware',
+        # 'django.middleware.csrf.CsrfViewMiddleware',
         'django.contrib.auth.middleware.AuthenticationMiddleware',
         'django.contrib.messages.middleware.MessageMiddleware',
     ]
-    STATIC_URL = '/static/'
+    STATIC_URL = '/api/static/'
+    STATIC_ROOT = os.environ.setdefault("STATIC_ROOT", str(BASE_DIR / 'static'))

@@ -7,8 +7,10 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /opt/compeng.gg
 
+COPY package-lock.json package.json .
+RUN npm ci
 COPY . .
-RUN npm ci && npm run build
+RUN npm run build
 
 EXPOSE 3000
 ENV PORT=3000
