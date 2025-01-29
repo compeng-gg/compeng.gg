@@ -15,3 +15,23 @@
   }
 }
 
+.form-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1em; /* Adjust the spacing as needed */
+}
+
+/* Add the spinning animation */
+@keyframes spin {
+  from {
+      transform: rotate(0deg);
+  }
+  to {
+      transform: rotate(360deg);
+  }
+}
+
+/* Apply spin animation only on hover */
+.hover-spin:hover {
+  animation: spin 1s linear infinite;
+}

@@ -30,7 +30,7 @@ import { routeModule } from 'next/dist/build/templates/app-page';
 
 export function getBadgeForRole(role: string, size?: "xlarge" | "large"){
 
-  const severity : string = (role == "Student") ? "info":"success";
+  const severity : string = (role == "Student") ? "info":"admin";
   return <Badge value={role} severity={severity} size={size}/>
 }
 
@@ -43,7 +43,7 @@ function getCourseCard(offering){
   
   console.log(offering.role);
   return (
-    <Link href={`/${offering.slug}/`} style={{maxWidth: "200px"}}>
+    <Link href={`/${offering.course_slug}/${offering.offering_slug}/`} style={{maxWidth: "200px"}}>
       <PrimeWrapper>
         <Card title={offering.name} footer={getBadgeForRole(getRoleFromOffering(offering)) } />
       </PrimeWrapper>

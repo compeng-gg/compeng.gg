@@ -1,5 +1,5 @@
 import { TabMenu } from "primereact/tabmenu";
-import { Lab } from "../[courseSlug]/page";
+import { Lab } from "../[courseSlug]/[offeringSlug]/page";
 import { useState } from 'react';
 import PrimeWrapper from "../components/primeWrapper";
 import 'primeicons/primeicons.css';
@@ -14,10 +14,11 @@ export interface StudentViewProps {
     courseName: string;
     labs: Lab[];
     courseSlug: string;
+    offeringSlug: string;
 }
 
 export default function StudentView(props: StudentViewProps){
-    const {courseName, labs, courseSlug} = props;
+    const {courseName, labs, courseSlug, offeringSlug} = props;
 
     const [idx, setIdx] = useState<number>(0);
     const items = [
@@ -36,13 +37,13 @@ export default function StudentView(props: StudentViewProps){
                 activeIndex={idx}
                 onTabChange={(e) => setIdx(e.index)}
             />
-            <DisplayCourseTab idx={idx} labs={labs} courseSlug={courseSlug}/>
+            <DisplayCourseTab idx={idx} labs={labs} courseSlug={courseSlug} offeringSlug={offeringSlug}/>
         </PrimeWrapper>
     </>
     )
 }
 
-function DisplayCourseTab({idx, labs, courseSlug}){
+function DisplayCourseTab({idx, labs, courseSlug, offeringSlug}){
 
     if(idx == 0){
         return <StudentAssignmentTab labs={labs}/>
