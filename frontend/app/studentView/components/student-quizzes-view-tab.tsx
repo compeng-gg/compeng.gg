@@ -1,4 +1,4 @@
-import QuizDisplay, { QuizProps } from "@/app/[courseSlug]/quiz/quiz-display";
+import QuizDisplay, { QuizProps } from "@/app/[courseSlug]/[offeringSlug]/quiz/quiz-display";
 import { fetchApi } from "@/app/lib/api";
 import { JwtContext } from "@/app/lib/jwt-provider";
 import { useContext, useEffect, useState } from "react";

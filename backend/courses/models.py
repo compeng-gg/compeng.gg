@@ -4,13 +4,13 @@ from django.db import models
 from django.urls import reverse, NoReverseMatch
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
+from datetime import timedelta
 
 from compeng_gg.django.github.models import Repository
 from runner.models import Runner, Task
 
 
 class Institution(models.Model):
-
     slug = models.SlugField(max_length=50)
     name = models.CharField(max_length=50)
     verified_discord_role_id = models.BigIntegerField(blank=True, null=True)
@@ -103,9 +103,7 @@ class OfferingTeamsSettings(models.Model):
         on_delete=models.CASCADE,
     )
     max_team_size = models.IntegerField(default=3)
-    formation_deadline = models.DateTimeField(default=(timezone.now))
-    show_group_members = models.BooleanField(default=True)
-    allow_custom_names = models.BooleanField(default=False)
+    formation_deadline = models.DateTimeField(default=(timezone.now() + timedelta(days=365)))
 
 class Assignment(models.Model):
 
@@ -207,6 +205,9 @@ class Team(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
     offering = models.ForeignKey(Offering, on_delete=models.CASCADE, related_name='teams')
     github_team_slug = models.CharField(max_length=255, blank=False, null=False)
+
+    def __str__(self):
+        return f'{self.name}'
 
     class Meta:
         constraints = [
