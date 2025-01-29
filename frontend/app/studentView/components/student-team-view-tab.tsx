@@ -53,6 +53,7 @@ export default function StudentTeamViewTab(props: StudentTeamViewTabProps){
     const [teams, setTeams] = useState<Team[]>([]);
     const [userMembership, setUserMembership] = useState<UserMembership | undefined>(undefined);
     const [userName, setUserName] = useState<string>("");
+    const [loading, setLoading] = useState<boolean>(true);
 
     // Fetch username on component mount
     useEffect(() => {
@@ -73,6 +74,7 @@ export default function StudentTeamViewTab(props: StudentTeamViewTabProps){
     // Fetch teams function, accessible to all parts of the file
     const fetchTeams = async () => {
         try {
+            setLoading(true);
             const res = await fetchApi(jwt, setAndStoreJwt, `teams/get/${courseSlug}`, "GET");
             const data = await res.json();
             const returnedTeams = [];
@@ -92,6 +94,8 @@ export default function StudentTeamViewTab(props: StudentTeamViewTabProps){
             setTeams(returnedTeams);
         } catch (error) {
             console.error("Failed to retrieve teams", error);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -168,6 +172,8 @@ export default function StudentTeamViewTab(props: StudentTeamViewTabProps){
     }
 
     const header = renderHeader();
+
+    if (loading) return <p>Loading...</p>;
 
     return(
         <div style={{display: "flex", flexDirection: "column", gap: "8px"}}>

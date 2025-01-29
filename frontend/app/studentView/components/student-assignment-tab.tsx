@@ -1,4 +1,4 @@
-import { Lab } from "@/app/[courseSlug]/page";
+import { Lab } from "@/app/[courseSlug]/[offeringSlug]/page";
 import { Card } from "primereact/card";
 
 

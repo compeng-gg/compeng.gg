@@ -12,8 +12,9 @@ import Link from 'next/link';
 import { JwtContext } from '@/app/lib/jwt-provider';
 import { fetchApi } from '@/app/lib/api';
 import { TabMenu } from 'primereact/tabmenu';
+import StudentView from '../../studentView/student-view';
 import { Card } from 'primereact/card';
-import StaffView from '../staffView/staff-view';
+import StaffView from '../../staffView/staff-view';
 
 export interface Lab {
   name: string;
@@ -33,14 +34,12 @@ const leaderboardFields: [string, string][] = [
   ['speedup', 'Speedup'],
 ]
 
-function Course({ params }: { params: { courseSlug: string } }) {
+function Course({ params }: { params: { courseSlug: string, offeringSlug: string } }) {
   const [jwt, setAndStoreJwt] = useContext(JwtContext);
   const [name, setName] = useState();
   const [labs, setLabs] = useState([] as Lab[]);
   const [role, setRole] = useState();
 
-  // TODO: Enable navigation to this page only by instructor and TA role
-  // Fetch and list all offerings for a given course in the same style and format as previous page for all courses
   useEffect(() => {
     async function fetchLabs() {
       try {
@@ -59,7 +58,14 @@ function Course({ params }: { params: { courseSlug: string } }) {
   }, [params.courseSlug, jwt, setAndStoreJwt]);
 
   return (
-    <WIP/>
+    <>
+      <Navbar />
+      <Card>
+        {(role == "Student")
+        ? <StudentView courseName={name} labs={labs} courseSlug={params.courseSlug}/>
+        : <StaffView courseName={name} labs={labs} courseSlug={params.courseSlug} offeringSlug={params.offeringSlug}/>}
+      </Card>
+    </>
   )
 
 
@@ -235,10 +241,4 @@ export default function Page({ params }: { params: { courseSlug: string } }) {
       <Course params={params} />
     </LoginRequired>
   );
-}
-
-function WIP(){
-    return (
-        <h4>This is a work in progress</h4>
-    )
 }
