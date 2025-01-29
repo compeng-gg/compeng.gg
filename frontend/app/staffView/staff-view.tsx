@@ -43,7 +43,10 @@ export default function StaffView(props: StaffViewProps){
     )
 }
 
-function DisplayCourseTab({idx, labs, courseSlug}){
+function DisplayCourseTab({idx, courseSlug, offeringSlug}){
+    if(idx == 0){
+        return <StaffCourseSettingsTab courseSlug={courseSlug} offeringSlug={offeringSlug}/>
+    }
     
     if(idx == 3){
         return <StaffTeamViewTab  courseSlug={courseSlug}/>
