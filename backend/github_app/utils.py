@@ -232,12 +232,12 @@ def create_student_sub_team(team_name, student_team_slug):
     
     return None
 
-def create_student_team_and_fork(offering, team_name, user):
+def create_student_team_and_fork(offering, team_name, user) -> bool: 
     # Verify github connected
     try:
         get_uid('github', user)
     except ObjectDoesNotExist:
-        return
+        return False
     
     # New Fork Settings
     offering_full_slug = offering.full_slug()
@@ -245,13 +245,13 @@ def create_student_team_and_fork(offering, team_name, user):
     student_repo_name = f'{offering_full_slug}-student'
     repo_name = f'{offering_full_slug}-{slugify(team_name)}'
 
-    # Create the github sub team under students
+    # Create the github sub team under students and add student to that team
     create_student_sub_team(team_name, student_repo_name)
     social = user.social_auth.get(provider='github')
     github_username = social.extra_data['login']
     api.add_team_membership_for_org(slugify(team_name), github_username)
 
-    # Init the fork and fork perms
+    # Init the team fork and fork perms for leader
     api.create_fork_for_org(student_repo_name,
         name=repo_name
     )
@@ -278,6 +278,8 @@ def create_student_team_and_fork(offering, team_name, user):
                 role.github_team_slug,
                 repo_name,
             )
+    
+    return True
 
 def add_student_to_github_team(user, github_team_slug):
     social = user.social_auth.get(provider='github')
