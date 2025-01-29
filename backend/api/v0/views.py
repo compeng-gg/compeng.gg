@@ -163,7 +163,6 @@ def self(request):
 @permission_classes([permissions.IsAuthenticated])
 def dashboard(request):
     user = request.user
-    print(request)
     print(request.user)
     offerings = []
     for enrollment in user.enrollment_set.all():
@@ -174,7 +173,8 @@ def dashboard(request):
             print(offering)
             offerings.append({
                 'name': str(offering),
-                'slug': offering.course.slug,
+                'course_slug': offering.course.slug,
+                'offering_slug': offering.slug,
                 'role': str(enrollment.role),
             })
         else:
@@ -243,7 +243,7 @@ def tasks(request):
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
 def course(request, slug):
-    from courses.models import Accommodation, Assignment, AssignmentLeaderboardEntry, Offering, AssignmentGrade
+    from courses.models import Accommodation, Assignment, AssignmentLeaderboardEntry, Offering, AssignmentGrade, Enrollment
     user = request.user
     try:
         offering = Offering.objects.get(course__slug=slug)
@@ -252,8 +252,17 @@ def course(request, slug):
     except Offering.MultipleObjectsReturned:
         offering = Offering.objects.get(course__slug=slug, active=True)
 
+    try:
+        enrollment = Enrollment.objects.filter(
+            user=user,
+            role__offering=offering
+        ).first()
+    except Enrollment.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
     data = {
         'name': str(offering),
+        'role': str(enrollment.role)
     }
     assignments = []
     for assignment in offering.assignment_set.all():
@@ -343,6 +352,7 @@ def course(request, slug):
             assignment_data['leaderboard'] = leaderboard
         assignments.append(assignment_data)
     data['assignments'] = assignments
+    print(data)
     return Response(data)
 
 @api_view(['GET'])

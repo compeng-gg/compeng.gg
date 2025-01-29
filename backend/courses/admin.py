@@ -22,6 +22,18 @@ class EnrollmentAdmin(admin.ModelAdmin):
     list_display = ('user', 'role')
     pass
 
+@admin.register(models.OfferingTeamsSettings)
+class OfferingTeamsSettingsAdmin(admin.ModelAdmin):
+    pass
+
+@admin.register(models.Team)
+class TeamAdmin(admin.ModelAdmin):
+    pass
+
+@admin.register(models.TeamMember)
+class TeamMemberAdmin(admin.ModelAdmin):
+    pass
+
 @admin.register(models.Assignment)
 class AssignmentAdmin(admin.ModelAdmin):
     pass
