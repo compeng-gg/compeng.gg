@@ -4,6 +4,8 @@ import { useState } from 'react';
 import PrimeWrapper from "../components/primeWrapper";
 import 'primeicons/primeicons.css';
 import { Button } from "primereact/button";
+import StudentTeamViewTab from "../studentView/components/student-team-view-tab";
+import StaffTeamViewTab from "./components/staff-team-view-tab";
 import StaffCourseSettingsTab from "./components/staff-course-settings-tab";
 
 export interface StaffViewProps {
@@ -42,9 +44,13 @@ export default function StaffView(props: StaffViewProps){
     )
 }
 
-function DisplayCourseTab({idx, courseSlug, offeringSlug}){
+function DisplayCourseTab({idx, courseSlug, offeringSlug, courseSlug}){
     if(idx == 0){
         return <StaffCourseSettingsTab courseSlug={courseSlug} offeringSlug={offeringSlug}/>
+    }
+    
+    if(idx == 2){
+        return <StaffTeamViewTab  courseSlug={courseSlug}/>
     }
 
     return (

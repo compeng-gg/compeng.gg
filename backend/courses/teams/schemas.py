@@ -55,7 +55,7 @@ class UpdateTeamSettingsForOfferingRequestSerializer(serializers.Serializer):
 class createTeamWithLeaderRequestSerializer(serializers.Serializer):
     team_name = serializers.CharField(max_length=255, required=True)
     course_slug = serializers.CharField(max_length=255, required=True)
-    leader_name = serializers.CharField(max_length=255, required=True)
+    leader_id = serializers.UUIDField(required=True)
     
 class removeTeamMemberRequestSerializer(serializers.Serializer):
     team_id = serializers.UUIDField(required=True)

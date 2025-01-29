@@ -1,9 +1,10 @@
 from rest_framework import permissions
-from courses.models import Role
+from courses.models import Role, Enrollment
 class IsInstructorOrTA(permissions.BasePermission):
     def has_permission(self, request, view):
-        # Assuming the user's role is associated with an `Enrollment` or similar model
-        return Role.objects.filter(
+        has_permission = Enrollment.objects.filter(
             user=request.user,
-            kind__in=[Role.Kind.INSTRUCTOR, Role.Kind.TA]
+            role__kind__in=[Role.Kind.INSTRUCTOR, Role.Kind.TA]
         ).exists()
+        print(f"Permission check for user {request.user}: {has_permission}")
+        return has_permission

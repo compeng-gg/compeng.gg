@@ -41,6 +41,9 @@ urlpatterns = [
 
     path('courses/offerings/', views.offerings),
     path('courses/<slug:slug>/', views.course),
+    
+    
+    
     path('teams/join/request/', teams_api.request_to_join_team),
     path('teams/join/manage/', teams_api.manage_join_team_request),
     path('teams/delete/', teams_api.delete_team),
@@ -55,6 +58,9 @@ urlpatterns = [
     path('teams/admin/remove/', teams_api.remove_member_from_team),
     path('teams/admin/delete/', teams_api.delete_team_as_admin),
     path('teams/user/status/<slug:slug>/', teams_api.get_user_team_status),
+    
+    path('offering/role/<slug:slug>/', teams_api.get_user_role),
+    path('offering/students/<slug:slug>/', teams_api.get_enrolled_students),
     
 
     path('quizzes/list/all/', quizzes_api.list_all),
