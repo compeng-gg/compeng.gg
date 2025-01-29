@@ -298,7 +298,10 @@ def create_team(request):
             return Response({'detail': 'Enrollment not found.'}, status=status.HTTP_404_NOT_FOUND)
 
         # Create team models
-        create_student_team_and_fork(offering, team_name, request.user)
+        success = create_student_team_and_fork(offering, team_name, request.user)
+        if not success:
+            return Response({'detail': 'Failed to create github team and fork'}, status=status.HTTP_400_BAD_REQUEST)
+        
         team = db.Team.objects.create(
             name=team_name,
             offering=offering,
@@ -317,58 +320,63 @@ def create_team(request):
 
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
-def get_team_settings_for_offering(request, slug):
+def get_team_settings_for_offering(request, course_slug, offering_slug):
     try:
-        offering = Offering.objects.get(course__slug=slug)
+        offering = Offering.objects.get(course__slug=course_slug, slug=offering_slug)
         team_settings = db.OfferingTeamsSettings.objects.get(offering=offering)
-    except (Offering.DoesNotExist, db.OfferingTeamsSettings.DoesNotExist) as e:
+        data = {
+            "max_team_size": team_settings.max_team_size,
+            "formation_deadline": team_settings.formation_deadline,
+        }
+    except (Offering.DoesNotExist) as e:
         return Response(e, status=status.HTTP_404_NOT_FOUND)
+    except db.Offering.MultipleObjectsReturned:
+        return Response({'detail': 'Multiple offerings found with the same slugs. This should not happen.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    except db.OfferingTeamsSettings.DoesNotExist:
+        print("Teams Setttings for offering not instantiated")
+        data = {
+            "max_team_size": None,
+            "formation_deadline": None,
+        }
     
-    return Response(team_settings)
+    return Response(data)
 
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
-def create_team_settings_for_offering(request):
-    serializer = CreateTeamSettingsForOfferingRequestSerializer(data=request.data)
+def create_team_settings_for_offering(request, course_slug, offering_slug):
+    try:
+        offering = Offering.objects.get(course__slug=course_slug, slug=offering_slug)
+    except db.Offering.DoesNotExist:
+        return Response({'detail': 'Offering not found.'}, status=status.HTTP_404_NOT_FOUND)
+    except db.Offering.MultipleObjectsReturned:
+        return Response({'detail': 'Multiple offerings found with the same slugs. This should not happen.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    if serializer.is_valid():
-        offering_id = serializer.validated_data.get('offering_id')
+    # Fail if teams settings already exists
+    try: 
+        _ = db.OfferingTeamsSettings.objects.get(offering=offering)
+        return Response({'detail': 'Team Settings already exists'}, status=status.HTTP_404_NOT_FOUND)
+    except db.OfferingTeamsSettings.DoesNotExist:
+        pass
 
-        try:
-            offering = db.Offering.objects.get(id=offering_id)
-        except db.Offering.DoesNotExist:
-            return Response({'detail': 'Offering not found.'}, status=status.HTTP_404_NOT_FOUND)
-
-        # Fail if teams settings already exists
-        try: 
-            offeringTeamsSettings = db.OfferingTeamsSettings.objects.get(offering=offering)
-            return Response({'detail': 'Team Settings already exists'}, status=status.HTTP_404_NOT_FOUND)
-        except db.OfferingTeamsSettings.DoesNotExist:
-            pass
-
-        team = db.OfferingTeamsSettings.objects.create(
-            offering=offering,
-            max_team_size = serializer.validated_data.get('max_team_size'),
-            formation_deadline = serializer.validated_data.get('formation_deadline'),
-            show_group_members = serializer.validated_data.get('show_group_members'),
-            allow_custom_names = serializer.validated_data.get('allow_custom_names'),
-        )
-
-        return Response({'id': team.id, 'name': team.name}, status=status.HTTP_201_CREATED)
-
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    teamSettings = db.OfferingTeamsSettings.objects.create(offering=offering)
+    data = {
+        "max_team_size": teamSettings.max_team_size,
+        "formation_deadline": teamSettings.formation_deadline
+    }
+    return Response(data, status=status.HTTP_201_CREATED)
 
 @api_view(['PATCH'])
 @permission_classes([permissions.IsAuthenticated])
-def update_team_settings_for_offering(request):
+def update_team_settings_for_offering(request, course_slug, offering_slug):
     serializer = UpdateTeamSettingsForOfferingRequestSerializer(data=request.data)
     
     if serializer.is_valid():
-        offering_id = serializer.validated_data.get('offering_id')
         try:
-            offering = db.Offering.objects.get(id=offering_id)
+            offering = Offering.objects.get(course__slug=course_slug, slug=offering_slug)
         except db.Offering.DoesNotExist:
             return Response({'detail': 'Offering not found.'}, status=status.HTTP_404_NOT_FOUND)
+        except db.Offering.MultipleObjectsReturned:
+            return Response({'detail': 'Multiple offerings found with the same slugs. This should not happen.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         try:
             offering_team_settings = db.OfferingTeamsSettings.objects.get(offering=offering)
@@ -377,29 +385,18 @@ def update_team_settings_for_offering(request):
 
         max_team_size = serializer.validated_data.get('max_team_size')
         formation_deadline = serializer.validated_data.get('formation_deadline')
-        show_group_members = serializer.validated_data.get('show_group_members')
-        allow_custom_names = serializer.validated_data.get('allow_custom_names')
 
         offering_team_settings.max_team_size = max_team_size
         offering_team_settings.formation_deadline = formation_deadline
-        offering_team_settings.show_group_members = show_group_members
-        offering_team_settings.allow_custom_names = allow_custom_names
         offering_team_settings.save()
 
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        data = {
+            "max_team_size": offering_team_settings.max_team_size,
+            "formation_deadline": offering_team_settings.formation_deadline
+        }
+        return Response(data, status=status.HTTP_200_OK)
     
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-@api_view(['GET'])
-@permission_classes([permissions.IsAuthenticated])
-def get_team_settings_for_offering(request, slug):
-    try:
-        offering = Offering.objects.get(course__slug=slug)
-        team_settings = db.OfferingTeamsSettings.objects.get(offering=offering)
-    except (Offering.DoesNotExist, db.OfferingTeamsSettings.DoesNotExist) as e:
-        return Response(e, status=status.HTTP_404_NOT_FOUND)
-    
-    return Response(team_settings)
 
 @api_view(['POST'])
 @permission_classes([IsInstructorOrTA])
