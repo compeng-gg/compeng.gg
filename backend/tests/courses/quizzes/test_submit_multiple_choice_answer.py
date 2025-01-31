@@ -14,8 +14,8 @@ from uuid import (
 
 
 class SubmitMultipleChoiceAnswerTests(TestCasesWithUserAuth):
-    def get_api_endpoint(self, quiz_slug: str, multiple_choice_question_id: UUID) -> str:
-        return f'/api/v0/quizzes/{quiz_slug}/answer/multiple_choice/{str(multiple_choice_question_id)}/'
+    def get_api_endpoint(self, course_slug: str, quiz_slug: str, multiple_choice_question_id: UUID) -> str:
+        return f'/api/v0/{course_slug}/quiz/{quiz_slug}/answer/multiple_choice/{str(multiple_choice_question_id)}/'
     
     def test_no_existing_answer_obj_happy_path(self):
         requesting_user_id = self.user.id
@@ -24,7 +24,7 @@ class SubmitMultipleChoiceAnswerTests(TestCasesWithUserAuth):
         
         quiz_submission = create_quiz_submission(
             user_id=requesting_user_id,
-            quiz_slug=quiz.id
+            quiz=quiz
         )
         
         multiple_choice_question = db.MultipleChoiceQuestion.objects.create(
@@ -51,7 +51,8 @@ class SubmitMultipleChoiceAnswerTests(TestCasesWithUserAuth):
         
         response = self.client.post(
             self.get_api_endpoint(
-                quiz_slug=quiz.id,
+                course_slug=quiz.offering.course.slug,
+                quiz_slug=quiz.slug,
                 multiple_choice_question_id=multiple_choice_question.id
             ), data=data
         )
@@ -72,7 +73,7 @@ class SubmitMultipleChoiceAnswerTests(TestCasesWithUserAuth):
         
         quiz_submission = create_quiz_submission(
             user_id=requesting_user_id,
-            quiz_slug=quiz.id
+            quiz=quiz
         )
         
         multiple_choice_question = db.MultipleChoiceQuestion.objects.create(
@@ -101,7 +102,8 @@ class SubmitMultipleChoiceAnswerTests(TestCasesWithUserAuth):
 
         response = self.client.post(
             self.get_api_endpoint(
-                quiz_slug=quiz.id,
+                course_slug=quiz.offering.course.slug,
+                quiz_slug=quiz.slug,
                 multiple_choice_question_id=multiple_choice_question.id
             ), data=data
         )
@@ -136,8 +138,9 @@ class SubmitMultipleChoiceAnswerTests(TestCasesWithUserAuth):
 
         response = self.client.post(
             self.get_api_endpoint(
-                quiz_slug=quiz.id,
-                multiple_choice_question_id=multiple_choice_question.id
+                course_slug=quiz.offering.course.slug,
+                quiz_slug=quiz.slug,
+                multiple_choice_question_id=uuid4()
             ), data=data
         )
         
@@ -153,7 +156,7 @@ class SubmitMultipleChoiceAnswerTests(TestCasesWithUserAuth):
         
         create_quiz_submission(
             user_id=requesting_user_id,
-            quiz_slug=quiz.id
+            quiz=quiz
         )
         
         multiple_choice_question = db.MultipleChoiceQuestion.objects.create(
@@ -175,7 +178,8 @@ class SubmitMultipleChoiceAnswerTests(TestCasesWithUserAuth):
         
         response = self.client.post(
             self.get_api_endpoint(
-                quiz_slug=quiz.id,
+                course_slug=quiz.offering.course.slug,
+                quiz_slug=quiz.slug,
                 multiple_choice_question_id=multiple_choice_question.id
             ), data=data
         )
@@ -192,7 +196,7 @@ class SubmitMultipleChoiceAnswerTests(TestCasesWithUserAuth):
         
         create_quiz_submission(
             user_id=requesting_user_id,
-            quiz_slug=quiz.id
+            quiz=quiz
         )
         
         data = {
@@ -201,7 +205,8 @@ class SubmitMultipleChoiceAnswerTests(TestCasesWithUserAuth):
         
         response = self.client.post(
             self.get_api_endpoint(
-                quiz_slug=quiz.id,
+                course_slug=quiz.offering.course.slug,
+                quiz_slug=quiz.slug,
                 multiple_choice_question_id=uuid4()
             ), data=data
         )
@@ -218,7 +223,7 @@ class SubmitMultipleChoiceAnswerTests(TestCasesWithUserAuth):
 
         create_quiz_submission(
             user_id=other_user_id,
-            quiz_slug=quiz.id
+            quiz=quiz
         )
         
         multiple_choice_question = db.MultipleChoiceQuestion.objects.create(
@@ -240,14 +245,15 @@ class SubmitMultipleChoiceAnswerTests(TestCasesWithUserAuth):
         
         response = self.client.post(
             self.get_api_endpoint(
-                quiz_slug=quiz.id,
-                multiple_choice_question_id=multiple_choice_question.id
+                course_slug=quiz.offering.course.slug,
+                quiz_slug=quiz.slug,
+                multiple_choice_question_id=uuid4()
             ), data=data
         )
         
-        expected_body = {'error': 'Quiz submission not found'}
+        expected_body = {'error': 'Student is not enrolled in this course'}
         
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertDictEqual(response.json(), expected_body)
 
     def test_submission_after_quiz_completed_throws_error(self):
@@ -257,7 +263,7 @@ class SubmitMultipleChoiceAnswerTests(TestCasesWithUserAuth):
         
         quiz_submission = create_quiz_submission(
             user_id=requesting_user_id,
-            quiz_slug=quiz.id
+            quiz=quiz
         )
         
         multiple_choice_question = db.MultipleChoiceQuestion.objects.create(
@@ -289,8 +295,9 @@ class SubmitMultipleChoiceAnswerTests(TestCasesWithUserAuth):
 
         response = self.client.post(
             self.get_api_endpoint(
-                quiz_slug=quiz.id,
-                multiple_choice_question_id=multiple_choice_question.id
+                course_slug=quiz.offering.course.slug,
+                quiz_slug=quiz.slug,
+                multiple_choice_question_id=uuid4()
             ), data=data
         )
         

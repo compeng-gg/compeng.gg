@@ -10,6 +10,9 @@ from datetime import timedelta
 
 
 class GetQuizTests(TestCasesWithUserAuth):
+    def get_url(self, course_slug: str, quiz_slug: str) -> str:
+        return f"/api/v0/{course_slug}/quiz/{quiz_slug}/"
+
     def test_creates_new_submission_on_first_request_happy_path(self):
         requesting_user_id = self.user.id
         
@@ -22,7 +25,7 @@ class GetQuizTests(TestCasesWithUserAuth):
         ).exists())
 
         response = self.client.get(
-            f"/api/v0/quizzes/{quiz.id}/",
+            self.get_url(quiz.offering.course.slug, quiz.slug)
         )
 
         self.assertEqual(
@@ -47,14 +50,14 @@ class GetQuizTests(TestCasesWithUserAuth):
         # Create a quiz that is nonviewable after submission
         quiz_submission = create_quiz_submission(
             user_id=requesting_user_id,
-            quiz_slug=quiz.id,
+            quiz=quiz
         )
         # Mark quiz as completed now
         quiz_submission.completed_at = timezone.now()
         quiz_submission.save()
 
         response = self.client.get(
-            f"/api/v0/quizzes/{quiz.id}/",
+            self.get_url(quiz.offering.course.slug, quiz.slug)
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -71,14 +74,14 @@ class GetQuizTests(TestCasesWithUserAuth):
         # Create a quiz that is nonviewable after submission
         quiz_submission = create_quiz_submission(
             user_id=requesting_user_id,
-            quiz_slug=quiz.id,
+            quiz=quiz
         )
         # Mark quiz as completed now
         quiz_submission.completed_at = timezone.now()
         quiz_submission.save()
 
         response = self.client.get(
-            f"/api/v0/quizzes/{quiz.id}/",
+            self.get_url(quiz.offering.course.slug, quiz.slug)
         )
 
         expected_body = {'error': 'Quiz content cannot be viewed after submission'}
@@ -96,7 +99,7 @@ class GetQuizTests(TestCasesWithUserAuth):
         )
 
         response = self.client.get(
-            f"/api/v0/quizzes/{quiz.id}/",
+            self.get_url(quiz.offering.course.slug, quiz.slug)
         )
 
         expected_body = {'error': 'Quiz has not started yet'}
@@ -116,17 +119,19 @@ class GetQuizTests(TestCasesWithUserAuth):
             order=1,
             points=20,
             programming_language=db.CodingQuestion.ProgrammingLanguage.PYTHON,
-            starter_code='print("HI!")'
+            starter_code='print("HI!")',
+            files=["test.py"]
         )
         
         response = self.client.get(
-            f"/api/v0/quizzes/{quiz.id}/",
+            self.get_url(quiz.offering.course.slug, quiz.slug)
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         
         expected_body = {
             'title': quiz.title,
+            'start_unix_timestamp': int(quiz.starts_at.timestamp()),
             'end_unix_timestamp': int(quiz.ends_at.timestamp()),
             'questions': [
                 {
@@ -135,7 +140,8 @@ class GetQuizTests(TestCasesWithUserAuth):
                     'points': coding_question.points,
                     'programming_language': str(coding_question.programming_language),
                     'solution': None,
-                    'starter_code': coding_question.starter_code
+                    'starter_code': coding_question.starter_code,
+                    'id': str(coding_question.id)
                 }
             ]
         }
@@ -151,7 +157,7 @@ class GetQuizTests(TestCasesWithUserAuth):
         
         quiz_submission = create_quiz_submission(
             user_id=requesting_user_id,
-            quiz_slug=quiz.id
+            quiz=quiz
         )
 
         coding_question = db.CodingQuestion.objects.create(
@@ -160,6 +166,7 @@ class GetQuizTests(TestCasesWithUserAuth):
             order=1,
             points=20,
             programming_language=db.CodingQuestion.ProgrammingLanguage.PYTHON,
+            files=["test.py"]
         )
         
         coding_answer = db.CodingAnswer.objects.create(
@@ -170,13 +177,14 @@ class GetQuizTests(TestCasesWithUserAuth):
         )
         
         response = self.client.get(
-            f"/api/v0/quizzes/{quiz.id}/",
+            self.get_url(quiz.offering.course.slug, quiz.slug)
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         
         expected_body = {
             'title': quiz.title,
+            'start_unix_timestamp': int(quiz.starts_at.timestamp()),
             'end_unix_timestamp': int(quiz.ends_at.timestamp()),
             'questions': [
                 {
@@ -185,7 +193,8 @@ class GetQuizTests(TestCasesWithUserAuth):
                     'points': coding_question.points,
                     'programming_language': str(coding_question.programming_language),
                     'solution': coding_answer.solution,
-                    'starter_code': None
+                    'starter_code': None,
+                    'id': str(coding_question.id)
                 }
             ]
         }
@@ -201,7 +210,7 @@ class GetQuizTests(TestCasesWithUserAuth):
         
         quiz_submission = create_quiz_submission(
             user_id=requesting_user_id,
-            quiz_slug=quiz.id
+            quiz=quiz
         )
 
         multiple_choice_question = db.MultipleChoiceQuestion.objects.create(
@@ -225,13 +234,14 @@ class GetQuizTests(TestCasesWithUserAuth):
         )
         
         response = self.client.get(
-            f"/api/v0/quizzes/{quiz.id}/",
+            self.get_url(quiz.offering.course.slug, quiz.slug)
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         
         expected_body = {
             'title': quiz.title,
+            'start_unix_timestamp': int(quiz.starts_at.timestamp()),
             'end_unix_timestamp': int(quiz.ends_at.timestamp()),
             'questions': [
                 {
@@ -239,7 +249,8 @@ class GetQuizTests(TestCasesWithUserAuth):
                     'question_type': 'MULTIPLE_CHOICE',
                     'points': multiple_choice_question.points,
                     'options': multiple_choice_question.options,
-                    'selected_answer_index': multiple_choice_answer.selected_answer_index
+                    'selected_answer_index': multiple_choice_answer.selected_answer_index,
+                    'id': str(multiple_choice_question.id)
                 },
             ]
         }
@@ -255,7 +266,7 @@ class GetQuizTests(TestCasesWithUserAuth):
         
         quiz_submission = create_quiz_submission(
             user_id=requesting_user_id,
-            quiz_slug=quiz.id
+            quiz=quiz
         )
 
         checkbox_question = db.CheckboxQuestion.objects.create(
@@ -275,13 +286,14 @@ class GetQuizTests(TestCasesWithUserAuth):
         )
         
         response = self.client.get(
-            f"/api/v0/quizzes/{quiz.id}/",
+            self.get_url(quiz.offering.course.slug, quiz.slug)
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         
         expected_body = {
             'title': quiz.title,
+            'start_unix_timestamp': int(quiz.starts_at.timestamp()),
             'end_unix_timestamp': int(quiz.ends_at.timestamp()),
             'questions': [
                 {
@@ -289,7 +301,8 @@ class GetQuizTests(TestCasesWithUserAuth):
                     'question_type': 'CHECKBOX',
                     'points': checkbox_question.points,
                     'options': checkbox_question.options,
-                    'selected_answer_indices': checkbox_answer.selected_answer_indices
+                    'selected_answer_indices': checkbox_answer.selected_answer_indices,
+                    'id': str(checkbox_question.id)
                 },
             ]
         }
@@ -305,7 +318,7 @@ class GetQuizTests(TestCasesWithUserAuth):
         
         quiz_submission = create_quiz_submission(
             user_id=requesting_user_id,
-            quiz_slug=quiz.id
+            quiz=quiz
         )
 
         written_response_question = db.WrittenResponseQuestion.objects.create(
@@ -324,13 +337,14 @@ class GetQuizTests(TestCasesWithUserAuth):
         )
         
         response = self.client.get(
-            f"/api/v0/quizzes/{quiz.id}/",
+            self.get_url(quiz.offering.course.slug, quiz.slug)
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         
         expected_body = {
             'title': quiz.title,
+            'start_unix_timestamp': int(quiz.starts_at.timestamp()),
             'end_unix_timestamp': int(quiz.ends_at.timestamp()),
             'questions': [
                 {
@@ -338,7 +352,8 @@ class GetQuizTests(TestCasesWithUserAuth):
                     'question_type': 'WRITTEN_RESPONSE',
                     'points': written_response_question.points,
                     'max_length': written_response_question.max_length,
-                    'response': written_response_answer.response
+                    'response': written_response_answer.response,
+                    'id': str(written_response_question.id)
                 },
             ]
         }
@@ -358,6 +373,7 @@ class GetQuizTests(TestCasesWithUserAuth):
             order=4,
             points=20,
             programming_language=db.CodingQuestion.ProgrammingLanguage.PYTHON,
+            files=["test.py"]
         )
 
         multiple_choice_question = db.MultipleChoiceQuestion.objects.create(
@@ -391,7 +407,7 @@ class GetQuizTests(TestCasesWithUserAuth):
         )
 
         response = self.client.get(
-            f"/api/v0/quizzes/{quiz.id}/",
+            self.get_url(quiz.offering.course.slug, quiz.slug)
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -399,27 +415,31 @@ class GetQuizTests(TestCasesWithUserAuth):
         expected_body = {
             'title': quiz.title,
             'end_unix_timestamp': int(quiz.ends_at.timestamp()),
+            'start_unix_timestamp': int(quiz.starts_at.timestamp()),
             'questions': [
                 {
                     'prompt': multiple_choice_question.prompt,
                     'question_type': 'MULTIPLE_CHOICE',
                     'points': multiple_choice_question.points,
                     'options': multiple_choice_question.options,
-                    'selected_answer_index': None
+                    'selected_answer_index': None,
+                    'id': str(multiple_choice_question.id)
                 },
                 {
                     'prompt': checkbox_question.prompt,
                     'question_type': 'CHECKBOX',
                     'points': checkbox_question.points,
                     'options': checkbox_question.options,
-                    'selected_answer_indices': None
+                    'selected_answer_indices': None,
+                    'id': str(checkbox_question.id)
                 },
                 {
                     'prompt': written_response_question.prompt,
                     'question_type': 'WRITTEN_RESPONSE',
                     'points': written_response_question.points,
                     'max_length': written_response_question.max_length,
-                    'response': None
+                    'response': None,
+                    'id': str(written_response_question.id)
                 },
                 {
                     'prompt': coding_question.prompt,
@@ -427,7 +447,8 @@ class GetQuizTests(TestCasesWithUserAuth):
                     'points': coding_question.points,
                     'programming_language': str(coding_question.programming_language),
                     'solution': None,
-                    'starter_code': coding_question.starter_code
+                    'starter_code': coding_question.starter_code,
+                    'id': str(coding_question.id)
                 }
             ]
         }

@@ -149,7 +149,7 @@ class Command(BaseCommand):
             programming_language=db.CodingQuestion.ProgrammingLanguage.PYTHON,
             file_to_replace="question1/add.py",
             grading_file_directory="question1",
-            files=["TODO"]
+            files=["question1/add.py"]
         )
 
         db.WrittenResponseQuestion.objects.create(

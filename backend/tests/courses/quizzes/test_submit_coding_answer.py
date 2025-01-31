@@ -1,7 +1,8 @@
 from tests.utils import (
     TestCasesWithUserAuth,
     create_quiz,
-    create_quiz_submission
+    create_quiz_submission,
+    create_coding_question
 )
 from django.contrib.auth.models import User
 import courses.models as db
@@ -14,8 +15,8 @@ from django.utils import timezone
 
 
 class SubmitCodingAnswerTests(TestCasesWithUserAuth):
-    def get_api_endpoint(self, quiz_slug: str, coding_question_id: UUID) -> str:
-        return f'/api/v0/quizzes/{quiz_slug}/answer/coding/{str(coding_question_id)}/'
+    def get_api_endpoint(self, course_slug: str, quiz_slug: str, coding_question_id: UUID) -> str:
+        return f'/api/v0/{course_slug}/quiz/{quiz_slug}/answer/coding/{str(coding_question_id)}/'
     
     def test_no_existing_answer_obj_happy_path(self):
         requesting_user_id = self.user.id
@@ -24,16 +25,10 @@ class SubmitCodingAnswerTests(TestCasesWithUserAuth):
         
         quiz_submission = create_quiz_submission(
             user_id=requesting_user_id,
-            quiz_slug=quiz.id
+            quiz=quiz
         )
         
-        coding_question = db.CodingQuestion.objects.create(
-            quiz=quiz,
-            prompt='Write a function that prints "Hello World!" in Python',
-            order=4,
-            points=20,
-            programming_language=db.CodingQuestion.ProgrammingLanguage.PYTHON,
-        )
+        coding_question = create_coding_question(quiz=quiz)
         
         data = {
             'solution': 'print("Hello World!")'
@@ -46,7 +41,8 @@ class SubmitCodingAnswerTests(TestCasesWithUserAuth):
         
         response = self.client.post(
             self.get_api_endpoint(
-                quiz_slug=quiz.id,
+                course_slug=quiz.offering.course.slug,
+                quiz_slug=quiz.slug,
                 coding_question_id=coding_question.id
             ), data=data
         )
@@ -67,16 +63,10 @@ class SubmitCodingAnswerTests(TestCasesWithUserAuth):
         
         quiz_submission = create_quiz_submission(
             user_id=requesting_user_id,
-            quiz_slug=quiz.id
+            quiz=quiz
         )
         
-        coding_question = db.CodingQuestion.objects.create(
-            quiz=quiz,
-            prompt='Write a function that prints "Hello World!" in Python',
-            order=4,
-            points=20,
-            programming_language=db.CodingQuestion.ProgrammingLanguage.PYTHON,
-        )
+        coding_question = create_coding_question(quiz=quiz)
         
         coding_answer = db.CodingAnswer.objects.create(
             quiz_submission=quiz_submission,
@@ -91,7 +81,8 @@ class SubmitCodingAnswerTests(TestCasesWithUserAuth):
         
         response = self.client.post(
             self.get_api_endpoint(
-                quiz_slug=quiz.id,
+                course_slug=quiz.offering.course.slug,
+                quiz_slug=quiz.slug,
                 coding_question_id=coding_question.id
             ), data=data
         )
@@ -109,7 +100,7 @@ class SubmitCodingAnswerTests(TestCasesWithUserAuth):
         
         create_quiz_submission(
             user_id=requesting_user_id,
-            quiz_slug=quiz.id
+            quiz=quiz
         )
         
         data = {
@@ -118,7 +109,8 @@ class SubmitCodingAnswerTests(TestCasesWithUserAuth):
 
         response = self.client.post(
             self.get_api_endpoint(
-                quiz_slug=quiz.id,
+                course_slug=quiz.offering.course.slug,
+                quiz_slug=quiz.slug,
                 coding_question_id=uuid4()
             ), data=data
         )
@@ -135,16 +127,10 @@ class SubmitCodingAnswerTests(TestCasesWithUserAuth):
 
         create_quiz_submission(
             user_id=other_user_id,
-            quiz_slug=quiz.id
+            quiz=quiz
         )
         
-        coding_question = db.CodingQuestion.objects.create(
-            quiz=quiz,
-            prompt='Write a function that prints "Hello World!" in Python',
-            order=4,
-            points=20,
-            programming_language=db.CodingQuestion.ProgrammingLanguage.PYTHON,
-        )
+        coding_question = create_coding_question(quiz=quiz)
         
         data = {
             'solution': 'print("Hello World!")'
@@ -152,14 +138,15 @@ class SubmitCodingAnswerTests(TestCasesWithUserAuth):
         
         response = self.client.post(
             self.get_api_endpoint(
-                quiz_slug=quiz.id,
+                course_slug=quiz.offering.course.slug,
+                quiz_slug=quiz.slug,
                 coding_question_id=coding_question.id
             ), data=data
         )
         
-        expected_body = {'error': 'Quiz submission not found'}
+        expected_body = {'error': 'Student is not enrolled in this course'}
         
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertDictEqual(response.json(), expected_body)
 
     def test_submission_after_quiz_completed_throws_error(self):
@@ -169,16 +156,10 @@ class SubmitCodingAnswerTests(TestCasesWithUserAuth):
         
         quiz_submission = create_quiz_submission(
             user_id=requesting_user_id,
-            quiz_slug=quiz.id
+            quiz=quiz
         )
         
-        coding_question = db.CodingQuestion.objects.create(
-            quiz=quiz,
-            prompt='Write a function that prints "Hello World!" in Python',
-            order=4,
-            points=20,
-            programming_language=db.CodingQuestion.ProgrammingLanguage.PYTHON,
-        )
+        coding_question = create_coding_question(quiz=quiz)
         
         coding_answer = db.CodingAnswer.objects.create(
             quiz_submission=quiz_submission,
@@ -196,7 +177,8 @@ class SubmitCodingAnswerTests(TestCasesWithUserAuth):
         
         response = self.client.post(
             self.get_api_endpoint(
-                quiz_slug=quiz.id,
+                course_slug=quiz.offering.course.slug,
+                quiz_slug=quiz.slug,
                 coding_question_id=coding_question.id
             ), data=data
         )
