@@ -19,7 +19,9 @@ class ListQuizzesForCourse(TestCasesWithUserAuth):
             user_id=requesting_user_id,
             quiz_title='final quiz',
             course_slug='ece344',
-            starts_at=quiz_1_starts_at
+            starts_at=quiz_1_starts_at,
+            repository_id=1,
+            repository_full_name="user/repo_1"
         )
         quiz_1.visible_at = now - timedelta(days=1)
         quiz_1.save()
@@ -29,7 +31,9 @@ class ListQuizzesForCourse(TestCasesWithUserAuth):
             user_id=requesting_user_id,
             quiz_title='ece454 midterm',
             course_slug='ece454',
-            starts_at=quiz_2_starts_at
+            starts_at=quiz_2_starts_at,
+            repository_id=2,
+            repository_full_name="user/repo_2"
         )
         quiz_2.visible_at = now - timedelta(days=1)
         quiz_2.save()
@@ -41,6 +45,7 @@ class ListQuizzesForCourse(TestCasesWithUserAuth):
                 'title': 'ece454 midterm', 
                 'start_unix_timestamp': int(quiz_2.starts_at.timestamp()),
                 'end_unix_timestamp': int(quiz_2.ends_at.timestamp()),
+                'slug': quiz_2.slug
             }
         ]
 

@@ -4,18 +4,18 @@ from django.utils import timezone
 from tests.utils import (
     create_quiz,
     create_quiz_submission,
-    create_offering
+    create_offering,
+    create_student_enrollment
 )
 from rest_framework import status
 from uuid import (
     uuid4,
-    UUID
 )
 
 
 class CompleteQuizTests(TestCasesWithUserAuth):
     def get_api_endpoint(self, course_slug: str, quiz_slug: str) -> str:
-        return f'/api/v0/quizzes/{course_slug}/{quiz_slug}/complete/'
+        return f'/api/v0/{course_slug}/quiz/{quiz_slug}/complete/'
 
     def test_happy_path(self):
         requesting_user_id = self.user.id
@@ -27,7 +27,7 @@ class CompleteQuizTests(TestCasesWithUserAuth):
         
         # Create a submission object by retrieving the quiz for the first time
         response = self.client.get(
-            f"/api/v0/quizzes/{quiz.offering.course.slug}/{quiz.slug}/",
+            f"/api/v0/{quiz.offering.course.slug}/quiz/{quiz.slug}/",
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -63,14 +63,17 @@ class CompleteQuizTests(TestCasesWithUserAuth):
         
         quiz_submission = create_quiz_submission(
             user_id=requesting_user_id,
-            quiz_slug=quiz.id
+            quiz=quiz
         )
 
         quiz_submission.completed_at = timezone.now()
         quiz_submission.save()
 
         response = self.client.post(
-            self.get_api_endpoint(quiz_slug=quiz.id)
+            self.get_api_endpoint(
+                quiz_slug=quiz.slug,
+                course_slug=quiz.offering.course.slug
+            )
         )
 
         expected_body = {'error': 'The quiz has already been completed'}
@@ -79,13 +82,16 @@ class CompleteQuizTests(TestCasesWithUserAuth):
         self.assertDictEqual(response.json(), expected_body)
 
     def test_nonexistent_quiz_throws_error(self):
+
         offering = create_offering()
+        create_student_enrollment(self.user.id, offering)
+
 
         response = self.client.post(
             self.get_api_endpoint(course_slug=offering.course.slug, quiz_slug=uuid4())
         )
 
-        expected_body = {'error': 'Quiz submission not found'}
+        expected_body = {'error': 'Quiz not found'}
         
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertDictEqual(response.json(), expected_body)
