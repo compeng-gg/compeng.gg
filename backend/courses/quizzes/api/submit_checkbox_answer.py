@@ -45,7 +45,7 @@ def submit_checkbox_answer(request, course_slug: str, quiz_slug: str, checkbox_q
     ### Validate selected checkbox indices are valid
     try:
         checkbox_question = db.CheckboxQuestion.objects.get(
-            quiz_slug=quiz_slug,
+            quiz__slug=quiz_slug,
             id=checkbox_question_id
         )
     except db.CheckboxQuestion.DoesNotExist:
