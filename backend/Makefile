@@ -11,3 +11,6 @@ migrate:
 
 run:
 	daphne compeng_gg.asgi:application
+
+test:
+	pipenv run pytest
