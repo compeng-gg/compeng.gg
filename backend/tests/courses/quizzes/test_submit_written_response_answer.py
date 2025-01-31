@@ -14,8 +14,8 @@ from uuid import (
 
 
 class SubmitWrittenResponseAnswerTests(TestCasesWithUserAuth):
-    def get_api_endpoint(self, quiz_slug: str, written_response_question_id: UUID) -> str:
-        return f'/api/v0/quizzes/{quiz_slug}/answer/written_response/{str(written_response_question_id)}/'
+    def get_api_endpoint(self, course_slug: str, quiz_slug: str, written_response_question_id: UUID) -> str:
+        return f'/api/v0/{course_slug}/quiz/{quiz_slug}/answer/written_response/{str(written_response_question_id)}/'
         
     def test_no_existing_answer_obj_happy_path(self):
         requesting_user_id = self.user.id
@@ -24,7 +24,7 @@ class SubmitWrittenResponseAnswerTests(TestCasesWithUserAuth):
         
         quiz_submission = create_quiz_submission(
             user_id=requesting_user_id,
-            quiz_slug=quiz.id
+            quiz=quiz
         )
         
         written_response_question = db.WrittenResponseQuestion.objects.create(
@@ -46,7 +46,8 @@ class SubmitWrittenResponseAnswerTests(TestCasesWithUserAuth):
         
         response = self.client.post(
             self.get_api_endpoint(
-                quiz_slug=quiz.id,
+                course_slug=quiz.offering.course.slug,
+                quiz_slug=quiz.slug,
                 written_response_question_id=written_response_question.id
             ), data=data
         )
@@ -67,7 +68,7 @@ class SubmitWrittenResponseAnswerTests(TestCasesWithUserAuth):
         
         quiz_submission = create_quiz_submission(
             user_id=requesting_user_id,
-            quiz_slug=quiz.id
+            quiz=quiz
         )
         
         written_response_question = db.WrittenResponseQuestion.objects.create(
@@ -91,7 +92,8 @@ class SubmitWrittenResponseAnswerTests(TestCasesWithUserAuth):
         
         response = self.client.post(
             self.get_api_endpoint(
-                quiz_slug=quiz.id,
+                course_slug=quiz.offering.course.slug,
+                quiz_slug=quiz.slug,
                 written_response_question_id=written_response_question.id
             ), data=data
         )
@@ -109,7 +111,7 @@ class SubmitWrittenResponseAnswerTests(TestCasesWithUserAuth):
         
         quiz_submission = create_quiz_submission(
             user_id=requesting_user_id,
-            quiz_slug=quiz.id
+            quiz=quiz
         )
         
         written_response_question = db.WrittenResponseQuestion.objects.create(
@@ -126,7 +128,8 @@ class SubmitWrittenResponseAnswerTests(TestCasesWithUserAuth):
         
         response = self.client.post(
             self.get_api_endpoint(
-                quiz_slug=quiz.id,
+                course_slug=quiz.offering.course.slug,
+                quiz_slug=quiz.slug,
                 written_response_question_id=written_response_question.id
             ), data=valid_data
         )
@@ -146,7 +149,8 @@ class SubmitWrittenResponseAnswerTests(TestCasesWithUserAuth):
         
         response = self.client.post(
             self.get_api_endpoint(
-                quiz_slug=quiz.id,
+                course_slug=quiz.offering.course.slug,
+                quiz_slug=quiz.slug,
                 written_response_question_id=written_response_question.id
             ), data=invalid_data
         )
@@ -167,7 +171,7 @@ class SubmitWrittenResponseAnswerTests(TestCasesWithUserAuth):
         
         create_quiz_submission(
             user_id=requesting_user_id,
-            quiz_slug=quiz.id
+            quiz=quiz
         )
         
         data = {
@@ -176,7 +180,8 @@ class SubmitWrittenResponseAnswerTests(TestCasesWithUserAuth):
         
         response = self.client.post(
             self.get_api_endpoint(
-                quiz_slug=quiz.id,
+                course_slug=quiz.offering.course.slug,
+                quiz_slug=quiz.slug,
                 written_response_question_id=uuid4()
             ), data=data
         )
@@ -193,7 +198,7 @@ class SubmitWrittenResponseAnswerTests(TestCasesWithUserAuth):
 
         create_quiz_submission(
             user_id=other_user_id,
-            quiz_slug=quiz.id
+            quiz=quiz
         )
         
         written_response_question = db.WrittenResponseQuestion.objects.create(
@@ -210,14 +215,15 @@ class SubmitWrittenResponseAnswerTests(TestCasesWithUserAuth):
         
         response = self.client.post(
             self.get_api_endpoint(
-                quiz_slug=quiz.id,
+                course_slug=quiz.offering.course.slug,
+                quiz_slug=quiz.slug,
                 written_response_question_id=written_response_question.id
             ), data=data
         )
         
-        expected_body = {'error': 'Quiz submission not found'}
+        expected_body = {'error': 'Student is not enrolled in this course'}
         
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertDictEqual(response.json(), expected_body)
 
     def test_submission_after_quiz_completed_throws_error(self):
@@ -227,7 +233,7 @@ class SubmitWrittenResponseAnswerTests(TestCasesWithUserAuth):
         
         quiz_submission = create_quiz_submission(
             user_id=requesting_user_id,
-            quiz_slug=quiz.id
+            quiz=quiz
         )
         
         written_response_question = db.WrittenResponseQuestion.objects.create(
@@ -254,7 +260,8 @@ class SubmitWrittenResponseAnswerTests(TestCasesWithUserAuth):
         
         response = self.client.post(
             self.get_api_endpoint(
-                quiz_slug=quiz.id,
+                course_slug=quiz.offering.course.slug,
+                quiz_slug=quiz.slug,
                 written_response_question_id=written_response_question.id
             ), data=data
         )

@@ -20,7 +20,9 @@ class ListAllQuizzesTests(TestCasesWithUserAuth):
             user_id=requesting_user_id,
             quiz_title='final quiz',
             course_slug='ece344',
-            starts_at=quiz_1_starts_at
+            starts_at=quiz_1_starts_at,
+            repository_id=1,
+            repository_full_name='user/repo_1'
         )
         quiz_1.visible_at = now - timedelta(days=1)
         quiz_1.save()
@@ -30,7 +32,9 @@ class ListAllQuizzesTests(TestCasesWithUserAuth):
             user_id=requesting_user_id,
             quiz_title='midterm',
             course_slug='ece454',
-            starts_at=quiz_2_starts_at
+            starts_at=quiz_2_starts_at,
+            repository_id=2,
+            repository_full_name='user/repo_2'
         )
         quiz_2.visible_at = now - timedelta(days=1)
         quiz_2.save()
@@ -40,7 +44,9 @@ class ListAllQuizzesTests(TestCasesWithUserAuth):
             user_id=other_user_id,
             quiz_title='midterm',
             course_slug='aps105',
-            starts_at=quiz_3_starts_at
+            starts_at=quiz_3_starts_at,
+            repository_id=3,
+            repository_full_name='user/repo_3'
         )
         quiz_3.visible_at = now - timedelta(days=1)
         quiz_3.save()
@@ -52,15 +58,17 @@ class ListAllQuizzesTests(TestCasesWithUserAuth):
                 'title': 'final quiz', 
                 'start_unix_timestamp': int(quiz_1.starts_at.timestamp()),
                 'end_unix_timestamp': int(quiz_1.ends_at.timestamp()),
-                'course_slug': 'ece344'
+                'course_slug': 'ece344',
+                'slug': quiz_1.slug
             },
             {   
                 'title': 'midterm',
                 'start_unix_timestamp': int(quiz_2.starts_at.timestamp()),
                 'end_unix_timestamp': int(quiz_2.ends_at.timestamp()),
-                'course_slug': 'ece454'
+                'course_slug': 'ece454',
+                'slug': quiz_2.slug
             }
         ]
-
+        
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json(), expected_body)

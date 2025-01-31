@@ -14,8 +14,8 @@ from uuid import (
 
 
 class SubmitCheckboxAnswerTests(TestCasesWithUserAuth):
-    def get_api_endpoint(self, quiz_slug: str, checkbox_question_id: UUID) -> str:
-        return f'/api/v0/quizzes/{quiz_slug}/answer/checkbox/{str(checkbox_question_id)}/'
+    def get_api_endpoint(self, course_slug: str, quiz_slug: str, checkbox_question_id: UUID) -> str:
+        return f'/api/v0/{course_slug}/quiz/{quiz_slug}/answer/checkbox/{str(checkbox_question_id)}/'
     
     def test_no_existing_answer_obj_happy_path(self):
         requesting_user_id = self.user.id
@@ -24,7 +24,7 @@ class SubmitCheckboxAnswerTests(TestCasesWithUserAuth):
         
         quiz_submission = create_quiz_submission(
             user_id=requesting_user_id,
-            quiz_slug=quiz.id
+            quiz=quiz
         )
         
         checkbox_question = db.CheckboxQuestion.objects.create(
@@ -47,7 +47,8 @@ class SubmitCheckboxAnswerTests(TestCasesWithUserAuth):
         
         response = self.client.post(
             self.get_api_endpoint(
-                quiz_slug=quiz.id,
+                course_slug=quiz.offering.course.slug,
+                quiz_slug=quiz.slug,
                 checkbox_question_id=checkbox_question.id
             ), data=data
         )
@@ -68,7 +69,7 @@ class SubmitCheckboxAnswerTests(TestCasesWithUserAuth):
         
         quiz_submission = create_quiz_submission(
             user_id=requesting_user_id,
-            quiz_slug=quiz.id
+            quiz=quiz
         )
         
         checkbox_question = db.CheckboxQuestion.objects.create(
@@ -93,7 +94,8 @@ class SubmitCheckboxAnswerTests(TestCasesWithUserAuth):
 
         response = self.client.post(
             self.get_api_endpoint(
-                quiz_slug=quiz.id,
+                course_slug=quiz.offering.course.slug,
+                quiz_slug=quiz.slug,
                 checkbox_question_id=checkbox_question.id
             ), data=data
         )
@@ -111,7 +113,7 @@ class SubmitCheckboxAnswerTests(TestCasesWithUserAuth):
         
         quiz_submission = create_quiz_submission(
             user_id=requesting_user_id,
-            quiz_slug=quiz.id
+            quiz=quiz
         )
         
         checkbox_question = db.CheckboxQuestion.objects.create(
@@ -133,10 +135,10 @@ class SubmitCheckboxAnswerTests(TestCasesWithUserAuth):
         data = {
             'selected_answer_indices': []
         }
-        
         response = self.client.post(
             self.get_api_endpoint(
-                quiz_slug=quiz.id,
+                course_slug=quiz.offering.course.slug,
+                quiz_slug=quiz.slug,
                 checkbox_question_id=checkbox_question.id
             ), data=data
         )
@@ -167,7 +169,8 @@ class SubmitCheckboxAnswerTests(TestCasesWithUserAuth):
 
         response = self.client.post(
             self.get_api_endpoint(
-                quiz_slug=quiz.id,
+                course_slug=quiz.offering.course.slug,
+                quiz_slug=quiz.slug,
                 checkbox_question_id=checkbox_question.id
             ), data=data
         )
@@ -184,7 +187,7 @@ class SubmitCheckboxAnswerTests(TestCasesWithUserAuth):
         
         quiz_submission = create_quiz_submission(
             user_id=requesting_user_id,
-            quiz_slug=quiz.id
+            quiz=quiz
         )
         
         checkbox_question = db.CheckboxQuestion.objects.create(
@@ -202,7 +205,8 @@ class SubmitCheckboxAnswerTests(TestCasesWithUserAuth):
 
         response = self.client.post(
             self.get_api_endpoint(
-                quiz_slug=quiz.id,
+                course_slug=quiz.offering.course.slug,
+                quiz_slug=quiz.slug,
                 checkbox_question_id=checkbox_question.id
             ), data=data
         )
@@ -219,7 +223,7 @@ class SubmitCheckboxAnswerTests(TestCasesWithUserAuth):
         
         quiz_submission = create_quiz_submission(
             user_id=requesting_user_id,
-            quiz_slug=quiz.id
+            quiz=quiz
         )
         
         checkbox_question = db.CheckboxQuestion.objects.create(
@@ -237,7 +241,8 @@ class SubmitCheckboxAnswerTests(TestCasesWithUserAuth):
 
         response = self.client.post(
             self.get_api_endpoint(
-                quiz_slug=quiz.id,
+                course_slug=quiz.offering.course.slug,
+                quiz_slug=quiz.slug,
                 checkbox_question_id=checkbox_question.id
             ), data=data
         )
@@ -254,7 +259,7 @@ class SubmitCheckboxAnswerTests(TestCasesWithUserAuth):
         
         create_quiz_submission(
             user_id=requesting_user_id,
-            quiz_slug=quiz.id
+            quiz=quiz
         )
         
         data = {
@@ -263,7 +268,8 @@ class SubmitCheckboxAnswerTests(TestCasesWithUserAuth):
         
         response = self.client.post(
             self.get_api_endpoint(
-                quiz_slug=quiz.id,
+                course_slug=quiz.offering.course.slug,
+                quiz_slug=quiz.slug,
                 checkbox_question_id=uuid4()
             ), data=data
         )
@@ -280,7 +286,7 @@ class SubmitCheckboxAnswerTests(TestCasesWithUserAuth):
 
         create_quiz_submission(
             user_id=other_user_id,
-            quiz_slug=quiz.id
+            quiz=quiz
         )
         
         checkbox_question = db.CheckboxQuestion.objects.create(
@@ -298,14 +304,15 @@ class SubmitCheckboxAnswerTests(TestCasesWithUserAuth):
         
         response = self.client.post(
             self.get_api_endpoint(
-                quiz_slug=quiz.id,
+                course_slug=quiz.offering.course.slug,
+                quiz_slug=quiz.slug,
                 checkbox_question_id=checkbox_question.id
             ), data=data
         )
         
-        expected_body = {'error': 'Quiz submission not found'}
+        expected_body = {'error': 'Student is not enrolled in this course'}
         
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertDictEqual(response.json(), expected_body)
 
     def test_submission_after_quiz_completed_throws_error(self):
@@ -315,7 +322,7 @@ class SubmitCheckboxAnswerTests(TestCasesWithUserAuth):
         
         quiz_submission = create_quiz_submission(
             user_id=requesting_user_id,
-            quiz_slug=quiz.id
+            quiz=quiz
         )
         
         checkbox_question = db.CheckboxQuestion.objects.create(
@@ -343,7 +350,8 @@ class SubmitCheckboxAnswerTests(TestCasesWithUserAuth):
 
         response = self.client.post(
             self.get_api_endpoint(
-                quiz_slug=quiz.id,
+                course_slug=quiz.offering.course.slug,
+                quiz_slug=quiz.slug,
                 checkbox_question_id=checkbox_question.id
             ), data=data
         )
