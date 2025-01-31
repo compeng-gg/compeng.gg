@@ -11,14 +11,17 @@ from rest_framework import (
 from rest_framework.decorators import api_view, permission_classes
 from courses.quizzes.schemas import QuizSerializer
 from django.utils import timezone
-from typing import Optional
+from typing import Union
 
 
-def get_quiz(user_id: int, course_slug: str, quiz_slug: str) -> Optional[db.Quiz]:
+def get_quiz_or_error_response(user_id: int, course_slug: str, quiz_slug: str) -> Union[db.Quiz, Response]:
     try:
         quiz = db.Quiz.objects.get(slug=quiz_slug, offering__course__slug=course_slug)
-    except db.Role.DoesNotExist:
-        raise ValidationError("Quiz does not exist")
+    except db.Quiz.DoesNotExist:
+        return Response(
+            {'error': 'Quiz not found'},
+            status=status.HTTP_404_NOT_FOUND
+        )
     
     try:
         db.Enrollment.objects.get(
@@ -44,7 +47,13 @@ def get_questions(request, course_slug: str, quiz_slug: str):
 
     user_id = request.user.id
 
-    quiz = get_quiz(user_id, course_slug, quiz_slug)
+    quiz_or_error_response = get_quiz_or_error_response(user_id, course_slug, quiz_slug)
+
+    if isinstance(quiz_or_error_response, Response):
+        error_response = quiz_or_error_response
+        return error_response
+
+    quiz = quiz_or_error_response
 
     if quiz is None:
         return Response(
@@ -108,7 +117,6 @@ def get_questions(request, course_slug: str, quiz_slug: str):
         checkbox_questions_prefetch
     )
 
-    print("HELLO")
     with transaction.atomic():
         try:
             quiz_submission = db.QuizSubmission.objects.get(
@@ -130,5 +138,4 @@ def get_questions(request, course_slug: str, quiz_slug: str):
                 completed_at=quiz.ends_at # Initialize this to the end datetime for the quiz
             )
 
-    print("HELLO")
     return Response(data=QuizSerializer(quiz).data)
