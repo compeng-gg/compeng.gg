@@ -43,7 +43,6 @@ def get_existing_answer_object(
 def get_quiz_submission_or_error_response(
     request_at: datetime, user_id: int, course_slug: str, quiz_slug: str
 ) -> Union[db.QuizSubmission, Response]:
-    print("getting submission")
     
         
     quiz_or_error_response = get_quiz_or_error_response(user_id=user_id, course_slug=course_slug, quiz_slug=quiz_slug)
@@ -75,18 +74,25 @@ def get_quiz_submission_or_error_response(
 
 def get_quiz_or_error_response(user_id: int, course_slug: str, quiz_slug: str) -> db.Quiz:
     try:
-        quiz = db.Quiz.objects.get(offering__course__slug=course_slug, slug=quiz_slug)
-    except db.Quiz.DoesNotExist:
-        raise ValidationError("Quiz does not exist")
-    
-    try:
         db.Enrollment.objects.get(
             role__kind=db.Role.Kind.STUDENT,
-            role__offering=quiz.offering,
+            role__offering__course__slug=course_slug,
             user_id=user_id,
         )
     except db.Enrollment.DoesNotExist:
-        raise ValidationError("Student is not enrolled in this course")
+        return Response(
+            {'error': "Student is not enrolled in this course"},
+            status=status.HTTP_403_FORBIDDEN
+        )
+
+    try:
+        quiz = db.Quiz.objects.get(offering__course__slug=course_slug, slug=quiz_slug)
+    except db.Quiz.DoesNotExist:
+        return Response(
+            {'error': 'Quiz not found'},
+            status=status.HTTP_404_NOT_FOUND
+        )
+    
     
     if quiz.starts_at > timezone.now():
         return Response(
