@@ -103,7 +103,7 @@ class OfferingTeamsSettings(models.Model):
         on_delete=models.CASCADE,
     )
     max_team_size = models.IntegerField(default=3)
-    formation_deadline = models.DateTimeField(default=(timezone.now() + timedelta(days=365)))
+    formation_deadline = models.DateTimeField(blank=True, null=True)
 
 class Assignment(models.Model):
 
