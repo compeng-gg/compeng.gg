@@ -16,7 +16,7 @@ def complete_quiz(request, course_slug: str, quiz_slug: str):
     user_id = request.user.id
     
     quiz_submission_or_error_response = get_quiz_submission_or_error_response(
-        request_at=request_at, user_id=user_id, quiz_slug=quiz_slug
+        request_at=request_at, user_id=user_id, quiz_slug=quiz_slug, course_slug=course_slug
     )
 
     print(quiz_submission_or_error_response)
