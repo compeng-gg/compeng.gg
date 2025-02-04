@@ -19,8 +19,6 @@ ace.config.setModuleUrl('ace/mode/c_cpp', '/ace/mode-c_cpp.js');
 ace.config.setModuleUrl('ace/theme/monokai', '/ace/theme-monokai.js');
 ace.config.setModuleUrl('ace/ext/language_tools', '/ace/ext-language_tools.js');
 
-const testFail = { "status": "FAILURE", "tests": null, "stderr": "Traceback (most recent call last):\n File \"/tmp/1737508206--52/reimagined-parakeet/question1/grade.py\", line 32, in <module>\n result = add(num1, num2)\n ^^^^^^^^^^^^^^^\n File \"/tmp/1737508206--52/reimagined-parakeet/question1/add.py\", line 2, in add\n return num1num2\n ^^^^^^^^\nNameError: name 'num1num2' is not defined\n", "num_passed": 0, "num_failed": 0 }
-const testHalf = { "status": "SUCCESS", "tests": [ { "kind": "public", "result": "OK", "actual_result": 0, "expected_result": 0 }, { "kind": "public", "result": "FAIL", "actual_result": 3, "expected_result": 4 }, { "kind": "private", "result": "FAIL" }, { "kind": "private", "result": "FAIL" } ], "stderr": null, "num_passed": 1, "num_failed": 2 };
 enum TestRunStatus {
   NOT_RUN = "Idle",
   ERROR = "Error",
@@ -47,9 +45,6 @@ export default function CodeEditor({ props, save }: { props: CodeQuestionProps, 
     ace.require('ace/theme/monokai');
 
     setLoaded(true);
-
-    //setTestRuns((testRuns) => [RawToTestRunProps(JSON.stringify(testFail)), RawToTestRunProps(JSON.stringify(testHalf))]);
-
     
   }, []);
 
