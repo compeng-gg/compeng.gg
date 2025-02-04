@@ -24,6 +24,9 @@ def _update(offering, quercus_users, role_kind):
         if username is None:
             continue
         quercus_user_id = quercus_user['id']
+        # Skip non students
+        if quercus_user['integration_id'] is None:
+            continue
         student_id = int(quercus_user['integration_id'])
         user, _ = User.objects.get_or_create(username=username)
         try:
