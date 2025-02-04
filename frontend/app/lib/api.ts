@@ -10,7 +10,7 @@ export function fetchApiSingle(endpoint: string, method: string, data: object, t
 export function fetchApiSingle(endpoint: string, method: string, dataOrToken?: object | string, maybeToken?: string): Promise<Response> {
   const url = apiUrl + endpoint
 
-  let headers: HeadersInit = {
+  const headers: HeadersInit = {
     'Content-Type': 'application/json',
   };
   let data: object | undefined;

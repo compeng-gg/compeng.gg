@@ -31,6 +31,9 @@ export function QuestionDisplay(props: QuestionProps) {
     const [debouncedAnswer, setDebouncedAnswer] = useState<any>(props.state.value);
 
     const lastSavedRef = useRef<any>(props.state.value);
+    const lastValueRef = useRef<any>(props.state.value);
+
+
 
     const MS_TO_DEBOUNCE_SAVE = 5000, MS_TO_AUTO_SAVE=20*1000;
 
@@ -40,28 +43,31 @@ export function QuestionDisplay(props: QuestionProps) {
 
     // Debounced save for TEXT/CODE questions
     if (props.questionType === "TEXT" || props.questionType === "CODE") {
+        
         useEffect(() => {
             if (props.state.value === lastSavedRef.current) return;
+            lastValueRef.current = props.state.value;
             if (isAnswered(props)) {
                 setStatus(QuestionSaveStatus.TYPING);
             }
-            const timer = setTimeout(() => setDebouncedAnswer(props.state.value), MS_TO_DEBOUNCE_SAVE);
+            const timer = setTimeout(() => {
+                setDebouncedAnswer(props.state.value);
+            }, MS_TO_DEBOUNCE_SAVE);
             return () => clearTimeout(timer);
         }, [props.state.value]);
 
         useEffect(() => {
             if (debouncedAnswer !== lastSavedRef.current && isAnswered(props)) {
-                console.log("DEBOUNCE SAVING");
                 save(debouncedAnswer);
+                lastSavedRef.current = props.state.value;
             }
         }, [debouncedAnswer]);
 
         // Periodic autosave
         useEffect(() => {
             const interval = setInterval(() => {
-                if (props.state.value !== lastSavedRef.current && isAnswered(props)) {
-                    console.log("AUTOSAVING");
-                    save(props.state.value);
+                if (lastValueRef.current !== lastSavedRef.current && isAnswered(props)) {
+                    save(lastValueRef.current);
                 }
             }, MS_TO_AUTO_SAVE);
             // Cleanup interval on unmount
