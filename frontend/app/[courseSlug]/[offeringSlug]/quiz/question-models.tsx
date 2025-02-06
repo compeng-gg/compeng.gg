@@ -46,12 +46,19 @@ type QuestionTypeToStateMap = {
     TEXT: TextState;
 };
 
+//An enum with the below values
+export enum QuestionViewMode {
+    STUDENT_WRITE,
+    STUDENT_VIEW,
+    INSTRUCTOR_EDIT,
+    INSTRUCTOR_GRADE
+};
 // Final Question Props
 export type CodeQuestionProps = CodeQuestionData & { state: CodeState };
 export type SelectQuestionProps = SelectQuestionData & { state: SelectState };
 export type TextQuestionProps = TextQuestionData & { state: TextState };
 
-export type QuestionProps = CodeQuestionProps | SelectQuestionProps | TextQuestionProps;
+export type QuestionProps = (CodeQuestionProps | SelectQuestionProps | TextQuestionProps) & {viewMode : QuestionViewMode};
 
 // Type Guards
 export const isCodeQuestion = (props: QuestionProps): props is CodeQuestionProps =>

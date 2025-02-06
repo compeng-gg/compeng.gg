@@ -36,7 +36,7 @@ const leaderboardFields: [string, string][] = [
 
 function Course({ params }: { params: { courseSlug: string, offeringSlug: string } }) {
   const [jwt, setAndStoreJwt] = useContext(JwtContext);
-  const [name, setName] = useState();
+  const [name, setName] = useState("");
   const [labs, setLabs] = useState([] as Lab[]);
   const [role, setRole] = useState();
 
