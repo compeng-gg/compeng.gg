@@ -31,6 +31,7 @@ def update_requirements():
         'discord',
         'social-auth-app-django',
         'whitenoise',
+        'audioop-lts', # Needed for Discord for Python 3.13
     ])
     p = run_venv(['pip', 'freeze'], capture_output=True)
     with open(BASE_DIR / 'requirements.txt', 'w') as f:
