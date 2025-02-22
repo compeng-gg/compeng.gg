@@ -166,7 +166,7 @@ def create_quiz_task(coding_answer_execution):
     run_command(["python", "manage.py", "quiz_buildrunner", str(coding_answer_execution.id)], "something broke")
 
 def create_quiz_build_runner(coding_answer_execution: course_models.CodingAnswerExecution) -> None:
-    repository = coding_answer_execution.coding_question.repository
+    repository = coding_answer_execution.coding_question.quiz.repository
 
     #if not repository.offering_runner.exists():
     #    print("Offering runner does not exist!")
