@@ -1,7 +1,7 @@
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework import permissions, status
 from courses.quizzes.api.admin.schema import (
-    CreateWrittenResponseQuestionRequestSerializer,
+    WrittenResponseQuestionRequestSerializer,
 )
 from rest_framework.response import Response
 import courses.models as db
@@ -17,7 +17,7 @@ def edit_written_response_question(
     written_response_question = db.WrittenResponseQuestion.objects.get(
         id=written_response_question_id
     )
-    serializer = CreateWrittenResponseQuestionRequestSerializer(
+    serializer = WrittenResponseQuestionRequestSerializer(
         written_response_question, data=request.data, partial=True
     )
 

@@ -46,3 +46,5 @@ from courses.quizzes.api.admin.question.delete import (
 )
 
 from courses.quizzes.api.admin.delete_quiz import delete_quiz
+
+from courses.quizzes.api.admin.edit_quiz import edit_quiz

@@ -1,6 +1,6 @@
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework import permissions, status
-from courses.quizzes.api.admin.schema import CreateCheckboxQuestionRequestSerializer
+from courses.quizzes.api.admin.schema import CheckboxQuestionRequestSerializer
 from rest_framework.response import Response
 import courses.models as db
 
@@ -13,7 +13,7 @@ def edit_checkbox_question(
     # TODO: validate user is instructor or TA in course
     # TODO: validate quiz matches question
     checkbox_question = db.CheckboxQuestion.objects.get(id=checkbox_question_id)
-    serializer = CreateCheckboxQuestionRequestSerializer(
+    serializer = CheckboxQuestionRequestSerializer(
         checkbox_question, data=request.data, partial=True
     )
     print(request.data)

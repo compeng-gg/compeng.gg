@@ -1,6 +1,6 @@
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework import permissions, status
-from courses.quizzes.api.admin.schema import CreateCodingQuestionRequestSerializer
+from courses.quizzes.api.admin.schema import CodingQuestionRequestSerializer
 from rest_framework.response import Response
 import courses.models as db
 
@@ -13,7 +13,7 @@ def edit_coding_question(
     # TODO: validate user is instructor or TA in course
     # TODO: validate quiz matches question
     coding_question = db.CodingQuestion.objects.get(id=coding_question_id)
-    serializer = CreateCodingQuestionRequestSerializer(
+    serializer = CodingQuestionRequestSerializer(
         coding_question, data=request.data, partial=True
     )
 
