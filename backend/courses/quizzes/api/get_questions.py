@@ -1,5 +1,4 @@
 import courses.models as db
-from uuid import UUID
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
 from django.db.models import Prefetch, prefetch_related_objects
@@ -53,7 +52,7 @@ def get_questions(request, course_slug: str, quiz_slug: str):
 
     if quiz is None:
         return Response(
-            data={"error": f"Quiz not found"}, status=status.HTTP_404_NOT_FOUND
+            data={"error": "Quiz not found"}, status=status.HTTP_404_NOT_FOUND
         )
 
     written_response_questions_prefetch = Prefetch(
