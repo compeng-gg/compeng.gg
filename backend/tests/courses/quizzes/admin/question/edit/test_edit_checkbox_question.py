@@ -5,7 +5,7 @@ from rest_framework import status
 
 class EditCheckboxQuestionTests(TestCasesWithUserAuth):
     def get_api_endpoint(self, course_slug: str, quiz_slug: str, checkbox_question_id) -> str:
-        return f'/api/v0/quizzes/admin/{course_slug}/{quiz_slug}/edit/checkbox/{checkbox_question_id}/'
+        return f'/api/v0/quizzes/admin/{course_slug}/{quiz_slug}/checkbox/{checkbox_question_id}/edit/'
 
     def test_happy_path(self):
         # Create a quiz and enroll the user as an instructor

@@ -1,26 +1,26 @@
-from tests.utils import TestCasesWithUserAuth, create_enrollment, create_quiz, create_multiple_choice_question
+from tests.utils import TestCasesWithUserAuth, create_enrollment, create_quiz, create_coding_question
 import courses.models as db
 from rest_framework import status
 
 
-class EditMultipleChoiceQuestionTests(TestCasesWithUserAuth):
+class EditCodingQuestionTests(TestCasesWithUserAuth):
     def get_api_endpoint(self, course_slug: str, quiz_slug: str, coding_question_id) -> str:
-        return f'/api/v0/quizzes/admin/{course_slug}/{quiz_slug}/edit/multiple_choice/{coding_question_id}/'
+        return f'/api/v0/quizzes/admin/{course_slug}/{quiz_slug}/coding/{coding_question_id}/edit/'
 
     def test_happy_path(self):
         # Create a quiz and enroll the user as an instructor
         mock_quiz = create_quiz(user_id=self.user.id)
         create_enrollment(user_id=self.user.id, offering=mock_quiz.offering, kind=db.Role.Kind.INSTRUCTOR)
 
-        mock_coding_question = create_multiple_choice_question(
+        mock_coding_question = create_coding_question(
             quiz=mock_quiz,
-            correct_option_index=1
+            programming_lanaguage=db.CodingQuestion.ProgrammingLanguage.C_PP
         )
 
-        updated_correct_option_index = 1
+        updated_programming_language = db.CodingQuestion.ProgrammingLanguage.C_PP
 
         request_data = {
-            "correct_option_index": updated_correct_option_index,
+            "programming_language": updated_programming_language,
         }
 
         response = self.client.post(
@@ -32,6 +32,6 @@ class EditMultipleChoiceQuestionTests(TestCasesWithUserAuth):
 
         mock_coding_question.refresh_from_db()
 
-        self.assertEqual(mock_coding_question.correct_option_index, updated_correct_option_index)
+        self.assertEqual(mock_coding_question.programming_language, updated_programming_language)
 
 # TODO more tests
