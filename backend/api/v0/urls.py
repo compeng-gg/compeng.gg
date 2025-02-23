@@ -71,6 +71,15 @@ urlpatterns = [
     path('<slug:course_slug>/quiz/<slug:quiz_slug>/answer/written_response/<uuid:written_response_question_id>/', quizzes_api.submit_written_response_answer),
     path('<slug:course_slug>/quiz/<slug:quiz_slug>/answer/coding/<uuid:coding_question_id>/', quizzes_api.submit_coding_answer),
     path('<slug:course_slug>/quiz/<slug:quiz_slug>/complete/', quizzes_api.complete_quiz),
+    path('quizzes/admin/<slug:course_slug>/create/', quizzes_api.create_quiz),
+    path('quizzes/admin/<slug:course_slug>/<slug:quiz_slug>/create/multiple_choice/', quizzes_api.create_multiple_choice_question),
+    path('quizzes/admin/<slug:course_slug>/<slug:quiz_slug>/create/checkbox/', quizzes_api.create_checkbox_question),
+    path('quizzes/admin/<slug:course_slug>/<slug:quiz_slug>/create/coding/', quizzes_api.create_coding_question),
+    path('quizzes/admin/<slug:course_slug>/<slug:quiz_slug>/create/written_response/', quizzes_api.create_written_response_question),
+    path('quizzes/admin/<slug:course_slug>/<slug:quiz_slug>/edit/checkbox/<uuid:checkbox_question_id>/', quizzes_api.edit_checkbox_question),
+    path('quizzes/admin/<slug:course_slug>/<slug:quiz_slug>/edit/coding/<uuid:coding_question_id>/', quizzes_api.edit_coding_question),
+    path('quizzes/admin/<slug:course_slug>/<slug:quiz_slug>/edit/written_response/<uuid:written_response_question_id>/', quizzes_api.edit_written_response_question),
+    path('quizzes/admin/<slug:course_slug>/<slug:quiz_slug>/edit/multiple_choice/<uuid:multiple_choice_question_id>/', quizzes_api.edit_multiple_choice_question),
 
     path('github/webhook/', github_webhook),
 
