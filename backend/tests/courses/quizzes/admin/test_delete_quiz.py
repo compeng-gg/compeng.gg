@@ -1,17 +1,12 @@
-from tests.utils import TestCasesWithUserAuth, create_enrollment, create_offering, create_repository, create_quiz
-import courses.models as db
+from tests.utils import TestCasesWithUserAuth, create_quiz
 import responses
-from courses.quizzes.api.admin.create_quiz import GITHUB_REPOS_API_BASE
-from typing import Optional
 from rest_framework import status
-from django.contrib.contenttypes.models import ContentType
 
 
-
-class CreateQuizTests(TestCasesWithUserAuth):
+class DeleteQuizTests(TestCasesWithUserAuth):
     def get_api_endpoint(self, course_slug: str, quiz_slug: str) -> str:
-        return f'/api/v0/quizzes/admin/{course_slug}/{quiz_slug}/delete/'
-    
+        return f"/api/v0/quizzes/admin/{course_slug}/{quiz_slug}/delete/"
+
     @responses.activate
     def test_happy_path(self):
         mock_quiz = create_quiz(self.user.id)
