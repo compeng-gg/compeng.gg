@@ -7,7 +7,7 @@ from datetime import timedelta
 
 class ListQuizzesForCourse(TestCasesWithUserAuth):
     def get_api_endpoint(self, course_slug: str) -> str:
-        return f'/api/v0/quizzes/list/{course_slug}/'
+        return f"/api/v0/quizzes/list/{course_slug}/"
 
     def test_happy_path(self):
         requesting_user_id = self.user.id
@@ -17,11 +17,11 @@ class ListQuizzesForCourse(TestCasesWithUserAuth):
         quiz_1_starts_at = now + timedelta(hours=1)
         quiz_1 = create_quiz(
             user_id=requesting_user_id,
-            quiz_title='final quiz',
-            course_slug='ece344',
+            quiz_title="final quiz",
+            course_slug="ece344",
             starts_at=quiz_1_starts_at,
             repository_id=1,
-            repository_full_name="user/repo_1"
+            repository_full_name="user/repo_1",
         )
         quiz_1.visible_at = now - timedelta(days=1)
         quiz_1.save()
@@ -29,23 +29,23 @@ class ListQuizzesForCourse(TestCasesWithUserAuth):
         quiz_2_starts_at = now + timedelta(hours=2)
         quiz_2 = create_quiz(
             user_id=requesting_user_id,
-            quiz_title='ece454 midterm',
-            course_slug='ece454',
+            quiz_title="ece454 midterm",
+            course_slug="ece454",
             starts_at=quiz_2_starts_at,
             repository_id=2,
-            repository_full_name="user/repo_2"
+            repository_full_name="user/repo_2",
         )
         quiz_2.visible_at = now - timedelta(days=1)
         quiz_2.save()
 
-        response = self.client.get(self.get_api_endpoint('ece454'))
+        response = self.client.get(self.get_api_endpoint("ece454"))
 
         expected_body = [
             {
-                'title': 'ece454 midterm', 
-                'start_unix_timestamp': int(quiz_2.starts_at.timestamp()),
-                'end_unix_timestamp': int(quiz_2.ends_at.timestamp()),
-                'slug': quiz_2.slug
+                "title": "ece454 midterm",
+                "start_unix_timestamp": int(quiz_2.starts_at.timestamp()),
+                "end_unix_timestamp": int(quiz_2.ends_at.timestamp()),
+                "slug": quiz_2.slug,
             }
         ]
 

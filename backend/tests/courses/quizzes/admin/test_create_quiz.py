@@ -1,22 +1,27 @@
-from tests.utils import TestCasesWithUserAuth, create_enrollment, create_offering, create_repository, create_quiz
+from tests.utils import (
+    TestCasesWithUserAuth,
+    create_enrollment,
+    create_offering,
+    create_repository,
+    create_quiz,
+)
 import courses.models as db
 import responses
 from courses.quizzes.api.admin.create_quiz import GITHUB_REPOS_API_BASE
-from typing import Optional
 from rest_framework import status
-from django.contrib.contenttypes.models import ContentType
-
 
 
 class CreateQuizTests(TestCasesWithUserAuth):
     def get_api_endpoint(self, course_slug: str) -> str:
-        return f'/api/v0/quizzes/admin/{course_slug}/create/'
-    
+        return f"/api/v0/quizzes/admin/{course_slug}/create/"
+
     @responses.activate
     def test_happy_path__new_repo(self):
         mock_offering = create_offering()
 
-        create_enrollment(user_id=self.user.id, offering=mock_offering, kind=db.Role.Kind.INSTRUCTOR)
+        create_enrollment(
+            user_id=self.user.id, offering=mock_offering, kind=db.Role.Kind.INSTRUCTOR
+        )
 
         github_repository = "user_name/repo_name"
         github_repository_id = 1
@@ -36,7 +41,7 @@ class CreateQuizTests(TestCasesWithUserAuth):
                     "id": github_repo_owner_id,
                 },
             },
-            status=status.HTTP_200_OK
+            status=status.HTTP_200_OK,
         )
 
         quiz_slug = "quiz-slug"
@@ -51,12 +56,11 @@ class CreateQuizTests(TestCasesWithUserAuth):
             "visible_at_timestamp": visible_at_timestamp,
             "starts_at_timestamp": starts_at_timestamp,
             "ends_at_timestamp": ends_at_timestamp,
-            "github_repository": github_repository
+            "github_repository": github_repository,
         }
 
         response = self.client.post(
-            self.get_api_endpoint(mock_offering.course.slug),
-            data=request_data
+            self.get_api_endpoint(mock_offering.course.slug), data=request_data
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -68,7 +72,7 @@ class CreateQuizTests(TestCasesWithUserAuth):
         self.assertEqual(repository.full_name, github_repo_full_name)
         self.assertEqual(repository.owner_id, github_repo_owner_id)
 
-         # Validate quiz creation
+        # Validate quiz creation
         self.assertEqual(db.Quiz.objects.count(), 1)
 
         quiz = db.Quiz.objects.get(slug=quiz_slug)
@@ -84,7 +88,9 @@ class CreateQuizTests(TestCasesWithUserAuth):
         mock_offering = create_offering()
         mock_repository = create_repository()
 
-        create_enrollment(user_id=self.user.id, offering=mock_offering, kind=db.Role.Kind.INSTRUCTOR)
+        create_enrollment(
+            user_id=self.user.id, offering=mock_offering, kind=db.Role.Kind.INSTRUCTOR
+        )
 
         # Mock the response from GitHub API for repository metadata
         responses.add(
@@ -98,7 +104,7 @@ class CreateQuizTests(TestCasesWithUserAuth):
                     "id": mock_repository.owner_id,
                 },
             },
-            status=status.HTTP_200_OK
+            status=status.HTTP_200_OK,
         )
 
         request_data = {
@@ -107,14 +113,13 @@ class CreateQuizTests(TestCasesWithUserAuth):
             "visible_at_timestamp": 1740248155,
             "starts_at_timestamp": 1740248155,
             "ends_at_timestamp": 1740248155,
-            "github_repository": mock_repository.full_name
+            "github_repository": mock_repository.full_name,
         }
 
         self.assertEqual(db.Repository.objects.count(), 1)
 
         response = self.client.post(
-            self.get_api_endpoint(mock_offering.course.slug),
-            data=request_data
+            self.get_api_endpoint(mock_offering.course.slug), data=request_data
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -125,7 +130,9 @@ class CreateQuizTests(TestCasesWithUserAuth):
         mock_offering = create_offering()
         mock_repository = create_repository()
 
-        create_enrollment(user_id=self.user.id, offering=mock_offering, kind=db.Role.Kind.STUDENT)
+        create_enrollment(
+            user_id=self.user.id, offering=mock_offering, kind=db.Role.Kind.STUDENT
+        )
 
         request_data = {
             "title": "Quiz Title",
@@ -133,20 +140,17 @@ class CreateQuizTests(TestCasesWithUserAuth):
             "visible_at_timestamp": 1740248155,
             "starts_at_timestamp": 1740248155,
             "ends_at_timestamp": 1740248155,
-            "github_repository": mock_repository.full_name
+            "github_repository": mock_repository.full_name,
         }
 
         response = self.client.post(
-            self.get_api_endpoint(mock_offering.course.slug),
-            data=request_data
+            self.get_api_endpoint(mock_offering.course.slug), data=request_data
         )
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
         data = response.json()
-        expected_data = {
-            "error": "User is not a TA or Instructor in this course"
-        }
+        expected_data = {"error": "User is not a TA or Instructor in this course"}
 
         self.assertEqual(data, expected_data)
 
@@ -155,13 +159,15 @@ class CreateQuizTests(TestCasesWithUserAuth):
         mock_offering = create_offering()
         mock_repository = create_repository()
 
-        create_enrollment(user_id=self.user.id, offering=mock_offering, kind=db.Role.Kind.INSTRUCTOR)
+        create_enrollment(
+            user_id=self.user.id, offering=mock_offering, kind=db.Role.Kind.INSTRUCTOR
+        )
 
         # Mock a 404 response from GitHub API for repository metadata
         responses.add(
             responses.GET,
             f"{GITHUB_REPOS_API_BASE}/{mock_repository.full_name}",
-            status=status.HTTP_404_NOT_FOUND
+            status=status.HTTP_404_NOT_FOUND,
         )
 
         request_data = {
@@ -170,12 +176,11 @@ class CreateQuizTests(TestCasesWithUserAuth):
             "visible_at_timestamp": 1740248155,
             "starts_at_timestamp": 1740248155,
             "ends_at_timestamp": 1740248155,
-            "github_repository": mock_repository.full_name
+            "github_repository": mock_repository.full_name,
         }
 
         response = self.client.post(
-            self.get_api_endpoint(mock_offering.course.slug),
-            data=request_data
+            self.get_api_endpoint(mock_offering.course.slug), data=request_data
         )
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
@@ -190,13 +195,15 @@ class CreateQuizTests(TestCasesWithUserAuth):
         mock_offering = create_offering()
         mock_repository = create_repository()
 
-        create_enrollment(user_id=self.user.id, offering=mock_offering, kind=db.Role.Kind.INSTRUCTOR)
+        create_enrollment(
+            user_id=self.user.id, offering=mock_offering, kind=db.Role.Kind.INSTRUCTOR
+        )
 
         # Mock a 403 response from GitHub API for repository metadata
         responses.add(
             responses.GET,
             f"{GITHUB_REPOS_API_BASE}/{mock_repository.full_name}",
-            status=status.HTTP_403_FORBIDDEN
+            status=status.HTTP_403_FORBIDDEN,
         )
 
         request_data = {
@@ -205,12 +212,11 @@ class CreateQuizTests(TestCasesWithUserAuth):
             "visible_at_timestamp": 1740248155,
             "starts_at_timestamp": 1740248155,
             "ends_at_timestamp": 1740248155,
-            "github_repository": mock_repository.full_name
+            "github_repository": mock_repository.full_name,
         }
 
         response = self.client.post(
-            self.get_api_endpoint(mock_offering.course.slug),
-            data=request_data
+            self.get_api_endpoint(mock_offering.course.slug), data=request_data
         )
 
         self.assertEqual(response.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -223,7 +229,11 @@ class CreateQuizTests(TestCasesWithUserAuth):
     def test_duplicate_quiz_slug_in_offering_throws_error(self):
         mock_quiz = create_quiz(self.user.id)
 
-        create_enrollment(user_id=self.user.id, offering=mock_quiz.offering, kind=db.Role.Kind.INSTRUCTOR)
+        create_enrollment(
+            user_id=self.user.id,
+            offering=mock_quiz.offering,
+            kind=db.Role.Kind.INSTRUCTOR,
+        )
 
         request_data = {
             "title": "Quiz Title",
@@ -231,12 +241,11 @@ class CreateQuizTests(TestCasesWithUserAuth):
             "visible_at_timestamp": 1740248155,
             "starts_at_timestamp": 1740248155,
             "ends_at_timestamp": 1740248155,
-            "github_repository": mock_quiz.repository.full_name
+            "github_repository": mock_quiz.repository.full_name,
         }
 
         response = self.client.post(
-            self.get_api_endpoint(mock_quiz.offering.course.slug),
-            data=request_data
+            self.get_api_endpoint(mock_quiz.offering.course.slug), data=request_data
         )
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
