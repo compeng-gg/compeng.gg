@@ -4,7 +4,6 @@ from courses.quizzes.api.admin.schema import (
     CreateMultipleChoiceQuestionRequestSerializer,
 )
 from rest_framework.response import Response
-from django.db.models import Q
 import courses.models as db
 
 
