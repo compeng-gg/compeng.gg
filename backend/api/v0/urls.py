@@ -80,6 +80,10 @@ urlpatterns = [
     path('quizzes/admin/<slug:course_slug>/<slug:quiz_slug>/edit/coding/<uuid:coding_question_id>/', quizzes_api.edit_coding_question),
     path('quizzes/admin/<slug:course_slug>/<slug:quiz_slug>/edit/written_response/<uuid:written_response_question_id>/', quizzes_api.edit_written_response_question),
     path('quizzes/admin/<slug:course_slug>/<slug:quiz_slug>/edit/multiple_choice/<uuid:multiple_choice_question_id>/', quizzes_api.edit_multiple_choice_question),
+    path('quizzes/admin/<slug:course_slug>/<slug:quiz_slug>/delete/checkbox/<uuid:checkbox_question_id>/', quizzes_api.delete_checkbox_question),
+    path('quizzes/admin/<slug:course_slug>/<slug:quiz_slug>/delete/coding/<uuid:coding_question_id>/', quizzes_api.delete_coding_question),
+    path('quizzes/admin/<slug:course_slug>/<slug:quiz_slug>/delete/written_response/<uuid:written_response_question_id>/', quizzes_api.delete_written_response_question),
+    path('quizzes/admin/<slug:course_slug>/<slug:quiz_slug>/delete/multiple_choice/<uuid:multiple_choice_question_id>/', quizzes_api.delete_multiple_choice_question),
 
     path('github/webhook/', github_webhook),
 
