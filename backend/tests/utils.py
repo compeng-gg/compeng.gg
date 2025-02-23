@@ -61,15 +61,17 @@ def create_repository(
 
     return mock_repository
 
-def create_student_enrollment(
+
+def create_enrollment(
     user_id: int,
-    offering: db.Offering
+    offering: db.Offering,
+    kind: db.Role.Kind
 ) -> db.Enrollment:
-    student_role, _ = db.Role.objects.get_or_create(kind=db.Role.Kind.STUDENT, offering=offering)
+    role, _ = db.Role.objects.get_or_create(kind=kind, offering=offering)
 
     return db.Enrollment.objects.create(
         user_id=user_id,
-        role=student_role,
+        role=role,
     )
 
 def create_quiz(
@@ -84,7 +86,7 @@ def create_quiz(
 ) -> db.Quiz:
     offering = create_offering(course_slug=course_slug)
 
-    create_student_enrollment(user_id, offering)
+    create_enrollment(user_id, offering, db.Role.Kind.STUDENT)
 
     ends_at = starts_at + timedelta(hours=1)
     visible_at = starts_at - timedelta(hours=1)
@@ -137,6 +139,56 @@ def create_coding_question(
         programming_language=programming_lanaguage,
         files=files
     )
+
+def create_checkbox_question(
+    quiz: db.Quiz,
+    prompt: Optional[str]="Prompt for a coding question",
+    order: Optional[int]=0,
+    points: Optional[int]=20,
+    options: Optional[list[str]]=["Option 1", "Option 2"],
+    correct_option_indices: Optional[list[str]]=[0]
+):
+    return db.CheckboxQuestion.objects.create(
+        quiz=quiz,
+        prompt=prompt,
+        order=order,
+        points=points,
+        options=options,
+        correct_option_indices=correct_option_indices
+    )
+
+def create_multiple_choice_question(
+    quiz: db.Quiz,
+    prompt: Optional[str]="Prompt for a multiple choice question",
+    order: Optional[int]=0,
+    points: Optional[int]=20,
+    options: Optional[list[str]]=["Option 1", "Option 2"],
+    correct_option_index: Optional[int]=0
+):
+    return db.MultipleChoiceQuestion.objects.create(
+        quiz=quiz,
+        prompt=prompt,
+        order=order,
+        points=points,
+        options=options,
+        correct_option_index=correct_option_index
+    )
+
+def create_written_response_question(
+    quiz: db.Quiz,
+    prompt: Optional[str]="Prompt for a written response question",
+    order: Optional[int]=0,
+    points: Optional[int]=20,
+    max_length: Optional[int]=500,
+):
+    return db.WrittenResponseQuestion.objects.create(
+        quiz=quiz,
+        prompt=prompt,
+        order=order,
+        points=points,
+        max_length=max_length,
+    )
+
 
 class TestCasesWithUserAuth(TestCase):
     def setUp(self):

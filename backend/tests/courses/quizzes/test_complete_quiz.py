@@ -5,7 +5,7 @@ from tests.utils import (
     create_quiz,
     create_quiz_submission,
     create_offering,
-    create_student_enrollment
+    create_enrollment
 )
 from rest_framework import status
 from uuid import (
@@ -84,9 +84,8 @@ class CompleteQuizTests(TestCasesWithUserAuth):
     def test_nonexistent_quiz_throws_error(self):
 
         offering = create_offering()
-        create_student_enrollment(self.user.id, offering)
-
-
+        create_enrollment(self.user.id, offering, db.Role.Kind.STUDENT)
+        
         response = self.client.post(
             self.get_api_endpoint(course_slug=offering.course.slug, quiz_slug=uuid4())
         )
