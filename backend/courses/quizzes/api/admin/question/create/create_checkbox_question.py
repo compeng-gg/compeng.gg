@@ -1,6 +1,6 @@
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework import permissions, status
-from courses.quizzes.api.admin.schema import CreateCheckboxQuestionRequestSerializer
+from courses.quizzes.api.admin.schema import CheckboxQuestionRequestSerializer
 from rest_framework.response import Response
 import courses.models as db
 from courses.quizzes.api.admin.utils import (
@@ -12,7 +12,7 @@ from courses.quizzes.api.admin.utils import (
 @api_view(["POST"])
 @permission_classes([permissions.IsAuthenticated])
 def create_checkbox_question(request, course_slug: str, quiz_slug: str):
-    serializer = CreateCheckboxQuestionRequestSerializer(data=request.data)
+    serializer = CheckboxQuestionRequestSerializer(data=request.data)
 
     if not serializer.is_valid():
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

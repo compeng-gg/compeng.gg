@@ -1,7 +1,7 @@
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework import permissions, status
 from courses.quizzes.api.admin.schema import (
-    CreateWrittenResponseQuestionRequestSerializer,
+    WrittenResponseQuestionRequestSerializer,
 )
 from rest_framework.response import Response
 import courses.models as db
@@ -14,7 +14,7 @@ from courses.quizzes.api.admin.utils import (
 @api_view(["POST"])
 @permission_classes([permissions.IsAuthenticated])
 def create_written_response_question(request, course_slug: str, quiz_slug: str):
-    serializer = CreateWrittenResponseQuestionRequestSerializer(data=request.data)
+    serializer = WrittenResponseQuestionRequestSerializer(data=request.data)
 
     if not serializer.is_valid():
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

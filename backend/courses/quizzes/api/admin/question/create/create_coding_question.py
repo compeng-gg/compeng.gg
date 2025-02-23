@@ -1,6 +1,6 @@
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework import permissions, status
-from courses.quizzes.api.admin.schema import CreateCodingQuestionRequestSerializer
+from courses.quizzes.api.admin.schema import CodingQuestionRequestSerializer
 from rest_framework.response import Response
 import courses.models as db
 from courses.quizzes.api.admin.utils import (
@@ -13,7 +13,7 @@ from courses.quizzes.api.admin.utils import (
 @permission_classes([permissions.IsAuthenticated])
 def create_coding_question(request, course_slug: str, quiz_slug: str):
     print(request.data)
-    serializer = CreateCodingQuestionRequestSerializer(data=request.data)
+    serializer = CodingQuestionRequestSerializer(data=request.data)
 
     if not serializer.is_valid():
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

@@ -1,7 +1,7 @@
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework import permissions, status
 from courses.quizzes.api.admin.schema import (
-    CreateMultipleChoiceQuestionRequestSerializer,
+    MultipleChoiceQuestionRequestSerializer,
 )
 from rest_framework.response import Response
 import courses.models as db
@@ -17,7 +17,7 @@ def edit_multiple_choice_question(
     multiple_choice_question = db.MultipleChoiceQuestion.objects.get(
         id=multiple_choice_question_id
     )
-    serializer = CreateMultipleChoiceQuestionRequestSerializer(
+    serializer = MultipleChoiceQuestionRequestSerializer(
         multiple_choice_question, data=request.data, partial=True
     )
 
