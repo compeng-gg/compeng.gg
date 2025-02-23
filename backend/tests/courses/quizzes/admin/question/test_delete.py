@@ -5,7 +5,7 @@ from rest_framework import status
 
 class DeleteQuestionTests(TestCasesWithUserAuth):
     def get_api_endpoint(self, course_slug: str, quiz_slug: str, question_type: str, checkbox_question_id) -> str:
-        return f'/api/v0/quizzes/admin/{course_slug}/{quiz_slug}/delete/{question_type}/{checkbox_question_id}/'
+        return f'/api/v0/quizzes/admin/{course_slug}/{quiz_slug}/{question_type}/{checkbox_question_id}/delete/'
 
     def test_delete_coding_question__happy_path(self):
         mock_quiz = create_quiz(user_id=self.user.id)

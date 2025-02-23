@@ -1,7 +1,7 @@
 from tests.utils import TestCasesWithUserAuth, create_enrollment, create_offering, create_repository, create_quiz
 import courses.models as db
 import responses
-from courses.quizzes.api.admin.api import GITHUB_REPOS_API_BASE
+from courses.quizzes.api.admin.create_quiz import GITHUB_REPOS_API_BASE
 from typing import Optional
 from rest_framework import status
 from django.contrib.contenttypes.models import ContentType
