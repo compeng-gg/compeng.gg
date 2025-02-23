@@ -7,6 +7,10 @@ import QuizDisplay, { QuizProps } from "../quiz-display";
 import { BaseQuestionData, CodeQuestionData, QuestionData, QuestionProps, QuestionViewMode, QuestionState, QuestionType, SelectQuestionData, ServerToLocal, TextQuestionData } from "../question-models";
 import { Card } from "primereact/card";
 import { QuestionDisplay } from "../question-display";
+import { fetchApi } from "@/app/lib/api";
+import { JwtContext } from "@/app/lib/jwt-provider";
+import { getQuestionDataFromRaw } from "../quiz-utilities";
+import { ProgressSpinner } from "primereact/progressspinner";
 
 const now = new Date()
 const oneHourBefore = new Date(now.getTime() - 1 * 60 * 60 * 1000);
@@ -14,9 +18,7 @@ const twoHoursLater = new Date(now.getTime() + 2 * 60 * 60 * 1000); // Add 2 hou
 
 
 export default function Page({ params }: { params: { courseSlug: string, quizSlug: string } }) {
-  console.log("params", params)
   const { courseSlug, quizSlug } = params;
-  console.log(courseSlug, quizSlug)
   const [jwt, setAndStoreJwt] = useContext(JwtContext);
   const [quiz, setQuiz] = useState<QuizProps | undefined>(undefined);
 
@@ -37,6 +39,7 @@ export default function Page({ params }: { params: { courseSlug: string, quizSlu
         name: data.title,
         courseSlug: courseSlug
       }
+      console.log("Quiz" + JSON.stringify(data, null, 2));
       setQuiz(retQuiz);
       const qData = data.questions.map((rawData) =>  getQuestionDataFromRaw(rawData, quizSlug, courseSlug));
       setQuestionData(qData);
@@ -62,12 +65,22 @@ export default function Page({ params }: { params: { courseSlug: string, quizSlu
     }
   }, [loaded]);
   //If quiz not found
+  if(!loaded){
+    return (
+      <LoginRequired>
+        <Navbar />
+
+        <h3 style={{ color: "yellow" }}>{`Loading quiz ${quizSlug}...`}</h3>
+      </LoginRequired>
+    )
+  }
+
   if (!quiz) {
     return (
       <LoginRequired>
         <Navbar />
 
-        <h3 style={{ color: "red" }}>{`quiz ${quizSlug} not found for course ${courseSlug}`}</h3>
+        <h3 style={{ color: "yellow" }}>{`quiz ${quizSlug} not found for course ${courseSlug}`}</h3>
       </LoginRequired>
     )
   }
@@ -96,36 +109,7 @@ export default function Page({ params }: { params: { courseSlug: string, quizSlu
   );
 }
 
-function getQuestionDataFromRaw(rawData: any, quizSlug: string, courseSlug: string): any {
-  const baseData: BaseQuestionData = {
-    id: rawData.id,
-    quizSlug: quizSlug,
-    courseSlug: courseSlug,
-    prompt: rawData.prompt,
-    serverQuestionType: rawData.question_type,
-    questionType: ServerToLocal.get(rawData.question_type) as QuestionType  ?? "TEXT",
-    isMutable: true,
-    totalMarks: rawData.points
-  }
-  switch (baseData.questionType) {
-    case "CODE":
-      return {
-        ...baseData,
-        starterCode: rawData.starter_code, programmingLanguage: rawData.programming_language
-      } as CodeQuestionData
-    case "SELECT":
-      return {
-        ...baseData,
-        options: rawData.options
-      } as SelectQuestionData
-    case "TEXT":
-      return {
-        ...baseData,
-      } as TextQuestionData
-    default:
-      throw new Error(`Unsupported question type: ${JSON.stringify(questionData)}`);
-  }
-}
+
 
 function getStartingStateValue(questionData: QuestionData, rawData: any): any {
   switch (questionData.questionType) {

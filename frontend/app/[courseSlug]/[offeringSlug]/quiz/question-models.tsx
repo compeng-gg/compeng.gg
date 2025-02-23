@@ -10,10 +10,13 @@ interface BaseQuestionData {
     questionType: "CODE" | "SELECT" | "TEXT";
 }
 
+export type ProgrammingLanguages = "C_PP" | "C" | "PYTHON";
+
 // Question Data
 export interface CodeQuestionData extends BaseQuestionData {
     questionType: "CODE";
     starterCode: string;
+    programmingLanguage: ProgrammingLanguages;
 }
 
 export interface SelectQuestionData extends BaseQuestionData {

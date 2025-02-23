@@ -92,7 +92,7 @@ export default function CodeEditor(props: CodeState) {
     <>
       {loaded && (
         <AceEditor
-          mode="c_cpp"
+          mode="c_cpp" //Todo: Make this the languagea of the coding question
           theme="monokai"
           name="my_ace_editor"
           value={props.value}
