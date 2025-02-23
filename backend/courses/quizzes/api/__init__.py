@@ -9,3 +9,27 @@ from courses.quizzes.api.submit_written_response_answer import (
     submit_written_response_answer,
 )
 from courses.quizzes.api.list import list_all, list_for_course
+from courses.quizzes.api.admin.api import create_quiz
+from courses.quizzes.api.admin.create.create_multiple_choice_question import (
+    create_multiple_choice_question,
+)
+from courses.quizzes.api.admin.create.create_checkbox_question import (
+    create_checkbox_question,
+)
+from courses.quizzes.api.admin.create.create_written_response_question import (
+    create_written_response_question,
+)
+from courses.quizzes.api.admin.create.create_coding_question import (
+    create_coding_question,
+)
+from courses.quizzes.api.admin.edit.edit_checkbox_question import edit_checkbox_question
+
+from courses.quizzes.api.admin.edit.edit_coding_question import edit_coding_question
+
+from courses.quizzes.api.admin.edit.edit_written_response_question import (
+    edit_written_response_question,
+)
+
+from courses.quizzes.api.admin.edit.edit_multiple_choice_question import (
+    edit_multiple_choice_question,
+)
