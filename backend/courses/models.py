@@ -381,7 +381,7 @@ class WrittenResponseQuestion(QuizQuestionBaseModel):
     id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name='written_response_questions')
     
-    max_length = models.PositiveIntegerField(default=1, null=True)
+    max_length = models.PositiveIntegerField(default=200, null=True)
 
     class Meta:
         constraints = [
