@@ -29,7 +29,7 @@ function StaffQuizDisplayBadges(props: StaffQuizProps) {
 function StaffQuizButton({ quizProps }: { quizProps: StaffQuizProps }) {
     return (
         <div style={{ position: "relative", display: "flex", flexDirection: "row-reverse" }}>
-            <Link href={`/${quizProps.courseSlug}/${quizProps.offeringSlug}/quiz/${quizProps.quizSlug}/grade`}>
+            <Link href={`/${quizProps.courseSlug}/${quizProps.offeringSlug}/quiz/${quizProps.quizSlug}/submissions/`}>
                 <Button label="Grade Quiz" size="small" />
             </Link>
         </div>
