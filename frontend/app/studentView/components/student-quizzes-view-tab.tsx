@@ -9,6 +9,7 @@ const twoHoursLater = new Date(now.getTime() + 2 * 60 * 60 * 1000); // Add 2 hou
 
 export interface StudentQuizViewProps {
     courseSlug: string;
+    offeringSlug: string;
 }
 
 export default function StudentQuizViewTab(props: StudentQuizViewProps){
@@ -26,6 +27,7 @@ export default function StudentQuizViewTab(props: StudentQuizViewProps){
                     grade: undefined,
                     quizSlug: quiz.slug,
                     courseSlug: props.courseSlug,
+                    offeringSlug: props.offeringSlug,
                     startTime: new Date(quiz.start_unix_timestamp*1000),
                     endTime: new Date(quiz.end_unix_timestamp*1000)
                 })
