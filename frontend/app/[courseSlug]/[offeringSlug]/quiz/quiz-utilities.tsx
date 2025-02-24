@@ -1,7 +1,7 @@
-import { BaseQuestionData, ServerToLocal, QuestionType, CodeQuestionData, SelectQuestionData, TextQuestionData } from "./question-models";
+import { BaseQuestionData, ServerToLocal, QuestionType, CodeQuestionData, SelectQuestionData, TextQuestionData, StaffCodeQuestionData } from "./question-models";
 
 
-export function getQuestionDataFromRaw(rawData: any, quizSlug: string, courseSlug: string): any {
+export function getQuestionDataFromRaw(rawData: any, quizSlug: string, courseSlug: string, isStaff?: boolean): any {
     const baseData: BaseQuestionData = {
       id: rawData.id,
       quizSlug: quizSlug,
@@ -14,11 +14,24 @@ export function getQuestionDataFromRaw(rawData: any, quizSlug: string, courseSlu
     }
     switch (baseData.questionType) {
       case "CODE":
+        if(isStaff) {
+          return {
+            ...baseData,
+            starterCode: rawData.starter_code, programmingLanguage: rawData.programming_language,
+            filesToPull: rawData.files_to_pull, fileToReplace: rawData.file_to_replace, gradingDirectory: rawData.grading_directory
+          } as StaffCodeQuestionData
+        }
         return {
           ...baseData,
           starterCode: rawData.starter_code, programmingLanguage: rawData.programming_language
         } as CodeQuestionData
       case "SELECT":
+        if(isStaff) {
+          return {
+            ...baseData,
+            options: rawData.options, correctAnswerIdx: rawData.correct_answer_idx
+          }
+        }
         return {
           ...baseData,
           options: rawData.options

@@ -10,6 +10,7 @@ import { fetchApi, jwtObtainPairEndpoint, apiUrl} from '@/app/lib/api';
 import { JwtContext } from '@/app/lib/jwt-provider';
 import TestRun, { RawToTestRunProps, TestRunHeader, TestRunProps } from './test-run';
 import { Accordion, AccordionTab } from 'primereact/accordion';
+import Ide from './ide';
 
 // Set base path for other Ace dependencies
 ace.config.set('basePath', '/ace');
@@ -26,7 +27,7 @@ enum TestRunStatus {
   COMPLETE = "Complete"
 }
 
-export default function CodeEditor(props: CodeState) {
+export default function CodeEditor({ props, includeTests }: { props: CodeQuestionProps, includeTests: boolean}) {
   const [loaded, setLoaded] = useState<boolean>(false);
   const [socket, setSocket] = useState<WebSocket | undefined>(undefined);
   const [message, setMessage] = useState<string>("");
@@ -89,27 +90,8 @@ export default function CodeEditor(props: CodeState) {
   }
 
   return (
-    <>
-      {loaded && (
-        <AceEditor
-          mode="c_cpp" //Todo: Make this the languagea of the coding question
-          theme="monokai"
-          name="my_ace_editor"
-          value={props.value}
-          onChange={props.setValue}
-          fontSize={14}
-          showPrintMargin={false}
-          showGutter={true}
-          highlightActiveLine={true}
-          style={{ width: '100%', height: '400px' }}
-          // Enable autocomplete features
-          setOptions={{
-            enableBasicAutocompletion: true,
-            enableLiveAutocompletion: true,
-            enableSnippets: true,
-          }}
-        />
-      )}
+    <div style={{ display: "flex", "flexDirection": "column", gap: "10px" }}>
+      <Ide language={props.programmingLanguage} value={props.state.value} onChange={props.state.setValue} />
       <Accordion>
         {testRuns.map((testRun: TestRunProps, index) => (
           <AccordionTab header={TestRunHeader(testRun)} key={index}>

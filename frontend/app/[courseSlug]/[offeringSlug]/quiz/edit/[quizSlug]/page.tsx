@@ -18,7 +18,7 @@ export default function Page({ params }: { params: { courseSlug: string, quizSlu
     const { courseSlug, quizSlug } = params;
     const [jwt, setAndStoreJwt] = useContext(JwtContext);
     const [quiz, setQuiz] = useState<QuizProps | undefined>(undefined);
-    const [questionData, setQuestionData] = useState<QuestionData[]>([]);
+    const [questionData, setQuestionData] = useState<StaffQuestionData[]>([]);
     const [loaded, setLoaded] = useState<boolean>(false);
 
     async function fetchQuiz() {
@@ -34,7 +34,7 @@ export default function Page({ params }: { params: { courseSlug: string, quizSlu
             }
             setQuiz(retQuiz);
             console.log("Quiz" + JSON.stringify(data, null, 2));
-            setQuestionData((data.questions.map((rawData: any) => getQuestionDataFromRaw(rawData, quizSlug, courseSlug))));
+            setQuestionData((data.questions.map((rawData: any) => getQuestionDataFromRaw(rawData, quizSlug, courseSlug, true))));
         } catch (error) {
             console.error("Failed to retrieve quiz", error);
         }
