@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import { useParams } from "next/navigation";
 import { fetchApi } from "@/app/lib/api";
+import { JwtContext } from "@/app/lib/jwt-provider";
 import { Button } from "primereact/button";
 import Link from "next/link";
 
@@ -15,21 +16,26 @@ interface Submission {
 
 export default function QuizSubmissionsPage() {
     const { courseSlug, offeringSlug, quizSlug } = useParams();
+    const [jwt, setAndStoreJwt] = useContext(JwtContext);  // ✅ Use JWT for authentication
     const [submissions, setSubmissions] = useState<Submission[]>([]);
     const [loading, setLoading] = useState(true);
 
     async function fetchSubmissions() {
         try {
             const res = await fetchApi(
-                null, // No JWT needed for now
-                null,
+                jwt, 
+                setAndStoreJwt,
                 `quizzes/admin/${courseSlug}/${quizSlug}/submissions/`,
                 "GET"
             );
+            if (!res.ok) {
+                throw new Error("Failed to fetch submissions");
+            }
             const data = await res.json();
             setSubmissions(data);
         } catch (error) {
             console.error("Failed to retrieve submissions", error);
+            setSubmissions([]);
         } finally {
             setLoading(false);
         }
@@ -37,7 +43,7 @@ export default function QuizSubmissionsPage() {
 
     useEffect(() => {
         fetchSubmissions();
-    }, [courseSlug, quizSlug]);
+    }, [courseSlug, quizSlug, jwt, setAndStoreJwt]);
 
     if (loading) {
         return <p>Loading submissions...</p>;
