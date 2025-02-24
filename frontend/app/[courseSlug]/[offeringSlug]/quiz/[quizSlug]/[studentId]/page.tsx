@@ -100,6 +100,7 @@ export default function StudentSubmissionPage() {
                         return (
                             <GradingQuestionDisplay
                                 key={idx}
+                                idx={idx + 1}
                                 question={question}
                                 studentAnswer={matchingAnswer}
                             />
