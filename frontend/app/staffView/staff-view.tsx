@@ -6,7 +6,8 @@ import 'primeicons/primeicons.css';
 import { Button } from "primereact/button";
 import StudentTeamViewTab from "../studentView/components/student-team-view-tab";
 import StaffTeamViewTab from "./components/staff-team-view-tab";
-
+import StaffCourseSettingsTab from "./components/staff-course-settings-tab";
+import StaffQuizViewTab from "./components/staff-quiz-view-tab";
 
 export interface StaffViewProps {
     courseName: string;
@@ -25,7 +26,8 @@ export default function StaffView(props: StaffViewProps){
         // { label: 'Tests', icon: 'pi pi-pencil'},
         { label: 'Course Settings', icon: 'pi pi-spin pi-cog',},
         { label: 'Students', icon: 'pi pi-spin pi-user'},
-        { label: 'Teams', icon: 'pi pi-spin pi-users'}
+        { label: 'Teams', icon: 'pi pi-spin pi-users'},
+        { label: 'Quizzes', icon: 'pi pi-spin pi-question'},
         // test
     ]
 
@@ -51,6 +53,10 @@ function DisplayCourseTab({idx, courseSlug, offeringSlug}){
     
     if(idx == 3){
         return <StaffTeamViewTab  courseSlug={courseSlug}/>
+    }
+
+    if (idx == 3){
+        return <StaffQuizViewTab courseSlug={courseSlug} offeringSlug={offeringSlug}/>
     }
 
     return (
