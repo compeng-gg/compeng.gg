@@ -49,7 +49,7 @@ function DisplayCourseTab({idx, labs, courseSlug, offeringSlug}){
         return <StudentAssignmentTab labs={labs}/>
     }
     if(idx == 2){
-        return <StudentQuizViewTab courseSlug={courseSlug}/>
+        return <StudentQuizViewTab courseSlug={courseSlug} offeringSlug={offeringSlug} />
     }
     if(idx == 3){
         return <StudentTeamViewTab  courseSlug={courseSlug}/>

@@ -9,6 +9,7 @@ import Link from "next/link";
 export interface QuizProps {
     name: string;
     courseSlug: string;
+    offeringSlug: string;
     quizSlug: string;
     startTime: Date;
     endTime: Date;
@@ -35,7 +36,7 @@ function QuizVisitButton({buttonText, quizProps}: {buttonText: string, quizProps
     return (
         <div style={{ position: 'relative', display: "flex", flexDirection: "row-reverse", }}>
             <span></span>
-            <Link href={`/${quizProps.courseSlug}/quiz/${quizProps.quizSlug}`}>
+            <Link href={`/${quizProps.courseSlug}/${quizProps.offeringSlug}/quiz/${quizProps.quizSlug}`}>
                 <Button label={buttonText} size="small"/>
             </Link>
         </div>
