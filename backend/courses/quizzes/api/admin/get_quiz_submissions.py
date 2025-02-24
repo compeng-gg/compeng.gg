@@ -113,5 +113,6 @@ def get_student_quiz_submission(request, course_slug: str, quiz_slug: str, stude
         "completed_at": submission.completed_at,
         "answers": answer_data
     }
+    print(submission_data)
 
     return Response(data=submission_data, status=status.HTTP_200_OK)
