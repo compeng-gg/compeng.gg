@@ -20,7 +20,7 @@ interface GradingQuestionDisplayProps {
 
 export default function GradingQuestionDisplay({ idx = 1, question, studentAnswer }: GradingQuestionDisplayProps) {
     const [comment, setComment] = useState("");
-    const [grade, setGrade] = useState<number | "">(0);
+    const [grade, setGrade] = useState("");
 
     return (
         <Card
@@ -86,7 +86,7 @@ export default function GradingQuestionDisplay({ idx = 1, question, studentAnswe
 
             {/* 🔥 Grading Section - Now Smaller and Properly Positioned */}
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "15px" }}>
-                {/* 🔹 Comment Box (TextEditor) - 🔥 Restored */}
+                {/* 🔹 Comment Box (TextEditor) */}
                 <div style={{ flex: "2", marginRight: "20px" }}>
                     <label><strong>Comments:</strong></label>
                     <TextEditor
@@ -98,7 +98,7 @@ export default function GradingQuestionDisplay({ idx = 1, question, studentAnswe
                     />
                 </div>
 
-                {/* 🔹 Grade Box - Now Smaller and Aligned */}
+                {/* 🔹 Grade Box (Now Uses Smaller `input` Instead of `TextEditor`) */}
                 <div
                     style={{
                         display: "flex",
@@ -113,16 +113,20 @@ export default function GradingQuestionDisplay({ idx = 1, question, studentAnswe
                 >
                     <strong style={{ marginRight: "8px" }}>Grade:</strong>
                     <input
-                        type="number"
+                        type="text" // ✅ Switch to text to remove number spinner
                         value={grade}
-                        onChange={(e) => setGrade(e.target.value ? Number(e.target.value) : "")}
+                        onChange={(e) => {
+                            const value = e.target.value.replace(/\D/, ""); // ✅ Allow only digits
+                            setGrade(value);
+                        }}
+                        pattern="[0-9]*" // ✅ Mobile-friendly numeric input
+                        inputMode="numeric" // ✅ Optimized for mobile keyboards
                         style={{
-                            width: "50px", // ✅ Fits a 3-digit number
-                            height: "20px",
+                            width: "50px", // ✅ Small width for 3-digit input
+                            padding: "3px 5px",
+                            border: "1px solid #ccc",
+                            borderRadius: "4px",
                             textAlign: "center",
-                            border: "none",
-                            outline: "none",
-                            background: "transparent",
                         }}
                     />
                 </div>
