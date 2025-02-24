@@ -1,83 +1,55 @@
-import { Badge } from "primereact/badge";
-import { Card } from "primereact/card";
-import { differenceInMinutes } from "date-fns";
-import { Button } from "primereact/button";
-import Link from "next/link";
+import StaffQuizDisplay, { StaffQuizProps } from "@/app/[courseSlug]/[offeringSlug]/quiz/staff-quiz-display";
+import { fetchApi } from "@/app/lib/api";
+import { JwtContext } from "@/app/lib/jwt-provider";
+import { useContext, useEffect, useState } from "react";
 
-export interface StaffQuizProps {
-    name: string;
+export interface StaffQuizViewProps {
     courseSlug: string;
     offeringSlug: string;
-    quizSlug: string;
-    startTime: Date;
-    endTime: Date;
 }
 
-function QuizDisplayBadges(props: StaffQuizProps) {
-    const duration = Math.abs(differenceInMinutes(props.endTime, props.startTime));
+export default function StaffQuizViewTab(props: StaffQuizViewProps) {
+    const [jwt, setAndStoreJwt] = useContext(JwtContext);
+    const [quizzes, setQuizzes] = useState<StaffQuizProps[]>([]);
+    const [loading, setLoading] = useState(true);
 
-    return (
-        <div style={{ position: "relative" }}>
-            <span></span>
-            <div style={{ position: "absolute", top: "10px", right: "10px", display: "flex", gap: "8px" }}>
-                <Badge value={`${duration} mins`} severity="secondary" />
-            </div>
-        </div>
-    );
-}
+    async function fetchQuizzes() {
+        try {
+            const res = await fetchApi(jwt, setAndStoreJwt, `quizzes/list/${props.courseSlug}`, "GET");
+            const data = await res.json();
 
-function QuizGradeButton({ quizProps }: { quizProps: StaffQuizProps }) {
-    return (
-        <div style={{ position: "relative", display: "flex", flexDirection: "row-reverse" }}>
-            <Link href={`/${quizProps.courseSlug}/${quizProps.offeringSlug}/quiz/${quizProps.quizSlug}/grade`}>
-                <Button label="Grade Quiz" size="small" />
-            </Link>
-        </div>
-    );
-}
-
-export default function QuizDisplayStaff(props: StaffQuizProps) {
-    const now = new Date();
-
-    if (now <= props.startTime) {
-        return UpcomingQuizDisplay(props);
-    } else if (now <= props.endTime) {
-        return OngoingQuizDisplay(props);
-    } else {
-        return PastQuizDisplay(props);
+            if (!Array.isArray(data) || data.length === 0) {
+                setQuizzes([]);
+            } else {
+                const retQuizzes: StaffQuizProps[] = data.map((quiz: any) => ({
+                    name: quiz.title,
+                    quizSlug: quiz.slug,
+                    courseSlug: props.courseSlug,
+                    offeringSlug: props.offeringSlug,
+                    startTime: quiz.start_unix_timestamp ? new Date(quiz.start_unix_timestamp * 1000) : null,
+                    endTime: quiz.end_unix_timestamp ? new Date(quiz.end_unix_timestamp * 1000) : null,
+                }));
+                setQuizzes(retQuizzes);
+            }
+        } catch (error) {
+            console.error("Failed to retrieve quizzes", error);
+        } finally {
+            setLoading(false);
+        }
     }
-}
 
-function UpcomingQuizDisplay(props: StaffQuizProps) {
-    return (
-        <Card
-            header={<QuizDisplayBadges {...props} />}
-            title={props.name}
-            subTitle={`Start Time: ${props.startTime}`}
-            className="bg-gray-50 dark:white shadow-md rounded-lg"
-        />
-    );
-}
+    useEffect(() => {
+        fetchQuizzes();
+    }, [props.courseSlug]);
 
-function OngoingQuizDisplay(props: StaffQuizProps) {
-    return (
-        <Card
-            header={<QuizDisplayBadges {...props} />}
-            title={props.name}
-            subTitle={`Started at: ${props.startTime}`}
-            className="bg-green-50 dark:white shadow-md rounded-lg"
-        />
-    );
-}
+    if (loading) return <p>Loading quizzes...</p>;
+    if (quizzes.length === 0) return <p>No quizzes available.</p>;
 
-function PastQuizDisplay(props: StaffQuizProps) {
     return (
-        <Card
-            header={<QuizDisplayBadges {...props} />}
-            footer={<QuizGradeButton quizProps={props} />}
-            title={props.name}
-            subTitle={`Ended on: ${props.endTime}`}
-            className="bg-gray-50 dark:white shadow-md rounded-lg"
-        />
+        <div style={{ display: "flex", flexDirection: "column", gap: "10px", width: "100%" }}>
+            {quizzes.map((quiz) => (
+                <StaffQuizDisplay key={quiz.quizSlug} {...quiz} />
+            ))}
+        </div>
     );
 }
