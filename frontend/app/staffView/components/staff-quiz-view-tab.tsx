@@ -3,6 +3,7 @@ import { fetchApi } from "@/app/lib/api";
 import { JwtContext } from "@/app/lib/jwt-provider";
 import { useContext, useEffect, useState } from "react";
 import { Button } from "primereact/button";
+import Link from "next/link";
 
 export interface StaffQuizViewProps {
     courseSlug: string;
@@ -36,13 +37,23 @@ export default function StaffQuizViewTab(props: StaffQuizViewProps) {
         fetchQuizzes();
     }, [props.courseSlug]);
 
+    function StaffQuizButton({ quizProps }: { quizProps: QuizProps }) {
+        return (
+            <div style={{ position: "relative", display: "flex", flexDirection: "row-reverse" }}>
+                <Link href={`/${quizProps.courseSlug}/${quizProps.offeringSlug}/quiz/${quizProps.quizSlug}/grade`}>
+                    <Button label="Grade Quiz" size="small" />
+                </Link>
+            </div>
+        );
+    }
+
     return (
         <div style={{ display: "flex", flexDirection: "column", gap: "10px", width: "100%" }}>
             {quizzes.length > 0 ? (
                 quizzes.map((quiz) => (
                     <div key={quiz.quizSlug} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px", border: "1px solid #ccc", borderRadius: "8px" }}>
                         <QuizDisplay {...quiz} />
-                        <Button onClick={() => router.push(`/staff/quiz/${quiz.quizSlug}`)}>View Quiz</Button>
+                        <StaffQuizButton quizProps={quiz} />
                     </div>
                 ))
             ) : (
