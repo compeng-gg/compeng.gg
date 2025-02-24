@@ -108,7 +108,7 @@ export default function QuizSubmissionsPage() {
                                     <p>Started: {new Date(submission.started_at).toLocaleString()}</p>
                                     <p>Completed: {new Date(submission.completed_at).toLocaleString()}</p>
                                 </div>
-                                <Link href={`/${courseSlug}/${offeringSlug}/quiz/${quizSlug}/submissions/${submission.user_id}/`}>
+                                <Link href={`/${courseSlug}/${offeringSlug}/quiz/${quizSlug}/${submission.user_id}/`}>
                                     <Button label="Grade Submission" size="small" />
                                 </Link>
                             </div>
