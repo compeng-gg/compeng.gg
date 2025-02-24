@@ -26,6 +26,7 @@ export default function StaffView(props: StaffViewProps){
         { label: 'Course Settings', icon: 'pi pi-spin pi-cog',},
         { label: 'Students', icon: 'pi pi-spin pi-user'},
         { label: 'Teams', icon: 'pi pi-spin pi-users'}
+        // test
     ]
 
     return (
