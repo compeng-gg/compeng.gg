@@ -33,7 +33,7 @@ export default function StaffView(props: StaffViewProps){
 
     return (
         <>
-            <h2>{courseName}</h2>
+            <h2>{courseName + "teehee"}</h2>
             <PrimeWrapper>
                 <TabMenu
                     model = {items}

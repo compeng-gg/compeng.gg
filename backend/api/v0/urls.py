@@ -40,6 +40,7 @@ urlpatterns = [
     path('tasks/', views.tasks),
 
     path('courses/offerings/', views.offerings),
+    
     path('courses/<slug:slug>/', views.course),
     
     
