@@ -88,6 +88,7 @@ urlpatterns = [
     path('quizzes/admin/<slug:course_slug>/<slug:quiz_slug>/edit/', quizzes_api.edit_quiz),
     path('quizzes/admin/<slug:course_slug>/<slug:quiz_slug>/', quizzes_api.get_quiz),
     path('quizzes/admin/<slug:course_slug>/', quizzes_api.admin_list_quizzes_for_course),
+    path('quizzes/admin/<slug:course_slug>/<slug:quiz_slug>/submissions/', quizzes_api.get_quiz_submissions),
 
     path('github/webhook/', github_webhook),
 
