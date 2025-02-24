@@ -1,12 +1,14 @@
 "use client";
 
 import { Card } from "primereact/card";
+import { Badge } from "primereact/badge";
 import CodeEditor from "../../components/code-editor";
 import TextEditor from "../../components/text-editor";
 import SelectEditor from "../../components/select-editor";
 import { useState } from "react";
 
 interface GradingQuestionDisplayProps {
+    idx?: number;
     question: {
         prompt: string;
         points: number;
@@ -16,20 +18,23 @@ interface GradingQuestionDisplayProps {
     studentAnswer: any; // The student's submitted answer
 }
 
-export default function GradingQuestionDisplay({ question, studentAnswer }: GradingQuestionDisplayProps) {
+export default function GradingQuestionDisplay({ idx = 1, question, studentAnswer }: GradingQuestionDisplayProps) {
     const [comment, setComment] = useState("");
     const [grade, setGrade] = useState<number | "">(0);
 
     return (
         <Card
-            title={question.prompt}
+            title={`Question ${idx}`} // ✅ Question Number Added
+            subTitle={question.prompt}
             style={{
                 marginBottom: "20px",
                 background: "#fff",
                 borderRadius: "8px",
                 padding: "15px",
                 boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+                position: "relative",
             }}
+            header={<GradeBadge totalAvailable={question.points} />} // ✅ Points Badge at Top-Right
         >
             {/* Student Answer Section */}
             <div style={{ marginBottom: "15px" }}>
@@ -51,7 +56,7 @@ export default function GradingQuestionDisplay({ question, studentAnswer }: Grad
                     // ✅ Coding Questions (Show only student's code)
                     <CodeEditor
                         props={{
-                            id: "code-question",
+                            id: `code-question-${idx}`,
                             quizSlug: "",
                             courseSlug: "",
                             prompt: question.prompt,
@@ -80,45 +85,50 @@ export default function GradingQuestionDisplay({ question, studentAnswer }: Grad
                 )}
             </div>
 
-            {/* 🔥 Grading Section - Styled to Look Clean */}
-            <div style={{ display: "flex", gap: "15px", alignItems: "center", marginTop: "15px" }}>
-                {/* Comment Box */}
-                <div style={{ flex: "2" }}>
-                    <label><strong>Comments:</strong></label>
-                    <textarea
-                        value={comment}
-                        onChange={(e) => setComment(e.target.value)}
-                        placeholder="Leave feedback for the student..."
-                        style={{
-                            width: "100%",
-                            minHeight: "50px",
-                            padding: "8px",
-                            borderRadius: "5px",
-                            border: "1px solid #ccc",
+            {/* 🔥 Grading Section - Now Smaller and in Bottom-Right */}
+            <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "15px" }}>
+                <div
+                    style={{
+                        display: "flex",
+                        alignItems: "center",
+                        border: "1px solid #ccc",
+                        padding: "6px 10px",
+                        borderRadius: "6px",
+                        background: "#f9f9f9",
+                    }}
+                >
+                    <strong style={{ marginRight: "8px" }}>Grade:</strong>
+                    <TextEditor
+                        state={{
+                            value: grade.toString(),
+                            setValue: (newValue) => setGrade(newValue ? Number(newValue) : ""),
                         }}
-                    />
-                </div>
-
-                {/* Grade Box */}
-                <div style={{ flex: "1", textAlign: "right" }}>
-                    <label><strong>Grade:</strong></label>
-                    <input
-                        type="number"
-                        value={grade}
-                        onChange={(e) => setGrade(e.target.value ? Number(e.target.value) : "")}
-                        min="0"
-                        max={question.points}
+                        save={() => {}} // ✅ Required prop
                         style={{
-                            width: "60px",
+                            width: "50px",
                             textAlign: "center",
-                            padding: "5px",
-                            borderRadius: "5px",
-                            border: "1px solid #ccc",
                         }}
                     />
-                    / {question.points}
                 </div>
             </div>
         </Card>
+    );
+}
+
+/* 🔹 Helper Component for Displaying Grade Badge (Top-Right of Each Card) */
+function GradeBadge({ totalAvailable }: { totalAvailable: number }) {
+    return (
+        <Badge
+            size="large"
+            value={`Points: ${totalAvailable}`}
+            severity="info"
+            style={{
+                fontSize: "14px",
+                padding: "6px 10px",
+                position: "absolute",
+                top: "10px",
+                right: "10px",
+            }}
+        />
     );
 }
