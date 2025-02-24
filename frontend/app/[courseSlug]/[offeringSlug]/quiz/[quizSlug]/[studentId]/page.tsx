@@ -6,7 +6,7 @@ import { fetchApi } from "@/app/lib/api";
 import { JwtContext } from "@/app/lib/jwt-provider";
 import Navbar from "@/app/components/navbar";
 import { QuestionDisplay } from "../../question-display";
-import { QuestionData, QuestionState } from "../../question-models";
+import { QuestionData, QuestionState, ServerToLocal } from "../../question-models";
 
 interface Submission {
     user_id: number;
@@ -25,84 +25,74 @@ export default function StudentSubmissionPage() {
     const { courseSlug, offeringSlug, quizSlug, studentId } = useParams();
     const [jwt, setAndStoreJwt] = useContext(JwtContext);
     const [submission, setSubmission] = useState<Submission | null>(null);
+    const [questions, setQuestions] = useState<QuestionData[]>([]);
     const [loading, setLoading] = useState(true);
-    const [questionData, setQuestionData] = useState<QuestionData[]>([]);
     const [questionStates, setQuestionStates] = useState<QuestionState[]>([]);
 
-    async function fetchSubmission() {
+    async function fetchQuizAndSubmission() {
         try {
-            const res = await fetchApi(
+            // Fetch the full quiz (to get questions)
+            const quizRes = await fetchApi(
+                jwt,
+                setAndStoreJwt,
+                `quizzes/admin/${courseSlug}/${quizSlug}/`,
+                "GET"
+            );
+            if (!quizRes.ok) {
+                throw new Error("Failed to fetch quiz details");
+            }
+            const quizData = await quizRes.json();
+            
+            const fetchedQuestions: QuestionData[] = quizData.questions.map((q: any) => ({
+                id: q.id,
+                quizSlug,
+                courseSlug,
+                prompt: q.prompt,  // ✅ Match answers using this
+                totalMarks: q.points,
+                isMutable: false, // Read-only for grading
+                questionType: ServerToLocal.get(q.question_type) ?? "TEXT",
+                serverQuestionType: q.question_type,
+                options: q.options ?? [], // For multiple-choice and checkbox
+                starterCode: q.starter_code ?? "",
+                programmingLanguage: q.programming_language ?? "PYTHON",
+            }));
+            setQuestions(fetchedQuestions);
+
+            // Fetch the student's submission
+            const subRes = await fetchApi(
                 jwt,
                 setAndStoreJwt,
                 `quizzes/admin/${courseSlug}/${quizSlug}/submissions/${studentId}/`,
                 "GET"
             );
-            if (!res.ok) {
+            if (!subRes.ok) {
                 throw new Error("Failed to fetch submission");
             }
-            const data = await res.json();
-            setSubmission(data);
+            const subData = await subRes.json();
+            setSubmission(subData);
 
-            // Convert the submission answers into question display format
-            const qData: QuestionData[] = [
-                ...data.answers.multiple_choice_answers.map((ans, idx) => ({
-                    id: `MC_${idx}`,
-                    quizSlug,
-                    courseSlug,
-                    prompt: ans.question,
-                    totalMarks: 1,
-                    isMutable: false,
-                    questionType: "SELECT",
-                    serverQuestionType: "MULTIPLE_CHOICE",
-                    options: ["Option 1", "Option 2", "Option 3"], // Placeholder options
-                })),
-                ...data.answers.checkbox_answers.map((ans, idx) => ({
-                    id: `CB_${idx}`,
-                    quizSlug,
-                    courseSlug,
-                    prompt: ans.question,
-                    totalMarks: 1,
-                    isMutable: false,
-                    questionType: "SELECT",
-                    serverQuestionType: "MULTIPLE_CHOICE",
-                    options: ["Option 1", "Option 2", "Option 3"], // Placeholder options
-                })),
-                ...data.answers.coding_answers.map((ans, idx) => ({
-                    id: `CODE_${idx}`,
-                    quizSlug,
-                    courseSlug,
-                    prompt: ans.question,
-                    totalMarks: 10,
-                    isMutable: false,
-                    questionType: "CODE",
-                    serverQuestionType: "CODING",
-                    starterCode: ans.solution,
-                    programmingLanguage: "PYTHON",
-                })),
-                ...data.answers.written_response_answers.map((ans, idx) => ({
-                    id: `TEXT_${idx}`,
-                    quizSlug,
-                    courseSlug,
-                    prompt: ans.question,
-                    totalMarks: 5,
-                    isMutable: false,
-                    questionType: "TEXT",
-                    serverQuestionType: "WRITTEN_RESPONSE",
-                })),
-            ];
-            setQuestionData(qData);
+            // 🔥 FIXED: Map answers correctly based on prompt (text matching)
+            const qStates: QuestionState[] = fetchedQuestions.map((q) => {
+                const mcAnswer = subData.answers.multiple_choice_answers.find((a) => a.question === q.prompt);
+                const cbAnswer = subData.answers.checkbox_answers.find((a) => a.question === q.prompt);
+                const codeAnswer = subData.answers.coding_answers.find((a) => a.question === q.prompt);
+                const textAnswer = subData.answers.written_response_answers.find((a) => a.question === q.prompt);
 
-            const qStates: QuestionState[] = qData.map((q, idx) => ({
-                value:
-                    q.questionType === "SELECT"
-                        ? data.answers.multiple_choice_answers[idx]?.selected_answer_index ?? -1
-                        : q.questionType === "TEXT"
-                        ? data.answers.written_response_answers[idx]?.response ?? ""
-                        : q.questionType === "CODE"
-                        ? data.answers.coding_answers[idx]?.solution ?? ""
-                        : "",
-                setValue: () => {}, // Read-only mode for grading
-            }));
+                return {
+                    value:
+                        q.questionType === "SELECT"
+                            ? mcAnswer?.selected_answer_index ?? -1
+                            : q.questionType === "CHECKBOX"
+                            ? cbAnswer?.selected_answer_indices ?? []
+                            : q.questionType === "CODE"
+                            ? codeAnswer?.solution ?? ""
+                            : q.questionType === "TEXT"
+                            ? textAnswer?.response ?? ""
+                            : "",
+                    setValue: () => {}, // Read-only mode for grading
+                };
+            });
+
             setQuestionStates(qStates);
         } catch (error) {
             console.error("Failed to retrieve student submission", error);
@@ -112,7 +102,7 @@ export default function StudentSubmissionPage() {
     }
 
     useEffect(() => {
-        fetchSubmission();
+        fetchQuizAndSubmission();
     }, [courseSlug, quizSlug, studentId, jwt, setAndStoreJwt]);
 
     if (loading) {
@@ -134,7 +124,7 @@ export default function StudentSubmissionPage() {
 
                 {/* Render each question */}
                 <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                    {questionData.map((q, idx) => (
+                    {questions.map((q, idx) => (
                         <QuestionDisplay key={q.id} {...q} state={questionStates[idx]} idx={idx} />
                     ))}
                 </div>
