@@ -62,7 +62,7 @@ function Course({ params }: { params: { courseSlug: string, offeringSlug: string
       <Navbar />
       <Card>
         {(role == "Student")
-        ? <StudentView courseName={name} labs={labs} courseSlug={params.courseSlug}/>
+        ? <StudentView courseName={name} labs={labs} courseSlug={params.courseSlug} offeringSlug={params.offeringSlug}/>
         : <StaffView courseName={name} labs={labs} courseSlug={params.courseSlug} offeringSlug={params.offeringSlug}/>}
       </Card>
     </>
