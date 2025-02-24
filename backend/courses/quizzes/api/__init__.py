@@ -50,3 +50,5 @@ from courses.quizzes.api.admin.delete_quiz import delete_quiz
 from courses.quizzes.api.admin.edit_quiz import edit_quiz
 
 from courses.quizzes.api.admin.get_quiz import get_quiz
+
+from courses.quizzes.api.admin.admin_list_quizzes_for_course import admin_list_quizzes_for_course

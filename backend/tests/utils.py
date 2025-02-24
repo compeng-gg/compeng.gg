@@ -74,7 +74,7 @@ def create_enrollment(
 
 
 def create_quiz(
-    user_id: int,
+    user_id: Optional[int]=None,
     quiz_title: Optional[str] = "Final Quiz",
     course_slug: Optional[str] = "ECE454",
     starts_at: Optional[datetime] = timezone.now(),
@@ -82,10 +82,14 @@ def create_quiz(
     repository_id: Optional[int] = 1,
     repository_name: Optional[str] = "repo_name",
     repository_full_name: Optional[str] = "user/repo_name",
+    offering: Optional[db.Offering]=None,
+    quiz_slug: Optional[str]="quiz_slug"
 ) -> db.Quiz:
-    offering = create_offering(course_slug=course_slug)
+    if offering is None:
+        offering = create_offering(course_slug=course_slug)
 
-    create_enrollment(user_id, offering, db.Role.Kind.STUDENT)
+    if user_id is not None:
+        create_enrollment(user_id, offering, db.Role.Kind.STUDENT)
 
     ends_at = starts_at + timedelta(hours=1)
     visible_at = starts_at - timedelta(hours=1)
@@ -97,7 +101,7 @@ def create_quiz(
     quiz = db.Quiz.objects.create(
         title=quiz_title,
         starts_at=starts_at,
-        slug="quiz_slug",
+        slug=quiz_slug,
         ends_at=ends_at,
         visible_at=visible_at,
         offering=offering,
