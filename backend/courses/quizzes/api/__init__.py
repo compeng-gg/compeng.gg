@@ -53,4 +53,7 @@ from courses.quizzes.api.admin.get_quiz import get_quiz
 
 from courses.quizzes.api.admin.admin_list_quizzes_for_course import admin_list_quizzes_for_course
 
-from courses.quizzes.api.admin.get_quiz_submissions import get_quiz_submissions
+from courses.quizzes.api.admin.get_quiz_submissions import (
+    get_quiz_submissions,
+    get_student_quiz_submission,
+)
