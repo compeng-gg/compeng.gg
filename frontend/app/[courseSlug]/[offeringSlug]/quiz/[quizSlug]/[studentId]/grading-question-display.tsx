@@ -61,7 +61,6 @@ export default function GradingQuestionDisplay({ idx = 1, question, studentAnswe
                             courseSlug: "",
                             prompt: question.prompt,
                             totalMarks: question.points,
-                            starterCode: "",
                             isMutable: false, // Read-only
                             questionType: "CODE",
                             serverQuestionType: "CODING",
@@ -85,28 +84,45 @@ export default function GradingQuestionDisplay({ idx = 1, question, studentAnswe
                 )}
             </div>
 
-            {/* 🔥 Grading Section - Now Smaller and in Bottom-Right */}
-            <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "15px" }}>
+            {/* 🔥 Grading Section - Now Smaller and Properly Positioned */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "15px" }}>
+                {/* 🔹 Comment Box (TextEditor) - 🔥 Restored */}
+                <div style={{ flex: "2", marginRight: "20px" }}>
+                    <label><strong>Comments:</strong></label>
+                    <TextEditor
+                        state={{
+                            value: comment,
+                            setValue: (newValue) => setComment(newValue),
+                        }}
+                        save={() => {}} // ✅ Required prop
+                    />
+                </div>
+
+                {/* 🔹 Grade Box - Now Smaller and Aligned */}
                 <div
                     style={{
                         display: "flex",
                         alignItems: "center",
                         border: "1px solid #ccc",
-                        padding: "6px 10px",
+                        padding: "5px 8px",
                         borderRadius: "6px",
                         background: "#f9f9f9",
+                        minWidth: "100px",
+                        height: "36px", // ✅ Smaller height
                     }}
                 >
                     <strong style={{ marginRight: "8px" }}>Grade:</strong>
-                    <TextEditor
-                        state={{
-                            value: grade.toString(),
-                            setValue: (newValue) => setGrade(newValue ? Number(newValue) : ""),
-                        }}
-                        save={() => {}} // ✅ Required prop
+                    <input
+                        type="number"
+                        value={grade}
+                        onChange={(e) => setGrade(e.target.value ? Number(e.target.value) : "")}
                         style={{
-                            width: "50px",
+                            width: "50px", // ✅ Fits a 3-digit number
+                            height: "20px",
                             textAlign: "center",
+                            border: "none",
+                            outline: "none",
+                            background: "transparent",
                         }}
                     />
                 </div>
