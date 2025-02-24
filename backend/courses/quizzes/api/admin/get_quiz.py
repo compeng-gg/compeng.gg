@@ -46,5 +46,6 @@ def get_quiz(request, course_slug: str, quiz_slug: str):
     quiz_data["questions"] = questions
     quiz_data["github_repository"] = quiz.repository.full_name
     
+    print(quiz_data)
 
     return Response(status=status.HTTP_200_OK, data=quiz_data)
