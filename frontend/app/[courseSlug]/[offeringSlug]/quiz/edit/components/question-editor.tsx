@@ -10,20 +10,39 @@ import { Dropdown } from "primereact/dropdown";
 import { Chips } from "primereact/chips";
 import { FloatLabel } from "primereact/floatlabel";
 import Ide from "../../components/ide";
+import { ButtonGroup } from "primereact/buttongroup";
+import { Button } from "primereact/button";
 
 export interface QuestionEditorProps {
     questionData: StaffQuestionData;
-    setQuestionData: (data: StaffQuestionData) => void;
+    setQuestionData: (data: StaffQuestionData | null) => void;
+    moveQuestion: (delta: number) => void;
     idx: number;
+    numQuestions: number;
+
 }
 
 export default function QuestionEditor(props: QuestionEditorProps) {
     
-    const { questionData, setQuestionData, idx } = props;
+    const { questionData, setQuestionData, moveQuestion, numQuestions, idx } = props;
+
+    const header = (
+        <div style={{ position: 'relative' }}>
+            <span></span>
+            <div style={{ position: 'absolute', top: '10px', right: '10px', display: 'flex', gap: '8px' }}>
+                <ButtonGroup>
+                    <Button icon="pi pi-arrow-up" severity="secondary" tooltip="Move Up" disabled={idx == 0} onClick={() => moveQuestion(-1)}/>
+                    <Button icon="pi pi-arrow-down" severity="secondary" tooltip="Move Down" disabled={idx == numQuestions-1} onClick={() => moveQuestion(1)}/>
+                </ButtonGroup>
+                <Button icon="pi pi-trash" severity="danger" onClick={() => setQuestionData(null)}/>
+            </div>
+        </div>
+    );
     return (
         <Card
             title={`Question ${idx !== undefined ? idx + 1 : ''}`}
             key={idx}
+            header={header}
         >   
             <div style={{display: "flex", flexDirection: "column", gap: "10px"}}>
                 <GenericQuestionEditor {...props}/>

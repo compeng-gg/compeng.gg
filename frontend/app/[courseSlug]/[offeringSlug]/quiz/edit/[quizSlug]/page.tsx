@@ -55,7 +55,14 @@ export default function Page({ params }: { params: { courseSlug: string, quizSlu
             serverQuestionType: "WRITTEN_RESPONSE"
         } as StaffQuestionData;
         setQuestionData(prevData => [...prevData, newQuestion]);
-    
+    }
+
+    const move = (idx: number, delta: number) => {
+        console.log("Moving question", idx, delta);
+        const temp = JSON.parse(JSON.stringify(questionData));
+        temp[idx] = questionData[idx+delta];
+        temp[idx+delta] = questionData[idx];
+        setQuestionData(temp);
     }
 
     useEffect(() => {
@@ -65,8 +72,16 @@ export default function Page({ params }: { params: { courseSlug: string, quizSlu
         }
     }, [loaded]);
 
-    const setQuestionDataAtIdx = (idx: number, data: StaffQuestionData) => {
+    const setQuestionDataAtIdx = (idx: number, data: StaffQuestionData | null) => {
         setModified(true);
+        if(data === null) {
+            setQuestionData(prevData => {
+                const newData = [...prevData];
+                newData.splice(idx, 1);
+                return newData;
+            });
+            return
+        }
         setQuestionData(prevData => {
             const newData = [...prevData];
             newData[idx] = data;
@@ -105,7 +120,7 @@ export default function Page({ params }: { params: { courseSlug: string, quizSlu
             <div style={{ display: "flex", gap: "10px", width: "100%", flexDirection: "column" }}>
                 <QuizSettingsEditor quizProps={quiz} setQuizProps={(newProps) => setQuizPropsCustom(newProps)} />
                 {questionData.map((data, idx) => (
-                    <QuestionEditor questionData={data} setQuestionData={(newData) => setQuestionDataAtIdx(idx, newData)} idx={idx}/>
+                    <QuestionEditor questionData={data} setQuestionData={(newData) => setQuestionDataAtIdx(idx, newData)} idx={idx} numQuestions={questionData.length} moveQuestion={(delta: number) => move(idx, delta)}/>
                 ))}
                 <AddQuestionButton addQuestion={addQuestion}/>
             </div>
