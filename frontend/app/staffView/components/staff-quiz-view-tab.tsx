@@ -96,7 +96,7 @@ export default function StaffQuizViewTab(props: StaffQuizViewProps) {
             const res = await fetchApi(
                 jwt,
                 setAndStoreJwt,
-                `quizzes/create/${props.courseSlug}`,
+                `quizzes/admin/${props.courseSlug}/create/`,
                 "POST",
                 payload
             );
@@ -123,7 +123,7 @@ export default function StaffQuizViewTab(props: StaffQuizViewProps) {
     };
 
     if (loading) return <p>Loading quizzes...</p>;
-    if (quizzes.length === 0) return <p>No quizzes available.</p>;
+    // if (quizzes.length === 0) return <p>No quizzes available.</p>;
 
     return (
         <div style={{ display: "flex", flexDirection: "column", gap: "10px", width: "100%", marginTop: "10px" }}>

@@ -25,17 +25,18 @@ def get_quiz(request, course_slug: str, quiz_slug: str):
     written_response_questions = db.WrittenResponseQuestion.objects.filter(quiz=quiz).all()
 
     question_types = [
-        checkbox_questions,
-        coding_questions,
-        multiple_choice_questions,
-        written_response_questions,
+        ("CODING", coding_questions),
+        ("MULTIPLE_CHOICE", multiple_choice_questions),
+        ("WRITTEN_RESPONSE", written_response_questions),
     ]
 
     questions = []
 
-    for question_type in question_types:
+    for question_type_key, question_type in question_types:
         for question in question_type:
             data = model_to_dict(question)
+            data["question_type"] = question_type_key
+            data["id"] = question.id
             data.pop("quiz")
 
             questions.append(data)

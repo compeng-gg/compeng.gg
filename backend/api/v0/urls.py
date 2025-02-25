@@ -92,7 +92,6 @@ urlpatterns = [
     path('quizzes/admin/<slug:course_slug>/<slug:quiz_slug>/submissions/', quizzes_api.get_quiz_submissions),
     path("quizzes/admin/<slug:course_slug>/<slug:quiz_slug>/submissions/<int:student_id>/", quizzes_api.get_student_quiz_submission),
     
-
     path('github/webhook/', github_webhook),
 
     path('users/', views.UserViewSet.as_view({'get': 'list'})),

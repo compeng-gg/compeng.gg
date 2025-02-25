@@ -1,5 +1,5 @@
 import { Card } from "primereact/card";
-import { BaseQuestionData, ProgrammingLanguages, QuestionData, QuestionType, ServerQuestionType, ServerToLocal, StaffCodeQuestionData, StaffQuestionData, StaffSelectQuestionData } from "../../question-models";
+import { BaseQuestionData, LocalToServer, ProgrammingLanguages, QuestionData, QuestionType, ServerQuestionType, ServerToLocal, StaffCodeQuestionData, StaffQuestionData, StaffSelectQuestionData } from "../../question-models";
 import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
 import { KeyFilterType } from "primereact/keyfilter";
@@ -60,7 +60,9 @@ function GenericQuestionEditor (props: QuestionEditorProps) {
         //Convert old data to generic
         const tempData: BaseQuestionData = questionData as BaseQuestionData;
         tempData.questionType = newType;
-        tempData.serverQuestionType = ServerToLocal.get(newType) as ServerQuestionType;
+        console.log(newType);
+        tempData.serverQuestionType = LocalToServer.get(newType.toString()) as ServerQuestionType;
+        console.log(tempData);
         switch(newType) {
             case "CODE":
                 setQuestionData({...tempData, programmingLanguage: "C", starterCode: "", gradingDirectory: "", filesToPull: [], fileToReplace: ""} as StaffCodeQuestionData);

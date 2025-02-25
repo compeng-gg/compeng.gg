@@ -11,6 +11,7 @@ def edit_quiz(request, course_slug: str, quiz_slug: str):
     # TODO: validations
     quiz = db.Quiz.objects.get(slug=quiz_slug, offering__course__slug=course_slug)
 
+
     serializer = EditQuizSerializer(quiz, data=request.data, partial=True)
 
     if not serializer.is_valid():
@@ -18,4 +19,6 @@ def edit_quiz(request, course_slug: str, quiz_slug: str):
 
     serializer.save()
 
+    
+    
     return Response(status=status.HTTP_204_NO_CONTENT)

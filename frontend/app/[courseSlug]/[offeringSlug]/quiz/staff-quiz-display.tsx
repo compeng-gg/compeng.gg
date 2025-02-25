@@ -52,10 +52,23 @@ export default function StaffQuizDisplay(props: StaffQuizProps) {
     }
 }
 
+//TODO: Fix logic on which buttons to show
 function UpcomingQuizDisplay(props: StaffQuizProps) {
+
+    const footer = () => {
+        return (
+            <div style={{display: "flex", flexDirection: "row", gap: "5px", justifyContent: "flex-end"}}>
+                <Link href={`/${props.courseSlug}/${props.offeringSlug}/quiz/edit/${props.quizSlug}/`}>
+                    <Button label="Edit Quiz" size="small" />
+                </Link>
+                <StaffQuizButton quizProps={props} />
+            </div>
+        )
+    }
     return (
         <Card
             header={<StaffQuizDisplayBadges {...props} />}
+            footer={footer}
             title={props.name}
             subTitle={`Start Time: ${props.startTime}`}
             className="bg-gray-50 dark:white shadow-md rounded-lg"
@@ -64,10 +77,21 @@ function UpcomingQuizDisplay(props: StaffQuizProps) {
 }
 
 function OngoingQuizDisplay(props: StaffQuizProps) {
+    const footer = () => {
+        return (
+            <div style={{display: "flex", flexDirection: "row", gap: "5px", justifyContent: "flex-end"}}>
+                <Link href={`/${props.courseSlug}/${props.offeringSlug}/quiz/edit/${props.quizSlug}/`}>
+                    <Button label="Edit Quiz" size="small" />
+                </Link>
+                <StaffQuizButton quizProps={props} />
+            </div>
+        )
+    }
+
     return (
         <Card
             header={<StaffQuizDisplayBadges {...props} />}
-            footer={<StaffQuizButton quizProps={props} />}
+            footer={footer}
             title={props.name}
             subTitle={`Started at: ${props.startTime}`}
             className="bg-green-50 dark:white shadow-md rounded-lg"
@@ -76,10 +100,21 @@ function OngoingQuizDisplay(props: StaffQuizProps) {
 }
 
 function PastQuizDisplay(props: StaffQuizProps) {
+
+    const footer = () => {
+        return (
+            <div style={{display: "flex", flexDirection: "row", justifyContent: "flex-end"}}>
+                <Link href={`/${props.courseSlug}/${props.offeringSlug}/quiz/edit/${props.quizSlug}/`}>
+                    <Button label="Edit Quiz" size="small" />
+                </Link>
+                <StaffQuizButton quizProps={props} />
+            </div>
+        )
+    }
     return (
         <Card
             header={<StaffQuizDisplayBadges {...props} />}
-            footer={<StaffQuizButton quizProps={props} />}
+            footer={footer}
             title={props.name}
             subTitle={`Ended on: ${props.endTime ?? "Unknown"}`}
             className="bg-gray-50 dark:white shadow-md rounded-lg"

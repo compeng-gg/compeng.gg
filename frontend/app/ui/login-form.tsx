@@ -17,10 +17,12 @@ function LoginForm() {
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
+    console.log("Submitted")
     try {
       const response = await fetchApiSingle(jwtObtainPairEndpoint, "POST", { username, password });
       const data = await response.json();
       if (response.ok) {
+        console.log("Success");
         setAndStoreJwt(data);
       }
       else {
@@ -28,6 +30,7 @@ function LoginForm() {
       }
     }
     catch (err) {
+      console.log("Error");
       setError("An unexpected error occurred");
     }
   }

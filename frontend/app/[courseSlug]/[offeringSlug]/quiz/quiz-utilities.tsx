@@ -18,7 +18,7 @@ export function getQuestionDataFromRaw(rawData: any, quizSlug: string, courseSlu
           return {
             ...baseData,
             starterCode: rawData.starter_code, programmingLanguage: rawData.programming_language,
-            filesToPull: rawData.files_to_pull, fileToReplace: rawData.file_to_replace, gradingDirectory: rawData.grading_directory
+            filesToPull: rawData.files, fileToReplace: rawData.file_to_replace, gradingDirectory: rawData.grading_file_directory
           } as StaffCodeQuestionData
         }
         return {
@@ -29,7 +29,7 @@ export function getQuestionDataFromRaw(rawData: any, quizSlug: string, courseSlu
         if(isStaff) {
           return {
             ...baseData,
-            options: rawData.options, correctAnswerIdx: rawData.correct_answer_idx
+            options: rawData.options, correctAnswerIdx: rawData.correct_option_index
           }
         }
         return {

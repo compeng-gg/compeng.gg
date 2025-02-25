@@ -7,6 +7,13 @@ export const ServerToLocal = new Map([
     ["WRITTEN_RESPONSE", "TEXT"]
 ])
 
+export const LocalToServer = new Map([
+    ["CODE", "CODING"],
+    ["SELECT", "MULTIPLE_CHOICE"],
+    ["TEXT", "WRITTEN_RESPONSE"]
+])
+
+
 export type QuestionType = "CODE" | "SELECT" | "TEXT";
 export type ServerQuestionType = "CODING" | "MULTIPLE_CHOICE" | "WRITTEN_RESPONSE"
 
