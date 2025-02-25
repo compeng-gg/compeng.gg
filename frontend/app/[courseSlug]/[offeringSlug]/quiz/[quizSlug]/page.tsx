@@ -13,6 +13,8 @@ import { getQuestionDataFromRaw } from "../quiz-utilities";
 import { ProgressSpinner } from "primereact/progressspinner";
 import { Badge } from "primereact/badge";
 import { time } from "console";
+import { confirmDialog, ConfirmDialog } from "primereact/confirmdialog";
+import { Button } from "primereact/button";
 
 const now = new Date()
 const oneHourBefore = new Date(now.getTime() - 1 * 60 * 60 * 1000);
@@ -60,6 +62,18 @@ export default function Page({ params }: { params: { courseSlug: string, quizSlu
     }
   }
 
+  async function submitQuiz() {
+    try {
+      const res = await fetchApi(jwt, setAndStoreJwt, `${courseSlug}/quiz/${quizSlug}/complete/`, "POST", {});
+      if (!res.ok) {
+        throw new Error("Failed to submit quiz");
+      }
+      window.location.href += `complete/`
+    } catch {
+      console.error("Failed to submit quiz");
+    }
+  }
+
   useEffect(() => {
     if (!loaded) {
       fetchQuiz();
@@ -87,6 +101,7 @@ export default function Page({ params }: { params: { courseSlug: string, quizSlu
     )
   }
 
+
   //If quiz in future
   if (quiz.startTime > now) {
     return (
@@ -97,10 +112,26 @@ export default function Page({ params }: { params: { courseSlug: string, quizSlu
     )
   }
 
+  const acceptSubmit = () => {
+      submitQuiz();
+  }
+
+  const submitDialog = () => {
+    confirmDialog({
+      message: 'Are you sure you want to submit your answers?',
+      header: 'Confirmation',
+      icon: 'pi pi-exclamation-triangle',
+      defaultFocus: 'accept',
+      accept: acceptSubmit,
+      reject: () => {}
+    })
+  }
+
   return (
     <LoginRequired>
       <Navbar />
-      <QuizWritingHeader quiz={quiz} />
+      <QuizWritingHeader quiz={quiz} submitDialog={submitDialog}/>
+      <ConfirmDialog />
       <div style={{ display: "flex", gap: "10px", width: "100%", flexDirection: "column" }}>
         {questionStates.map((state, idx) => (
           <QuestionDisplay {...questionData[idx]} state={state} idx={idx} viewMode={QuestionViewMode.INSTRUCTOR_EDIT}/>
@@ -126,14 +157,17 @@ function getStartingStateValue(questionData: QuestionData, rawData: any): any {
   }
 }
 
-function QuizWritingHeader({ quiz }: { quiz: QuizProps }) {
+function QuizWritingHeader({ quiz, submitDialog }: { quiz: QuizProps, submitDialog: () => void }) {
   return (
     <div className="sticky_header">
       <div style={{ display: "flex", flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
         <div>
           <h2>{`${quiz.name}`}</h2>
         </div>
-        <CountdownClock endTime={quiz.endTime} />
+        <div style={{ display: "flex", flexDirection: "row", gap: "10px", alignItems: "center" }}>
+          <CountdownClock endTime={quiz.endTime} />
+          <Button label="Submit" onClick={submitDialog}/> 
+        </div>
       </div>
     </div>
   )
@@ -171,7 +205,7 @@ function CountdownClock({ endTime }: { endTime: Date }) {
 
   return (
     <div>
-      <Badge size="large" value={`Time Left: ${formatTimer(secondsLeft)}`} />
+      <Badge size="large" value={`Time Left: ${formatTimer(secondsLeft)}`} severity="secondary" />
     </div>
   )
 }
