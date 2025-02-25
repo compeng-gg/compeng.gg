@@ -11,6 +11,8 @@ import { fetchApi } from "@/app/lib/api";
 import { JwtContext } from "@/app/lib/jwt-provider";
 import { getQuestionDataFromRaw } from "../quiz-utilities";
 import { ProgressSpinner } from "primereact/progressspinner";
+import { Badge } from "primereact/badge";
+import { time } from "console";
 
 const now = new Date()
 const oneHourBefore = new Date(now.getTime() - 1 * 60 * 60 * 1000);
@@ -98,7 +100,7 @@ export default function Page({ params }: { params: { courseSlug: string, quizSlu
   return (
     <LoginRequired>
       <Navbar />
-      <h2>{quiz.name}</h2>
+      <QuizWritingHeader quiz={quiz} />
       <div style={{ display: "flex", gap: "10px", width: "100%", flexDirection: "column" }}>
         {questionStates.map((state, idx) => (
           <QuestionDisplay {...questionData[idx]} state={state} idx={idx} viewMode={QuestionViewMode.INSTRUCTOR_EDIT}/>
@@ -124,6 +126,55 @@ function getStartingStateValue(questionData: QuestionData, rawData: any): any {
   }
 }
 
+function QuizWritingHeader({ quiz }: { quiz: QuizProps }) {
+  return (
+    <div className="sticky_header">
+      <div style={{ display: "flex", flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+        <div>
+          <h2>{`${quiz.name}`}</h2>
+        </div>
+        <CountdownClock endTime={quiz.endTime} />
+      </div>
+    </div>
+  )
+}
+
+function CountdownClock({ endTime }: { endTime: Date }) {
+  const [secondsLeft, setSecondsLeft] = useState<number>((endTime.getTime() - new Date().getTime()) / 1000);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setSecondsLeft((endTime.getTime() - new Date().getTime()) / 1000);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [endTime]);
+
+  const formatTimer = (secondsLeft: number) => {
+    let timeString = "";
+    const totalHours = Math.floor(secondsLeft / 3600);
+    const days = Math.floor(totalHours / 24);
+    if(days > 0){
+      timeString = `${days}d `;
+    }
+    const hours = totalHours % 24;
+    if(hours > 0){
+      timeString = timeString + ` ${hours}h `;
+    }
+    const minutes = Math.floor(secondsLeft / 60) % 60;
+    const seconds = Math.floor(secondsLeft) % 60;
+    if(timeString == ""){
+      return `${minutes}:${seconds}`;
+    } else {
+      return timeString + ` ${minutes}m`;
+    }
+
+  }
+
+  return (
+    <div>
+      <Badge size="large" value={`Time Left: ${formatTimer(secondsLeft)}`} />
+    </div>
+  )
+}
 
 export function useInitializeQuestionStates(questionDataList: QuestionData[]) {
   return questionDataList.map((questionData) => {
