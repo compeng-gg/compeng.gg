@@ -37,6 +37,8 @@ export default function StudentSubmissionPage() {
     const [questions, setQuestions] = useState<Question[]>([]);
     const [submission, setSubmission] = useState<Submission | null>(null);
     const [loading, setLoading] = useState(true);
+    const [gradeSubmitted, setGradeSubmitted] = useState(false);
+
 
     async function fetchQuizAndSubmission() {
         try {
@@ -112,6 +114,60 @@ export default function StudentSubmissionPage() {
                     })}
                 </div>
             </div>
+            <button
+                onClick={() => {
+                    setGradeSubmitted(true);
+                    setTimeout(() => setGradeSubmitted(false), 3000); // Auto-hide after 3 seconds
+                }}
+                style={{
+                    position: "fixed",
+                    bottom: "20px",
+                    right: "20px",
+                    backgroundColor: "#007bff",
+                    color: "#fff",
+                    padding: "10px 20px",
+                    borderRadius: "5px",
+                    border: "none",
+                    cursor: "pointer",
+                    fontSize: "16px",
+                    boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
+                }}
+            >
+                Submit Grade
+            </button>
+            {gradeSubmitted && (
+                <div
+                    style={{
+                        position: "fixed",
+                        bottom: "70px",
+                        right: "100px",
+                        backgroundColor: "#28a745",
+                        color: "#fff",
+                        padding: "10px 15px",
+                        borderRadius: "5px",
+                        fontSize: "14px",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "10px",
+                        boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
+                    }}
+                >
+                    Grade successfully submitted!
+                    <button
+                        onClick={() => setGradeSubmitted(false)}
+                        style={{
+                            background: "none",
+                            border: "none",
+                            color: "#fff",
+                            fontSize: "14px",
+                            cursor: "pointer",
+                        }}
+                    >
+                        ✖
+                    </button>
+                </div>
+            )}
+
         </>
     );
 }

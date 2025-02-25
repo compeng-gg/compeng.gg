@@ -6,6 +6,7 @@ import { fetchApi } from "@/app/lib/api";
 import { JwtContext } from "@/app/lib/jwt-provider";
 import Navbar from "@/app/components/navbar";
 import { Button } from "primereact/button";
+import { Badge } from "primereact/badge";
 import Link from "next/link";
 
 interface Submission {
@@ -13,6 +14,7 @@ interface Submission {
     username: string;
     started_at: string;
     completed_at: string;
+    grade: number | null;
 }
 
 export default function QuizSubmissionsPage() {
@@ -20,8 +22,9 @@ export default function QuizSubmissionsPage() {
     const [jwt, setAndStoreJwt] = useContext(JwtContext);
     const [submissions, setSubmissions] = useState<Submission[]>([]);
     const [loading, setLoading] = useState(true);
-    const [offeringName, setOfferingName] = useState(""); // Store offering name
-    const [quizTitle, setQuizTitle] = useState(""); // Store quiz title
+    const [offeringName, setOfferingName] = useState("");
+    const [quizTitle, setQuizTitle] = useState("");
+    const [totalPoints, setTotalPoints] = useState<number>(0); // Store total points
 
     async function fetchSubmissions() {
         try {
@@ -35,7 +38,7 @@ export default function QuizSubmissionsPage() {
                 throw new Error("Failed to fetch submissions");
             }
             const data = await res.json();
-            setSubmissions(data);
+            setSubmissions(data.submissions);
         } catch (error) {
             console.error("Failed to retrieve submissions", error);
             setSubmissions([]);
@@ -49,15 +52,16 @@ export default function QuizSubmissionsPage() {
             const res = await fetchApi(
                 jwt,
                 setAndStoreJwt,
-                `quizzes/admin/${courseSlug}/${quizSlug}/`, // Assuming API exists for fetching quiz details
+                `quizzes/admin/${courseSlug}/${quizSlug}/`, 
                 "GET"
             );
             if (!res.ok) {
                 throw new Error("Failed to fetch quiz details");
             }
             const data = await res.json();
-            setOfferingName(data.offering_name); // Example: "2024 Fall ECE344"
-            setQuizTitle(data.title); // Example: "Midterm Quiz"
+            setOfferingName(data.offering_name);
+            setQuizTitle(data.title);
+            setTotalPoints(data.total_points); // Get total points from API
         } catch (error) {
             console.error("Failed to retrieve quiz info", error);
         }
@@ -81,12 +85,9 @@ export default function QuizSubmissionsPage() {
         <>
             <Navbar />
             <div style={{ padding: "20px" }}>
-                {/* Page Title */}
-                // TODO: Add Offering name to the page title
-                <h1>{offeringName || "Offering Name Here..."}</h1>
+                <h1>{offeringName || "ECE344 Fall 2024"}</h1>
                 <h2>{quizTitle || "Loading quiz..."}</h2>
 
-                {/* Quiz Submissions List */}
                 <h3>Quiz Submissions</h3>
 
                 {submissions.length === 0 ? (
@@ -102,12 +103,26 @@ export default function QuizSubmissionsPage() {
                                 border: "1px solid #ccc",
                                 borderRadius: "8px",
                                 background: "#f9f9f9",
+                                position: "relative"
                             }}>
+                                {/* Left: Submission Details */}
                                 <div>
                                     <p><strong>{submission.username}</strong></p>
                                     <p>Started: {new Date(submission.started_at).toLocaleString()}</p>
                                     <p>Completed: {new Date(submission.completed_at).toLocaleString()}</p>
                                 </div>
+
+                                {/* Right: Grade Display */}
+                                <Badge 
+                                    size="large" 
+                                    severity="info" 
+                                    value={submission.grade !== null ? 
+                                        `Grade: ${submission.grade}/${totalPoints}` : 
+                                        `Grade: Ungraded/${totalPoints}`} 
+                                    style={{ position: "absolute", top: "10px", right: "10px" }}
+                                />
+
+                                {/* Right: Grade Submission Button */}
                                 <Link href={`/${courseSlug}/${offeringSlug}/quiz/${quizSlug}/${submission.user_id}/`}>
                                     <Button label="Grade Submission" size="small" />
                                 </Link>
