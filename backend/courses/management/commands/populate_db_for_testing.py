@@ -107,7 +107,7 @@ class Command(BaseCommand):
             visible_at=now_datetime,
             starts_at=now_datetime,
             ends_at=now_datetime + timedelta(days=365),
-            repository=mock_repository
+            repository=mock_repository,
             total_points=100
         )
 
