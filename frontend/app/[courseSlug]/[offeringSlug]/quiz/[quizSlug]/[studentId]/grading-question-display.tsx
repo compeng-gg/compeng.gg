@@ -14,13 +14,35 @@ interface GradingQuestionDisplayProps {
         points: number;
         options?: string[];
         programming_language?: string;
+        correct_option_index?: number; // ✅ Added for multiple-choice auto-grading
+        correct_option_indices?: number[]; // ✅ Added for checkbox auto-grading
     };
     studentAnswer: any; // The student's submitted answer
 }
 
 export default function GradingQuestionDisplay({ idx = 1, question, studentAnswer }: GradingQuestionDisplayProps) {
     const [comment, setComment] = useState("");
-    const [grade, setGrade] = useState("");
+    const [grade, setGrade] = useState(() => {
+        if (question.correct_option_index !== undefined) {
+            // ✅ Auto-grade multiple choice: Full points if correct, 0 otherwise
+            return studentAnswer?.selected_answer_index === question.correct_option_index ? question.points : 0;
+        } else if (question.correct_option_indices !== undefined) {
+            // ✅ Auto-grade checkbox (Partial Credit)
+            const studentSelection = new Set(studentAnswer?.selected_answer_indices || []);
+            const correctSelection = new Set(question.correct_option_indices);
+    
+            // Calculate number of correct choices picked
+            const correctCount = [...studentSelection].filter((idx) => correctSelection.has(idx)).length;
+            const incorrectCount = [...studentSelection].filter((idx) => !correctSelection.has(idx)).length;
+    
+            // Partial score: Correct selections get points, incorrect choices subtract points
+            const totalCorrect = correctSelection.size;
+            const partialScore = Math.max(0, (correctCount / totalCorrect) * question.points - incorrectCount);
+    
+            return Math.round(partialScore);
+        }
+        return "";
+    });
 
     return (
         <Card

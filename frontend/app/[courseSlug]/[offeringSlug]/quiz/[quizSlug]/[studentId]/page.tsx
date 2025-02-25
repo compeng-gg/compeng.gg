@@ -92,16 +92,20 @@ export default function StudentSubmissionPage() {
                 <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
                     {questions.map((question, idx) => {
                         const matchingAnswer =
-                            submission?.answers.multiple_choice_answers.find((a) => a.question === question.prompt) ||
-                            submission?.answers.checkbox_answers.find((a) => a.question === question.prompt) ||
-                            submission?.answers.coding_answers.find((a) => a.question === question.prompt) ||
-                            submission?.answers.written_response_answers.find((a) => a.question === question.prompt);
-
+                        submission?.answers.multiple_choice_answers.find((a) => a.question === question.prompt) ||
+                        submission?.answers.checkbox_answers.find((a) => a.question === question.prompt) ||
+                        submission?.answers.coding_answers.find((a) => a.question === question.prompt) ||
+                        submission?.answers.written_response_answers.find((a) => a.question === question.prompt);
+                    
                         return (
                             <GradingQuestionDisplay
                                 key={idx}
                                 idx={idx + 1}
-                                question={question}
+                                question={{
+                                    ...question,
+                                    correct_option_index: question.correct_option_index,
+                                    correct_option_indices: question.correct_option_indices,
+                                }}
                                 studentAnswer={matchingAnswer}
                             />
                         );
