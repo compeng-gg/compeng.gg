@@ -105,3 +105,11 @@ class CheckboxAnswerAdmin(admin.ModelAdmin):
 @admin.register(models.MultipleChoiceAnswer)
 class MultipleChoiceAdmin(admin.ModelAdmin):
     pass
+
+@admin.register(models.CodingAnswer)
+class CodingAnswerAdmin(admin.ModelAdmin):
+    pass
+
+@admin.register(models.CodingAnswerExecution)
+class CodingAnswerExecutionAdmin(admin.ModelAdmin):
+    pass
