@@ -444,7 +444,7 @@ class CodingAnswerExecution(models.Model):
         SUCCESS = "SUCCESS", _("Success")
         FAILURE = "FAILURE", _("Failure")
 
-    coding_question = models.ForeignKey(CodingQuestion, on_delete=models.CASCADE, related_name="executions")
+    coding_answer = models.ForeignKey(CodingAnswer, on_delete=models.CASCADE, related_name="executions")
     solution = models.TextField()
     result = models.JSONField(blank=True, null=True)
     stderr = models.TextField()

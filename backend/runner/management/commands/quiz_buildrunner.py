@@ -24,7 +24,7 @@ class Command(BaseCommand):
         solution = coding_answer_execution.solution
         print(f'Solution is {solution}')
 
-        repository = coding_answer_execution.coding_question.quiz.repository
+        repository = coding_answer_execution.coding_answer.question.quiz.repository
 
         # TODO: dont use this path. We're doing this to mock is locally for now
         curr_time = str(int(time()))
@@ -40,8 +40,8 @@ class Command(BaseCommand):
             check=True
         )
 
-        file_path_to_replace = coding_answer_execution.coding_question.file_to_replace
-        grading_file_directory = coding_answer_execution.coding_question.grading_file_directory
+        file_path_to_replace = coding_answer_execution.coding_answer.question.file_to_replace
+        grading_file_directory = coding_answer_execution.coding_answer.question.grading_file_directory
 
         file_path = f"{repo_dir}/{file_path_to_replace}"
 

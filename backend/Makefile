@@ -14,3 +14,6 @@ run:
 
 test:
 	pipenv run pytest
+
+populate:
+	python manage.py populate_db_for_testing  

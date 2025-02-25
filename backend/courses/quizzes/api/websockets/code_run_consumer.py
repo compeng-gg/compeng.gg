@@ -57,10 +57,16 @@ def do_stuff(quiz_submission, coding_question_id, solution):
 
 @database_sync_to_async
 def create_coding_answer_execution(
-    solution: str, coding_question_id
+    solution: str, coding_question_id, quiz_slug: str, course_slug: str, user_id: int
 ) -> db.CodingAnswerExecution:
+    quiz = db.Quiz.objects.get(offering__course__slug=course_slug, slug=quiz_slug)
+
+    quiz_submission = db.QuizSubmission.objects.get(quiz=quiz, user_id=user_id)
+
+    coding_answer = db.CodingAnswer.objects.get(quiz_submission=quiz_submission, question_id=coding_question_id)
+
     coding_answer_execution = db.CodingAnswerExecution.objects.create(
-        coding_question_id=coding_question_id,
+        coding_answer_id=coding_answer.id,
         solution=solution,
         status=db.CodingAnswerExecution.Status.IN_PROGRESS,
     )
@@ -143,7 +149,7 @@ class CodeRunConsumer(AsyncWebsocketConsumer):
         solution = data["solution"]
 
         coding_answer_execution = await create_coding_answer_execution(
-            solution, self.coding_question_id
+            solution, self.coding_question_id, self.quiz_slug, self.course_slug, self.user.id
         )
 
         await sync_to_async(create_quiz_task)(coding_answer_execution)
