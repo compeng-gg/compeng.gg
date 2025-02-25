@@ -35,3 +35,11 @@
 .hover-spin:hover {
   animation: spin 1s linear infinite;
 }
+
+.sticky_header {
+  position: sticky;
+  top: 0;
+  z-index: 1000; /* Adjust to ensure it sits above other elements */
+  background-color: white; /* Optional: set a background so content below doesn't show through */
+  padding: 1rem; /* Optional styling */
+}

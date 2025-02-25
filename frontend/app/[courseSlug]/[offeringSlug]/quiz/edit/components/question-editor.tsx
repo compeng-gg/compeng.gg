@@ -1,5 +1,5 @@
 import { Card } from "primereact/card";
-import { ProgrammingLanguages, QuestionData, QuestionType, StaffCodeQuestionData, StaffQuestionData, StaffSelectQuestionData } from "../../question-models";
+import { BaseQuestionData, ProgrammingLanguages, QuestionData, QuestionType, ServerQuestionType, ServerToLocal, StaffCodeQuestionData, StaffQuestionData, StaffSelectQuestionData } from "../../question-models";
 import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
 import { KeyFilterType } from "primereact/keyfilter";
@@ -37,6 +37,24 @@ function GenericQuestionEditor (props: QuestionEditorProps) {
 
    const {questionData, setQuestionData, idx} = props;
 
+   const changeQuestionType = (newType: QuestionType) => {
+        //Convert old data to generic
+        const tempData: BaseQuestionData = questionData as BaseQuestionData;
+        tempData.questionType = newType;
+        tempData.serverQuestionType = ServerToLocal.get(newType) as ServerQuestionType;
+        switch(newType) {
+            case "CODE":
+                setQuestionData({...tempData, programmingLanguage: "C", starterCode: "", gradingDirectory: "", filesToPull: [], fileToReplace: ""} as StaffCodeQuestionData);
+                break;
+            case "TEXT":
+                setQuestionData({...tempData} as StaffQuestionData);
+                break;
+            case "SELECT":
+                setQuestionData({...tempData, options: [], correctAnswerIdx: -1} as StaffSelectQuestionData);
+                break;
+        }       
+    }
+
    return (
         <div style={{display: "flex", flexDirection: "column", gap: "10px"}}>
             <TextBoxInput label="Prompt" value={questionData.prompt} setValue={(newValue) => setQuestionData({ ...questionData, prompt: newValue })} />
@@ -44,7 +62,7 @@ function GenericQuestionEditor (props: QuestionEditorProps) {
                 <InputNumber id="marks" value={questionData.totalMarks} showButtons onValueChange={(e) => setQuestionData({ ...questionData, totalMarks: e.value ?? 0 })} />
             </LabelledField>
             <LabelledField label="Question Type" id="questionType">
-                <Dropdown value={questionData.questionType} options={["CODE" as QuestionType, "TEXT" as QuestionType, "SELECT" as QuestionType]} onChange={(e) => setQuestionData({ ...questionData, questionType: e.value})} />
+                <Dropdown value={questionData.questionType} options={["CODE" as QuestionType, "TEXT" as QuestionType, "SELECT" as QuestionType]} onChange={(e) => changeQuestionType(e.value)} />
             </LabelledField>
         </div>
    )
@@ -67,7 +85,7 @@ function TextBoxInput({label, value, setValue}: {label: string, value: string, s
 }
 
 //Ensures consistent label styling
-function LabelledField({label, id, children}: {label: string, id: string, children: any}) {
+export function LabelledField({label, id, children}: {label: string, id: string, children: any}) {
     return (
         <div style={{display: "flex", flexDirection: "column", gap: "5px", width: "100%"}}>
             <label htmlFor={id}>{label}</label>

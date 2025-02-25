@@ -1,7 +1,7 @@
 'use client';
 
 import { useContext, useEffect, useState } from "react";
-import { QuestionData } from "../../question-models";
+import { QuestionData, StaffQuestionData } from "../../question-models";
 import { QuizProps } from "../../quiz-display";
 import { JwtContext } from "@/app/lib/jwt-provider";
 import { fetchApi } from "@/app/lib/api";
@@ -10,6 +10,8 @@ import { id, se } from "date-fns/locale";
 import Navbar from "@/app/components/navbar";
 import LoginRequired from "@/app/lib/login-required";
 import QuestionEditor from "../components/question-editor";
+import { QuizSettingsEditor } from "../components/quiz-settings-editor";
+import { Button } from "primereact/button";
 
 
 
@@ -20,7 +22,8 @@ export default function Page({ params }: { params: { courseSlug: string, quizSlu
     const [quiz, setQuiz] = useState<QuizProps | undefined>(undefined);
     const [questionData, setQuestionData] = useState<StaffQuestionData[]>([]);
     const [loaded, setLoaded] = useState<boolean>(false);
-
+    const [modified, setModified] = useState<boolean>(false);
+    
     async function fetchQuiz() {
         try {
             const res = await fetchApi(jwt, setAndStoreJwt, `${courseSlug}/quiz/${quizSlug}`, "GET");
@@ -40,6 +43,21 @@ export default function Page({ params }: { params: { courseSlug: string, quizSlu
         }
     }
 
+    const addQuestion= () => {
+        const newQuestion = {
+            id: "set_on_server",
+            quizSlug: quizSlug,
+            courseSlug: courseSlug,
+            prompt: "",
+            totalMarks: 0,
+            isMutable: true,
+            questionType: "TEXT",
+            serverQuestionType: "WRITTEN_RESPONSE"
+        } as StaffQuestionData;
+        setQuestionData(prevData => [...prevData, newQuestion]);
+    
+    }
+
     useEffect(() => {
         if (!loaded) {
             fetchQuiz();
@@ -47,12 +65,18 @@ export default function Page({ params }: { params: { courseSlug: string, quizSlu
         }
     }, [loaded]);
 
-    const setQuestionDataAtIdx = (idx: number, data: QuestionData) => {
+    const setQuestionDataAtIdx = (idx: number, data: StaffQuestionData) => {
+        setModified(true);
         setQuestionData(prevData => {
             const newData = [...prevData];
             newData[idx] = data;
             return newData;
         });
+    }
+
+    const setQuizPropsCustom = (newProps: QuizProps) => {
+        setModified(true);
+        setQuiz(newProps);
     }
 
     if (!loaded) {
@@ -74,18 +98,49 @@ export default function Page({ params }: { params: { courseSlug: string, quizSlu
             </LoginRequired>
         )
     }
-    console.log("Returning editor")
     return (
         <LoginRequired>
             <Navbar />
-            <h2>{quiz?.name}</h2>
+            <QuizEditorTopbar quiz={quiz} questionData={questionData} modified={modified} setModified={setModified} />
             <div style={{ display: "flex", gap: "10px", width: "100%", flexDirection: "column" }}>
+                <QuizSettingsEditor quizProps={quiz} setQuizProps={(newProps) => setQuizPropsCustom(newProps)} />
                 {questionData.map((data, idx) => (
                     <QuestionEditor questionData={data} setQuestionData={(newData) => setQuestionDataAtIdx(idx, newData)} idx={idx}/>
                 ))}
+                <AddQuestionButton addQuestion={addQuestion}/>
             </div>
         </LoginRequired>
     )
+}
 
+interface QuizEditorTopbarProps {
+    quiz: QuizProps;
+    questionData: StaffQuestionData[];
+    modified: boolean;
+    setModified: (newVal: boolean) => void;
+}
 
+function QuizEditorTopbar(props: QuizEditorTopbarProps) {
+    const { quiz, questionData, modified, setModified } = props;
+
+    return (
+        <div className="sticky_header">
+        <div style={{ display: "flex", flexDirection: "row", justifyContent: "space-between", alignItems: "center"}}>
+            <div> 
+                <h2>{`Editing ${quiz.name}`}</h2>
+            </div>
+            <div style={{display: "flex", height: "70%", flexDirection: "row", gap: "3px"}}>
+                <Button icon="pi pi-save" label={modified ? "Save": "No Changes"} disabled={!modified} raised={modified} />
+                <Button icon="pi pi-undo" label="Undo Changes" disabled={!modified} severity="secondary"/>
+                <Button icon="pi pi-trash" label="Delete Quiz" severity="danger"/>
+            </div>
+        </div>
+        </div>
+    )
+}
+
+function AddQuestionButton({ addQuestion }: { addQuestion: () => void }) {
+    return (
+        <Button label="Add Question" onClick={addQuestion} />
+    )
 }
