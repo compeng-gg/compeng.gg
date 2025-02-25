@@ -108,11 +108,12 @@ class Command(BaseCommand):
             starts_at=now_datetime,
             ends_at=now_datetime + timedelta(days=365),
             repository=mock_repository
+            total_points=100
         )
 
         db.CheckboxQuestion.objects.create(
             prompt="Answer the checkbox question",
-            points=20,
+            points=15,
             order=1,
             quiz=mock_quiz,
             options=['1', '2', '3'],

@@ -25,8 +25,8 @@ def get_quiz_submissions(request, course_slug: str, quiz_slug: str):
     ).exists():
         return Response({"error": "Permission denied"}, status=status.HTTP_403_FORBIDDEN)
 
-    # Fetch quiz submissions along with user data
-    quiz_submissions = db.QuizSubmission.objects.filter(quiz=quiz).select_related("user")
+    # Fetch quiz submissions along with user and grader data
+    quiz_submissions = db.QuizSubmission.objects.filter(quiz=quiz).select_related("user", "graded_by")
 
     # Serialize the data
     submission_data = [
@@ -35,11 +35,17 @@ def get_quiz_submissions(request, course_slug: str, quiz_slug: str):
             "username": submission.user.username,
             "started_at": submission.started_at,
             "completed_at": submission.completed_at,
+            "grade": submission.grade,  # Include grade
+            "graded_at": submission.graded_at,  # Include grading timestamp
+            "graded_by": submission.graded_by.username if submission.graded_by else None,  # Include grader username
         }
         for submission in quiz_submissions
     ]
 
-    return Response(data=submission_data, status=status.HTTP_200_OK)
+    return Response(
+        data={"total_points": quiz.total_points, "submissions": submission_data},  # Include total points
+        status=status.HTTP_200_OK
+    )
 
 
 @api_view(["GET"])
@@ -111,6 +117,10 @@ def get_student_quiz_submission(request, course_slug: str, quiz_slug: str, stude
         "username": submission.user.username,
         "started_at": submission.started_at,
         "completed_at": submission.completed_at,
+        "grade": submission.grade,  # Include grade
+        "graded_at": submission.graded_at,  # Include grading timestamp
+        "graded_by": submission.graded_by.username if submission.graded_by else None,  # Include grader username
+        "total_points": quiz.total_points,  # Include total points for the quiz
         "answers": answer_data
     }
     print(submission_data)

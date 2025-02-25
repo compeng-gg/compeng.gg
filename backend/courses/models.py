@@ -343,6 +343,7 @@ class Quiz(models.Model):
     starts_at = models.DateTimeField() # TODO: validate ends_at > starts_at
     ends_at = models.DateTimeField()
     repository = models.ForeignKey(Repository, on_delete=models.DO_NOTHING, related_name='quizzes')
+    total_points = models.PositiveIntegerField(default=0)
     
     class Meta:
         unique_together = ['slug', 'offering']
@@ -356,6 +357,9 @@ class QuizSubmission(models.Model):
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name='quiz_submissions')
     started_at = models.DateTimeField()
     completed_at = models.DateTimeField()
+    grade = models.PositiveIntegerField(null=True)
+    graded_at = models.DateTimeField(null=True)
+    graded_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.DO_NOTHING, null=True, related_name='graded_quiz_submissions')
     
 
 class QuizQuestionBaseModel(models.Model):
