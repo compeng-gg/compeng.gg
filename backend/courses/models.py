@@ -345,6 +345,9 @@ class Quiz(models.Model):
     repository = models.ForeignKey(Repository, on_delete=models.DO_NOTHING, related_name='quizzes')
     total_points = models.PositiveIntegerField(default=0)
     
+    def __str__( self):
+        return f"{self.title}({self.offering.slug})"
+    
     class Meta:
         unique_together = ['slug', 'offering']
         verbose_name = "Quiz"
