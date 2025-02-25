@@ -1,6 +1,10 @@
+import TextEditor from "@/app/[courseSlug]/[offeringSlug]/quiz/components/text-editor";
 import StaffQuizDisplay, { StaffQuizProps } from "@/app/[courseSlug]/[offeringSlug]/quiz/staff-quiz-display";
 import { fetchApi } from "@/app/lib/api";
 import { JwtContext } from "@/app/lib/jwt-provider";
+import { Button } from "primereact/button";
+import { Calendar } from "primereact/calendar";
+import { InputText } from "primereact/inputtext";
 import { useContext, useEffect, useState } from "react";
 
 export interface StaffQuizViewProps {
@@ -122,15 +126,14 @@ export default function StaffQuizViewTab(props: StaffQuizViewProps) {
     if (quizzes.length === 0) return <p>No quizzes available.</p>;
 
     return (
-        <div style={{ display: "flex", flexDirection: "column", gap: "10px", width: "100%" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: "10px", width: "100%", marginTop: "10px" }}>
             {/* 
                 Match existing button style. 
                 Replace `btn btn-primary` with your actual classes if different. 
             */}
-            <button className="btn btn-primary" onClick={() => setShowModal(true)}>
-                Create New Quiz
-            </button>
-
+            <div style={{display: "flex", flexDirection: "row", justifyContent: "flex-end"}}>
+                <Button icon="pi pi-plus" label="Create New Quiz" onClick={() => setShowModal(true)}/>
+            </div>
             {quizzes.map((quiz) => (
                 <StaffQuizDisplay key={quiz.quizSlug} {...quiz} />
             ))}
@@ -208,19 +211,10 @@ export default function StaffQuizViewTab(props: StaffQuizViewProps) {
                                 />
                             </div>
                             {formError && <p style={{ color: "red" }}>{formError}</p>}
-                            <div style={{ marginTop: "10px" }}>
+                            <div style={{ display: "flex", marginTop: "10px", gap: "5px" }}>
                                 {/* Match your existing button classes here as well */}
-                                <button className="btn btn-primary" type="submit">
-                                    Submit
-                                </button>
-                                <button
-                                    className="btn btn-secondary"
-                                    type="button"
-                                    onClick={() => setShowModal(false)}
-                                    style={{ marginLeft: "10px" }}
-                                >
-                                    Cancel
-                                </button>
+                                <Button label="Submit" type="submit" size="small"/>
+                                <Button label="Cancel" onClick={() => setShowModal(false)} severity="danger" size="small"/>
                             </div>
                         </form>
                     </div>
