@@ -8,7 +8,6 @@ from django.forms.models import model_to_dict
 @api_view(["GET"])
 @permission_classes([permissions.IsAuthenticated])
 def get_quiz(request, course_slug: str, quiz_slug: str):
-    # TODO: validations
     quiz = db.Quiz.objects.get(slug=quiz_slug, offering__course__slug=course_slug)
     quiz_data = model_to_dict(quiz)
 
@@ -18,7 +17,6 @@ def get_quiz(request, course_slug: str, quiz_slug: str):
 
     quiz_data.pop("repository")
 
-    # TODO: do this all in 1 query
     checkbox_questions = db.CheckboxQuestion.objects.filter(quiz=quiz).all()
     coding_questions = db.CodingQuestion.objects.filter(quiz=quiz).all()
     multiple_choice_questions = db.MultipleChoiceQuestion.objects.filter(quiz=quiz).all()
@@ -44,10 +42,7 @@ def get_quiz(request, course_slug: str, quiz_slug: str):
 
     questions = sorted(questions, key=lambda x: x['order'])
 
-
     quiz_data["questions"] = questions
     quiz_data["github_repository"] = quiz.repository.full_name
-    
-    print(quiz_data)
 
     return Response(status=status.HTTP_200_OK, data=quiz_data)

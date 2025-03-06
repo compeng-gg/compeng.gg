@@ -8,6 +8,7 @@ import Navbar from "@/app/components/navbar";
 import GradingQuestionDisplay from "./grading-question-display";
 
 interface Question {
+    id: string;  
     prompt: string;
     points: number;
     order: number;
@@ -16,14 +17,7 @@ interface Question {
     correct_option_indices?: number[];
     starter_code?: string;
     programming_language?: string;
-    executions?: {  // ✅ New field to store execution results
-        solution: string;
-        result: any;
-        stderr: string;
-        status: string;
-    }[];
 }
-
 
 interface Submission {
     user_id: number;
@@ -31,14 +25,12 @@ interface Submission {
     started_at: string;
     completed_at: string;
     answers: {
-        multiple_choice_answers: { question: string; selected_answer_index: number; grade: number | null; comment: string | null }[];
-        checkbox_answers: { question: string; selected_answer_indices: number[]; grade: number | null; comment: string | null }[];
-        coding_answers: { question: string; solution: string; executions?: any[]; grade: number | null; comment: string | null }[];
-        written_response_answers: { question: string; response: string; grade: number | null; comment: string | null }[];
+        multiple_choice_answers: { question_id: string; selected_answer_index: number; grade: number | null; comment: string | null }[];
+        checkbox_answers: { question_id: string; selected_answer_indices: number[]; grade: number | null; comment: string | null }[];
+        coding_answers: { question_id: string; solution: string; executions?: any[]; grade: number | null; comment: string | null }[];
+        written_response_answers: { question_id: string; response: string; grade: number | null; comment: string | null }[];
     };
 }
-
-
 
 export default function StudentSubmissionPage() {
     const { courseSlug, offeringSlug, quizSlug, studentId } = useParams();
@@ -48,9 +40,9 @@ export default function StudentSubmissionPage() {
     const [loading, setLoading] = useState(true);
     const [gradeSubmitted, setGradeSubmitted] = useState(false);
 
-
     async function fetchQuizAndSubmission() {
         try {
+            
             const quizRes = await fetchApi(
                 jwt,
                 setAndStoreJwt,
@@ -61,6 +53,7 @@ export default function StudentSubmissionPage() {
             const quizData = await quizRes.json();
             setQuestions(quizData.questions);
 
+            
             const subRes = await fetchApi(
                 jwt,
                 setAndStoreJwt,
@@ -68,16 +61,13 @@ export default function StudentSubmissionPage() {
                 "GET"
             );
             if (!subRes.ok) throw new Error("Failed to fetch submission");
-
-            const submissionData = await subRes.json();
-            setSubmission(submissionData);
+            setSubmission(await subRes.json());
         } catch (error) {
             console.error("Failed to retrieve data", error);
         } finally {
             setLoading(false);
         }
     }
-    
 
     useEffect(() => {
         fetchQuizAndSubmission();
@@ -103,13 +93,14 @@ export default function StudentSubmissionPage() {
                 {/* Render questions with answers */}
                 <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
                     {questions.map((question, idx) => {
-                        const matchingAnswer =
-                            submission?.answers.multiple_choice_answers.find((a) => a.question === question.prompt) ||
-                            submission?.answers.checkbox_answers.find((a) => a.question === question.prompt) ||
-                            submission?.answers.coding_answers.find((a) => a.question === question.prompt) ||
-                            submission?.answers.written_response_answers.find((a) => a.question === question.prompt);
+                        
+                        const matchingAnswer = submission?.answers.multiple_choice_answers.find((a) => a.question_id === question.id)
+                            || submission?.answers.checkbox_answers.find((a) => a.question_id === question.id)
+                            || submission?.answers.coding_answers.find((a) => a.question_id === question.id)
+                            || submission?.answers.written_response_answers.find((a) => a.question_id === question.id);
 
-                            const executions = submission?.answers.coding_answers.find((a) => a.question === question.prompt)?.executions || [];
+                        const executions = submission?.answers.coding_answers.find((a) => a.question_id === question.id)?.executions || [];
+
 
                         return (
                             <GradingQuestionDisplay
@@ -117,6 +108,7 @@ export default function StudentSubmissionPage() {
                                 idx={idx + 1}
                                 question={{
                                     ...question,
+                                    id: question.id,
                                     correct_option_index: question.correct_option_index,
                                     correct_option_indices: question.correct_option_indices,
                                 }}
@@ -129,10 +121,11 @@ export default function StudentSubmissionPage() {
                     })}
                 </div>
             </div>
+
             <button
                 onClick={() => {
                     setGradeSubmitted(true);
-                    setTimeout(() => setGradeSubmitted(false), 3000); // Auto-hide after 3 seconds
+                    setTimeout(() => setGradeSubmitted(false), 3000);
                 }}
                 style={{
                     position: "fixed",
@@ -150,6 +143,7 @@ export default function StudentSubmissionPage() {
             >
                 Submit Grade
             </button>
+
             {gradeSubmitted && (
                 <div
                     style={{
@@ -182,7 +176,6 @@ export default function StudentSubmissionPage() {
                     </button>
                 </div>
             )}
-
         </>
     );
 }

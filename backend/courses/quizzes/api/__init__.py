@@ -57,3 +57,5 @@ from courses.quizzes.api.admin.get_quiz_submissions import (
     get_quiz_submissions,
     get_student_quiz_submission,
 )
+
+from courses.quizzes.api.admin.post_quiz_grades import update_submission_question

@@ -1,69 +1,113 @@
 "use client";
 
+import { useState, useEffect, useContext } from "react";
 import { Card } from "primereact/card";
 import { Badge } from "primereact/badge";
 import CodeEditor from "../../components/code-editor";
 import TextEditor from "../../components/text-editor";
 import SelectEditor from "../../components/select-editor";
 import CheckboxEditor from "../../components/checkbox-editor-VA";
-import { useState } from "react";
+import { fetchApi } from "@/app/lib/api";
+import { JwtContext } from "@/app/lib/jwt-provider";
+import { useParams } from "next/navigation";
 
 interface GradingQuestionDisplayProps {
     idx?: number;
     question: {
+        id: string;  
         prompt: string;
         points: number;
         options?: string[];
         programming_language?: string;
         correct_option_index?: number;
         correct_option_indices?: number[];
+        question_type: string;  
     };
     studentAnswer: any;
-    executions?: { 
+    executions?: {
         solution: string;
         result: any;
         stderr: string;
         status: string;
     }[];
     grade?: number | null;
-    comment?: string | null; // ✅ Pass comment as a prop
+    comment?: string | null;
 }
 
-
-
-export default function GradingQuestionDisplay({ idx = 1, question, studentAnswer, executions, grade: initialGrade }: GradingQuestionDisplayProps) {    
-    const [comment, setComment] = useState(() => studentAnswer?.comment ?? "");
-
-    const [grade, setGrade] = useState(() => {
-        if (initialGrade !== null) {
-            return initialGrade; // ✅ Use existing grade if set
+export default function GradingQuestionDisplay({ 
+    idx = 1, 
+    question, 
+    studentAnswer, 
+    executions, 
+    grade: initialGrade, 
+    comment: initialComment 
+}: GradingQuestionDisplayProps) {
+    
+    const { courseSlug, quizSlug, studentId } = useParams();
+    const [jwt, setAndStoreJwt] = useContext(JwtContext);
+    
+    const [comment, setComment] = useState(initialComment ?? studentAnswer?.comment ?? "");
+    const [grade, setGrade] = useState<number | null>(() => {
+        if (initialGrade !== null && initialGrade !== undefined) {
+            return initialGrade; 
         }
-
+    
+        let autoGradedScore: number | null = null;
+    
         if (question.correct_option_index !== undefined) {
-            // ✅ Auto-grade multiple choice: Full points if correct, 0 otherwise
-            return studentAnswer?.selected_answer_index === question.correct_option_index ? question.points : 0;
-        } else if (question.correct_option_indices !== undefined) {
-            // ✅ Auto-grade checkbox (Partial Credit)
+            
+            autoGradedScore = studentAnswer?.selected_answer_index === question.correct_option_index ? question.points : 0;
+        } 
+        else if (question.correct_option_indices !== undefined) {
+            
             const studentSelection = new Set(studentAnswer?.selected_answer_indices || []);
             const correctSelection = new Set(question.correct_option_indices);
-
+    
             const correctCount = [...studentSelection].filter((idx) => correctSelection.has(idx)).length;
             const incorrectCount = [...studentSelection].filter((idx) => !correctSelection.has(idx)).length;
-
             const totalCorrect = correctSelection.size;
-            const partialScore = Math.max(0, (correctCount / totalCorrect) * question.points - incorrectCount);
+            autoGradedScore = Math.round(Math.max(0, (correctCount / totalCorrect) * question.points - incorrectCount));
+        } 
+        else if (question.programming_language) {
             
-            return Math.round(partialScore);
-        } else if (question.programming_language) {
-            // ✅ Auto-grade coding question based on execution results
             if (executions && executions.length > 0) {
                 const highestGrade = Math.max(...executions.map(exec => exec.result?.grade ?? 0));
-                return Math.round(highestGrade * question.points);
+                autoGradedScore = Math.round(highestGrade * question.points);
+            } else {
+                autoGradedScore = 0;
             }
-            return 0; // Default to zero if no executions exist
         }
-        return null;
+    
+        if (autoGradedScore !== null) {
+            
+            updateGradeOrComment(question.id, grade ?? null, comment ?? "");
+        }
+    
+        return autoGradedScore ?? null; 
     });
+    
+    
+
+    /** ✅ **Function to update grade & comment in backend** */
+    async function updateGradeOrComment(questionId: string, grade: number | null, comment: string) {
+    await fetchApi(jwt, setAndStoreJwt, 
+        `quizzes/admin/${courseSlug}/${quizSlug}/submissions/${studentId}/update-question/`, 
+        "POST", {
+            question_id: questionId,  // ✅ Use question_id instead of prompt
+            grade: grade,
+            comment: comment
+        }
+    );
+}
+
+    /** ✅ **Trigger backend update on grade/comment change** */
+    useEffect(() => {
+        const timeout = setTimeout(() => {
+            updateGradeOrComment(question.id, grade ?? null, comment ?? "");
+        }, 500); 
+
+        return () => clearTimeout(timeout);
+    }, [grade, comment]);
 
     return (
         <Card
@@ -82,14 +126,13 @@ export default function GradingQuestionDisplay({ idx = 1, question, studentAnswe
             <div style={{ marginBottom: "15px" }}>
                 <strong>Student Answer:</strong>
 
-                {/* ✅ Multiple-Choice & Checkbox Questions */}
                 {question.options ? (
                     question.correct_option_indices ? (
                         <CheckboxEditor
                             props={{
                                 state: {
                                     value: studentAnswer?.selected_answer_indices || [],
-                                    setValue: () => {}, // Read-only
+                                    setValue: () => {}, 
                                 },
                                 options: question.options,
                             }}
@@ -100,7 +143,7 @@ export default function GradingQuestionDisplay({ idx = 1, question, studentAnswe
                             props={{
                                 state: {
                                     value: studentAnswer?.selected_answer_index ?? -1,
-                                    setValue: () => {}, // Read-only
+                                    setValue: () => {}, 
                                 },
                                 options: question.options,
                             }}
@@ -123,7 +166,7 @@ export default function GradingQuestionDisplay({ idx = 1, question, studentAnswe
                                 value: studentAnswer?.solution ?? "No answer provided",
                                 setValue: () => {},
                             },
-                            executions: executions, // ✅ Pass executions explicitly
+                            executions: executions,
                         }}
                         save={() => {}}
                     />
@@ -147,10 +190,9 @@ export default function GradingQuestionDisplay({ idx = 1, question, studentAnswe
                             value: comment,
                             setValue: (newValue) => setComment(newValue),
                         }}
-                        save={() => {}} 
+                        save={() => {}}
                     />
                 </div>
-
 
                 <div
                     style={{
@@ -169,7 +211,7 @@ export default function GradingQuestionDisplay({ idx = 1, question, studentAnswe
                         type="text"
                         value={grade !== null ? grade : ""}
                         onChange={(e) => {
-                            const value = e.target.value.replace(/\D/, ""); 
+                            const value = e.target.value.replace(/\D/, "");
                             setGrade(value ? parseInt(value) : null);
                         }}
                         pattern="[0-9]*"
@@ -188,7 +230,7 @@ export default function GradingQuestionDisplay({ idx = 1, question, studentAnswe
     );
 }
 
-/* 🔹 Helper Component for Displaying Grade Badge (Top-Right of Each Card) */
+/** ✅ **Grade Badge at Top-Right of Each Card** */
 function GradeBadge({ totalAvailable }: { totalAvailable: number }) {
     return (
         <Badge
