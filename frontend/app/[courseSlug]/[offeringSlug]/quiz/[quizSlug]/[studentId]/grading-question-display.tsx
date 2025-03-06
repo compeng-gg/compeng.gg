@@ -55,11 +55,9 @@ export default function GradingQuestionDisplay({
         let autoGradedScore: number | null = null;
     
         if (question.correct_option_index !== undefined) {
-            
             autoGradedScore = studentAnswer?.selected_answer_index === question.correct_option_index ? question.points : 0;
         } 
         else if (question.correct_option_indices !== undefined) {
-            
             const studentSelection = new Set(studentAnswer?.selected_answer_indices || []);
             const correctSelection = new Set(question.correct_option_indices);
     
@@ -69,7 +67,6 @@ export default function GradingQuestionDisplay({
             autoGradedScore = Math.round(Math.max(0, (correctCount / totalCorrect) * question.points - incorrectCount));
         } 
         else if (question.programming_language) {
-            
             if (executions && executions.length > 0) {
                 const highestGrade = Math.max(...executions.map(exec => exec.result?.grade ?? 0));
                 autoGradedScore = Math.round(highestGrade * question.points);
@@ -79,12 +76,13 @@ export default function GradingQuestionDisplay({
         }
     
         if (autoGradedScore !== null) {
-            
-            updateGradeOrComment(question.id, grade ?? null, comment ?? "");
+            // ✅ Use `autoGradedScore` instead of `grade`
+            updateGradeOrComment(question.id, autoGradedScore, comment ?? "");
         }
     
-        return autoGradedScore ?? null; 
+        return autoGradedScore ?? null;
     });
+    
     
     
 
