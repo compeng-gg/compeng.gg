@@ -16,7 +16,14 @@ interface Question {
     correct_option_indices?: number[];
     starter_code?: string;
     programming_language?: string;
+    executions?: {  // ✅ New field to store execution results
+        solution: string;
+        result: any;
+        stderr: string;
+        status: string;
+    }[];
 }
+
 
 interface Submission {
     user_id: number;
@@ -24,12 +31,14 @@ interface Submission {
     started_at: string;
     completed_at: string;
     answers: {
-        multiple_choice_answers: { question: string; selected_answer_index: number }[];
-        checkbox_answers: { question: string; selected_answer_indices: number[] }[];
-        coding_answers: { question: string; solution: string }[];
-        written_response_answers: { question: string; response: string }[];
+        multiple_choice_answers: { question: string; selected_answer_index: number; grade: number | null }[];
+        checkbox_answers: { question: string; selected_answer_indices: number[]; grade: number | null }[];
+        coding_answers: { question: string; solution: string; executions?: any[]; grade: number | null }[];
+        written_response_answers: { question: string; response: string; grade: number | null }[];
     };
 }
+
+
 
 export default function StudentSubmissionPage() {
     const { courseSlug, offeringSlug, quizSlug, studentId } = useParams();
@@ -42,7 +51,6 @@ export default function StudentSubmissionPage() {
 
     async function fetchQuizAndSubmission() {
         try {
-            // Fetch the full quiz (to get questions and point values)
             const quizRes = await fetchApi(
                 jwt,
                 setAndStoreJwt,
@@ -53,7 +61,6 @@ export default function StudentSubmissionPage() {
             const quizData = await quizRes.json();
             setQuestions(quizData.questions);
 
-            // Fetch the student's submission
             const subRes = await fetchApi(
                 jwt,
                 setAndStoreJwt,
@@ -61,13 +68,16 @@ export default function StudentSubmissionPage() {
                 "GET"
             );
             if (!subRes.ok) throw new Error("Failed to fetch submission");
-            setSubmission(await subRes.json());
+
+            const submissionData = await subRes.json();
+            setSubmission(submissionData);
         } catch (error) {
             console.error("Failed to retrieve data", error);
         } finally {
             setLoading(false);
         }
     }
+    
 
     useEffect(() => {
         fetchQuizAndSubmission();
@@ -94,11 +104,13 @@ export default function StudentSubmissionPage() {
                 <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
                     {questions.map((question, idx) => {
                         const matchingAnswer =
-                        submission?.answers.multiple_choice_answers.find((a) => a.question === question.prompt) ||
-                        submission?.answers.checkbox_answers.find((a) => a.question === question.prompt) ||
-                        submission?.answers.coding_answers.find((a) => a.question === question.prompt) ||
-                        submission?.answers.written_response_answers.find((a) => a.question === question.prompt);
-                    
+                            submission?.answers.multiple_choice_answers.find((a) => a.question === question.prompt) ||
+                            submission?.answers.checkbox_answers.find((a) => a.question === question.prompt) ||
+                            submission?.answers.coding_answers.find((a) => a.question === question.prompt) ||
+                            submission?.answers.written_response_answers.find((a) => a.question === question.prompt);
+
+                        const executions = submission?.answers.coding_answers.find((a) => a.question === question.prompt)?.executions || [];
+
                         return (
                             <GradingQuestionDisplay
                                 key={idx}
@@ -109,6 +121,8 @@ export default function StudentSubmissionPage() {
                                     correct_option_indices: question.correct_option_indices,
                                 }}
                                 studentAnswer={matchingAnswer}
+                                executions={executions} // ✅ Pass executions for coding questions
+                                grade={matchingAnswer?.grade ?? null} // ✅ Pass the grade for the question
                             />
                         );
                     })}

@@ -5,6 +5,7 @@ import { Badge } from "primereact/badge";
 import CodeEditor from "../../components/code-editor";
 import TextEditor from "../../components/text-editor";
 import SelectEditor from "../../components/select-editor";
+import CheckboxEditor from "../../components/checkbox-editor-VA";
 import { useState } from "react";
 
 interface GradingQuestionDisplayProps {
@@ -14,14 +15,20 @@ interface GradingQuestionDisplayProps {
         points: number;
         options?: string[];
         programming_language?: string;
-        correct_option_index?: number; // ✅ Added for multiple-choice auto-grading
-        correct_option_indices?: number[]; // ✅ Added for checkbox auto-grading
+        correct_option_index?: number;
+        correct_option_indices?: number[];
     };
-    studentAnswer: any; // The student's submitted answer
+    studentAnswer: any;
+    executions?: { // ✅ New executions field for coding answers
+        solution: string;
+        result: any;
+        stderr: string;
+        status: string;
+    }[];
+    grade?: number | null; // ✅ Pass grade as a prop
 }
 
-export default function GradingQuestionDisplay({ idx = 1, question, studentAnswer }: GradingQuestionDisplayProps) {
-    const [comment, setComment] = useState("");
+export default function GradingQuestionDisplay({ idx = 1, question, studentAnswer, executions }: GradingQuestionDisplayProps) {    const [comment, setComment] = useState("");
     const [grade, setGrade] = useState(() => {
         if (question.correct_option_index !== undefined) {
             // ✅ Auto-grade multiple choice: Full points if correct, 0 otherwise
@@ -40,13 +47,22 @@ export default function GradingQuestionDisplay({ idx = 1, question, studentAnswe
             const partialScore = Math.max(0, (correctCount / totalCorrect) * question.points - incorrectCount);
     
             return Math.round(partialScore);
+        } else if (question.programming_language) {
+            // ✅ Auto-grade coding question based on execution results
+            const executions = studentAnswer?.executions || [];
+            if (executions.length > 0) {
+                // Extract the highest grade among executions
+                const highestGrade = Math.max(...executions.map(exec => exec.result?.grade ?? 0));
+                return Math.round(highestGrade * question.points); // Scale to max question points
+            }
+            return 0; // Default to zero if no executions exist
         }
         return "";
     });
 
     return (
         <Card
-            title={`Question ${idx}`} // ✅ Question Number Added
+            title={`Question ${idx}`}
             subTitle={question.prompt}
             style={{
                 marginBottom: "20px",
@@ -56,13 +72,12 @@ export default function GradingQuestionDisplay({ idx = 1, question, studentAnswe
                 boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
                 position: "relative",
             }}
-            header={<GradeBadge totalAvailable={question.points} />} // ✅ Points Badge at Top-Right
+            header={<GradeBadge totalAvailable={question.points} />}
         >
-            {/* Student Answer Section */}
             <div style={{ marginBottom: "15px" }}>
                 <strong>Student Answer:</strong>
 
-                {/* ✅ Multiple-Choice & Checkbox Questions (Using SelectEditor) */}
+                {/* ✅ Multiple-Choice & Checkbox Questions */}
                 {question.options ? (
                     <SelectEditor
                         props={{
@@ -72,10 +87,9 @@ export default function GradingQuestionDisplay({ idx = 1, question, studentAnswe
                             },
                             options: question.options,
                         }}
-                        save={() => {}} // ✅ Required prop
+                        save={() => {}} 
                     />
                 ) : question.programming_language ? (
-                    // ✅ Coding Questions (Show only student's code)
                     <CodeEditor
                         props={{
                             id: `code-question-${idx}`,
@@ -83,16 +97,17 @@ export default function GradingQuestionDisplay({ idx = 1, question, studentAnswe
                             courseSlug: "",
                             prompt: question.prompt,
                             totalMarks: question.points,
-                            isMutable: false, // Read-only
+                            isMutable: false,
                             questionType: "CODE",
                             serverQuestionType: "CODING",
-                            programmingLanguage: (question.programming_language as "PYTHON" | "C_PP" | "C") ?? "PYTHON",
+                            programmingLanguage: question.programming_language ?? "PYTHON",
                             state: {
                                 value: studentAnswer?.solution ?? "No answer provided",
                                 setValue: () => {},
                             },
+                            executions: executions, // ✅ Pass executions explicitly
                         }}
-                        save={() => {}} // ✅ Required prop
+                        save={() => {}}
                     />
                 ) : (
                     // ✅ Written Response Questions
@@ -101,14 +116,13 @@ export default function GradingQuestionDisplay({ idx = 1, question, studentAnswe
                             value: studentAnswer?.response ?? "No answer provided",
                             setValue: () => {},
                         }}
-                        save={() => {}} // ✅ Required prop
+                        save={() => {}}
                     />
                 )}
             </div>
 
-            {/* 🔥 Grading Section - Now Smaller and Properly Positioned */}
+            {/* 🔥 Grading Section */}
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "15px" }}>
-                {/* 🔹 Comment Box (TextEditor) */}
                 <div style={{ flex: "2", marginRight: "20px" }}>
                     <label><strong>Comments:</strong></label>
                     <TextEditor
@@ -116,11 +130,10 @@ export default function GradingQuestionDisplay({ idx = 1, question, studentAnswe
                             value: comment,
                             setValue: (newValue) => setComment(newValue),
                         }}
-                        save={() => {}} // ✅ Required prop
+                        save={() => {}}
                     />
                 </div>
 
-                {/* 🔹 Grade Box (Now Uses Smaller `input` Instead of `TextEditor`) */}
                 <div
                     style={{
                         display: "flex",
@@ -130,21 +143,21 @@ export default function GradingQuestionDisplay({ idx = 1, question, studentAnswe
                         borderRadius: "6px",
                         background: "#f9f9f9",
                         minWidth: "100px",
-                        height: "36px", // ✅ Smaller height
+                        height: "36px",
                     }}
                 >
                     <strong style={{ marginRight: "8px" }}>Grade:</strong>
                     <input
-                        type="text" // ✅ Switch to text to remove number spinner
+                        type="text"
                         value={grade}
                         onChange={(e) => {
-                            const value = e.target.value.replace(/\D/, ""); // ✅ Allow only digits
+                            const value = e.target.value.replace(/\D/, ""); 
                             setGrade(value);
                         }}
-                        pattern="[0-9]*" // ✅ Mobile-friendly numeric input
-                        inputMode="numeric" // ✅ Optimized for mobile keyboards
+                        pattern="[0-9]*"
+                        inputMode="numeric"
                         style={{
-                            width: "50px", // ✅ Small width for 3-digit input
+                            width: "50px",
                             padding: "3px 5px",
                             border: "1px solid #ccc",
                             borderRadius: "4px",

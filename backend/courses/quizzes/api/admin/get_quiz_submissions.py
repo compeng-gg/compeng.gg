@@ -79,33 +79,38 @@ def get_student_quiz_submission(request, course_slug: str, quiz_slug: str, stude
     coding_answers = db.CodingAnswer.objects.filter(quiz_submission=submission).select_related("question")
     written_response_answers = db.WrittenResponseAnswer.objects.filter(quiz_submission=submission).select_related("question")
 
-    # Serialize the answers
+    # ✅ Modify serialized data to include per-question grade
     answer_data = {
         "multiple_choice_answers": [
             {
                 "question": answer.question.prompt,
-                "selected_answer_index": answer.selected_answer_index
+                "selected_answer_index": answer.selected_answer_index,
+                "grade": answer.grade  # ✅ Include per-question grade
             }
             for answer in multiple_choice_answers
         ],
         "checkbox_answers": [
             {
                 "question": answer.question.prompt,
-                "selected_answer_indices": answer.selected_answer_indices
+                "selected_answer_indices": answer.selected_answer_indices,
+                "grade": answer.grade  # ✅ Include per-question grade
             }
             for answer in checkbox_answers
         ],
         "coding_answers": [
             {
                 "question": answer.question.prompt,
-                "solution": answer.solution
+                "solution": answer.solution,
+                "executions": list(answer.executions.values("solution", "result", "stderr", "status")),  # ✅ Include executions
+                "grade": answer.grade  # ✅ Include per-question grade
             }
             for answer in coding_answers
         ],
         "written_response_answers": [
             {
                 "question": answer.question.prompt,
-                "response": answer.response
+                "response": answer.response,
+                "grade": answer.grade  # ✅ Include per-question grade
             }
             for answer in written_response_answers
         ],
@@ -117,12 +122,11 @@ def get_student_quiz_submission(request, course_slug: str, quiz_slug: str, stude
         "username": submission.user.username,
         "started_at": submission.started_at,
         "completed_at": submission.completed_at,
-        "grade": submission.grade,  # Include grade
-        "graded_at": submission.graded_at,  # Include grading timestamp
-        "graded_by": submission.graded_by.username if submission.graded_by else None,  # Include grader username
-        "total_points": quiz.total_points,  # Include total points for the quiz
+        "grade": submission.grade,  # ✅ Overall quiz grade
+        "graded_at": submission.graded_at,
+        "graded_by": submission.graded_by.username if submission.graded_by else None,
+        "total_points": quiz.total_points,  # ✅ Include total points for the quiz
         "answers": answer_data
     }
-    print(submission_data)
 
     return Response(data=submission_data, status=status.HTTP_200_OK)

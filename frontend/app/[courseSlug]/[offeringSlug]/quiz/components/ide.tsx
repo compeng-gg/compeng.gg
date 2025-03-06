@@ -30,6 +30,8 @@ ace.config.setModuleUrl('ace/ext/language_tools', '/ace/ext-language_tools.js');
 export interface IdeProps {
     language: ProgrammingLanguages;
     value: string;
+    isMutable: boolean;
+    state: CodeState;
     onChange: (value: string) => void;
 }
 
@@ -60,17 +62,17 @@ export default function Ide(props: IdeProps) {
                 theme="monokai"
                 name="my_ace_editor"
                 value={props.value}
-                onChange={props.onChange}
+                onChange={props.isMutable ? props.state.setValue : () => {}} 
                 fontSize={14}
                 showPrintMargin={false}
                 showGutter={true}
                 highlightActiveLine={true}
                 style={{ width: '100%', height: '400px' }}
-                // Enable autocomplete features
+                readOnly={!props.isMutable} 
                 setOptions={{
-                  enableBasicAutocompletion: true,
-                  enableLiveAutocompletion: true,
-                  enableSnippets: true,
+                  enableBasicAutocompletion: props.isMutable,
+                  enableLiveAutocompletion: props.isMutable,
+                  enableSnippets: props.isMutable,
                 }}
               />}
         </div>
