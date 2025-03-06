@@ -46,14 +46,14 @@ export interface Team {
 }
 
 export default function StudentTeamViewTab(props: StudentTeamViewTabProps) {
-    const [jwt, setAndStoreJwt] = useContext(JwtContext);
-    const { courseSlug, offeringSlug } = props;
-    const [teams, setTeams] = useState<Team[]>([]);
-    const [userMembership, setUserMembership] = useState<
-        UserMembership | undefined
-    >(undefined);
-    const [userName, setUserName] = useState<string>('');
-    const [loading, setLoading] = useState<boolean>(true);
+	const [jwt, setAndStoreJwt] = useContext(JwtContext);
+	const { courseSlug, offeringSlug } = props;
+	const [teams, setTeams] = useState<Team[]>([]);
+	const [userMembership, setUserMembership] = useState<
+		UserMembership | undefined
+	>(undefined);
+	const [userName, setUserName] = useState<string>("");
+	const [loading, setLoading] = useState<boolean>(true);
 
     // Fetch username on component mount
     useEffect(() => {
@@ -71,19 +71,19 @@ export default function StudentTeamViewTab(props: StudentTeamViewTabProps) {
         }
     }, [userName]);
 
-    // Fetch teams function, accessible to all parts of the file
-    const fetchTeams = async () => {
-        try {
-            setLoading(true);
-            const res = await fetchApi(
-                jwt,
-                setAndStoreJwt,
-                `teams/get/${courseSlug}/${offeringSlug}`,
-                'GET'
-            );
-            const data = await res.json();
-            const returnedTeams = [];
-            let foundMembership = false;
+	// Fetch teams function, accessible to all parts of the file
+	const fetchTeams = async () => {
+		try {
+			setLoading(true);
+			const res = await fetchApi(
+				jwt,
+				setAndStoreJwt,
+				`teams/get/${courseSlug}/${offeringSlug}`,
+				"GET"
+			);
+			const data = await res.json();
+			const returnedTeams = [];
+			let foundMembership = false;
 
             data.forEach((team) => {
                 const userMember = team.members.find((m) => m.name === userName);
@@ -146,16 +146,16 @@ export default function StudentTeamViewTab(props: StudentTeamViewTabProps) {
         setGlobalFilterValue(value);
     };
 
-    const createTeam = () => {
-        fetchApi(jwt, setAndStoreJwt, 'teams/create/', 'POST', {
-            team_name: 'Team ' + (teams.length + 1).toString(),
-            course_slug: courseSlug,
+	const createTeam = () => {
+		fetchApi(jwt, setAndStoreJwt, `teams/create/`, "POST", {
+			team_name: "Team " + (teams.length + 1).toString(),
+			course_slug: courseSlug,
 			offering_slug: offeringSlug,
-        }).then((response) => {
-            console.log(response);
-            fetchTeams();
-        });
-    };
+		}).then((response) => {
+			console.log(response)
+			fetchTeams();
+		});
+	};
 
     const renderHeader = () => {
         return (

@@ -52,7 +52,7 @@ function DisplayCourseTab({idx, labs, courseSlug, offeringSlug}){
         return <StudentQuizViewTab courseSlug={courseSlug} offeringSlug={offeringSlug} />;
     }
     if(idx == 3){
-        return <StudentTeamViewTab courseSlug={courseSlug} offeringSlug={offeringSlug}/>;
+        return <StudentTeamViewTab  courseSlug={courseSlug} offeringSlug={offeringSlug}/>
     }
 
     return (
