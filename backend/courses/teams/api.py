@@ -21,8 +21,6 @@ from django.utils import timezone
 from github_app.utils import create_student_team_and_fork, add_student_to_github_team
 from slugify import slugify
 from courses.models import Offering, TeamMember, Team
-from github_app.utils import create_student_team_and_fork, add_student_to_github_team
-from slugify import slugify
 
 from dataclasses import dataclass
 from courses.teams.utils import IsInstructorOrTA
@@ -39,7 +37,7 @@ def get_student_enrollment_for_team(team_id: UUID, user_id: int) -> TeamEnrollme
             id=team_id,
         )
     except db.Team.DoesNotExist:
-        raise Response({'detail': 'Team not found.'}, status=status.HTTP_404_NOT_FOUND)
+        return Response({'detail': 'Team not found.'}, status=status.HTTP_404_NOT_FOUND)
     
     course_slug = team.offering.course.slug
     try:
@@ -48,7 +46,7 @@ def get_student_enrollment_for_team(team_id: UUID, user_id: int) -> TeamEnrollme
             active=True
         )
     except db.Offering.DoesNotExist:
-        raise Response({'detail': 'Offering not found.'}, status=status.HTTP_404_NOT_FOUND)
+        return Response({'detail': 'Offering not found.'}, status=status.HTTP_404_NOT_FOUND)
 
     try:
         role = db.Role.objects.get(
@@ -56,7 +54,7 @@ def get_student_enrollment_for_team(team_id: UUID, user_id: int) -> TeamEnrollme
             offering=offering,
         )
     except db.Role.DoesNotExist:
-        raise Response({'detail': 'Role not found.'}, status=status.HTTP_404_NOT_FOUND)
+        return Response({'detail': 'Role not found.'}, status=status.HTTP_404_NOT_FOUND)
     
     try:
         enrollment = db.Enrollment.objects.get(
@@ -64,12 +62,12 @@ def get_student_enrollment_for_team(team_id: UUID, user_id: int) -> TeamEnrollme
             user_id=user_id,
         )
     except db.Enrollment.DoesNotExist:
-        raise Response({'detail': 'Enrollment not found.'}, status=status.HTTP_404_NOT_FOUND)
+        return Response({'detail': 'Enrollment not found.'}, status=status.HTTP_404_NOT_FOUND)
     
     try:
         team_settings = db.OfferingTeamsSettings.objects.get(offering=team.offering)
     except db.OfferingTeamsSettings.DoesNotExist:
-        raise Response({'detail': 'Team settings not found.'}, status=status.HTTP_404_NOT_FOUND)
+        return Response({'detail': 'Team settings not found.'}, status=status.HTTP_404_NOT_FOUND)
     
     return TeamEnrollmentData(
         team=team,
@@ -95,15 +93,15 @@ def request_to_join_team(request):
         
         # Validate user does not break membership conditions
         if db.TeamMember.objects.filter(enrollment=enrollment).count() > 0:
-            raise Response({'detail': 'User is already in a team.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': 'User is already in a team.'}, status=status.HTTP_400_BAD_REQUEST)
         
         max_team_size = team_enrollment_data.team_settings.max_team_size
         formation_deadline = team_enrollment_data.team_settings.formation_deadline
         if db.TeamMember.objects.filter(team=team).count() >= max_team_size:
-            raise Response({'detail': 'Team is full.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': 'Team is full.'}, status=status.HTTP_400_BAD_REQUEST)
         
         if formation_deadline < timezone.now():
-            raise Response({'detail': 'Team formation deadline has passed.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': 'Team formation deadline has passed.'}, status=status.HTTP_400_BAD_REQUEST)
             
         db.TeamMember.objects.create(
             team_id=team_id,
@@ -147,9 +145,9 @@ def manage_join_team_request(request):
                     approvedJoiner = member
         
         if leader == None:
-            raise Response({'detail': 'Leader not found.'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'detail': 'Leader not found.'}, status=status.HTTP_404_NOT_FOUND)
         if approvedJoiner == None:
-            raise Response({'detail': 'Joiner not found.'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'detail': 'Joiner not found.'}, status=status.HTTP_404_NOT_FOUND)
         
         if approved:
             add_student_to_github_team(request.user, team.github_team_slug)
@@ -176,6 +174,11 @@ def delete_team(request):
             team_id=team_id,
             user_id=user_id,
         )
+        print(team_enrollment_data)
+
+        if isinstance(team_enrollment_data, Response):
+            return team_enrollment_data
+
         enrollment = team_enrollment_data.enrollment
         team = team_enrollment_data.team
         try:
@@ -184,10 +187,10 @@ def delete_team(request):
                 enrollment=enrollment,
             )
         except db.TeamMember.DoesNotExist:
-            raise Response({'detail': 'Team member not found.'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'detail': 'Team member not found.'}, status=status.HTTP_404_NOT_FOUND)
         
         if team_member.membership_type != db.TeamMember.MembershipType.LEADER:
-            raise Response({'detail': 'Only team leader can delete team.'}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response({'detail': 'Only team leader can delete team.'}, status=status.HTTP_401_UNAUTHORIZED)
   
         teamMembers = db.TeamMember.objects.filter(team=team)
         teamMembers.delete()
@@ -220,7 +223,7 @@ def leave_team(request):
                 enrollment=enrollment,
             )
         except db.TeamMember.DoesNotExist:
-            raise Response({'detail': 'Team member not found.'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'detail': 'Team member not found.'}, status=status.HTTP_404_NOT_FOUND)
         
         team_empty = False
         
@@ -238,9 +241,9 @@ def leave_team(request):
 
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
-def teams(request, slug):
+def teams(request, course_slug, offering_slug):
     try:
-        offering = Offering.objects.get(course__slug=slug)
+        offering = Offering.objects.get(course__slug=course_slug, slug=offering_slug)
     except Offering.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
     
@@ -273,17 +276,18 @@ def create_team(request):
         # Validations
         team_name = serializer.validated_data.get('team_name')
         course_slug = serializer.validated_data.get('course_slug')
+        offering_slug = serializer.validated_data.get('offering_slug')
         try:
-            offering = Offering.objects.get(course__slug=course_slug)
+            offering = Offering.objects.get(course__slug=course_slug, slug=offering_slug)
         except Offering.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
         try:
             team_settings = db.OfferingTeamsSettings.objects.get(offering=offering)
         except db.OfferingTeamsSettings.DoesNotExist:
-            raise Response({'detail': 'Team settings not found.'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'detail': 'Team settings not found.'}, status=status.HTTP_404_NOT_FOUND)
         
         if team_settings.formation_deadline < timezone.now():
-            raise Response({'detail': 'Team formation deadline has passed.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': 'Team formation deadline has passed.'}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             role = db.Role.objects.get(

@@ -19,7 +19,8 @@ import { fetchUserName } from '@/app/lib/getUser';
 import { Dialog } from 'primereact/dialog';
 
 export interface StudentTeamViewTabProps {
-    courseSlug: string;
+	courseSlug: string;
+	offeringSlug: string;
 }
 
 export enum TeamMembershipRole {
@@ -46,7 +47,7 @@ export interface Team {
 
 export default function StudentTeamViewTab(props: StudentTeamViewTabProps) {
     const [jwt, setAndStoreJwt] = useContext(JwtContext);
-    const { courseSlug } = props;
+    const { courseSlug, offeringSlug } = props;
     const [teams, setTeams] = useState<Team[]>([]);
     const [userMembership, setUserMembership] = useState<
         UserMembership | undefined
@@ -77,7 +78,7 @@ export default function StudentTeamViewTab(props: StudentTeamViewTabProps) {
             const res = await fetchApi(
                 jwt,
                 setAndStoreJwt,
-                `teams/get/${courseSlug}`,
+                `teams/get/${courseSlug}/${offeringSlug}`,
                 'GET'
             );
             const data = await res.json();
@@ -149,6 +150,7 @@ export default function StudentTeamViewTab(props: StudentTeamViewTabProps) {
         fetchApi(jwt, setAndStoreJwt, 'teams/create/', 'POST', {
             team_name: 'Team ' + (teams.length + 1).toString(),
             course_slug: courseSlug,
+			offering_slug: offeringSlug,
         }).then((response) => {
             console.log(response);
             fetchTeams();

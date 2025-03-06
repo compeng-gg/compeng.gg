@@ -50,7 +50,7 @@ urlpatterns = [
     path('teams/join/manage/', teams_api.manage_join_team_request),
     path('teams/delete/', teams_api.delete_team),
     path('teams/leave/', teams_api.leave_team),
-    path('teams/<slug:slug>/', teams_api.teams),
+    path('teams/get/<slug:course_slug>/<slug:offering_slug>', teams_api.teams),
     path('teams/create/', teams_api.create_team),
     path('teams/settings/get/<slug:course_slug>/<slug:offering_slug>', teams_api.get_team_settings_for_offering),
     path('teams/settings/create/<slug:course_slug>/<slug:offering_slug>', teams_api.create_team_settings_for_offering),
