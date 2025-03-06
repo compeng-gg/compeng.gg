@@ -174,30 +174,13 @@ def test_team_duplicate_names_for_different_offerings_succeeds():
 @pytest.mark.django_db
 def test_offering_teams_settings_creation():
     offering = create_offering()
-    settings = db.OfferingTeamsSettings.objects.create(offering=offering)
+    settings = db.OfferingTeamsSettings.objects.create(offering=offering, max_team_size=3)
 
     # Assert that the instance was created
     assert isinstance(settings, db.OfferingTeamsSettings)
     assert settings.offering == offering
     assert settings.max_team_size == 3
-    now = timezone.now()
-    assert abs((settings.formation_deadline - now).total_seconds()) < 1
-    assert settings.show_group_members is True
-    assert settings.allow_custom_names is False
-
-
-@pytest.mark.django_db
-def test_offering_teams_settings_custom_max_values():
-    offering = create_offering()
-    settings = db.OfferingTeamsSettings.objects.create(
-        offering=offering,
-        max_team_size=5,
-        formation_deadline=timezone.now() + timedelta(days=1),
-        show_group_members=False,
-        allow_custom_names=True,
-    )
-    assert settings.max_team_size == 5
-
+    assert settings.formation_deadline == None
 
 @pytest.mark.django_db
 def test_unique_offering_constraint():

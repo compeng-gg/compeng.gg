@@ -19,6 +19,7 @@ class DeleteTeamRequestSerializer(serializers.Serializer):
 class CreateTeamRequestSerializer(serializers.Serializer):
     team_name = serializers.CharField(max_length=255, required=True)
     course_slug = serializers.CharField(max_length=255, required=True)
+    offering_slug = serializers.CharField(max_length=255, required=True)
 
 class CreateTeamSettingsForOfferingRequestSerializer(serializers.Serializer):
     max_team_size = serializers.IntegerField(required=True)

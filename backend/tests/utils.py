@@ -1,13 +1,33 @@
 import courses.models as db
 from datetime import datetime, timedelta, timezone
 from django.utils import timezone
+from django.utils.text import slugify
 from django.test import TestCase
 from rest_framework.test import APIClient
 from django.contrib.auth.models import User
 from rest_framework_simplejwt.tokens import RefreshToken
 from typing import Optional
 from django.contrib.contenttypes.models import ContentType
+from enum import IntEnum
 
+class Kind(IntEnum):
+    INSTRUCTOR = 1
+    TA = 2
+    STUDENT = 3
+    AUDIT = 4
+
+def create_student_role(offering: db.Offering):
+    return create_role(Kind.STUDENT, offering)
+
+def create_role(
+    kind: Kind,
+    offering: db.Offering,
+    ) -> db.Role:
+    role = db.Role.objects.create(
+        kind=kind,
+        offering=offering 
+    )
+    return role
 
 def create_offering(
     offering_name: str = "fall 2024",
@@ -21,6 +41,7 @@ def create_offering(
 
     offering = db.Offering.objects.create(
         name=offering_name,
+        slug=slugify(offering_name),
         course=course,
         start=timezone.now(),
         end=timezone.now() + timedelta(days=100),
@@ -61,6 +82,10 @@ def create_repository(
 
     return mock_repository
 
+def create_student_enrollment(
+    user_id: int, offering: db.Offering
+) -> db.Enrollment:
+    return create_enrollment(user_id, offering, Kind.STUDENT)
 
 def create_enrollment(
     user_id: int, offering: db.Offering, kind: db.Role.Kind
@@ -192,6 +217,11 @@ def create_written_response_question(
         points=points,
         max_length=max_length,
     )
+
+def create_user(username):
+    return User.objects.create_user(
+            username=username, password="testpassword"
+        )
 
 
 class TestCasesWithUserAuth(TestCase):
