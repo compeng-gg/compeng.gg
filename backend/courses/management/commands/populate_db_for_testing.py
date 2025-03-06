@@ -91,73 +91,73 @@ class Command(BaseCommand):
 
         mock_content_type = ContentType.objects.create(app_label="your_app", model="mock_model")
 
-        # mock_repository = db.Repository.objects.create(
-        #     id=1,
-        #     name="reimagined-parakeet",
-        #     full_name="nickwood5/reimagined-parakeet",
-        #     owner_content_type=mock_content_type,
-        #     owner_id=1,
-        # )
+        mock_repository = db.Repository.objects.create(
+            id=1,
+            name="reimagined-parakeet",
+            full_name="nickwood5/reimagined-parakeet",
+            owner_content_type=mock_content_type,
+            owner_id=1,
+        )
 
 
-        # mock_quiz = db.Quiz.objects.create(
-        #     slug="quiz-slug",
-        #     offering=mock_offering,
-        #     title="Quiz Title",
-        #     visible_at=now_datetime,
-        #     starts_at=now_datetime,
-        #     ends_at=now_datetime + timedelta(days=365),
-        #     repository=mock_repository
-        # )
+        mock_quiz = db.Quiz.objects.create(
+            slug="quiz-slug",
+            offering=mock_offering,
+            title="Quiz Title",
+            visible_at=now_datetime,
+            starts_at=now_datetime,
+            ends_at=now_datetime + timedelta(days=365),
+            repository=mock_repository
+        )
 
-        # db.CheckboxQuestion.objects.create(
-        #     prompt="Answer the checkbox question",
-        #     points=20,
-        #     order=1,
-        #     quiz=mock_quiz,
-        #     options=['1', '2', '3'],
-        #     correct_option_indices=[0, 1]
-        # )
+        db.CheckboxQuestion.objects.create(
+            prompt="Answer the checkbox question",
+            points=20,
+            order=1,
+            quiz=mock_quiz,
+            options=['1', '2', '3'],
+            correct_option_indices=[0, 1]
+        )
 
-        # db.MultipleChoiceQuestion.objects.create(
-        #     prompt="Prompt for a multiple choice question",
-        #     points=20,
-        #     order=2,
-        #     quiz=mock_quiz,
-        #     options=['Correct Option', 'Incorrect Option 1', 'Incorrect Option 2'],
-        #     correct_option_index=0,
-        # )
+        db.MultipleChoiceQuestion.objects.create(
+            prompt="Prompt for a multiple choice question",
+            points=20,
+            order=2,
+            quiz=mock_quiz,
+            options=['Correct Option', 'Incorrect Option 1', 'Incorrect Option 2'],
+            correct_option_index=0,
+        )
 
-        # db.CodingQuestion.objects.create(
-        #     prompt="Prompt for a C++ coding question",
-        #     points=15,
-        #     order=3,
-        #     quiz=mock_quiz,
-        #     starter_code=None,
-        #     programming_language=db.CodingQuestion.ProgrammingLanguage.C_PP,
-        #     file_to_replace="question1/add.py",
-        #     grading_file_directory="question1",
-        #     files=["TODO"]
-        # )
+        db.CodingQuestion.objects.create(
+            prompt="Prompt for a C++ coding question",
+            points=15,
+            order=3,
+            quiz=mock_quiz,
+            starter_code=None,
+            programming_language=db.CodingQuestion.ProgrammingLanguage.C_PP,
+            file_to_replace="question1/add.py",
+            grading_file_directory="question1",
+            files=["TODO"]
+        )
 
-        # python_coding_question = db.CodingQuestion.objects.create(
-        #     prompt="Write a Python function `add(num1, num2)` that adds two integers.",
-        #     points=25,
-        #     order=4,
-        #     quiz=mock_quiz,
-        #     starter_code=None,
-        #     programming_language=db.CodingQuestion.ProgrammingLanguage.PYTHON,
-        #     file_to_replace="question1/add.py",
-        #     grading_file_directory="question1",
-        #     files=["question1/add.py"]
-        # )
+        python_coding_question = db.CodingQuestion.objects.create(
+            prompt="Write a Python function `add(num1, num2)` that adds two integers.",
+            points=25,
+            order=4,
+            quiz=mock_quiz,
+            starter_code=None,
+            programming_language=db.CodingQuestion.ProgrammingLanguage.PYTHON,
+            file_to_replace="question1/add.py",
+            grading_file_directory="question1",
+            files=["question1/add.py"]
+        )
 
-        # db.WrittenResponseQuestion.objects.create(
-        #     prompt="Prompt for a written response question",
-        #     points=25,
-        #     order=5,
-        #     quiz=mock_quiz,
-        #     max_length=200,
-        # )
+        db.WrittenResponseQuestion.objects.create(
+            prompt="Prompt for a written response question",
+            points=25,
+            order=5,
+            quiz=mock_quiz,
+            max_length=200,
+        )
 
         print("Populated DB with mock data!")

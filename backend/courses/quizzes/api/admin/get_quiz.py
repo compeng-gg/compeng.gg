@@ -28,6 +28,7 @@ def get_quiz(request, course_slug: str, quiz_slug: str):
         ("CODING", coding_questions),
         ("MULTIPLE_CHOICE", multiple_choice_questions),
         ("WRITTEN_RESPONSE", written_response_questions),
+        ("CHECKBOX", checkbox_questions),
     ]
 
     questions = []

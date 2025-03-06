@@ -134,7 +134,7 @@ export default function Page({ params }: { params: { courseSlug: string, quizSlu
       <ConfirmDialog />
       <div style={{ display: "flex", gap: "10px", width: "100%", flexDirection: "column" }}>
         {questionStates.map((state, idx) => (
-          <QuestionDisplay {...questionData[idx]} state={state} idx={idx} viewMode={QuestionViewMode.INSTRUCTOR_EDIT}/>
+          <QuestionDisplay {...questionData[idx]} state={state} idx={idx}/>
         ))}
       </div>
 
@@ -146,14 +146,16 @@ export default function Page({ params }: { params: { courseSlug: string, quizSlu
 
 function getStartingStateValue(questionData: QuestionData, rawData: any): any {
   switch (questionData.questionType) {
-      case "CODE":
-          return (questionData as CodeQuestionData).starterCode || "";
-      case "SELECT":
-          return -1; // Default to no option selected
-      case "TEXT":
-          return "";
-      default:
-          throw new Error(`Unsupported question type: ${JSON.stringify(questionData)}`);
+    case "CODE":
+      return (rawData.solution) ?? ((questionData as CodeQuestionData).starterCode || "");
+    case "SELECT":
+      return (rawData.selected_answer_index) ?? -1; // Default to no option selected
+    case "TEXT":
+      return (rawData.response) ?? "";
+    case "MULTI_SELECT":
+      return (rawData.selected_answer_indices) ?? [];
+    default:
+      throw new Error(`Unsupported question type: ${JSON.stringify(questionData)}`);
   }
 }
 

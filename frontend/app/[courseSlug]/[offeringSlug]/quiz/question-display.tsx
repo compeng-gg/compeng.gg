@@ -9,6 +9,7 @@ import { useContext, useEffect, useRef, useState } from "react";
 import { JwtContext } from "@/app/lib/jwt-provider";
 import { fetchApi } from "@/app/lib/api";
 import { QuizProps } from "./quiz-display";
+import MultiSelectEditor from "./components/multiselect-editor";
 
 enum QuestionSaveStatus {
     NOT_ANSWERED = "Not Answered",
@@ -147,6 +148,8 @@ function QuestionContent({ props, save }: { props: QuestionProps, save: (newValu
             return <TextEditor state={props.state} save={save} />;
         case "SELECT":
             return <SelectEditor props={props} save={save} />;
+        case "MULTI_SELECT":
+            return <MultiSelectEditor props={props} save={save} />;
         default:
             return null;
     }
@@ -202,5 +205,7 @@ function getAnswerBody(props: QuestionProps, value: any) {
             return { selected_answer_index: value };
         case "TEXT":
             return { response: value };
+        case "MULTI_SELECT":
+            return {selected_answer_indices: value};
     }
 }

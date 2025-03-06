@@ -1,5 +1,5 @@
 import { Card } from "primereact/card";
-import { BaseQuestionData, LocalToServer, ProgrammingLanguages, QuestionData, QuestionType, ServerQuestionType, ServerToLocal, StaffCodeQuestionData, StaffQuestionData, StaffSelectQuestionData } from "../../question-models";
+import { BaseQuestionData, ID_SET_ON_SERVER, LocalToServer, ProgrammingLanguages, QuestionData, QuestionType, ServerQuestionType, ServerToLocal, StaffCodeQuestionData, StaffMultiSelectQuestionData, StaffQuestionData, StaffSelectQuestionData } from "../../question-models";
 import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
 import { KeyFilterType } from "primereact/keyfilter";
@@ -12,11 +12,13 @@ import { FloatLabel } from "primereact/floatlabel";
 import Ide from "../../components/ide";
 import { ButtonGroup } from "primereact/buttongroup";
 import { Button } from "primereact/button";
+import { register } from "module";
 
 export interface QuestionEditorProps {
     questionData: StaffQuestionData;
     setQuestionData: (data: StaffQuestionData | null) => void;
     moveQuestion: (delta: number) => void;
+    registerDelete: (data: StaffQuestionData) => void;
     idx: number;
     numQuestions: number;
 
@@ -54,12 +56,16 @@ export default function QuestionEditor(props: QuestionEditorProps) {
 
 function GenericQuestionEditor (props: QuestionEditorProps) {
 
-   const {questionData, setQuestionData, idx} = props;
+   const {questionData, setQuestionData, idx, registerDelete} = props;
 
    const changeQuestionType = (newType: QuestionType) => {
         //Convert old data to generic
+        console.log("Chaning type from " + questionData.questionType + " to " + newType);
+        console.log(JSON.stringify(questionData, null,2));
+        registerDelete(JSON.parse(JSON.stringify(questionData)));
         const tempData: BaseQuestionData = questionData as BaseQuestionData;
         tempData.questionType = newType;
+        tempData.id = ID_SET_ON_SERVER;
         console.log(newType);
         tempData.serverQuestionType = LocalToServer.get(newType.toString()) as ServerQuestionType;
         console.log(tempData);
@@ -73,6 +79,9 @@ function GenericQuestionEditor (props: QuestionEditorProps) {
             case "SELECT":
                 setQuestionData({...tempData, options: [], correctAnswerIdx: -1} as StaffSelectQuestionData);
                 break;
+            case "MULTI_SELECT":
+                setQuestionData({...tempData, options: [], correctAnswerIdxs: []} as StaffMultiSelectQuestionData);
+                break;
         }       
     }
 
@@ -83,7 +92,7 @@ function GenericQuestionEditor (props: QuestionEditorProps) {
                 <InputNumber id="marks" value={questionData.totalMarks} showButtons onValueChange={(e) => setQuestionData({ ...questionData, totalMarks: e.value ?? 0 })} />
             </LabelledField>
             <LabelledField label="Question Type" id="questionType">
-                <Dropdown value={questionData.questionType} options={["CODE" as QuestionType, "TEXT" as QuestionType, "SELECT" as QuestionType]} onChange={(e) => changeQuestionType(e.value)} />
+                <Dropdown value={questionData.questionType} options={["CODE" as QuestionType, "TEXT" as QuestionType, "SELECT" as QuestionType, "MULTI_SELECT" as QuestionType]} onChange={(e) => changeQuestionType(e.value)} />
             </LabelledField>
         </div>
    )
@@ -123,6 +132,8 @@ function QuestionSpecificEditor(props: QuestionEditorProps) {
             return null;
         case "SELECT":
             return <SelectQuestionEditor {...props} />;
+        case "MULTI_SELECT":
+            return <MultiSelectQuestionEditor {...props} />;    
         default:
             return null;
     }
@@ -169,6 +180,26 @@ function SelectQuestionEditor(props: QuestionEditorProps) {
             </LabelledField>
             <LabelledField label="Correct Answer" id="answer">
                 <Dropdown id="answer" value={questionData.options[questionData.correctAnswerIdx]} options={questionData.options} onChange={(e) => setQuestionData({ ...questionData, correctAnswerIdx: getAnswerIdx(e.value)})} />
+            </LabelledField>
+        </div>
+    )
+}
+
+function MultiSelectQuestionEditor(props: QuestionEditorProps) {
+    const questionData : StaffMultiSelectQuestionData = props.questionData as StaffMultiSelectQuestionData;
+    const setQuestionData = props.setQuestionData
+
+    const getAnswerIdxs = (answers: string[]) => {
+        return answers.map((answer) => questionData.options.indexOf(answer));
+    }
+
+    return (
+        <div style={{display: "flex", flexDirection: "column", gap: "10px"}}>
+            <LabelledField label="Options" id="options">
+                <Chips id="options" value={questionData.options} onChange={(e) => setQuestionData({ ...questionData, options: e.value ?? [] })} />
+            </LabelledField>
+            <LabelledField label="Correct Answers" id="answers">
+                <MultiSelect id="answers" value={questionData.options.filter((_, idx) => questionData.correctAnswerIdxs.includes(idx))} options={questionData.options} onChange={(e) => setQuestionData({ ...questionData, correctAnswerIdxs: getAnswerIdxs(e.value ?? [])})} />
             </LabelledField>
         </div>
     )

@@ -1,7 +1,7 @@
 'use client';
 
 import { useContext, useEffect, useState } from "react";
-import { QuestionData, StaffQuestionData } from "../../question-models";
+import { ID_SET_ON_SERVER, QuestionData, StaffQuestionData } from "../../question-models";
 import { QuizProps } from "../../quiz-display";
 import { JwtContext } from "@/app/lib/jwt-provider";
 import { fetchApi } from "@/app/lib/api";
@@ -31,6 +31,7 @@ export default function Page({ params }: { params: { courseSlug: string, quizSlu
     const [jwt, setAndStoreJwt] = useContext(JwtContext);
     const [quiz, setQuiz] = useState<StaffQuizProps | undefined>(undefined);
     const [questionData, setQuestionData] = useState<StaffQuestionData[]>([]);
+    const [deletedQuestions, setDeletedQuestions] = useState<StaffQuestionData[]>([]);
     const [loaded, setLoaded] = useState<boolean>(false);
     const [modified, setModified] = useState<boolean>(false);
     
@@ -59,7 +60,7 @@ export default function Page({ params }: { params: { courseSlug: string, quizSlu
     const addQuestion= () => {
         setModified(true);
         const newQuestion = {
-            id: "set_on_server",
+            id: ID_SET_ON_SERVER,
             quizSlug: quizSlug,
             courseSlug: courseSlug,
             prompt: "",
@@ -79,6 +80,11 @@ export default function Page({ params }: { params: { courseSlug: string, quizSlu
         setQuestionData(temp);
     }
 
+    const registerDelete = (questionData: StaffQuestionData) => {
+        console.log("Registering delete", questionData);
+        setDeletedQuestions(prevData => [...prevData, questionData]);
+    }
+
     useEffect(() => {
         if (!loaded) {
             fetchQuiz();
@@ -89,6 +95,8 @@ export default function Page({ params }: { params: { courseSlug: string, quizSlu
     const setQuestionDataAtIdx = (idx: number, data: StaffQuestionData | null) => {
         setModified(true);
         if(data === null) {
+            //Add to deletion
+            registerDelete(questionData[idx]);
             setQuestionData(prevData => {
                 const newData = [...prevData];
                 newData.splice(idx, 1);
@@ -130,11 +138,18 @@ export default function Page({ params }: { params: { courseSlug: string, quizSlu
     return (
         <LoginRequired>
             <Navbar />
-            <QuizEditorTopbar quiz={quiz} fetchQuiz={fetchQuiz} questionData={questionData} modified={modified} setModified={setModified} />
+            <QuizEditorTopbar quiz={quiz} fetchQuiz={fetchQuiz} deletedQuestions={deletedQuestions} setDeletedQuestions={setDeletedQuestions} questionData={questionData} modified={modified} setModified={setModified} />
             <div style={{ display: "flex", gap: "10px", width: "100%", flexDirection: "column" }}>
                 <QuizSettingsEditor quizProps={quiz} setQuizProps={(newProps) => setQuizPropsCustom(newProps)} />
                 {questionData.map((data, idx) => (
-                    <QuestionEditor questionData={data} setQuestionData={(newData) => setQuestionDataAtIdx(idx, newData)} idx={idx} numQuestions={questionData.length} moveQuestion={(delta: number) => move(idx, delta)}/>
+                    <QuestionEditor
+                        questionData={data}
+                        setQuestionData={(newData) => setQuestionDataAtIdx(idx, newData)}
+                        idx={idx}
+                        numQuestions={questionData.length}
+                        moveQuestion={(delta: number) => move(idx, delta)}
+                        registerDelete={registerDelete}
+                    />
                 ))}
                 <AddQuestionButton addQuestion={addQuestion}/>
             </div> 
@@ -146,12 +161,14 @@ interface QuizEditorTopbarProps {
     quiz: StaffQuizProps;
     questionData: StaffQuestionData[];
     modified: boolean;
+    deletedQuestions: StaffQuestionData[];
     fetchQuiz: () => void;
+    setDeletedQuestions: (newVal: StaffQuestionData[]) => void;
     setModified: (newVal: boolean) => void;
 }
 
 function QuizEditorTopbar(props: QuizEditorTopbarProps) {
-    const { quiz, questionData, modified, setModified } = props;
+    const { quiz, questionData, modified, setModified, deletedQuestions, setDeletedQuestions } = props;
 
     const [error, setError] = useState<boolean>(false);
 
@@ -187,9 +204,27 @@ function QuizEditorTopbar(props: QuizEditorTopbarProps) {
         }
     }
 
+
+    async function deleteQuestion(questionData: StaffQuestionData) {
+        if(questionData.id === ID_SET_ON_SERVER) return;
+        try {
+            const res = await fetchApi(jwt, setAndStoreJwt, `quizzes/admin/${quiz.courseSlug}/${quiz.quizSlug}/${questionData.serverQuestionType.toLowerCase()}/${questionData.id}/delete/`, "DELETE");
+            if(!res.ok){
+                throw new Error("Failed to delete question");
+            }
+        } 
+        catch(e) {
+            setError(true);
+            console.error("Failed to delete question", JSON.stringify(questionData, null, 2), e);
+        }
+    }
+
     async function updateQuiz() {
         try {
             const res = await fetchApi(jwt, setAndStoreJwt, `quizzes/admin/${quiz.courseSlug}/${quiz.quizSlug}/edit/`, "POST", serializeQuizData(quiz));
+            if(!res.ok){
+                throw new Error("Failed to save question");
+            }
         } catch(e) {
             setError(true);
             console.error("Failed to update quiz", JSON.stringify(quiz, null, 2), e);
@@ -199,17 +234,25 @@ function QuizEditorTopbar(props: QuizEditorTopbarProps) {
     async function saveQuiz() {
         if(!modified) return;
         setError(false);
-        questionData.forEach(async (question, idx) => {
-            if (question.id === "set_on_server") {
+        await Promise.all(deletedQuestions.map(async (question) => {
+            await deleteQuestion(question);
+        }));
+        
+        await Promise.all(questionData.map(async (question, idx) => {
+            if (question.id === ID_SET_ON_SERVER) {
                 await createQuestion(question, idx);
             } else {
                 await saveQuestion(question, idx);
             }
-        });
+        }));
+
         await updateQuiz();
         if(!error){
+            setDeletedQuestions([]);
             setModified(false);
             props.fetchQuiz();
+        } else {
+            console.log("ERROR");
         }
 
     }
@@ -246,7 +289,7 @@ function serializeQuestionData(questionData: StaffQuestionData, idx: number) {
     const base = {
         prompt: questionData.prompt,
         points: questionData.totalMarks,
-        order: idx,
+        order: idx+1,
         question_type: questionData.serverQuestionType.toLowerCase(),
     }   
     switch(questionData.questionType) {
@@ -267,6 +310,14 @@ function serializeQuestionData(questionData: StaffQuestionData, idx: number) {
             }
         case "TEXT":
             return base;
+        case "MULTI_SELECT":
+            return {
+                ...base,
+                options: questionData.options,
+                correct_option_indices: questionData.correctAnswerIdxs
+            }
+        default:
+            throw new Error(`Unsupported question type: ${JSON.stringify(questionData)}`);
         }
 }
 

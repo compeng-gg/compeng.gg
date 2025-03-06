@@ -40,6 +40,18 @@ export function getQuestionDataFromRaw(rawData: any, quizSlug: string, courseSlu
         return {
           ...baseData,
         } as TextQuestionData
+      case "MULTI_SELECT":
+        if(isStaff) {
+          return {
+            ...baseData,
+            options: rawData.options, correctAnswerIdxs: rawData.correct_option_indices
+          }
+        } else {
+          return {
+            ...baseData,
+            options: rawData.options
+          }
+        }
       default:
         throw new Error(`Unsupported question type: ${JSON.stringify(rawData)}`);
     }

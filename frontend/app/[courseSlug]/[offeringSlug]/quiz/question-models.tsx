@@ -4,18 +4,21 @@
 export const ServerToLocal = new Map([
     ["CODING", "CODE"],
     ["MULTIPLE_CHOICE", "SELECT"],
-    ["WRITTEN_RESPONSE", "TEXT"]
+    ["WRITTEN_RESPONSE", "TEXT"],
+    ["CHECKBOX", "MULTI_SELECT"]
 ])
 
 export const LocalToServer = new Map([
     ["CODE", "CODING"],
     ["SELECT", "MULTIPLE_CHOICE"],
-    ["TEXT", "WRITTEN_RESPONSE"]
+    ["TEXT", "WRITTEN_RESPONSE"],
+    ["MULTI_SELECT", "CHECKBOX"]
 ])
 
+export const ID_SET_ON_SERVER = "set_on_server";
 
-export type QuestionType = "CODE" | "SELECT" | "TEXT";
-export type ServerQuestionType = "CODING" | "MULTIPLE_CHOICE" | "WRITTEN_RESPONSE"
+export type QuestionType = "CODE" | "SELECT" | "TEXT" | "MULTI_SELECT";
+export type ServerQuestionType = "CODING" | "MULTIPLE_CHOICE" | "WRITTEN_RESPONSE" | "CHECKBOX";
 
 export interface BaseQuestionData {
     id: string;
@@ -51,14 +54,23 @@ export interface StaffSelectQuestionData extends SelectQuestionData {
     correctAnswerIdx: number;
 }
 
+export interface MultiSelectQuestionData extends BaseQuestionData {
+    questionType: "MULTI_SELECT";
+    options: string[];
+}
+
+export interface StaffMultiSelectQuestionData extends MultiSelectQuestionData {
+    correctAnswerIdxs: number[];
+}
+
 export interface TextQuestionData extends BaseQuestionData {
     questionType: "TEXT";
 }
 
-export type QuestionData = CodeQuestionData | SelectQuestionData | TextQuestionData;
+export type QuestionData = CodeQuestionData | SelectQuestionData | TextQuestionData | MultiSelectQuestionData;
 
 
-export type StaffQuestionData = StaffCodeQuestionData | StaffSelectQuestionData | TextQuestionData;
+export type StaffQuestionData = StaffCodeQuestionData | StaffSelectQuestionData | TextQuestionData | StaffMultiSelectQuestionData;
 // States
 interface BaseState<T> {
     value: T;
@@ -68,6 +80,7 @@ interface BaseState<T> {
 export type CodeState = BaseState<string>; // For starterCode or similar
 export type SelectState = BaseState<number>; // For selectedIdx
 export type TextState = BaseState<string>; // For currentText
+export type MultiSelectState = BaseState<number[]>; // For selectedIdxs
 
 export type QuestionState = CodeState | SelectState | TextState;
 
@@ -76,6 +89,7 @@ type QuestionTypeToStateMap = {
     CODE: CodeState;
     SELECT: SelectState;
     TEXT: TextState;
+    MULTI_SELECT: MultiSelectState;
 };
 
 //An enum with the below values
@@ -89,8 +103,9 @@ export enum QuestionViewMode {
 export type CodeQuestionProps = CodeQuestionData & { state: CodeState };
 export type SelectQuestionProps = SelectQuestionData & { state: SelectState };
 export type TextQuestionProps = TextQuestionData & { state: TextState };
+export type MultiSelectQuestionProps = MultiSelectQuestionData & { state: MultiSelectState };
 
-export type QuestionProps = (CodeQuestionProps | SelectQuestionProps | TextQuestionProps) & {viewMode : QuestionViewMode};
+export type QuestionProps = (CodeQuestionProps | SelectQuestionProps | TextQuestionProps | MultiSelectQuestionProps)
 
 // Type Guards
 export const isCodeQuestion = (props: QuestionProps): props is CodeQuestionProps =>
@@ -101,3 +116,19 @@ export const isSelectQuestion = (props: QuestionProps): props is SelectQuestionP
 
 export const isTextQuestion = (props: QuestionProps): props is TextQuestionProps =>
     props.questionType === "TEXT";
+
+export const isMultiSelectQuestion = (props: QuestionProps): props is MultiSelectQuestionProps =>
+    props.questionType === "MULTI_SELECT";
+
+export const isAnswered = (props: QuestionProps) => {
+    switch(props.questionType){
+        case "TEXT":
+            return props.state.value.length;
+        case "CODE":
+            return props.state.value != props.starterCode;
+        case "SELECT":
+            return props.state.value != -1;
+        case "MULTI_SELECT":
+            return props.state.value.length;
+    }
+}
