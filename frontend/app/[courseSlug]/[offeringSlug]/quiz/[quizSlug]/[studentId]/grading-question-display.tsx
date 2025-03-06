@@ -19,17 +19,26 @@ interface GradingQuestionDisplayProps {
         correct_option_indices?: number[];
     };
     studentAnswer: any;
-    executions?: { // ✅ New executions field for coding answers
+    executions?: { 
         solution: string;
         result: any;
         stderr: string;
         status: string;
     }[];
-    grade?: number | null; // ✅ Pass grade as a prop
+    grade?: number | null;
+    comment?: string | null; // ✅ Pass comment as a prop
 }
 
-export default function GradingQuestionDisplay({ idx = 1, question, studentAnswer, executions }: GradingQuestionDisplayProps) {    const [comment, setComment] = useState("");
+
+
+export default function GradingQuestionDisplay({ idx = 1, question, studentAnswer, executions, grade: initialGrade }: GradingQuestionDisplayProps) {    
+    const [comment, setComment] = useState(() => studentAnswer?.comment ?? "");
+
     const [grade, setGrade] = useState(() => {
+        if (initialGrade !== null) {
+            return initialGrade; // ✅ Use existing grade if set
+        }
+
         if (question.correct_option_index !== undefined) {
             // ✅ Auto-grade multiple choice: Full points if correct, 0 otherwise
             return studentAnswer?.selected_answer_index === question.correct_option_index ? question.points : 0;
@@ -37,27 +46,23 @@ export default function GradingQuestionDisplay({ idx = 1, question, studentAnswe
             // ✅ Auto-grade checkbox (Partial Credit)
             const studentSelection = new Set(studentAnswer?.selected_answer_indices || []);
             const correctSelection = new Set(question.correct_option_indices);
-    
-            // Calculate number of correct choices picked
+
             const correctCount = [...studentSelection].filter((idx) => correctSelection.has(idx)).length;
             const incorrectCount = [...studentSelection].filter((idx) => !correctSelection.has(idx)).length;
-    
-            // Partial score: Correct selections get points, incorrect choices subtract points
+
             const totalCorrect = correctSelection.size;
             const partialScore = Math.max(0, (correctCount / totalCorrect) * question.points - incorrectCount);
-    
+            
             return Math.round(partialScore);
         } else if (question.programming_language) {
             // ✅ Auto-grade coding question based on execution results
-            const executions = studentAnswer?.executions || [];
-            if (executions.length > 0) {
-                // Extract the highest grade among executions
+            if (executions && executions.length > 0) {
                 const highestGrade = Math.max(...executions.map(exec => exec.result?.grade ?? 0));
-                return Math.round(highestGrade * question.points); // Scale to max question points
+                return Math.round(highestGrade * question.points);
             }
             return 0; // Default to zero if no executions exist
         }
-        return "";
+        return null;
     });
 
     return (
@@ -79,16 +84,29 @@ export default function GradingQuestionDisplay({ idx = 1, question, studentAnswe
 
                 {/* ✅ Multiple-Choice & Checkbox Questions */}
                 {question.options ? (
-                    <SelectEditor
-                        props={{
-                            state: {
-                                value: studentAnswer?.selected_answer_index ?? -1,
-                                setValue: () => {}, // Read-only
-                            },
-                            options: question.options,
-                        }}
-                        save={() => {}} 
-                    />
+                    question.correct_option_indices ? (
+                        <CheckboxEditor
+                            props={{
+                                state: {
+                                    value: studentAnswer?.selected_answer_indices || [],
+                                    setValue: () => {}, // Read-only
+                                },
+                                options: question.options,
+                            }}
+                            save={() => {}}
+                        />
+                    ) : (
+                        <SelectEditor
+                            props={{
+                                state: {
+                                    value: studentAnswer?.selected_answer_index ?? -1,
+                                    setValue: () => {}, // Read-only
+                                },
+                                options: question.options,
+                            }}
+                            save={() => {}}
+                        />
+                    )
                 ) : question.programming_language ? (
                     <CodeEditor
                         props={{
@@ -110,7 +128,6 @@ export default function GradingQuestionDisplay({ idx = 1, question, studentAnswe
                         save={() => {}}
                     />
                 ) : (
-                    // ✅ Written Response Questions
                     <TextEditor
                         state={{
                             value: studentAnswer?.response ?? "No answer provided",
@@ -130,9 +147,10 @@ export default function GradingQuestionDisplay({ idx = 1, question, studentAnswe
                             value: comment,
                             setValue: (newValue) => setComment(newValue),
                         }}
-                        save={() => {}}
+                        save={() => {}} 
                     />
                 </div>
+
 
                 <div
                     style={{
@@ -149,10 +167,10 @@ export default function GradingQuestionDisplay({ idx = 1, question, studentAnswe
                     <strong style={{ marginRight: "8px" }}>Grade:</strong>
                     <input
                         type="text"
-                        value={grade}
+                        value={grade !== null ? grade : ""}
                         onChange={(e) => {
                             const value = e.target.value.replace(/\D/, ""); 
-                            setGrade(value);
+                            setGrade(value ? parseInt(value) : null);
                         }}
                         pattern="[0-9]*"
                         inputMode="numeric"

@@ -376,8 +376,9 @@ class QuizQuestionBaseModel(models.Model):
 
 
 class QuizAnswerBaseModel(models.Model):
-
     last_updated_at = models.DateTimeField()
+    comment = models.TextField(null=True, blank=True)
+    grade = models.PositiveIntegerField(null=True, blank=True)
 
     class Meta:
         abstract = True
@@ -404,7 +405,6 @@ class WrittenResponseAnswer(QuizAnswerBaseModel):
     question = models.ForeignKey(WrittenResponseQuestion, on_delete=models.CASCADE, related_name='answers')
     
     response = models.TextField()
-    grade = models.PositiveIntegerField(null=True, blank=True)
 
 
 class CodingQuestion(QuizQuestionBaseModel):
@@ -443,7 +443,6 @@ class CodingAnswer(QuizAnswerBaseModel):
     question = models.ForeignKey(CodingQuestion, on_delete=models.CASCADE, related_name="answers")
     
     solution = models.TextField()
-    grade = models.PositiveIntegerField(null=True, blank=True)
 
 
 class CodingAnswerExecution(models.Model):
@@ -487,7 +486,6 @@ class MultipleChoiceAnswer(QuizAnswerBaseModel):
     quiz_submission = models.ForeignKey(QuizSubmission, on_delete=models.CASCADE, related_name='multiple_choice_answers')
     question = models.ForeignKey(MultipleChoiceQuestion, on_delete=models.CASCADE, related_name='answers')
     selected_answer_index = models.PositiveIntegerField()
-    grade = models.PositiveIntegerField(null=True, blank=True)
 
 
 class CheckboxQuestion(QuizQuestionBaseModel):
@@ -512,4 +510,3 @@ class CheckboxAnswer(QuizAnswerBaseModel):
     question = models.ForeignKey(CheckboxQuestion, on_delete=models.CASCADE, related_name='answers')
     
     selected_answer_indices = models.JSONField(null=True) # TODO: validate this is an array
-    grade = models.PositiveIntegerField(null=True, blank=True)

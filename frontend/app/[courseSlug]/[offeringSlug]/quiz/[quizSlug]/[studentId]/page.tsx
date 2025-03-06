@@ -31,10 +31,10 @@ interface Submission {
     started_at: string;
     completed_at: string;
     answers: {
-        multiple_choice_answers: { question: string; selected_answer_index: number; grade: number | null }[];
-        checkbox_answers: { question: string; selected_answer_indices: number[]; grade: number | null }[];
-        coding_answers: { question: string; solution: string; executions?: any[]; grade: number | null }[];
-        written_response_answers: { question: string; response: string; grade: number | null }[];
+        multiple_choice_answers: { question: string; selected_answer_index: number; grade: number | null; comment: string | null }[];
+        checkbox_answers: { question: string; selected_answer_indices: number[]; grade: number | null; comment: string | null }[];
+        coding_answers: { question: string; solution: string; executions?: any[]; grade: number | null; comment: string | null }[];
+        written_response_answers: { question: string; response: string; grade: number | null; comment: string | null }[];
     };
 }
 
@@ -109,7 +109,7 @@ export default function StudentSubmissionPage() {
                             submission?.answers.coding_answers.find((a) => a.question === question.prompt) ||
                             submission?.answers.written_response_answers.find((a) => a.question === question.prompt);
 
-                        const executions = submission?.answers.coding_answers.find((a) => a.question === question.prompt)?.executions || [];
+                            const executions = submission?.answers.coding_answers.find((a) => a.question === question.prompt)?.executions || [];
 
                         return (
                             <GradingQuestionDisplay
@@ -121,8 +121,9 @@ export default function StudentSubmissionPage() {
                                     correct_option_indices: question.correct_option_indices,
                                 }}
                                 studentAnswer={matchingAnswer}
-                                executions={executions} // ✅ Pass executions for coding questions
-                                grade={matchingAnswer?.grade ?? null} // ✅ Pass the grade for the question
+                                executions={executions}
+                                grade={matchingAnswer?.grade}
+                                comment={matchingAnswer?.comment}
                             />
                         );
                     })}
