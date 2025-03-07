@@ -60,6 +60,13 @@ def add_github_team_membership_for_enrollment(enrollment):
     api = GitHubRestAPI()
     api.add_team_membership_for_org(github_team_slug, github_username)
 
+def safe_add_github_team_membership_for_enrollment(enrollment):
+    try:
+        get_uid('github', enrollment.user)
+        add_github_team_membership_for_enrollment(enrollment)
+    except ObjectDoesNotExist:
+        pass
+
 def remove_github_team_membership_for_enrollment(enrollment):
     user = enrollment.user
     social = user.social_auth.get(provider='github')
@@ -68,6 +75,13 @@ def remove_github_team_membership_for_enrollment(enrollment):
     github_team_slug = role.github_team_slug
     api = GitHubRestAPI()
     api.remove_team_membership_for_org(github_team_slug, github_username)
+
+def safe_remove_github_team_membership_for_enrollment(enrollment):
+    try:
+        get_uid('github', enrollment.user)
+        remove_github_team_membership_for_enrollment(enrollment)
+    except ObjectDoesNotExist:
+        pass
 
 def remove_github_fork(enrollment):
     user = enrollment.user

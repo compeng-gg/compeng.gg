@@ -8,6 +8,43 @@ from courses.models import *
 from discord_app.utils import *
 from github_app.utils import *
 
+def remove_enrollment(enrollment):
+    user = enrollment.user
+    print(f'    Removing {user.username}')
+
+    # Remove Discord role and GitHub team membership
+    safe_remove_discord_role_for_enrollment(enrollment)
+    safe_remove_github_team_membership_for_enrollment(enrollment)
+
+    try:
+        remove_github_fork(enrollment)
+    except:
+        print('      GitHub Repository not found')
+
+    offering = enrollment.role.offering
+    for assignment in offering.assignment_set.all():
+        AssignmentTask.objects.filter(user=user, assignment=assignment).delete()
+        AssignmentLeaderboardEntry.objects.filter(user=user, assignment=assignment).delete()
+        AssignmentGrade.objects.filter(user=user, assignment=assignment).delete()
+        Accommodation.objects.filter(user=user, assignment=assignment).delete()
+    enrollment.delete()
+
+def change_role_from_student_to_audit(enrollment):
+    user = enrollment.user
+    role = enrollment.role
+    assert role.kind == Role.Kind.STUDENT
+
+    # Remove the student roles
+    safe_remove_discord_role_for_enrollment(enrollment)
+    safe_remove_github_team_membership_for_enrollment(enrollment)
+
+    audit_role = Role.objects.get(offering=role.offering, kind=Role.Kind.AUDIT)
+    enrollment.role = audit_role
+    enrollment.save()
+
+    safe_add_discord_role_for_enrollment(enrollment)
+    safe_add_github_team_membership_for_enrollment(enrollment)
+
 def _update(offering, quercus_users, role_kind):
     utoronto = Institution.objects.get(slug='utoronto')
 
@@ -43,7 +80,7 @@ def _update(offering, quercus_users, role_kind):
             QuercusUser.objects.create(user=user, id=quercus_user_id)
 
         if user in users_removed:
-         users_removed.remove(user)
+            users_removed.remove(user)
 
         enrollment, enrollment_created = Enrollment.objects.get_or_create(
             user=user, role=role
@@ -54,20 +91,12 @@ def _update(offering, quercus_users, role_kind):
         print('    Adding', user.username)
 
         # If they're already in Discord, give them the roles
-        try:
-            get_uid('discord', user)
-            try:
-                add_discord_role_for_enrollment(enrollment)
-            except:
-                # Likely they left the server, handle this later
-                pass
-        except ObjectDoesNotExist:
-            pass
+        safe_add_discord_role_for_enrollment(enrollment)
+        safe_add_github_team_membership_for_enrollment(enrollment)
 
-        # If they're already connected to GitHub, add them
+        # If they're already connected to GitHub, create their repository
         try:
             get_uid('github', user)
-            add_github_team_membership_for_enrollment(enrollment)
             create_fork_for_enrollment(enrollment)
         except ObjectDoesNotExist:
             pass
@@ -75,36 +104,8 @@ def _update(offering, quercus_users, role_kind):
     print(f"  Removed students: {len(users_removed)}")
     for user in users_removed:
         enrollment = Enrollment.objects.get(user=user, role=role)
-        print(f'    Removing {user.username}')
-        # If they're already in Discord, remove the roles
-        try:
-            get_uid('discord', user)
-            try:
-                remove_discord_role_for_enrollment(enrollment)
-            except:
-                # Likely they left the server, handle this later
-                pass
-        except ObjectDoesNotExist:
-            pass
-
-        try:
-            get_uid('github', user)
-            remove_github_team_membership_for_enrollment(enrollment)
-        except ObjectDoesNotExist:
-            pass
-        
-        try:
-            remove_github_fork(enrollment)
-        except:
-            print('      GitHub Repository not found')
-
-        offering = enrollment.role.offering
-        for assignment in offering.assignment_set.all():
-            AssignmentTask.objects.filter(user=user, assignment=assignment).delete()
-            AssignmentLeaderboardEntry.objects.filter(user=user, assignment=assignment).delete()
-            AssignmentGrade.objects.filter(user=user, assignment=assignment).delete()
-            Accommodation.objects.filter(user=user, assignment=assignment).delete()
-        enrollment.delete()
+        # This was remove_enrollment
+        change_role_from_student_to_audit(enrollment)
 
 def _get_instructor_with_token(offering):
     instructor = None

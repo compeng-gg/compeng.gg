@@ -1,6 +1,7 @@
 from compeng_gg.auth import get_access_token, get_uid
 from courses.models import Institution
 from discord_app.rest_api import DiscordRestAPI
+from django.core.exceptions import ObjectDoesNotExist
 
 def add_discord_role_for_enrollment(enrollment):
     discord_user_id = get_uid('discord', enrollment.user)
@@ -37,12 +38,34 @@ def add_discord_role_for_enrollment(enrollment):
                 discord_user_id, utoronto.fourth_year_discord_role_id
             )
 
+def safe_add_discord_role_for_enrollment(enrollment):
+    try:
+        get_uid('discord', enrollment.user)
+        try:
+            add_discord_role_for_enrollment(enrollment)
+        except:
+            # Likely they left the server, handle this later
+            pass
+    except ObjectDoesNotExist:
+        pass
+
 def remove_discord_role_for_enrollment(enrollment):
     discord_user_id = get_uid('discord', enrollment.user)
     role = enrollment.role
     discord_role_id = role.discord_role_id
     api = DiscordRestAPI()
     api.remove_guild_member_role_for_guild(discord_user_id, discord_role_id)
+
+def safe_remove_discord_role_for_enrollment(enrollment):
+    try:
+        get_uid('discord', enrollment.user)
+        try:
+            remove_discord_role_for_enrollment(enrollment)
+        except:
+            # Likely they left the server, handle this later
+            pass
+    except ObjectDoesNotExist:
+        pass
 
 def add_discord_roles(user):
     discord_user_id = get_uid('discord', user)
