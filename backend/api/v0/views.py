@@ -172,6 +172,26 @@ def self(request):
 
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
+def navbar(request):
+    user = request.user
+    offerings = []
+    for enrollment in user.enrollment_set.all():
+        if(enrollment.role):    
+            offering = enrollment.role.offering
+            offerings.append({
+                'name': str(offering),
+                'course_slug': offering.course.slug,
+                'offering_slug': offering.slug,
+                'role': str(enrollment.role),
+            })
+        else:
+            print("NO ROLE IN ENROLLMENT")
+    return Response({
+        'offerings': offerings,
+    })
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
 def dashboard(request):
     user = request.user
     print(request.user)

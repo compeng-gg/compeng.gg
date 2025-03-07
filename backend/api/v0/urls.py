@@ -34,6 +34,7 @@ urlpatterns = [
 
     path('users/self/', views.self),
 
+    path('navbar/', views.navbar),
     path('dashboard/', views.dashboard),
     path('settings/', views.settings),
 

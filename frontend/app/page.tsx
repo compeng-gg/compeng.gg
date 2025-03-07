@@ -125,7 +125,7 @@ function Dashboard() {
 
   return (
     <>
-      <Navbar offerings={offerings}/>
+      <Navbar />
       <Main>
         {/* {todos} */}
         <H2>Courses</H2>
