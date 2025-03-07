@@ -510,7 +510,7 @@ def staff_assignment_student(request, course_slug, assignment_slug, student_user
 
     assignment_data = _get_assignment_data(assignment, student_user)
 
-    return assignment_data
+    return Response(assignment_data)
 
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
