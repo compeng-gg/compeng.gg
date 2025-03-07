@@ -243,6 +243,113 @@ def tasks(request):
         data.append(task_data)
     return Response(data)
 
+def _get_assignment_data(assignment, user):
+    due_date = assignment.due_date
+    is_private_released = assignment.is_private_released
+    # Look for accommodations
+    try:
+        accommodation = Accommodation.objects.get(
+            user=user, assignment=assignment
+        )
+        due_date = accommodation.due_date
+    except Accommodation.DoesNotExist:
+        accommodation = None
+
+    assignment_grade = 0
+    tasks = []
+    for assignment_task in assignment.assignmenttask_set.filter(
+        user=user, assignment=assignment
+    ).order_by('-task__created'):
+        task = assignment_task.task
+        result = get_task_result(task)
+        grade = None
+        before_due_date = assignment_task.before_due_date
+
+        task_data = {
+            'id': task.id,
+            'status': task.get_status_display(),
+            'result': result,
+        }
+        # Old style
+        if task.push:
+            push = task.push
+            received = push.received
+            task_data['repo'] = push.payload['repository']['name']
+            task_data['commit'] = push.payload['after']
+            task_data['received'] = received
+        # New style
+        if task.head_commit:
+            head_commit = task.head_commit
+            repository = head_commit.repository
+            # TODO: check if this every returns more than one
+            received = head_commit.pushes_head.all()[0].delivery.received
+            task_data['repo'] = repository.name
+            task_data['commit'] = head_commit.sha1
+            task_data['received'] = received
+
+        if not result is None and "tests" in result:
+            if not is_private_released:
+                # Filter out the tests
+                result["tests"] = list(filter(lambda test: not "kind" in test or test["kind"] == "public", result["tests"]))
+                grade = f"{assignment_task.public_grade:.0f}/{assignment.public_total:.0f} ({assignment.private_total:.0f} hidden)"
+                if before_due_date and assignment_task.public_grade > assignment_grade:
+                    assignment_grade = assignment_task.public_grade
+            else:
+                grade = f"{assignment_task.overall_grade:.0f}/{assignment.overall_total:.0f}"
+                if before_due_date and assignment_task.overall_grade > assignment_grade:
+                    assignment_grade = assignment_task.overall_grade
+
+        if assignment.kind == Assignment.Kind.TESTS:
+            if not grade is None:
+                task_data['grade'] = grade
+        elif assignment.kind == Assignment.Kind.LEADERBOARD:
+            speedup = result['speedup'] if result and 'speedup' in result else None
+            if speedup:
+                task_data['speedup'] = speedup
+        tasks.append(task_data)
+        # on_time = received <= due_date
+        # max_grade = 100 # TODO: This should probably come from the assign.
+        # if accommodation and not on_time:
+        #     if received > accommodation.due_date:
+        #         continue
+        #     if accommodation.max_grade:
+        #         max_grade = accommodation.max_grade
+        # elif not on_time:
+        #     continue
+        # if grade is None:
+        #     continue
+        # grade = min(grade, max_grade)
+        # if grade > assignment_grade:
+        #     assignment_grade = grade
+    assignment_data = {
+        'slug': assignment.slug,
+        'name': assignment.name,
+        'kind': assignment.kind,
+        'due_date': due_date,
+        'tasks': tasks,
+    }
+    # try:
+    #     ag = AssignmentGrade.objects.get(user=user, assignment=assignment)
+    #     if ag.grade > assignment_grade:
+    #         assignment_grade = ag.grade
+    #         assignment_data['grade'] = assignment_grade
+    # except AssignmentGrade.DoesNotExist:
+    #     pass
+    if assignment.kind == Assignment.Kind.TESTS:
+        if not is_private_released:
+            assignment_data["grade"] = f"{assignment_grade:.0f}/{assignment.public_total:.0f} ({assignment.private_total:.0f} hidden)"
+        else:
+            assignment_data["grade"] = f"{assignment_grade:.0f}/{assignment.overall_total:.0f}"
+    elif assignment.kind == Assignment.Kind.LEADERBOARD:
+        leaderboard = []
+        for entry in AssignmentLeaderboardEntry.objects.filter(assignment=assignment).order_by('-speedup'):
+            entry_data = {'id': entry.user.id, 'speedup': entry.speedup}
+            if entry.user.id == user.id:
+                entry_data['highlight'] = True
+            leaderboard.append(entry_data)
+        assignment_data['leaderboard'] = leaderboard
+    return assignment_data
+
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
 def course(request, slug):
@@ -261,110 +368,7 @@ def course(request, slug):
     }
     assignments = []
     for assignment in offering.assignment_set.all():
-        due_date = assignment.due_date
-        is_private_released = assignment.is_private_released
-        # Look for accommodations
-        try:
-            accommodation = Accommodation.objects.get(
-                user=user, assignment=assignment
-            )
-            due_date = accommodation.due_date
-        except Accommodation.DoesNotExist:
-            accommodation = None
-
-        assignment_grade = 0
-        tasks = []
-        for assignment_task in assignment.assignmenttask_set.filter(
-            user=request.user, assignment=assignment
-        ).order_by('-task__created'):
-            task = assignment_task.task
-            result = get_task_result(task)
-            grade = None
-            before_due_date = assignment_task.before_due_date
-
-            task_data = {
-                'id': task.id,
-                'status': task.get_status_display(),
-                'result': result,
-            }
-            # Old style
-            if task.push:
-                push = task.push
-                received = push.received
-                task_data['repo'] = push.payload['repository']['name']
-                task_data['commit'] = push.payload['after']
-                task_data['received'] = received
-            # New style
-            if task.head_commit:
-                head_commit = task.head_commit
-                repository = head_commit.repository
-                # TODO: check if this every returns more than one
-                received = head_commit.pushes_head.all()[0].delivery.received
-                task_data['repo'] = repository.name
-                task_data['commit'] = head_commit.sha1
-                task_data['received'] = received
-
-            if not result is None and "tests" in result:
-                if not is_private_released:
-                    # Filter out the tests
-                    result["tests"] = list(filter(lambda test: not "kind" in test or test["kind"] == "public", result["tests"]))
-                    grade = f"{assignment_task.public_grade:.0f}/{assignment.public_total:.0f} ({assignment.private_total:.0f} hidden)"
-                    if before_due_date and assignment_task.public_grade > assignment_grade:
-                        assignment_grade = assignment_task.public_grade
-                else:
-                    grade = f"{assignment_task.overall_grade:.0f}/{assignment.overall_total:.0f}"
-                    if before_due_date and assignment_task.overall_grade > assignment_grade:
-                        assignment_grade = assignment_task.overall_grade
-
-            if assignment.kind == Assignment.Kind.TESTS:
-                if not grade is None:
-                    task_data['grade'] = grade
-            elif assignment.kind == Assignment.Kind.LEADERBOARD:
-                speedup = result['speedup'] if result and 'speedup' in result else None
-                if speedup:
-                    task_data['speedup'] = speedup
-            tasks.append(task_data)
-            # on_time = received <= due_date
-            # max_grade = 100 # TODO: This should probably come from the assign.
-            # if accommodation and not on_time:
-            #     if received > accommodation.due_date:
-            #         continue
-            #     if accommodation.max_grade:
-            #         max_grade = accommodation.max_grade
-            # elif not on_time:
-            #     continue
-            # if grade is None:
-            #     continue
-            # grade = min(grade, max_grade)
-            # if grade > assignment_grade:
-            #     assignment_grade = grade
-        assignment_data = {
-            'slug': assignment.slug,
-            'name': assignment.name,
-            'kind': assignment.kind,
-            'due_date': due_date,
-            'tasks': tasks,
-        }
-        # try:
-        #     ag = AssignmentGrade.objects.get(user=user, assignment=assignment)
-        #     if ag.grade > assignment_grade:
-        #         assignment_grade = ag.grade
-        #         assignment_data['grade'] = assignment_grade
-        # except AssignmentGrade.DoesNotExist:
-        #     pass
-        if assignment.kind == Assignment.Kind.TESTS:
-            if not is_private_released:
-                assignment_data["grade"] = f"{assignment_grade:.0f}/{assignment.public_total:.0f} ({assignment.private_total:.0f} hidden)"
-            else:
-                assignment_data["grade"] = f"{assignment_grade:.0f}/{assignment.overall_total:.0f}"
-        elif assignment.kind == Assignment.Kind.LEADERBOARD:
-            leaderboard = []
-            for entry in AssignmentLeaderboardEntry.objects.filter(assignment=assignment).order_by('-speedup'):
-                entry_data = {'id': entry.user.id, 'speedup': entry.speedup}
-                if entry.user.id == request.user.id:
-                    entry_data['highlight'] = True
-                leaderboard.append(entry_data)
-            assignment_data['leaderboard'] = leaderboard
+        assignment_data = _get_assignment_data(assignment, user)
         assignments.append(assignment_data)
     data['assignments'] = assignments
     return Response(data)
@@ -474,6 +478,39 @@ def staff_assignment(request, course_slug, assignment_slug):
 
 class IsPrivateReleasedSerializer(serializers.Serializer):
     is_private_released = serializers.BooleanField()
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def staff_assignment_student(request, course_slug, assignment_slug, student_username):
+    user = request.user
+    try:
+        offering = Offering.objects.get(active=True, course__slug=course_slug)
+    except Offering.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    if not is_staff(user, offering):
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
+
+    try:
+        assignment = Assignment.objects.get(offering=offering, slug=assignment_slug)
+    except Assignment.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    try:
+        student_user = User.objects.get(username=student_username)
+    except User.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    student_role = Role.objects.get(offering=offering, kind=Role.Kind.STUDENT)
+
+    try:
+        enrollment = Enrollment.objects.get(user=student_user, role=student_role)
+    except Enrollment.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    assignment_data = _get_assignment_data(assignment, student_user)
+
+    return assignment_data
 
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
