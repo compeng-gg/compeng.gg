@@ -406,7 +406,9 @@ def _staff_assignment_student_data(assignment, enrollment):
     try:
         assignment_result = AssignmentResult.objects.get(user=user, assignment=assignment)
         task = assignment_result.task
-        graded_commit_url = f"https://github.com/{repository.full_name}/tree/{task.head_commit.sha1}"
+        # No sure why this disappeared?
+        if not task.head_commit is None:
+            graded_commit_url = f"https://github.com/{repository.full_name}/tree/{task.head_commit.sha1}"
         overall_grade = assignment_result.overall_grade
     except AssignmentResult.DoesNotExist:
         pass
