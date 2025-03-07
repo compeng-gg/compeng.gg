@@ -456,6 +456,10 @@ def staff_assignment(request, course_slug, assignment_slug):
     students_count = 0
     students_data = []
     for enrollment in Enrollment.objects.filter(role=student_role).order_by("user__username"):
+        # TODO: skip if there's no student repo
+        if enrollment.student_repo is None:
+            # TODO, why does this happen now?
+            continue
         student_data = _staff_assignment_student_data(assignment, enrollment)
         if student_data["submissions"] > 0:
             students_with_submissions_count += 1

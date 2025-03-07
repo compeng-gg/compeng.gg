@@ -95,7 +95,6 @@ def _update(offering, quercus_users, role_kind):
 
         # If they're already in Discord, give them the roles
         safe_add_discord_role_for_enrollment(enrollment)
-        safe_add_github_team_membership_for_enrollment(enrollment)
 
         # If they're already connected to GitHub, create their repository
         try:
@@ -103,6 +102,8 @@ def _update(offering, quercus_users, role_kind):
             create_fork_for_enrollment(enrollment)
         except ObjectDoesNotExist:
             pass
+
+        safe_add_github_team_membership_for_enrollment(enrollment)
 
     print(f"  Removed students: {len(users_removed)}")
     for user in users_removed:
