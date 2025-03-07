@@ -167,7 +167,11 @@ function StaffAssignment() {
 
             return (
             <tr key={rowIndex}>
-              <td className="text-left border border-slate-500 p-2 text-sm" >{student.username}</td>
+              <td className="text-left border border-slate-500 p-2 text-sm" >
+                <Link href={`/${params.course_slug}/staff/${params.assignment_slug}/${student.username}/`} className="text-blue-500 hover:underline">
+                  {student.username}
+                </Link>
+              </td>
               <td className="text-left border border-slate-500 p-2 text-sm" >
                   {student.repository_name === "" ? (
                   <span className="text-red-500">Missing</span>
