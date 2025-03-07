@@ -32,7 +32,10 @@ def remove_enrollment(enrollment):
 def change_role_from_student_to_audit(enrollment):
     user = enrollment.user
     role = enrollment.role
-    assert role.kind == Role.Kind.STUDENT
+
+    # If they're already an audit, skip
+    if role.kind == Role.Kind.AUDIT:
+        return
 
     # Remove the student roles
     safe_remove_discord_role_for_enrollment(enrollment)
