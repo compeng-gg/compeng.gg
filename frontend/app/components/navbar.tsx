@@ -22,14 +22,6 @@ export default function Navbar() {
   const [jwt, setAndStoreJwt] = useContext(JwtContext);
   const [username, setUserName] = useState("");
   const [offerings, setOfferings] = useState<any[]>([]);
-
-  document.addEventListener("DOMContentLoaded", function () {
-    document.addEventListener('hide.bs.modal', function (event) {
-        if (document.activeElement) {
-            document.activeElement.blur();
-        }
-    });
-  });
   
   useEffect(() => {
     async function fetchOfferings() {
@@ -85,11 +77,12 @@ export default function Navbar() {
 
   return (
     <PrimeWrapper>
-      <Menubar start={startingIcon} model={menuItems} appendTo={document.body} end={avatar} />
+      <Menubar start={startingIcon} model={menuItems} end={avatar}/>
       <style jsx global>{`
-        .p-menu-overlay,
-        .p-tieredmenu-panel {
-          z-index: 9999 !important;
+        .p-submenu-list,
+        .p-menuitem,
+        .p-menuitem-content {
+          z-index: 2000 !important;
         }
       `}</style>
     </PrimeWrapper>
