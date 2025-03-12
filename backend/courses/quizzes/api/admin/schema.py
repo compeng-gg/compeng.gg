@@ -93,6 +93,10 @@ class EditQuizSerializer(serializers.ModelSerializer):
         model = db.Quiz
         fields = ["slug", "title", "visible_at", "starts_at", "ends_at"]
 
+class DeleteQuizAccommodationSerializer(serializers.Serializer):
+    username = serializers.CharField(required=True)
+
+
 
 class BaseQuestionSerializer(serializers.Serializer):
     prompt = serializers.CharField(required=True)

@@ -63,3 +63,5 @@ from courses.quizzes.api.admin.get_quiz_submissions import (
 from courses.quizzes.api.admin.post_quiz_grades import update_submission_question
 from courses.quizzes.api.admin.create_accommodation import create_quiz_accommodation
 from courses.quizzes.api.admin.list_accommodations import list_quiz_accommodations
+from courses.quizzes.api.admin.delete_accommodation import delete_quiz_accommodation
+
