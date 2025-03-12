@@ -1,6 +1,7 @@
 from rest_framework import serializers
 import courses.models as db
 from datetime import datetime
+from django.contrib.auth.models import User
 
 
 class CreateQuizRequestSerializer(serializers.Serializer):
@@ -48,10 +49,39 @@ class QuizAccommodationSerializer(serializers.ModelSerializer):
     visible_at = UnixTimestampDateTimeField()
     starts_at = UnixTimestampDateTimeField()
     ends_at = UnixTimestampDateTimeField()
+    
+    username = serializers.SlugRelatedField(
+        source='user',
+        slug_field='username',
+        queryset=User.objects.all(),
+        error_messages={
+            'does_not_exist': "The username you entered does not exist",
+            'invalid': "Invalid username format"
+        }
+    )
 
     class Meta:
         model = db.QuizAccommodation
-        fields = ["user", "quiz", "visible_at", "starts_at", "ends_at"]
+        fields = ["username", "quiz", "visible_at", "starts_at", "ends_at"]
+
+class QuizAccommodationListItemSerializer(serializers.ModelSerializer):
+    visible_at_unix_timestamp = serializers.SerializerMethodField()
+    starts_at_unix_timestamp = serializers.SerializerMethodField()
+    ends_at_unix_timestamp = serializers.SerializerMethodField()
+    username = serializers.CharField(source="user.username")
+
+    class Meta:
+        model = db.QuizAccommodation
+        fields = ["user_id", "username", "visible_at_unix_timestamp", "starts_at_unix_timestamp", "ends_at_unix_timestamp"]
+
+    def get_ends_at_unix_timestamp(self, quiz: db.Quiz) -> int:
+        return int(quiz.ends_at.timestamp())
+
+    def get_starts_at_unix_timestamp(self, quiz: db.Quiz) -> int:
+        return int(quiz.starts_at.timestamp())
+    
+    def get_visible_at_unix_timestamp(self, quiz: db.Quiz) -> int:
+        return int(quiz.visible_at.timestamp())
 
 
 class EditQuizSerializer(serializers.ModelSerializer):

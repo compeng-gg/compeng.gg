@@ -223,6 +223,20 @@ def create_user(username):
             username=username, password="testpassword"
         )
 
+def create_quiz_accommodation(
+    user: User, 
+    quiz: db.Quiz,
+    visible_at: Optional[datetime]=datetime.now(),
+    starts_at: Optional[datetime]=datetime.now() + timedelta(days=1),
+    ends_at: Optional[datetime]=datetime.now() + timedelta(days=1, hours=1),
+):
+    return db.QuizAccommodation.objects.create(
+        user=user,
+        quiz=quiz,
+        starts_at=starts_at,
+        ends_at=ends_at,
+        visible_at=visible_at
+    )
 
 class TestCasesWithUserAuth(TestCase):
     def setUp(self):

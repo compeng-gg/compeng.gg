@@ -90,6 +90,8 @@ urlpatterns = [
     path('quizzes/admin/<slug:course_slug>/<slug:quiz_slug>/edit/', quizzes_api.edit_quiz),
     path('quizzes/admin/<slug:course_slug>/<slug:quiz_slug>/', quizzes_api.get_quiz),
     path('quizzes/admin/<slug:course_slug>/<slug:quiz_slug>/accommodation/create/', quizzes_api.create_quiz_accommodation),
+    path('quizzes/admin/<slug:course_slug>/<slug:quiz_slug>/accommodations/', quizzes_api.list_quiz_accommodations),
+    
     path('quizzes/admin/<slug:course_slug>/', quizzes_api.admin_list_quizzes_for_course),
     path('quizzes/admin/<slug:course_slug>/<slug:quiz_slug>/submissions/', quizzes_api.get_quiz_submissions),
     path("quizzes/admin/<slug:course_slug>/<slug:quiz_slug>/submissions/<int:student_id>/", quizzes_api.get_student_quiz_submission),
