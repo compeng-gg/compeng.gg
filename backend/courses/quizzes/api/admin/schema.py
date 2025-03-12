@@ -44,6 +44,16 @@ class UnixTimestampDateTimeField(serializers.DateTimeField):
         return dt
 
 
+class QuizAccommodationSerializer(serializers.ModelSerializer):
+    visible_at = UnixTimestampDateTimeField()
+    starts_at = UnixTimestampDateTimeField()
+    ends_at = UnixTimestampDateTimeField()
+
+    class Meta:
+        model = db.QuizAccommodation
+        fields = ["user", "quiz", "visible_at", "starts_at", "ends_at"]
+
+
 class EditQuizSerializer(serializers.ModelSerializer):
     visible_at = UnixTimestampDateTimeField()
     starts_at = UnixTimestampDateTimeField()

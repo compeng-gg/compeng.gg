@@ -353,6 +353,26 @@ class Quiz(models.Model):
         verbose_name = "Quiz"
         verbose_name_plural = "Quizzes"
     
+class QuizAccommodation(models.Model):
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+    )
+    quiz = models.ForeignKey(
+        Quiz,
+        on_delete=models.CASCADE,
+    )
+    visible_at = models.DateTimeField()
+    starts_at = models.DateTimeField() # TODO: validate ends_at > starts_at
+    ends_at = models.DateTimeField()
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'quiz'], name='quiz_accommodation_unique_user_quiz'
+            )
+        ]
 
 class QuizSubmission(models.Model):
 
