@@ -17,3 +17,12 @@ test:
 
 populate:
 	python manage.py populate_db_for_testing  
+
+typecheck:
+	pipenv run mypy courses/quizzes
+
+format:
+	pipenv run ruff format courses/quizzes
+
+lint:
+	pipenv run ruff check courses/quizzes --fix
