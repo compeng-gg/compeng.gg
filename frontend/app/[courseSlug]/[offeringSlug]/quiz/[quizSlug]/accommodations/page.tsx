@@ -22,6 +22,13 @@ export default function QuizAccommodationsPage() {
     const [offeringName, setOfferingName] = useState('');
     const [quizTitle, setQuizTitle] = useState('');
 
+    // State for the "Create New Accommodation" modal
+    const [showCreateModal, setShowCreateModal] = useState(false);
+    const [username, setUsername] = useState('');
+    const [visibleAt, setVisibleAt] = useState('');  // store as ISO string for <input type="datetime-local" />
+    const [startsAt, setStartsAt] = useState('');
+    const [endsAt, setEndsAt] = useState('');
+
     async function fetchAccommodations() {
         try {
             const res = await fetchApi(
@@ -59,6 +66,46 @@ export default function QuizAccommodationsPage() {
             setQuizTitle(data.title);
         } catch (error) {
             console.error('Failed to retrieve quiz info', error);
+        }
+    }
+
+    // POST the new accommodation
+    async function handleCreate() {
+        // Ensure required fields are provided
+        if (!username || !visibleAt || !startsAt || !endsAt) {
+            alert('Please fill in all fields before creating an accommodation.');
+            return;
+        }
+
+        try {
+            const body = {
+                username: username,
+                visible_at: new Date(visibleAt).getTime() / 1000,
+                starts_at: new Date(startsAt).getTime() / 1000,
+                ends_at: new Date(endsAt).getTime() / 1000
+            };
+
+            const res = await fetchApi(
+                jwt,
+                setAndStoreJwt,
+                `quizzes/admin/${courseSlug}/${quizSlug}/accommodation/create/`,
+                'POST',
+                body
+            );
+            if (!res.ok) {
+                throw new Error('Failed to create accommodation');
+            }
+
+            // Hide the modal and refresh the accommodations list
+            setShowCreateModal(false);
+            setUsername('');
+            setVisibleAt('');
+            setStartsAt('');
+            setEndsAt('');
+            fetchAccommodations();
+        } catch (error) {
+            console.error('Error creating accommodation:', error);
+            alert('Failed to create the accommodation. See console for details.');
         }
     }
 
@@ -118,6 +165,73 @@ export default function QuizAccommodationsPage() {
                                 </div>
                             </div>
                         ))}
+                    </div>
+                )}
+
+                {/* Button to open the modal */}
+                <button
+                    style={{ marginTop: '20px' }}
+                    onClick={() => setShowCreateModal(true)}
+                >
+                    Create New Accommodation
+                </button>
+
+                {/* Modal for creating a new accommodation */}
+                {showCreateModal && (
+                    <div
+                        style={{
+                            position: 'fixed',
+                            top: 0,
+                            left: 0,
+                            width: '100%',
+                            height: '100%',
+                            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            zIndex: 999
+                        }}
+                    >
+                        <div
+                            style={{
+                                backgroundColor: 'white',
+                                padding: '20px',
+                                borderRadius: '8px',
+                                width: '300px'
+                            }}
+                        >
+                            <h2>Create Accommodation</h2>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                <input
+                                    type="text"
+                                    placeholder="Username"
+                                    value={username}
+                                    onChange={(e) => setUsername(e.target.value)}
+                                />
+                                <label>Visible At</label>
+                                <input
+                                    type="datetime-local"
+                                    value={visibleAt}
+                                    onChange={(e) => setVisibleAt(e.target.value)}
+                                />
+                                <label>Starts At</label>
+                                <input
+                                    type="datetime-local"
+                                    value={startsAt}
+                                    onChange={(e) => setStartsAt(e.target.value)}
+                                />
+                                <label>Ends At</label>
+                                <input
+                                    type="datetime-local"
+                                    value={endsAt}
+                                    onChange={(e) => setEndsAt(e.target.value)}
+                                />
+                            </div>
+                            <div style={{ marginTop: '20px', display: 'flex', gap: '10px' }}>
+                                <button onClick={handleCreate}>Create</button>
+                                <button onClick={() => setShowCreateModal(false)}>Cancel</button>
+                            </div>
+                        </div>
                     </div>
                 )}
             </div>
