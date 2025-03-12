@@ -21,11 +21,17 @@ export default function QuizAccommodationsPage() {
     const [loading, setLoading] = useState(true);
     const [offeringName, setOfferingName] = useState('');
     const [quizTitle, setQuizTitle] = useState('');
+
+    // Create modal states
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [username, setUsername] = useState('');
     const [visibleAt, setVisibleAt] = useState('');
     const [startsAt, setStartsAt] = useState('');
     const [endsAt, setEndsAt] = useState('');
+
+    // Delete modal states
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [usernameToDelete, setUsernameToDelete] = useState('');
 
     async function fetchAccommodations() {
         try {
@@ -104,6 +110,41 @@ export default function QuizAccommodationsPage() {
         }
     }
 
+    // Show the confirm-delete modal for a specific username
+    function handleDeleteButtonClick(username: string) {
+        setUsernameToDelete(username);
+        setShowDeleteModal(true);
+    }
+
+    // Confirm deletion
+    async function handleConfirmDelete() {
+        try {
+            const body = { username: usernameToDelete };
+            const res = await fetchApi(
+                jwt,
+                setAndStoreJwt,
+                `quizzes/admin/${courseSlug}/${quizSlug}/accommodation/delete/`,
+                'DELETE',
+                body
+            );
+            if (!res.ok) {
+                throw new Error('Failed to delete accommodation');
+            }
+            setShowDeleteModal(false);
+            setUsernameToDelete('');
+            fetchAccommodations();
+        } catch (error) {
+            console.error('Error deleting accommodation:', error);
+            alert('Failed to delete the accommodation. See console for details.');
+        }
+    }
+
+    // Cancel deletion
+    function handleCancelDelete() {
+        setShowDeleteModal(false);
+        setUsernameToDelete('');
+    }
+
     useEffect(() => {
         fetchAccommodations();
         fetchQuizInfo();
@@ -125,7 +166,7 @@ export default function QuizAccommodationsPage() {
                 <h1>{offeringName || 'ECE344 Fall 2024'}</h1>
                 <h2>{quizTitle || 'Loading quiz...'}</h2>
 
-                {/* Button to open the modal, moved to the top */}
+                {/* Button to open the "Create New Accommodation" modal */}
                 <button
                     style={{ marginBottom: '20px' }}
                     onClick={() => setShowCreateModal(true)}
@@ -133,6 +174,7 @@ export default function QuizAccommodationsPage() {
                     Create New Accommodation
                 </button>
 
+                {/* Create modal */}
                 {showCreateModal && (
                     <div
                         style={{
@@ -215,11 +257,49 @@ export default function QuizAccommodationsPage() {
                                     <p>Starts At: {new Date(item.starts_at_unix_timestamp * 1000).toLocaleString()}</p>
                                     <p>Ends At: {new Date(item.ends_at_unix_timestamp * 1000).toLocaleString()}</p>
                                 </div>
+                                {/* Delete button */}
+                                <button onClick={() => handleDeleteButtonClick(item.username)}>
+                                    Delete
+                                </button>
                             </div>
                         ))}
                     </div>
                 )}
             </div>
+
+            {/* Confirm-delete modal */}
+            {showDeleteModal && (
+                <div
+                    style={{
+                        position: 'fixed',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        height: '100%',
+                        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        zIndex: 999
+                    }}
+                >
+                    <div
+                        style={{
+                            backgroundColor: 'white',
+                            padding: '20px',
+                            borderRadius: '8px',
+                            width: '300px'
+                        }}
+                    >
+                        <h2>Confirm Delete</h2>
+                        <p>Are you sure you want to delete the accommodation for <strong>{usernameToDelete}</strong>?</p>
+                        <div style={{ marginTop: '20px', display: 'flex', gap: '10px' }}>
+                            <button onClick={handleConfirmDelete}>Yes</button>
+                            <button onClick={handleCancelDelete}>No</button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </>
     );
 }
