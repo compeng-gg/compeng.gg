@@ -36,6 +36,16 @@ function StaffQuizButton({ quizProps }: { quizProps: StaffQuizProps }) {
     );
 }
 
+function CreateStudentQuizAccommodationButton({ quizProps }: { quizProps: StaffQuizProps }) {
+    return (
+        <div style={{ position: 'relative', display: 'flex', flexDirection: 'row-reverse' }}>
+            <Link href={`/${quizProps.courseSlug}/${quizProps.offeringSlug}/quiz/${quizProps.quizSlug}/accommodations/`}>
+                <Button label="Create Student Accommodation" size="small" />
+            </Link>
+        </div>
+    );
+}
+
 export default function StaffQuizDisplay(props: StaffQuizProps) {
     if (!props.startTime || !props.endTime) {
         return <Card title={props.name} subTitle="Invalid quiz data" className="bg-gray-50 dark:white shadow-md rounded-lg" />;
@@ -83,6 +93,7 @@ function OngoingQuizDisplay(props: StaffQuizProps) {
                 <Link href={`/${props.courseSlug}/${props.offeringSlug}/quiz/edit/${props.quizSlug}/`}>
                     <Button label="Edit Quiz" size="small" />
                 </Link>
+                <CreateStudentQuizAccommodationButton quizProps={props} />
                 <StaffQuizButton quizProps={props} />
             </div>
         );
