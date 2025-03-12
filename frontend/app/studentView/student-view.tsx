@@ -24,7 +24,7 @@ export default function StudentView(props: StudentViewProps){
     const items = [
         { label: 'Assignments', icon: 'pi pi-list-check'},
         { label: 'Exercises', icon: 'pi pi-check-circle'},
-        { label: 'Tests', icon: 'pi pi-pencil'},
+        { label: 'Quizzes', icon: 'pi pi-pencil'},
         { label: 'Teams', icon: 'pi pi-users'}
     ];
 
