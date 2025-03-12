@@ -12,7 +12,6 @@ def admin_list_quizzes_for_course(request, course_slug: str):
     # TODO: Exclude quizzes from dead offerings. Or just include the offering slug in URLs
     quizzes = db.Quiz.objects.filter(offering__course__slug=course_slug).all()
 
-
     quizzes_list = []
 
     for quiz in quizzes:
@@ -22,13 +21,11 @@ def admin_list_quizzes_for_course(request, course_slug: str):
             "slug": quiz_data["slug"],
             "visible_at": int(quiz_data["visible_at"].timestamp()),
             "starts_at": int(quiz_data["starts_at"].timestamp()),
-            "ends_at": int(quiz_data["ends_at"].timestamp())
+            "ends_at": int(quiz_data["ends_at"].timestamp()),
         }
 
         quizzes_list.append(data)
 
-    response_data = {
-        "quizzes": quizzes_list
-    }
+    response_data = {"quizzes": quizzes_list}
 
     return Response(status=status.HTTP_200_OK, data=response_data)

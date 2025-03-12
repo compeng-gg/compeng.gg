@@ -19,8 +19,12 @@ def get_quiz(request, course_slug: str, quiz_slug: str):
 
     checkbox_questions = db.CheckboxQuestion.objects.filter(quiz=quiz).all()
     coding_questions = db.CodingQuestion.objects.filter(quiz=quiz).all()
-    multiple_choice_questions = db.MultipleChoiceQuestion.objects.filter(quiz=quiz).all()
-    written_response_questions = db.WrittenResponseQuestion.objects.filter(quiz=quiz).all()
+    multiple_choice_questions = db.MultipleChoiceQuestion.objects.filter(
+        quiz=quiz
+    ).all()
+    written_response_questions = db.WrittenResponseQuestion.objects.filter(
+        quiz=quiz
+    ).all()
 
     question_types = [
         ("CODING", coding_questions),
@@ -40,7 +44,7 @@ def get_quiz(request, course_slug: str, quiz_slug: str):
 
             questions.append(data)
 
-    questions = sorted(questions, key=lambda x: x['order'])
+    questions = sorted(questions, key=lambda x: x["order"])
 
     quiz_data["questions"] = questions
     quiz_data["github_repository"] = quiz.repository.full_name
