@@ -110,6 +110,14 @@ class Command(BaseCommand):
             repository=mock_repository
         )
 
+        db.QuizAccommodation.objects.create(
+            user=mock_student_user_1,
+            quiz=mock_quiz,
+            visible_at=now_datetime,
+            starts_at=now_datetime,
+            ends_at=now_datetime + timedelta(days=365)
+        )
+
         db.CheckboxQuestion.objects.create(
             prompt="Answer the checkbox question",
             points=20,
