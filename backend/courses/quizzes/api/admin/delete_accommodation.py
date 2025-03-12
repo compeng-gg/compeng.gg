@@ -8,7 +8,6 @@ from courses.quizzes.api.admin.schema import DeleteQuizAccommodationSerializer
 @api_view(["DELETE"])
 @permission_classes([permissions.IsAuthenticated])
 def delete_quiz_accommodation(request, course_slug: str, quiz_slug: str):
-
     serializer = DeleteQuizAccommodationSerializer(data=request.data)
 
     if not serializer.is_valid():
@@ -21,7 +20,7 @@ def delete_quiz_accommodation(request, course_slug: str, quiz_slug: str):
             {"error": "Quiz does not exist"},
             status=status.HTTP_400_BAD_REQUEST,
         )
-    
+
     try:
         quiz_accommodation = db.QuizAccommodation.objects.get(
             quiz=quiz,
@@ -32,7 +31,7 @@ def delete_quiz_accommodation(request, course_slug: str, quiz_slug: str):
             {"error": "Quiz accommodation does not exist"},
             status=status.HTTP_400_BAD_REQUEST,
         )
-    
+
     quiz_accommodation.delete()
 
     return Response(status=status.HTTP_204_NO_CONTENT)
