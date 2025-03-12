@@ -18,7 +18,7 @@ class CreateAccommodationTests(TestCasesWithUserAuth):
         ends_at_timestamp = 1740248155
 
         request_data = {
-            "user": user.id,
+            "username": user.username,
             "visible_at": visible_at_timestamp,
             "starts_at": starts_at_timestamp,
             "ends_at": ends_at_timestamp,
@@ -45,4 +45,30 @@ class CreateAccommodationTests(TestCasesWithUserAuth):
         self.assertEqual(quiz_accommodation.starts_at.timestamp(), starts_at_timestamp)
         self.assertEqual(quiz_accommodation.ends_at.timestamp(), ends_at_timestamp)
 
+    def test_nonexistent_username_throws_error(self):
+        mock_quiz = create_quiz()
+        create_enrollment(self.user.id, mock_quiz.offering, db.Role.Kind.TA)
+
+        request_data = {
+            "username": "nonexistent_username",
+            "visible_at": 1740248155,
+            "starts_at": 1740248155,
+            "ends_at": 1740248155,
+        }
+
+        response = self.client.post(
+            self.get_api_endpoint(mock_quiz.offering.course.slug, mock_quiz.slug),
+            data=request_data,
+        )
+
+        print(response.json())
+
+        response_data = response.json()
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        expected_data = {'username': ['The username you entered does not exist']}
+        self.assertEqual(response_data, expected_data)
+
     # TODO more tests
+
