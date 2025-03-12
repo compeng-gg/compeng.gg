@@ -1,12 +1,12 @@
-import { TabMenu } from "primereact/tabmenu";
-import { Lab } from "../[courseSlug]/[offeringSlug]/page";
+import { TabMenu } from 'primereact/tabmenu';
+import { Lab } from '../[courseSlug]/[offeringSlug]/page';
 import { useState } from 'react';
-import PrimeWrapper from "../components/primeWrapper";
+import PrimeWrapper from '../components/primeWrapper';
 import 'primeicons/primeicons.css';
-import { Button } from "primereact/button";
-import StudentAssignmentTab from "./components/student-assignment-tab";
-import StudentTeamViewTab from "./components/student-team-view-tab";
-import StudentQuizViewTab from "./components/student-quizzes-view-tab";
+import { Button } from 'primereact/button';
+import StudentAssignmentTab from './components/student-assignment-tab';
+import StudentTeamViewTab from './components/student-team-view-tab';
+import StudentQuizViewTab from './components/student-quizzes-view-tab';
 
 
 
@@ -26,42 +26,42 @@ export default function StudentView(props: StudentViewProps){
         { label: 'Exercises', icon: 'pi pi-check-circle'},
         { label: 'Tests', icon: 'pi pi-pencil'},
         { label: 'Teams', icon: 'pi pi-users'}
-    ]
+    ];
 
     return (
-    <>
-        <h2>{courseName}</h2>
-        <PrimeWrapper>
-            <TabMenu
-                model = {items}
-                activeIndex={idx}
-                onTabChange={(e) => setIdx(e.index)}
-            />
-            <DisplayCourseTab idx={idx} labs={labs} courseSlug={courseSlug} offeringSlug={offeringSlug}/>
-        </PrimeWrapper>
-    </>
-    )
+        <>
+            <h2>{courseName}</h2>
+            <PrimeWrapper>
+                <TabMenu
+                    model = {items}
+                    activeIndex={idx}
+                    onTabChange={(e) => setIdx(e.index)}
+                />
+                <DisplayCourseTab idx={idx} labs={labs} courseSlug={courseSlug} offeringSlug={offeringSlug}/>
+            </PrimeWrapper>
+        </>
+    );
 }
 
 function DisplayCourseTab({idx, labs, courseSlug, offeringSlug}){
 
     if(idx == 0){
-        return <StudentAssignmentTab labs={labs}/>
+        return <StudentAssignmentTab labs={labs}/>;
     }
     if(idx == 2){
-        return <StudentQuizViewTab courseSlug={courseSlug} offeringSlug={offeringSlug} />
+        return <StudentQuizViewTab courseSlug={courseSlug} offeringSlug={offeringSlug} />;
     }
     if(idx == 3){
-        return <StudentTeamViewTab  courseSlug={courseSlug}/>
+        return <StudentTeamViewTab courseSlug={courseSlug}/>;
     }
 
     return (
         <WIP/>
-    )
+    );
 }
 
 function WIP(){
     return (
         <h4>This is a work in progress</h4>
-    )
+    );
 }

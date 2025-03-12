@@ -1,11 +1,11 @@
-import { Accordion, AccordionTab } from "primereact/accordion";
-import { RawToTestResult, TestResult, TestResultDisplay, TestResultHeader } from "./test-result";
-import { Badge } from "primereact/badge";
+import { Accordion, AccordionTab } from 'primereact/accordion';
+import { RawToTestResult, TestResult, TestResultDisplay, TestResultHeader } from './test-result';
+import { Badge } from 'primereact/badge';
 
 
 export enum TestRunStatus {
-    SUCCESS = "SUCCESS",
-    FAILURE = "FAILURE",
+    SUCCESS = 'SUCCESS',
+    FAILURE = 'FAILURE',
 }
 
 export interface TestRunProps {
@@ -22,23 +22,23 @@ export function TestRunHeader(props: TestRunProps){
 
     const headerBadges = () => {
         if(status === TestRunStatus.SUCCESS){
-            return (<div style={{gap: "5px", display: "flex"}}>
-                <Badge value={numPassed} className="ml-auto" severity={"success"}/>
-                <Badge value={numFailed} className="ml-auto" severity={"danger"}/>
-            </div>)
+            return (<div style={{gap: '5px', display: 'flex'}}>
+                <Badge value={numPassed} className="ml-auto" severity={'success'}/>
+                <Badge value={numFailed} className="ml-auto" severity={'danger'}/>
+            </div>);
         } else if(status === TestRunStatus.FAILURE){
             return (
-                <Badge value={"Failed"} severity={"danger"}/>
-            )
+                <Badge value={'Failed'} severity={'danger'}/>
+            );
         }
-    }
+    };
 
     return (
-        <span style={{display: "flex", justifyContent: "space-between", alignItems: "center"}}>
+        <span style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
             <span>{time.toLocaleTimeString()}</span>
             {headerBadges()}
         </span>
-    )
+    );
 }
 
 export default function TestRun(props: TestRunProps){
@@ -56,7 +56,7 @@ export default function TestRun(props: TestRunProps){
                     </AccordionTab>
                 ))}
             </Accordion>
-        )
+        );
     } else {
         return (
             <div>
@@ -92,6 +92,6 @@ export function RawToTestRunProps(raw: string) : TestRunProps{
             numFailed: 0,
             stderr: parsed.stderr,
             testResults: [],
-        }
+        };
     }
 }

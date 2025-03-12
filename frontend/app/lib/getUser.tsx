@@ -1,4 +1,4 @@
-import { fetchApi } from "@/app/lib/api";
+import { fetchApi } from '@/app/lib/api';
 /**
  * Fetches the username of the current user.
  * @param {string} jwt - The JWT token for authentication.
@@ -7,11 +7,11 @@ import { fetchApi } from "@/app/lib/api";
  */
 export async function fetchUserName(jwt: string, setAndStoreJwt: Function): Promise<string> {
     try {
-        const res = await fetchApi(jwt, setAndStoreJwt, "users/self/", "GET");
+        const res = await fetchApi(jwt, setAndStoreJwt, 'users/self/', 'GET');
         const data = await res.json();
         return data.username; // Return the username from the API response
     } catch (error) {
-        console.error("Failed to fetch username", error);
-        throw new Error("Failed to fetch username");
+        console.error('Failed to fetch username', error);
+        throw new Error('Failed to fetch username');
     }
 }

@@ -2,23 +2,23 @@
 
 //To-do: align question types
 export const ServerToLocal = new Map([
-    ["CODING", "CODE"],
-    ["MULTIPLE_CHOICE", "SELECT"],
-    ["WRITTEN_RESPONSE", "TEXT"],
-    ["CHECKBOX", "MULTI_SELECT"]
-])
+    ['CODING', 'CODE'],
+    ['MULTIPLE_CHOICE', 'SELECT'],
+    ['WRITTEN_RESPONSE', 'TEXT'],
+    ['CHECKBOX', 'MULTI_SELECT']
+]);
 
 export const LocalToServer = new Map([
-    ["CODE", "CODING"],
-    ["SELECT", "MULTIPLE_CHOICE"],
-    ["TEXT", "WRITTEN_RESPONSE"],
-    ["MULTI_SELECT", "CHECKBOX"]
-])
+    ['CODE', 'CODING'],
+    ['SELECT', 'MULTIPLE_CHOICE'],
+    ['TEXT', 'WRITTEN_RESPONSE'],
+    ['MULTI_SELECT', 'CHECKBOX']
+]);
 
-export const ID_SET_ON_SERVER = "set_on_server";
+export const ID_SET_ON_SERVER = 'set_on_server';
 
-export type QuestionType = "CODE" | "SELECT" | "TEXT" | "MULTI_SELECT";
-export type ServerQuestionType = "CODING" | "MULTIPLE_CHOICE" | "WRITTEN_RESPONSE" | "CHECKBOX";
+export type QuestionType = 'CODE' | 'SELECT' | 'TEXT' | 'MULTI_SELECT';
+export type ServerQuestionType = 'CODING' | 'MULTIPLE_CHOICE' | 'WRITTEN_RESPONSE' | 'CHECKBOX';
 
 export interface BaseQuestionData {
     id: string;
@@ -30,11 +30,11 @@ export interface BaseQuestionData {
     questionType: "CODE" | "SELECT" | "TEXT";
 }
 
-export type ProgrammingLanguages = "C_PP" | "C" | "PYTHON";
+export type ProgrammingLanguages = 'C_PP' | 'C' | 'PYTHON';
 
 // Question Data
 export interface CodeQuestionData extends BaseQuestionData {
-    questionType: "CODE";
+    questionType: 'CODE';
     starterCode: string;
     programmingLanguage: ProgrammingLanguages;   
 }
@@ -46,7 +46,7 @@ export interface StaffCodeQuestionData extends CodeQuestionData {
 }
 
 export interface SelectQuestionData extends BaseQuestionData {
-    questionType: "SELECT";
+    questionType: 'SELECT';
     options: string[];
 }
 
@@ -55,7 +55,7 @@ export interface StaffSelectQuestionData extends SelectQuestionData {
 }
 
 export interface MultiSelectQuestionData extends BaseQuestionData {
-    questionType: "MULTI_SELECT";
+    questionType: 'MULTI_SELECT';
     options: string[];
 }
 
@@ -64,7 +64,7 @@ export interface StaffMultiSelectQuestionData extends MultiSelectQuestionData {
 }
 
 export interface TextQuestionData extends BaseQuestionData {
-    questionType: "TEXT";
+    questionType: 'TEXT';
 }
 
 export type QuestionData = CodeQuestionData | SelectQuestionData | TextQuestionData | MultiSelectQuestionData;
@@ -109,26 +109,26 @@ export type QuestionProps = (CodeQuestionProps | SelectQuestionProps | TextQuest
 
 // Type Guards
 export const isCodeQuestion = (props: QuestionProps): props is CodeQuestionProps =>
-    props.questionType === "CODE";
+    props.questionType === 'CODE';
 
 export const isSelectQuestion = (props: QuestionProps): props is SelectQuestionProps =>
-    props.questionType === "SELECT";
+    props.questionType === 'SELECT';
 
 export const isTextQuestion = (props: QuestionProps): props is TextQuestionProps =>
-    props.questionType === "TEXT";
+    props.questionType === 'TEXT';
 
 export const isMultiSelectQuestion = (props: QuestionProps): props is MultiSelectQuestionProps =>
-    props.questionType === "MULTI_SELECT";
+    props.questionType === 'MULTI_SELECT';
 
 export const isAnswered = (props: QuestionProps) => {
     switch(props.questionType){
-        case "TEXT":
-            return props.state.value.length;
-        case "CODE":
-            return props.state.value != props.starterCode;
-        case "SELECT":
-            return props.state.value != -1;
-        case "MULTI_SELECT":
-            return props.state.value.length;
+    case 'TEXT':
+        return props.state.value.length;
+    case 'CODE':
+        return props.state.value != props.starterCode;
+    case 'SELECT':
+        return props.state.value != -1;
+    case 'MULTI_SELECT':
+        return props.state.value.length;
     }
-}
+};

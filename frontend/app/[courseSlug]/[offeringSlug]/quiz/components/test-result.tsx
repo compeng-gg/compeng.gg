@@ -12,12 +12,12 @@ Success example:
 
 */
 
-import { Badge } from "primereact/badge";
-import { IconField } from "primereact/iconfield";
+import { Badge } from 'primereact/badge';
+import { IconField } from 'primereact/iconfield';
 
 enum TestCaseType {
-    PUBLIC = "public",
-    PRIVATE = "private",
+    PUBLIC = 'public',
+    PRIVATE = 'private',
 };
 
 
@@ -30,11 +30,11 @@ export interface TestResult {
 
 export function TestResultHeader({test, index} : {test : TestResult, index: number}) {
     return (
-        <span style={{display: "flex", justifyContent: "space-between", alignItems: "center"}}>
+        <span style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
             <span>{`Test ${index}`}</span>
-            <Badge value={test.isOk ? "Passed" : "Failed"} severity={test.isOk ? "success" : "danger"}/>
+            <Badge value={test.isOk ? 'Passed' : 'Failed'} severity={test.isOk ? 'success' : 'danger'}/>
         </span>
-    )
+    );
 }
 
 export function TestResultDisplay(test: TestResult) {
@@ -44,13 +44,13 @@ export function TestResultDisplay(test: TestResult) {
                 <div>Actual Result: {test.actualResult}</div>
                 <div>Expected Result: {test.expectedResult}</div>
             </div>
-        )
+        );
     } else {
         return (
             <div>
                 Private
             </div>
-        )
+        );
     }
 }
 
@@ -59,7 +59,7 @@ export function RawToTestResult(raw: string): TestResult {
 
     return {
         kind: parsed.kind as TestCaseType,
-        isOk: parsed.result === "OK",
+        isOk: parsed.result === 'OK',
         actualResult: parsed.actual_result,
         expectedResult: parsed.expected_result,
     } as TestResult;

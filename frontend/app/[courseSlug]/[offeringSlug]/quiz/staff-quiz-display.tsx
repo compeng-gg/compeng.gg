@@ -1,8 +1,8 @@
-import { Badge } from "primereact/badge";
-import { Card } from "primereact/card";
-import { differenceInMinutes } from "date-fns";
-import { Button } from "primereact/button";
-import Link from "next/link";
+import { Badge } from 'primereact/badge';
+import { Card } from 'primereact/card';
+import { differenceInMinutes } from 'date-fns';
+import { Button } from 'primereact/button';
+import Link from 'next/link';
 
 export interface StaffQuizProps {
     name: string;
@@ -14,12 +14,12 @@ export interface StaffQuizProps {
 }
 
 function StaffQuizDisplayBadges(props: StaffQuizProps) {
-    const duration = props.startTime && props.endTime ? Math.abs(differenceInMinutes(props.endTime, props.startTime)) : "N/A";
+    const duration = props.startTime && props.endTime ? Math.abs(differenceInMinutes(props.endTime, props.startTime)) : 'N/A';
 
     return (
-        <div style={{ position: "relative" }}>
+        <div style={{ position: 'relative' }}>
             <span></span>
-            <div style={{ position: "absolute", top: "10px", right: "10px", display: "flex", gap: "8px" }}>
+            <div style={{ position: 'absolute', top: '10px', right: '10px', display: 'flex', gap: '8px' }}>
                 <Badge value={`${duration} mins`} severity="secondary" />
             </div>
         </div>
@@ -28,7 +28,7 @@ function StaffQuizDisplayBadges(props: StaffQuizProps) {
 
 function StaffQuizButton({ quizProps }: { quizProps: StaffQuizProps }) {
     return (
-        <div style={{ position: "relative", display: "flex", flexDirection: "row-reverse" }}>
+        <div style={{ position: 'relative', display: 'flex', flexDirection: 'row-reverse' }}>
             <Link href={`/${quizProps.courseSlug}/${quizProps.offeringSlug}/quiz/${quizProps.quizSlug}/submissions/`}>
                 <Button label="Grade Quiz" size="small" />
             </Link>
@@ -57,14 +57,14 @@ function UpcomingQuizDisplay(props: StaffQuizProps) {
 
     const footer = () => {
         return (
-            <div style={{display: "flex", flexDirection: "row", gap: "5px", justifyContent: "flex-end"}}>
+            <div style={{display: 'flex', flexDirection: 'row', gap: '5px', justifyContent: 'flex-end'}}>
                 <Link href={`/${props.courseSlug}/${props.offeringSlug}/quiz/edit/${props.quizSlug}/`}>
                     <Button label="Edit Quiz" size="small" />
                 </Link>
                 <StaffQuizButton quizProps={props} />
             </div>
-        )
-    }
+        );
+    };
     return (
         <Card
             header={<StaffQuizDisplayBadges {...props} />}
@@ -79,14 +79,14 @@ function UpcomingQuizDisplay(props: StaffQuizProps) {
 function OngoingQuizDisplay(props: StaffQuizProps) {
     const footer = () => {
         return (
-            <div style={{display: "flex", flexDirection: "row", gap: "5px", justifyContent: "flex-end"}}>
+            <div style={{display: 'flex', flexDirection: 'row', gap: '5px', justifyContent: 'flex-end'}}>
                 <Link href={`/${props.courseSlug}/${props.offeringSlug}/quiz/edit/${props.quizSlug}/`}>
                     <Button label="Edit Quiz" size="small" />
                 </Link>
                 <StaffQuizButton quizProps={props} />
             </div>
-        )
-    }
+        );
+    };
 
     return (
         <Card
@@ -103,20 +103,20 @@ function PastQuizDisplay(props: StaffQuizProps) {
 
     const footer = () => {
         return (
-            <div style={{display: "flex", flexDirection: "row", justifyContent: "flex-end"}}>
+            <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'flex-end'}}>
                 <Link href={`/${props.courseSlug}/${props.offeringSlug}/quiz/edit/${props.quizSlug}/`}>
                     <Button label="Edit Quiz" size="small" />
                 </Link>
                 <StaffQuizButton quizProps={props} />
             </div>
-        )
-    }
+        );
+    };
     return (
         <Card
             header={<StaffQuizDisplayBadges {...props} />}
             footer={footer}
             title={props.name}
-            subTitle={`Ended on: ${props.endTime ?? "Unknown"}`}
+            subTitle={`Ended on: ${props.endTime ?? 'Unknown'}`}
             className="bg-gray-50 dark:white shadow-md rounded-lg"
         />
     );

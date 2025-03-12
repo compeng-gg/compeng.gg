@@ -6,20 +6,20 @@ import H2 from '@/app/ui/h2';
 
 function Labs({ params }: { params: { slug: string, lab_slug: string } }) {
     return (
-    <>
-      <Navbar />
-      <Main>
-            <H2>Grade for {params.lab_slug}:</H2>
-      </Main>
-    </>
+        <>
+            <Navbar />
+            <Main>
+                <H2>Grade for {params.lab_slug}:</H2>
+            </Main>
+        </>
     );
 }
 
 
 export default function Page({ params }: { params: { slug: string, lab_slug: string } }) {
     return (
-      <LoginRequired>
-        <Labs params={params} />
-      </LoginRequired>
+        <LoginRequired>
+            <Labs params={params} />
+        </LoginRequired>
     );
-  }
+}

@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { useEffect, useState, useContext } from "react";
-import { useParams } from "next/navigation";
-import { fetchApi } from "@/app/lib/api";
-import { JwtContext } from "@/app/lib/jwt-provider";
-import Navbar from "@/app/components/navbar";
-import GradingQuestionDisplay from "./grading-question-display";
+import { useEffect, useState, useContext } from 'react';
+import { useParams } from 'next/navigation';
+import { fetchApi } from '@/app/lib/api';
+import { JwtContext } from '@/app/lib/jwt-provider';
+import Navbar from '@/app/components/navbar';
+import GradingQuestionDisplay from './grading-question-display';
 
 interface Question {
     id: string;  
@@ -47,9 +47,9 @@ export default function StudentSubmissionPage() {
                 jwt,
                 setAndStoreJwt,
                 `quizzes/admin/${courseSlug}/${quizSlug}/`,
-                "GET"
+                'GET'
             );
-            if (!quizRes.ok) throw new Error("Failed to fetch quiz details");
+            if (!quizRes.ok) throw new Error('Failed to fetch quiz details');
             const quizData = await quizRes.json();
             setQuestions(quizData.questions);
 
@@ -58,12 +58,12 @@ export default function StudentSubmissionPage() {
                 jwt,
                 setAndStoreJwt,
                 `quizzes/admin/${courseSlug}/${quizSlug}/submissions/${studentId}/`,
-                "GET"
+                'GET'
             );
-            if (!subRes.ok) throw new Error("Failed to fetch submission");
+            if (!subRes.ok) throw new Error('Failed to fetch submission');
             setSubmission(await subRes.json());
         } catch (error) {
-            console.error("Failed to retrieve data", error);
+            console.error('Failed to retrieve data', error);
         } finally {
             setLoading(false);
         }
@@ -85,13 +85,13 @@ export default function StudentSubmissionPage() {
     return (
         <>
             <Navbar />
-            <div style={{ padding: "20px" }}>
-                <h2>{submission?.username}'s Submission</h2>
-                <p>Started at: {new Date(submission?.started_at ?? "").toLocaleString()}</p>
-                <p>Completed at: {new Date(submission?.completed_at ?? "").toLocaleString()}</p>
+            <div style={{ padding: '20px' }}>
+                <h2>{submission?.username}&apos;s Submission</h2>
+                <p>Started at: {new Date(submission?.started_at ?? '').toLocaleString()}</p>
+                <p>Completed at: {new Date(submission?.completed_at ?? '').toLocaleString()}</p>
 
                 {/* Render questions with answers */}
-                <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                     {questions.map((question, idx) => {
                         
                         const matchingAnswer = submission?.answers.multiple_choice_answers.find((a) => a.question_id === question.id)
@@ -128,17 +128,17 @@ export default function StudentSubmissionPage() {
                     setTimeout(() => setGradeSubmitted(false), 3000);
                 }}
                 style={{
-                    position: "fixed",
-                    bottom: "20px",
-                    right: "20px",
-                    backgroundColor: "#007bff",
-                    color: "#fff",
-                    padding: "10px 20px",
-                    borderRadius: "5px",
-                    border: "none",
-                    cursor: "pointer",
-                    fontSize: "16px",
-                    boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
+                    position: 'fixed',
+                    bottom: '20px',
+                    right: '20px',
+                    backgroundColor: '#007bff',
+                    color: '#fff',
+                    padding: '10px 20px',
+                    borderRadius: '5px',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontSize: '16px',
+                    boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
                 }}
             >
                 Submit Grade
@@ -147,29 +147,29 @@ export default function StudentSubmissionPage() {
             {gradeSubmitted && (
                 <div
                     style={{
-                        position: "fixed",
-                        bottom: "70px",
-                        right: "100px",
-                        backgroundColor: "#28a745",
-                        color: "#fff",
-                        padding: "10px 15px",
-                        borderRadius: "5px",
-                        fontSize: "14px",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "10px",
-                        boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
+                        position: 'fixed',
+                        bottom: '70px',
+                        right: '100px',
+                        backgroundColor: '#28a745',
+                        color: '#fff',
+                        padding: '10px 15px',
+                        borderRadius: '5px',
+                        fontSize: '14px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px',
+                        boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
                     }}
                 >
                     Grade successfully submitted!
                     <button
                         onClick={() => setGradeSubmitted(false)}
                         style={{
-                            background: "none",
-                            border: "none",
-                            color: "#fff",
-                            fontSize: "14px",
-                            cursor: "pointer",
+                            background: 'none',
+                            border: 'none',
+                            color: '#fff',
+                            fontSize: '14px',
+                            cursor: 'pointer',
                         }}
                     >
                         ✖

@@ -1,5 +1,5 @@
-import { RadioButton } from "primereact/radiobutton";
-import { SelectState } from "../question-models";
+import { RadioButton, RadioButtonChangeEvent } from 'primereact/radiobutton';
+import { SelectState } from '../question-models';
 
 export interface SelectEditorProps {
     state: SelectState;
@@ -8,6 +8,11 @@ export interface SelectEditorProps {
 
 export default function SelectEditor(props: SelectEditorProps){
     const {state, options} = props;
+
+    const onChange = (e : RadioButtonChangeEvent) => {
+        state.setValue(e.value);
+        save(e.value);
+    };
     const toDisplay = options.map((option, idx) => {
         return (
             <div key={idx} className="flex align-items-center">

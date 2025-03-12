@@ -1,4 +1,5 @@
 import 'primeicons/primeicons.css';
-import "primereact/resources/themes/lara-dark-blue/theme.css";
+import 'primereact/resources/themes/lara-dark-blue/theme.css';
+import primeIcons from 'primeicons/primeicons.css';
 
-export 'primeicons/primeicons.css' as primeIcons;
+export { primeIcons };

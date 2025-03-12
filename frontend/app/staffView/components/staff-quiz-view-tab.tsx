@@ -1,11 +1,11 @@
-import TextEditor from "@/app/[courseSlug]/[offeringSlug]/quiz/components/text-editor";
-import StaffQuizDisplay, { StaffQuizProps } from "@/app/[courseSlug]/[offeringSlug]/quiz/staff-quiz-display";
-import { fetchApi } from "@/app/lib/api";
-import { JwtContext } from "@/app/lib/jwt-provider";
-import { Button } from "primereact/button";
-import { Calendar } from "primereact/calendar";
-import { InputText } from "primereact/inputtext";
-import { useContext, useEffect, useState } from "react";
+import TextEditor from '@/app/[courseSlug]/[offeringSlug]/quiz/components/text-editor';
+import StaffQuizDisplay, { StaffQuizProps } from '@/app/[courseSlug]/[offeringSlug]/quiz/staff-quiz-display';
+import { fetchApi } from '@/app/lib/api';
+import { JwtContext } from '@/app/lib/jwt-provider';
+import { Button } from 'primereact/button';
+import { Calendar } from 'primereact/calendar';
+import { InputText } from 'primereact/inputtext';
+import { useContext, useEffect, useState } from 'react';
 
 export interface StaffQuizViewProps {
     courseSlug: string;
@@ -20,17 +20,17 @@ export default function StaffQuizViewTab(props: StaffQuizViewProps) {
     const [showModal, setShowModal] = useState(false);
 
     // Form state for creating a new quiz
-    const [title, setTitle] = useState("");
-    const [slug, setSlug] = useState("");
-    const [visibleAt, setVisibleAt] = useState("");
-    const [startsAt, setStartsAt] = useState("");
-    const [endsAt, setEndsAt] = useState("");
-    const [githubRepository, setGithubRepository] = useState("");
-    const [formError, setFormError] = useState("");
+    const [title, setTitle] = useState('');
+    const [slug, setSlug] = useState('');
+    const [visibleAt, setVisibleAt] = useState('');
+    const [startsAt, setStartsAt] = useState('');
+    const [endsAt, setEndsAt] = useState('');
+    const [githubRepository, setGithubRepository] = useState('');
+    const [formError, setFormError] = useState('');
 
     async function fetchQuizzes() {
         try {
-            const res = await fetchApi(jwt, setAndStoreJwt, `quizzes/list/${props.courseSlug}`, "GET");
+            const res = await fetchApi(jwt, setAndStoreJwt, `quizzes/list/${props.courseSlug}`, 'GET');
             const data = await res.json();
 
             if (!Array.isArray(data) || data.length === 0) {
@@ -51,7 +51,7 @@ export default function StaffQuizViewTab(props: StaffQuizViewProps) {
                 setQuizzes(retQuizzes);
             }
         } catch (error) {
-            console.error("Failed to retrieve quizzes", error);
+            console.error('Failed to retrieve quizzes', error);
         } finally {
             setLoading(false);
         }
@@ -63,7 +63,7 @@ export default function StaffQuizViewTab(props: StaffQuizViewProps) {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setFormError("");
+        setFormError('');
 
         // Convert datetime-local values to Unix timestamps (seconds)
         const visibleTimestamp = Math.floor(new Date(visibleAt).getTime() / 1000);
@@ -72,14 +72,14 @@ export default function StaffQuizViewTab(props: StaffQuizViewProps) {
 
         // Validate start < end
         if (startTimestamp >= endTimestamp) {
-            setFormError("Start time must be before end time.");
+            setFormError('Start time must be before end time.');
             return;
         }
 
         // Validate GitHub repo format
         const githubRegex = /^[a-zA-Z0-9_.-]+\/[a-zA-Z0-9_.-]+$/;
         if (!githubRegex.test(githubRepository)) {
-            setFormError("GitHub repository must be in the format 'user_name/repo_name'.");
+            setFormError('GitHub repository must be in the format \'user_name/repo_name\'.');
             return;
         }
 
@@ -97,7 +97,7 @@ export default function StaffQuizViewTab(props: StaffQuizViewProps) {
                 jwt,
                 setAndStoreJwt,
                 `quizzes/admin/${props.courseSlug}/create/`,
-                "POST",
+                'POST',
                 payload
             );
             if (res.ok) {
@@ -106,19 +106,19 @@ export default function StaffQuizViewTab(props: StaffQuizViewProps) {
                 setShowModal(false);
 
                 // Clear form
-                setTitle("");
-                setSlug("");
-                setVisibleAt("");
-                setStartsAt("");
-                setEndsAt("");
-                setGithubRepository("");
+                setTitle('');
+                setSlug('');
+                setVisibleAt('');
+                setStartsAt('');
+                setEndsAt('');
+                setGithubRepository('');
             } else {
                 const errorData = await res.json();
-                setFormError(errorData.detail || "Error creating quiz.");
+                setFormError(errorData.detail || 'Error creating quiz.');
             }
         } catch (error) {
-            console.error("Error creating quiz:", error);
-            setFormError("An unexpected error occurred.");
+            console.error('Error creating quiz:', error);
+            setFormError('An unexpected error occurred.');
         }
     };
 
@@ -126,12 +126,12 @@ export default function StaffQuizViewTab(props: StaffQuizViewProps) {
     // if (quizzes.length === 0) return <p>No quizzes available.</p>;
 
     return (
-        <div style={{ display: "flex", flexDirection: "column", gap: "10px", width: "100%", marginTop: "10px" }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', width: '100%', marginTop: '10px' }}>
             {/* 
                 Match existing button style. 
                 Replace `btn btn-primary` with your actual classes if different. 
             */}
-            <div style={{display: "flex", flexDirection: "row", justifyContent: "flex-end"}}>
+            <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'flex-end'}}>
                 <Button icon="pi pi-plus" label="Create New Quiz" onClick={() => setShowModal(true)}/>
             </div>
             {quizzes.map((quiz) => (
@@ -210,8 +210,8 @@ export default function StaffQuizViewTab(props: StaffQuizViewProps) {
                                     title="Enter the GitHub repo in the format 'user_name/repo_name'."
                                 />
                             </div>
-                            {formError && <p style={{ color: "red" }}>{formError}</p>}
-                            <div style={{ display: "flex", marginTop: "10px", gap: "5px" }}>
+                            {formError && <p style={{ color: 'red' }}>{formError}</p>}
+                            <div style={{ display: 'flex', marginTop: '10px', gap: '5px' }}>
                                 {/* Match your existing button classes here as well */}
                                 <Button label="Submit" type="submit" size="small"/>
                                 <Button label="Cancel" onClick={() => setShowModal(false)} severity="danger" size="small"/>

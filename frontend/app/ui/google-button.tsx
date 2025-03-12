@@ -8,7 +8,7 @@ import { usePathname } from 'next/navigation';
 import Button from '@/app/ui/button';
 
 function generateState() {
-  return Math.random().toString(36).substring(6);
+    return Math.random().toString(36).substring(6);
 }
 
 interface GoogleButtonProps {
@@ -19,31 +19,31 @@ const authRedirectUri = process.env.NEXT_PUBLIC_AUTH_REDIRECT_URI || 'http://loc
 const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '';
 
 function GoogleButton({ action }: GoogleButtonProps) {
-  const [jwt, setAndStoreJwt] = useContext(JwtContext);
-  const pathname = usePathname()
+    const [jwt, setAndStoreJwt] = useContext(JwtContext);
+    const pathname = usePathname();
 
-  function handleClick(event: any) {
-    const state = generateState();
+    function handleClick(event: any) {
+        const state = generateState();
 
-    sessionStorage.setItem('action', action);
-    sessionStorage.setItem('provider', 'google');
-    sessionStorage.setItem('next', pathname);
-    sessionStorage.setItem('state', state);
+        sessionStorage.setItem('action', action);
+        sessionStorage.setItem('provider', 'google');
+        sessionStorage.setItem('next', pathname);
+        sessionStorage.setItem('state', state);
 
-    const scope = 'openid profile email https://www.googleapis.com/auth/youtube';
+        const scope = 'openid profile email https://www.googleapis.com/auth/youtube';
 
-    const redirectUri = encodeURIComponent(authRedirectUri);
+        const redirectUri = encodeURIComponent(authRedirectUri);
     
-    window.location.href = `https://accounts.google.com/o/oauth2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&access_type=offline&prompt=consent&scope=${scope}&state=${state}`;
-  }
+        window.location.href = `https://accounts.google.com/o/oauth2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&access_type=offline&prompt=consent&scope=${scope}&state=${state}`;
+    }
 
-  const buttonText = action === 'auth' ? 'Login with Google' : 'Connect with Google';
+    const buttonText = action === 'auth' ? 'Login with Google' : 'Connect with Google';
 
-  return (
-    <Button kind="primary" onClick={handleClick}>
-      {buttonText}
-    </Button>
-  )
+    return (
+        <Button kind="primary" onClick={handleClick}>
+            {buttonText}
+        </Button>
+    );
 
 }
 export default GoogleButton;

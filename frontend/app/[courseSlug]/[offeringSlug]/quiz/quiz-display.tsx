@@ -1,10 +1,10 @@
-import { Badge } from "primereact/badge";
-import { Card } from "primereact/card";
-import { start } from "repl";
-import {differenceInMinutes} from "date-fns";
-import { Button } from "primereact/button";
-import { Router } from "next/router";
-import Link from "next/link";
+import { Badge } from 'primereact/badge';
+import { Card } from 'primereact/card';
+import { start } from 'repl';
+import {differenceInMinutes} from 'date-fns';
+import { Button } from 'primereact/button';
+import { Router } from 'next/router';
+import Link from 'next/link';
 
 export interface QuizProps {
     name: string;
@@ -20,12 +20,12 @@ function QuizDisplayBadges(props: QuizProps){
     const {grade} = props;
     const duration = Math.abs(differenceInMinutes(props.endTime, props.startTime));
 
-    const gradeString = (grade != -1) ? `Grade: ${grade}%` : "Ungraded";
+    const gradeString = (grade) ? `Grade: ${grade}%` : 'Ungraded';
     return (
         <div style={{ position: 'relative'}}>
             <span></span>
             <div style={{ position: 'absolute', top: '10px', right: '10px', display: 'flex', gap: '8px' }}>
-                <Badge value={gradeString} severity={"success"} />
+                <Badge value={gradeString} severity={'success'} />
                 <Badge value={`${duration} mins`} severity="secondary" />
             </div>
         </div>
@@ -34,13 +34,13 @@ function QuizDisplayBadges(props: QuizProps){
 
 function QuizVisitButton({buttonText, quizProps}: {buttonText: string, quizProps: QuizProps}){
     return (
-        <div style={{ position: 'relative', display: "flex", flexDirection: "row-reverse", }}>
+        <div style={{ position: 'relative', display: 'flex', flexDirection: 'row-reverse', }}>
             <span></span>
             <Link href={`/${quizProps.courseSlug}/${quizProps.offeringSlug}/quiz/${quizProps.quizSlug}`}>
                 <Button label={buttonText} size="small"/>
             </Link>
         </div>
-    )
+    );
     
 }
 
@@ -68,29 +68,29 @@ function UpcomingQuizDisplay(props: QuizProps){
             subTitle={`Start Time: ${props.startTime}`}
             className="bg-gray-50 dark:white shadow-md rounded-lg"
         />
-    )
+    );
 }
 
 function OngoingQuizDisplay(props: QuizProps){
     return (
         <Card
             header={<QuizDisplayBadges {...props} />}
-            footer={<QuizVisitButton quizProps={props} buttonText={"Write quiz"}/>}
+            footer={<QuizVisitButton quizProps={props} buttonText={'Write quiz'}/>}
             title={props.name}
             subTitle={`Started at: ${props.startTime}`}
             className="bg-green-50 dark:white shadow-md rounded-lg"
         />
-    )
+    );
 }
 
 function PastQuizDisplay(props: QuizProps){
     return (
         <Card
             header={<QuizDisplayBadges {...props} />}
-            footer={<QuizVisitButton quizProps={props} buttonText={"View Submission"}/>}
+            footer={<QuizVisitButton quizProps={props} buttonText={'View Submission'}/>}
             title={props.name}
             subTitle={`Ended on: ${props.endTime}`}
             className="bg-gray-50 dark:white shadow-md rounded-lg"
         />
-    )
+    );
 }

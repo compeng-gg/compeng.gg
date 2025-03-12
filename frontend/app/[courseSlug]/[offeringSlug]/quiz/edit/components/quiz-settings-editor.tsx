@@ -1,9 +1,9 @@
-import { Calendar } from "primereact/calendar";
-import { QuizProps } from "../../quiz-display";
-import { InputText } from "primereact/inputtext";
-import { LabelledField } from "./question-editor";
-import React from "react";
-import { Checkbox } from "primereact/checkbox";
+import { Calendar } from 'primereact/calendar';
+import { QuizProps } from '../../quiz-display';
+import { InputText } from 'primereact/inputtext';
+import { LabelledField } from './question-editor';
+import React from 'react';
+import { Checkbox } from 'primereact/checkbox';
 export interface StaffQuizProps {
     name: string;
     courseSlug: string;
@@ -22,9 +22,9 @@ export interface QuizSettingsEditorProps {
 
 export function QuizSettingsEditor(props: QuizSettingsEditorProps) {
     const { quizProps, setQuizProps } = props;
-    const [repoUrl, setRepoUrl] = React.useState<string>("");
+    const [repoUrl, setRepoUrl] = React.useState<string>('');
     return (
-        <div style={{display: "flex", flexDirection: "column", gap: "10px"}}>
+        <div style={{display: 'flex', flexDirection: 'column', gap: '10px'}}>
             <LabelledField label="Quiz Name" id="quizName">
                 <InputText id="quizName" value={quizProps.name} onChange={(e) => setQuizProps({ ...quizProps, name: e.target.value })} />
             </LabelledField>
@@ -45,6 +45,6 @@ export function QuizSettingsEditor(props: QuizSettingsEditorProps) {
                 <Checkbox id="content-viewable" checked={quizProps.contentViewableAfterSubmission} onChange={(e) => setQuizProps({ ...quizProps, contentViewableAfterSubmission: e.checked })} />
             </LabelledField>
         </div>
-    )
+    );
 
 }

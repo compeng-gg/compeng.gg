@@ -52,10 +52,10 @@ export default function Ide(props: IdeProps) {
     
         setLoaded(true);
         
-      }, []);
+    }, []);
     
 
-      return (
+    return (
         <div>
             {loaded && <AceEditor
                 mode={ProgrammingLanguageToMode(props.language)}
@@ -70,23 +70,23 @@ export default function Ide(props: IdeProps) {
                 style={{ width: '100%', height: '400px' }}
                 readOnly={!props.isMutable} 
                 setOptions={{
-                  enableBasicAutocompletion: props.isMutable,
-                  enableLiveAutocompletion: props.isMutable,
-                  enableSnippets: props.isMutable,
+                    enableBasicAutocompletion: props.isMutable,
+                    enableLiveAutocompletion: props.isMutable,
+                    enableSnippets: props.isMutable,
                 }}
-              />}
+            />}
         </div>
-      )
+    );
 
 
 }
 
 export function ProgrammingLanguageToMode(language: ProgrammingLanguages): string {
     switch(language){
-        case "C":
-        case "C_PP":
-            return "c_cpp";
-        case "PYTHON":
-            return "python";
+    case 'C':
+    case 'C_PP':
+        return 'c_cpp';
+    case 'PYTHON':
+        return 'python';
     }
 }

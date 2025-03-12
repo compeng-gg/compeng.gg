@@ -9,7 +9,7 @@ import { Button } from 'primereact/button';
 import PrimeWrapper from '../components/primeWrapper';
 
 function generateState() {
-  return Math.random().toString(36).substring(6);
+    return Math.random().toString(36).substring(6);
 }
 
 interface GitHubButtonProps {
@@ -20,29 +20,29 @@ const authRedirectUri = process.env.NEXT_PUBLIC_AUTH_REDIRECT_URI || 'http://loc
 const clientId = process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID || '';
 
 function GitHubButton({ action }: GitHubButtonProps) {
-  const [jwt, setAndStoreJwt] = useContext(JwtContext);
-  const pathname = usePathname()
+    const [jwt, setAndStoreJwt] = useContext(JwtContext);
+    const pathname = usePathname();
 
-  function handleClick(event: any) {
-    const state = generateState();
+    function handleClick(event: any) {
+        const state = generateState();
 
-    sessionStorage.setItem('action', action);
-    sessionStorage.setItem('provider', 'github');
-    sessionStorage.setItem('next', pathname);
-    sessionStorage.setItem('state', state);
+        sessionStorage.setItem('action', action);
+        sessionStorage.setItem('provider', 'github');
+        sessionStorage.setItem('next', pathname);
+        sessionStorage.setItem('state', state);
 
-    const redirectUri = encodeURIComponent(authRedirectUri);
+        const redirectUri = encodeURIComponent(authRedirectUri);
     
-    window.location.href = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&state=${state}`;
-  }
+        window.location.href = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&state=${state}`;
+    }
 
-  const buttonText = action === 'auth' ? 'Login with GitHub' : 'Connect with GitHub';
+    const buttonText = action === 'auth' ? 'Login with GitHub' : 'Connect with GitHub';
 
-  return (
-    <PrimeWrapper>
-      <Button label={buttonText} onClick={handleClick} raised outlined/>
-    </PrimeWrapper>
-  )
+    return (
+        <PrimeWrapper>
+            <Button label={buttonText} onClick={handleClick} raised outlined/>
+        </PrimeWrapper>
+    );
 
 }
 export default GitHubButton;

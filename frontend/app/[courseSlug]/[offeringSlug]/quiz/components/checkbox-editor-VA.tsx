@@ -1,5 +1,5 @@
-import { Checkbox, CheckboxChangeEvent } from "primereact/checkbox";
-import { SelectState } from "../question-models";
+import { Checkbox, CheckboxChangeEvent } from 'primereact/checkbox';
+import { SelectState } from '../question-models';
 
 export interface CheckboxEditorProps {
     state: SelectState;

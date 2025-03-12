@@ -1,6 +1,6 @@
-import { RadioButton, RadioButtonChangeEvent } from "primereact/radiobutton";
-import { MultiSelectQuestionProps, SelectState } from "../question-models";
-import { Checkbox, CheckboxChangeEvent } from "primereact/checkbox";
+import { RadioButton, RadioButtonChangeEvent } from 'primereact/radiobutton';
+import { MultiSelectQuestionProps, SelectState } from '../question-models';
+import { Checkbox, CheckboxChangeEvent } from 'primereact/checkbox';
 
 export default function MultiSelectEditor({props, save} : {props: MultiSelectQuestionProps, save: (newValue: any) => void}){
     const {state, options} = props;
@@ -15,7 +15,7 @@ export default function MultiSelectEditor({props, save} : {props: MultiSelectQue
         }
         state.setValue(checked);
         save(checked);
-    }
+    };
     const toDisplay = options.map((option, idx) => {
         return (
             <div key={idx} className="flex align-items-center">

@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link'
+import Link from 'next/link';
 import LoginRequired from '@/app/lib/login-required';
 
 import { createContext, useContext, useEffect, useRef, useState } from 'react';
@@ -28,128 +28,128 @@ import { log } from 'console';
 import PrimeWrapper from './components/primeWrapper';
 import { routeModule } from 'next/dist/build/templates/app-page';
 
-export function getBadgeForRole(role: string, size?: "xlarge" | "large"){
+export function getBadgeForRole(role: string, size?: 'xlarge' | 'large'){
 
-  const severity : string = (role == "Student") ? "info":"admin";
-  return <Badge value={role} severity={severity} size={size}/>
+    const severity : string = (role == 'Student') ? 'info':'admin';
+    return <Badge value={role} severity={severity} size={size}/>;
 }
 
 export function getRoleFromOffering(offering) {
-  const spIdx = offering.role.lastIndexOf(" ");
-  return offering.role.substring(spIdx+1);
+    const spIdx = offering.role.lastIndexOf(' ');
+    return offering.role.substring(spIdx+1);
 }
 
 function getCourseCard(offering){
   
-  console.log(offering.role);
-  return (
-    <Link href={`/${offering.course_slug}/${offering.offering_slug}/`} style={{maxWidth: "200px"}}>
-      <PrimeWrapper>
-        <Card title={offering.name} footer={getBadgeForRole(getRoleFromOffering(offering)) } />
-      </PrimeWrapper>
-    </Link>
-    )
+    console.log(offering.role);
+    return (
+        <Link href={`/${offering.course_slug}/${offering.offering_slug}/`} style={{maxWidth: '200px'}}>
+            <PrimeWrapper>
+                <Card title={offering.name} footer={getBadgeForRole(getRoleFromOffering(offering)) } />
+            </PrimeWrapper>
+        </Link>
+    );
 
 }
 
 
 function Dashboard() {
-  const [jwt, setAndStoreJwt] = useContext(JwtContext);
-  const [isInitialized, setIsInitialized] = useState(false);
-  const [username, setUsername] = useState("");
-  const [failedChecks, setFailedChecks] = useState<any[]>([]);
-  const [offerings, setOfferings] = useState<any[]>([]);
+    const [jwt, setAndStoreJwt] = useContext(JwtContext);
+    const [isInitialized, setIsInitialized] = useState(false);
+    const [username, setUsername] = useState('');
+    const [failedChecks, setFailedChecks] = useState<any[]>([]);
+    const [offerings, setOfferings] = useState<any[]>([]);
 
-  useEffect(() => {
-    let ignore = false;
+    useEffect(() => {
+        let ignore = false;
     
-    async function startFetching() {
-      const res = await fetchApi(jwt, setAndStoreJwt, "dashboard/", "GET");
-      const data = await res.json();
-      if (!ignore) {
-        console.log(data)
-        setUsername(data.username);
-        setOfferings(data.offerings);
-        if ("failed-checks" in data) {
-          setFailedChecks(data['failed-checks'])
+        async function startFetching() {
+            const res = await fetchApi(jwt, setAndStoreJwt, 'dashboard/', 'GET');
+            const data = await res.json();
+            if (!ignore) {
+                console.log(data);
+                setUsername(data.username);
+                setOfferings(data.offerings);
+                if ('failed-checks' in data) {
+                    setFailedChecks(data['failed-checks']);
+                }
+                setIsInitialized(true);
+            }
         }
-        setIsInitialized(true);
-      }
+
+        startFetching();
+
+        return () => {
+            ignore = true;
+        };
+    }, []);
+
+    if (!isInitialized) {
+        return (<></>);
     }
 
-    startFetching();
-
-    return () => {
-      ignore = true;
-    };
-  }, []);
-
-  if (!isInitialized) {
-    return (<></>);
-  }
 
 
 
-
-  const todos = [];
-  if (failedChecks.length > 0) {
+    const todos = [];
+    if (failedChecks.length > 0) {
     //fix this
-    todos.push(<H2>TODOs</H2>);
-    var todoCards: any[] = [];
-    if (failedChecks.includes('connect-discord')) {
-      todoCards.push(
-      <div className="text-blue p-4 rounded-lg shadow-lg bg-red-900 max-w-fit space-y-4">
-      <p>Please connect your Discord account to access repositories.</p>
-      <DiscordButton action="connect" />
-    </div>);
+        todos.push(<H2>TODOs</H2>);
+        var todoCards: any[] = [];
+        if (failedChecks.includes('connect-discord')) {
+            todoCards.push(
+                <div className="text-blue p-4 rounded-lg shadow-lg bg-red-900 max-w-fit space-y-4">
+                    <p>Please connect your Discord account to access repositories.</p>
+                    <DiscordButton action="connect" />
+                </div>);
+        }
+        if (failedChecks.includes('connect-github')) {
+            todoCards.push(
+                <div className="text-white p-4 rounded-lg shadow-lg bg-red-900 max-w-fit space-y-4">
+                    <p>Please connect your GitHub account to access repositories.</p>
+                    <GitHubButton action="connect" />
+                </div>
+            );
+        }
+        if (failedChecks.includes('join-github-organization')) {
+            todoCards.push(
+                <div className="text-white p-4 rounded-lg shadow-lg bg-red-900 max-w-fit space-y-4">
+                    <p>Please join the GitHub organization. Click <a className="text-red-300" href="https://github.com/orgs/compeng-gg/invitation">here</a> to accept the invite.</p>
+                </div>
+            );
+        }
+        todos.push(<div className="flex flex-col gap-4">{...todoCards}</div>);
     }
-    if (failedChecks.includes('connect-github')) {
-      todoCards.push(
-        <div className="text-white p-4 rounded-lg shadow-lg bg-red-900 max-w-fit space-y-4">
-          <p>Please connect your GitHub account to access repositories.</p>
-          <GitHubButton action="connect" />
-        </div>
-      );
-    }
-    if (failedChecks.includes('join-github-organization')) {
-      todoCards.push(
-        <div className="text-white p-4 rounded-lg shadow-lg bg-red-900 max-w-fit space-y-4">
-          <p>Please join the GitHub organization. Click <a className="text-red-300" href="https://github.com/orgs/compeng-gg/invitation">here</a> to accept the invite.</p>
-        </div>
-      );
-    }
-    todos.push(<div className="flex flex-col gap-4">{...todoCards}</div>);
-  }
 
   
 
-  return (
-    <>
-      <Navbar />
-      <Main>
-        {/* {todos} */}
-        <H2>Courses</H2>
-        <ul>
-          <div style={{display: "flex", flexDirection: "row", flexWrap: "wrap", gap: "10px"}}>
-            {offerings?.map((offering, i) =>
-              <div key={i}>
-                {getCourseCard(offering)}
-              </div>
-            )}
-          </div>
-        </ul>
-      </Main>
-    </>
-  );
+    return (
+        <>
+            <Navbar />
+            <Main>
+                {/* {todos} */}
+                <H2>Courses</H2>
+                <ul>
+                    <div style={{display: 'flex', flexDirection: 'row', flexWrap: 'wrap', gap: '10px'}}>
+                        {offerings?.map((offering, i) =>
+                            <div key={i}>
+                                {getCourseCard(offering)}
+                            </div>
+                        )}
+                    </div>
+                </ul>
+            </Main>
+        </>
+    );
 }
 
 
 export default function Page() {
-  return (
-    <LoginRequired>
-      <PrimeReactProvider>
-        <Dashboard />
-      </PrimeReactProvider>
-    </LoginRequired>
-  );
+    return (
+        <LoginRequired>
+            <PrimeReactProvider>
+                <Dashboard />
+            </PrimeReactProvider>
+        </LoginRequired>
+    );
 }
