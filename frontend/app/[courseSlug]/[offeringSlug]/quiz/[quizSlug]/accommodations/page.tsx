@@ -21,11 +21,9 @@ export default function QuizAccommodationsPage() {
     const [loading, setLoading] = useState(true);
     const [offeringName, setOfferingName] = useState('');
     const [quizTitle, setQuizTitle] = useState('');
-
-    // State for the "Create New Accommodation" modal
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [username, setUsername] = useState('');
-    const [visibleAt, setVisibleAt] = useState('');  // store as ISO string for <input type="datetime-local" />
+    const [visibleAt, setVisibleAt] = useState('');
     const [startsAt, setStartsAt] = useState('');
     const [endsAt, setEndsAt] = useState('');
 
@@ -69,9 +67,7 @@ export default function QuizAccommodationsPage() {
         }
     }
 
-    // POST the new accommodation
     async function handleCreate() {
-        // Ensure required fields are provided
         if (!username || !visibleAt || !startsAt || !endsAt) {
             alert('Please fill in all fields before creating an accommodation.');
             return;
@@ -96,7 +92,6 @@ export default function QuizAccommodationsPage() {
                 throw new Error('Failed to create accommodation');
             }
 
-            // Hide the modal and refresh the accommodations list
             setShowCreateModal(false);
             setUsername('');
             setVisibleAt('');
@@ -130,53 +125,14 @@ export default function QuizAccommodationsPage() {
                 <h1>{offeringName || 'ECE344 Fall 2024'}</h1>
                 <h2>{quizTitle || 'Loading quiz...'}</h2>
 
-                <h3>Accommodations</h3>
-                {accommodations.length === 0 ? (
-                    <p>No accommodations found.</p>
-                ) : (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                        {accommodations.map((item) => (
-                            <div
-                                key={item.user_id}
-                                style={{
-                                    display: 'flex',
-                                    justifyContent: 'space-between',
-                                    alignItems: 'center',
-                                    padding: '10px',
-                                    border: '1px solid #ccc',
-                                    borderRadius: '8px',
-                                    background: '#f9f9f9'
-                                }}
-                            >
-                                <div>
-                                    <p><strong>{item.username}</strong></p>
-                                    <p>
-                                        Visible At:{' '}
-                                        {new Date(item.visible_at_unix_timestamp * 1000).toLocaleString()}
-                                    </p>
-                                    <p>
-                                        Starts At:{' '}
-                                        {new Date(item.starts_at_unix_timestamp * 1000).toLocaleString()}
-                                    </p>
-                                    <p>
-                                        Ends At:{' '}
-                                        {new Date(item.ends_at_unix_timestamp * 1000).toLocaleString()}
-                                    </p>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                )}
-
-                {/* Button to open the modal */}
+                {/* Button to open the modal, moved to the top */}
                 <button
-                    style={{ marginTop: '20px' }}
+                    style={{ marginBottom: '20px' }}
                     onClick={() => setShowCreateModal(true)}
                 >
                     Create New Accommodation
                 </button>
 
-                {/* Modal for creating a new accommodation */}
                 {showCreateModal && (
                     <div
                         style={{
@@ -232,6 +188,35 @@ export default function QuizAccommodationsPage() {
                                 <button onClick={() => setShowCreateModal(false)}>Cancel</button>
                             </div>
                         </div>
+                    </div>
+                )}
+
+                <h3>Accommodations</h3>
+                {accommodations.length === 0 ? (
+                    <p>No accommodations found.</p>
+                ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                        {accommodations.map((item) => (
+                            <div
+                                key={item.user_id}
+                                style={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    padding: '10px',
+                                    border: '1px solid #ccc',
+                                    borderRadius: '8px',
+                                    background: '#f9f9f9'
+                                }}
+                            >
+                                <div>
+                                    <p><strong>{item.username}</strong></p>
+                                    <p>Visible At: {new Date(item.visible_at_unix_timestamp * 1000).toLocaleString()}</p>
+                                    <p>Starts At: {new Date(item.starts_at_unix_timestamp * 1000).toLocaleString()}</p>
+                                    <p>Ends At: {new Date(item.ends_at_unix_timestamp * 1000).toLocaleString()}</p>
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 )}
             </div>
