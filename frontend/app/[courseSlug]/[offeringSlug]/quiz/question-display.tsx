@@ -9,8 +9,10 @@ import { useContext, useEffect, useRef, useState } from 'react';
 import { JwtContext } from '@/app/lib/jwt-provider';
 import { fetchApi } from '@/app/lib/api';
 import { QuizProps } from './quiz-display';
+import { InlineMath } from "react-katex";
 import MultiSelectEditor from './components/multiselect-editor';
 import { Image } from 'primereact/image';
+import 'katex/dist/katex.min.css';
 
 enum QuestionSaveStatus {
     NOT_ANSWERED = 'Not Answered',
@@ -144,7 +146,7 @@ export function QuestionDisplay(props: QuestionProps){
     return (
         <Card
             title={title ?? `Question ${idx !== undefined ? idx + 1 : ''}`}
-            subTitle={prompt}
+            subTitle={props.renderPromptAsLatex ? <InlineMath math={prompt}/> : prompt}
             header={header}
             footer={footer}
         >

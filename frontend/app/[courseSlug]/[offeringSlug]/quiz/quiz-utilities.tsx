@@ -12,6 +12,7 @@ export function getQuestionDataFromRaw(rawData: any, quizSlug: string, courseSlu
         isMutable: true,
         images: rawData.images,
         totalMarks: rawData.points,
+        renderPromptAsLatex: rawData.render_prompt_as_latex
     };
     switch (baseData.questionType) {
     case 'CODE':

@@ -36,6 +36,7 @@ export interface BaseQuestionData {
     serverQuestionType: ServerQuestionType;
     images: QuestionImage[];
     idx?: number;
+    renderPromptAsLatex: boolean;
 }
 
 export type ProgrammingLanguages = 'C_PP' | 'C' | 'PYTHON';
