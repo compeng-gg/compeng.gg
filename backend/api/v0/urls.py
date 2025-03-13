@@ -74,6 +74,7 @@ urlpatterns = [
     path('<slug:course_slug>/quiz/<slug:quiz_slug>/answer/coding/<uuid:coding_question_id>/', quizzes_api.submit_coding_answer),
     path('<slug:course_slug>/quiz/<slug:quiz_slug>/complete/', quizzes_api.complete_quiz),
     path('quizzes/admin/<slug:course_slug>/create/', quizzes_api.create_quiz),
+    path('quizzes/<slug:course_slug>/<slug:quiz_slug>/image/<uuid:question_image_id>/', quizzes_api.get_quiz_question_image),
     path('quizzes/admin/<slug:course_slug>/<slug:quiz_slug>/multiple_choice/create/', quizzes_api.create_multiple_choice_question),
     path('quizzes/admin/<slug:course_slug>/<slug:quiz_slug>/checkbox/create/', quizzes_api.create_checkbox_question),
     path('quizzes/admin/<slug:course_slug>/<slug:quiz_slug>/coding/create/', quizzes_api.create_coding_question),
@@ -98,8 +99,8 @@ urlpatterns = [
     path("quizzes/admin/<slug:course_slug>/<slug:quiz_slug>/submissions/<int:student_id>/", quizzes_api.get_student_quiz_submission),
     path("quizzes/admin/<slug:course_slug>/<slug:quiz_slug>/submissions/<int:student_id>/update-question/", quizzes_api.update_submission_question),
 
-    path("quizzes/admin/<slug:course_slug>/<slug:quiz_slug>/images/add", quizzes_api.create_question_image),
-    path("quizzes/admin/<slug:course_slug>/<slug:quiz_slug>/images/delete", quizzes_api.delete_question_image),
+    path("quizzes/admin/<slug:course_slug>/<slug:quiz_slug>/images/add/", quizzes_api.create_question_image),
+    path("quizzes/admin/<slug:course_slug>/<slug:quiz_slug>/images/delete/", quizzes_api.delete_question_image),
     
     path('github/webhook/', github_webhook),
 

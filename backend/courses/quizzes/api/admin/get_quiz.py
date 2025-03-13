@@ -1,4 +1,3 @@
-from courses.quizzes.api.utils import get_quiz_images_from_question_list
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework import permissions, status
 from rest_framework.response import Response
@@ -49,6 +48,5 @@ def get_quiz(request, course_slug: str, quiz_slug: str):
 
     quiz_data["questions"] = questions
     quiz_data["github_repository"] = quiz.repository.full_name
-    quiz_data["images"] = get_quiz_images_from_question_list(questions)
 
     return Response(status=status.HTTP_200_OK, data=quiz_data)

@@ -67,3 +67,4 @@ from courses.quizzes.api.admin.delete_accommodation import delete_quiz_accommoda
 
 from courses.quizzes.api.admin.images.create_question_image import create_question_image
 from courses.quizzes.api.admin.images.delete_question_image import delete_question_image
+from courses.quizzes.api.get_quiz_question_image import get_quiz_question_image

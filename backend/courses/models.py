@@ -386,12 +386,19 @@ class QuizSubmission(models.Model):
     graded_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.DO_NOTHING, null=True, related_name='graded_quiz_submissions')
     
 
+class QuizQuestionImage(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
+    order = models.PositiveIntegerField()
+    image = models.ImageField(upload_to="quiz_question_images/")
+    caption = models.TextField(null=True, blank=True)
+
 class QuizQuestionBaseModel(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
     prompt = models.TextField()
     points = models.PositiveIntegerField(default=1)
     order = models.PositiveIntegerField()
-
+    images = models.ManyToManyField(QuizQuestionImage)
+    
     class Meta:
         abstract = True
 
@@ -537,22 +544,3 @@ class QuestionType(models.TextChoices):
     CODING = "CODING", _("Coding")
     MULTIPLE_CHOICE = "MULTIPLE_CHOICE", _("Multiple Choice")
     CHECKBOX = "CHECKBOX", _("Checkbox")
-    
-class QuestionImage(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
-    image = models.ImageField(upload_to="question_images/")
-    question_type = models.CharField(
-        choices=QuestionType.choices,
-        max_length=max(len(choice.value) for choice in QuestionType),
-    )
-    question_id = models.CharField(max_length=256)
-    
-    #Override delete to remove associated image
-    def delete(self, *args, **kwargs):
-        if self.image:
-            if os.path.isfile(self.image.path):
-                os.remove(self.image.path)
-        super().delete(*args, **kwargs)
-    
-    def __str__(self):
-        return f"{self.question_type}: {self.question_id} - {self.image.name}"

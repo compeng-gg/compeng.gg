@@ -3,20 +3,38 @@ import courses.models as db
 from typing import List, Dict, Any, Optional
 
 
-class MultipleChoiceQuestionSerializer(serializers.ModelSerializer):
+DEFAULT_QUIZ_QUESTION_FIELDS = [
+    "order",
+    "prompt",
+    "points",
+    "id",
+    "question_type",
+    "images",
+]
+
+
+class BaseQuestionSerializer(serializers.ModelSerializer):
+    images = serializers.SerializerMethodField()
+
+    def get_images(self, question) -> List[dict]:
+        """Retrieve question images sorted by 'order' field."""
+        res = []
+        print("images")
+        for image in question.images.all().order_by("order"):
+            res.append({"caption": image.caption, "id": image.id})
+        print(res)
+        return res
+
+
+class MultipleChoiceQuestionSerializer(BaseQuestionSerializer):
     question_type = serializers.CharField(default="MULTIPLE_CHOICE", read_only=True)
     selected_answer_index = serializers.SerializerMethodField()
 
     class Meta:
         model = db.MultipleChoiceQuestion
-        fields = [
-            "order",
-            "prompt",
-            "question_type",
-            "points",
+        fields = DEFAULT_QUIZ_QUESTION_FIELDS + [
             "options",
             "selected_answer_index",
-            "id",
         ]
 
     def get_selected_answer_index(
@@ -28,20 +46,15 @@ class MultipleChoiceQuestionSerializer(serializers.ModelSerializer):
         return answer.selected_answer_index
 
 
-class CheckboxQuestionSerializer(serializers.ModelSerializer):
+class CheckboxQuestionSerializer(BaseQuestionSerializer):
     question_type = serializers.CharField(default="CHECKBOX", read_only=True)
     selected_answer_indices = serializers.SerializerMethodField()
 
     class Meta:
         model = db.CheckboxQuestion
-        fields = [
-            "order",
-            "prompt",
-            "question_type",
-            "points",
+        fields = DEFAULT_QUIZ_QUESTION_FIELDS + [
             "options",
             "selected_answer_indices",
-            "id",
         ]
 
     def get_selected_answer_indices(
@@ -53,21 +66,15 @@ class CheckboxQuestionSerializer(serializers.ModelSerializer):
         return answer.selected_answer_indices
 
 
-class WrittenResponseQuestionSerializer(serializers.ModelSerializer):
+class WrittenResponseQuestionSerializer(BaseQuestionSerializer):
     question_type = serializers.CharField(default="WRITTEN_RESPONSE", read_only=True)
     response = serializers.SerializerMethodField()
 
     class Meta:
         model = db.WrittenResponseQuestion
-        fields = [
-            "order",
-            "prompt",
-            "question_type",
-            "points",
+        fields = DEFAULT_QUIZ_QUESTION_FIELDS + [
             "max_length",
-            "question_type",
             "response",
-            "id",
         ]
 
     def get_response(
@@ -79,21 +86,16 @@ class WrittenResponseQuestionSerializer(serializers.ModelSerializer):
         return answer.response
 
 
-class CodingQuestionSerializer(serializers.ModelSerializer):
+class CodingQuestionSerializer(BaseQuestionSerializer):
     question_type = serializers.CharField(default="CODING", read_only=True)
     solution = serializers.SerializerMethodField()
 
     class Meta:
         model = db.CodingQuestion
-        fields = [
-            "order",
-            "prompt",
-            "points",
-            "programming_language",
-            "question_type",
+        fields = DEFAULT_QUIZ_QUESTION_FIELDS + [
             "starter_code",
+            "programming_language",
             "solution",
-            "id",
         ]
 
     def get_solution(self, coding_question: db.CodingQuestion) -> Optional[str]:
@@ -111,7 +113,13 @@ class QuizSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = db.Quiz
-        fields = ["title", "end_unix_timestamp", "start_unix_timestamp", "questions", "images"]
+        fields = [
+            "title",
+            "end_unix_timestamp",
+            "start_unix_timestamp",
+            "questions",
+            "images",
+        ]
 
     def get_questions(self, quiz: db.Quiz) -> List[Dict[str, Any]]:
         checkbox_questions = quiz.checkbox_questions

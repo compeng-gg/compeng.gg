@@ -116,6 +116,7 @@ class GetQuizTests(TestCasesWithUserAuth):
                     "solution": None,
                     "starter_code": coding_question.starter_code,
                     "id": str(coding_question.id),
+                    "images": []
                 }
             ],
         }
@@ -162,6 +163,7 @@ class GetQuizTests(TestCasesWithUserAuth):
                     "solution": coding_answer.solution,
                     "starter_code": None,
                     "id": str(coding_question.id),
+                    "images": []
                 }
             ],
         }
@@ -207,6 +209,7 @@ class GetQuizTests(TestCasesWithUserAuth):
                     "options": multiple_choice_question.options,
                     "selected_answer_index": multiple_choice_answer.selected_answer_index,
                     "id": str(multiple_choice_question.id),
+                    "images": []
                 },
             ],
         }
@@ -252,6 +255,7 @@ class GetQuizTests(TestCasesWithUserAuth):
                     "options": checkbox_question.options,
                     "selected_answer_indices": checkbox_answer.selected_answer_indices,
                     "id": str(checkbox_question.id),
+                    "images": []
                 },
             ],
         }
@@ -292,6 +296,7 @@ class GetQuizTests(TestCasesWithUserAuth):
                     "max_length": written_response_question.max_length,
                     "response": written_response_answer.response,
                     "id": str(written_response_question.id),
+                    "images": []
                 },
             ],
         }
@@ -350,6 +355,7 @@ class GetQuizTests(TestCasesWithUserAuth):
                     "options": multiple_choice_question.options,
                     "selected_answer_index": None,
                     "id": str(multiple_choice_question.id),
+                    "images": []
                 },
                 {
                     "prompt": checkbox_question.prompt,
@@ -358,6 +364,7 @@ class GetQuizTests(TestCasesWithUserAuth):
                     "options": checkbox_question.options,
                     "selected_answer_indices": None,
                     "id": str(checkbox_question.id),
+                    "images": []
                 },
                 {
                     "prompt": written_response_question.prompt,
@@ -366,6 +373,7 @@ class GetQuizTests(TestCasesWithUserAuth):
                     "max_length": written_response_question.max_length,
                     "response": None,
                     "id": str(written_response_question.id),
+                    "images": []
                 },
                 {
                     "prompt": coding_question.prompt,
@@ -375,8 +383,11 @@ class GetQuizTests(TestCasesWithUserAuth):
                     "solution": None,
                     "starter_code": coding_question.starter_code,
                     "id": str(coding_question.id),
+                    "images": []
                 },
             ],
         }
+        print(response.json())
+        print(expected_body)
 
         self.assertDictEqual(response.json(), expected_body)

@@ -114,6 +114,6 @@ class CodingAnswerAdmin(admin.ModelAdmin):
 class CodingAnswerExecutionAdmin(admin.ModelAdmin):
     pass
 
-@admin.register(models.QuestionImage)
-class QuestionImageAdmin(admin.ModelAdmin):
+@admin.register(models.QuizQuestionImage)
+class QuizQuestionImageAdmin(admin.ModelAdmin):
     pass

@@ -4,6 +4,8 @@ from django.contrib.auth.models import User
 from datetime import timedelta
 from django.utils import timezone
 from django.contrib.contenttypes.models import ContentType
+import requests
+from django.core.files.base import ContentFile
 
 class Command(BaseCommand):
     help = 'Populates the database with test data'
@@ -159,6 +161,11 @@ class Command(BaseCommand):
             grading_file_directory="question1",
             files=["question1/add.py"]
         )
+
+        image_response = requests.get("https://img.freepik.com/free-vector/gradient-t-logo-template_23-2149372726.jpg")
+
+        quiz_question_image = db.QuizQuestionImage.objects.create(image=ContentFile(image_response.content, name="test.jpg"), order=1)
+        python_coding_question.images.add(quiz_question_image)
 
         db.WrittenResponseQuestion.objects.create(
             prompt="Prompt for a written response question",
