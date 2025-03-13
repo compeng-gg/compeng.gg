@@ -1,3 +1,4 @@
+import os
 from django.conf import settings
 from uuid import uuid4
 from django.db import models
@@ -530,3 +531,28 @@ class CheckboxAnswer(QuizAnswerBaseModel):
     question = models.ForeignKey(CheckboxQuestion, on_delete=models.CASCADE, related_name='answers')
     
     selected_answer_indices = models.JSONField(null=True) # TODO: validate this is an array
+
+class QuestionType(models.TextChoices):
+    WRITTEN_RESPONSE = "WRITTEN_RESPONSE", _("Written Response")
+    CODING = "CODING", _("Coding")
+    MULTIPLE_CHOICE = "MULTIPLE_CHOICE", _("Multiple Choice")
+    CHECKBOX = "CHECKBOX", _("Checkbox")
+    
+class QuestionImage(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
+    image = models.ImageField(upload_to="question_images/")
+    question_type = models.CharField(
+        choices=QuestionType.choices,
+        max_length=max(len(choice.value) for choice in QuestionType),
+    )
+    question_id = models.CharField(max_length=256)
+    
+    #Override delete to remove associated image
+    def delete(self, *args, **kwargs):
+        if self.image:
+            if os.path.isfile(self.image.path):
+                os.remove(self.image.path)
+        super().delete(*args, **kwargs)
+    
+    def __str__(self):
+        return f"{self.question_type}: {self.question_id} - {self.image.name}"

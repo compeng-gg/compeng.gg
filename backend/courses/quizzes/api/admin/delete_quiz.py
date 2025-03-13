@@ -8,6 +8,15 @@ import courses.models as db
 @permission_classes([permissions.IsAuthenticated])
 def delete_quiz(request, course_slug: str, quiz_slug: str):
     # TODO: validations
+    
+    user_id = request.user.id
+    try:
+        validate_user_is_ta_or_instructor_in_course(user_id, course_slug)
+    except CustomException as e:
+        return Response(
+            {"error": str(e)},
+            status=status.HTTP_403_FORBIDDEN,
+        )
     quiz = db.Quiz.objects.get(slug=quiz_slug, offering__course__slug=course_slug)
     quiz.delete()
 

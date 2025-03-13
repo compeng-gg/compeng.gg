@@ -1,3 +1,4 @@
+from courses.quizzes.api.utils import get_quiz_images_from_question_list, get_quiz_questions
 import courses.models as db
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
@@ -110,6 +111,9 @@ def get_questions(request, course_slug: str, quiz_slug: str):
         multiple_choice_questions_prefetch,
         checkbox_questions_prefetch,
     )
+    
+    quiz_questions = get_quiz_questions(quiz)
+    quiz.images = get_quiz_images_from_question_list(quiz_questions)
 
     with transaction.atomic():
         try:

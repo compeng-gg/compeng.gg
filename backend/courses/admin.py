@@ -113,3 +113,7 @@ class CodingAnswerAdmin(admin.ModelAdmin):
 @admin.register(models.CodingAnswerExecution)
 class CodingAnswerExecutionAdmin(admin.ModelAdmin):
     pass
+
+@admin.register(models.QuestionImage)
+class QuestionImageAdmin(admin.ModelAdmin):
+    pass

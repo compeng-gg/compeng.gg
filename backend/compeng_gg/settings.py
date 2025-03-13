@@ -240,6 +240,10 @@ GITHUB_WEBHOOK_TOKEN = os.environ.setdefault('GITHUB_WEBHOOK_TOKEN', '')
 # TODO: init this from environment
 RUN_LOCALLY = True
 
+# Media Storage
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
 ## New GitHub module
 GITHUB_WEBHOOK_SECRET = GITHUB_WEBHOOK_TOKEN # New name
 GITHUB_API_URL = "https://api.github.com"
