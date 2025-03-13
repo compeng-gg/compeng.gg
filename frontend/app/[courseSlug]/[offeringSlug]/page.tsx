@@ -24,7 +24,7 @@ export interface Lab {
   tasks: any;
 }
 
-export function getRoleEnum(role) {
+function getRoleEnum(role) {
     const spIdx = role.lastIndexOf(' ');
     return role.substring(spIdx+1);
 }
