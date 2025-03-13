@@ -57,5 +57,4 @@ class ListAccommodationsTests(TestCasesWithUserAuth):
         for accommodation_data in response_data["quiz_accommodations"]:
             user_id = accommodation_data["user_id"]
             self.assertEqual(accommodation_data, user_id_to_expected_accommodation_data[user_id])
-
-        exit()
+    
