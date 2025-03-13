@@ -6,6 +6,7 @@ from typing import List, Dict, Any, Optional
 DEFAULT_QUIZ_QUESTION_FIELDS = [
     "order",
     "prompt",
+    "render_prompt_as_latex",
     "points",
     "id",
     "question_type",
