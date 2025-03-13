@@ -13,7 +13,7 @@ run:
 	daphne compeng_gg.asgi:application
 
 test:
-	pipenv run pytest
+	pytest
 
 populate:
 	python manage.py populate_db_for_testing  
