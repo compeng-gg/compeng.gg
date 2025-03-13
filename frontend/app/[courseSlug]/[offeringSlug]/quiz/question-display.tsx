@@ -148,7 +148,7 @@ export function QuestionDisplay(props: QuestionProps){
             header={header}
             footer={footer}
         >
-            <QuestionImageDisplay images={images} />
+            <QuestionImageDisplay images={images} props={props} />
             <QuestionContent props={props} save={save} />
         </Card>
     );
@@ -169,8 +169,7 @@ function QuestionContent({ props, save }: { props: QuestionProps, save: (newValu
     }
 }
 
-function QuestionImageDisplay({ images }: { images: QuestionImage[] }) {
-    if (images.length === 0) return null;
+function QuestionImageDisplay({ images, props}: { images: QuestionImage[], props: QuestionProps }) {
 
     const [jwt, setAndStoreJwt] = useContext(JwtContext);
     const [imageSrcs, setImageSrcs] = useState<string[]>([]);
@@ -183,10 +182,8 @@ function QuestionImageDisplay({ images }: { images: QuestionImage[] }) {
                         const res = await fetchApi(
                             jwt,
                             setAndStoreJwt,
-                            `quizzes/ece344/quiz-slug/image/${image.id}`,
+                            `quizzes/${props.courseSlug}/${props.quizSlug}/image/${image.id}`,
                             'GET',
-                            null,
-                            true 
                         );
 
                         const buffer = await res.arrayBuffer();
@@ -206,6 +203,8 @@ function QuestionImageDisplay({ images }: { images: QuestionImage[] }) {
 
         fetchImages();
     }, [images, jwt, setAndStoreJwt]);
+
+    if (images.length === 0) return null;
 
     return (
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginBottom: '10px' }}>
