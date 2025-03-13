@@ -186,15 +186,15 @@ function QuestionImageDisplay({ images }: { images: QuestionImage[] }) {
                             `quizzes/ece344/quiz-slug/image/${image.id}`,
                             'GET',
                             null,
-                            true // Ensure responseType is handled as blob
+                            true 
                         );
 
-                        const buffer = await res.arrayBuffer(); // Convert response to ArrayBuffer
+                        const buffer = await res.arrayBuffer();
                         const base64String = btoa(
                             new Uint8Array(buffer).reduce((data, byte) => data + String.fromCharCode(byte), '')
                         );
 
-                        return `data:image/png;base64,${base64String}`; // Adjust MIME type if needed
+                        return `data:image/png;base64,${base64String}`;
                     })
                 );
 
@@ -216,22 +216,27 @@ function QuestionImageDisplay({ images }: { images: QuestionImage[] }) {
                         flex: '1 1 40%',
                         maxHeight: '350px',
                         display: 'flex',
+                        flexDirection: 'column',
                         maxWidth: '400px',
                         overflow: 'hidden',
                         minWidth: '200px',
                         justifyContent: 'center',
                         alignItems: 'center',
+                        textAlign: 'center',
                     }}
                 >
                     {imageSrcs[idx] ? (
-                        <Image
-                            width={'70%'}
-                            height="auto"
-                            style={{ objectFit: 'contain' }}
-                            src={imageSrcs[idx]}
-                            alt={image.caption}
-                            preview
-                        />
+                        <>
+                            <Image
+                                width={'70%'}
+                                height="auto"
+                                style={{ objectFit: 'contain' }}
+                                src={imageSrcs[idx]}
+                                alt={image.caption}
+                                preview
+                            />
+                            <p style={{ marginTop: '5px', fontSize: '14px', color: '#555' }}>{image.caption}</p>
+                        </>
                     ) : (
                         <p>Loading...</p>
                     )}
