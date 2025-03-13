@@ -10,6 +10,7 @@ import { JwtContext } from '@/app/lib/jwt-provider';
 import { fetchApi } from '@/app/lib/api';
 import { QuizProps } from './quiz-display';
 import MultiSelectEditor from './components/multiselect-editor';
+import { Image } from 'primereact/image';
 
 enum QuestionSaveStatus {
     NOT_ANSWERED = 'Not Answered',
@@ -26,7 +27,7 @@ export function QuestionDisplay(props: QuestionProps){
     //   props.courseSlug
     //   props.quizSlug
     // from the question props
-    const { title, prompt, totalMarks, isMutable, questionType, idx } = props;
+    const { title, prompt, totalMarks, isMutable, questionType, idx, imageUrls } = props;
 
     const [debouncedAnswer, setDebouncedAnswer] = useState<any>(props.state.value);
 
@@ -139,7 +140,7 @@ export function QuestionDisplay(props: QuestionProps){
             </div>
         </div>
     );
-
+    console.log(JSON.stringify(props, null, 2));
     return (
         <Card
             title={title ?? `Question ${idx !== undefined ? idx + 1 : ''}`}
@@ -147,6 +148,7 @@ export function QuestionDisplay(props: QuestionProps){
             header={header}
             footer={footer}
         >
+            <QuestionImageDisplay imageUrls={imageUrls} />
             <QuestionContent props={props} save={save} />
         </Card>
     );
@@ -165,6 +167,23 @@ function QuestionContent({ props, save }: { props: QuestionProps, save: (newValu
     default:
         return null;
     }
+}
+
+function QuestionImageDisplay({ imageUrls }: { imageUrls: string[] }) {
+    if(imageUrls.length == 0){
+        return null;
+    }
+    const images = imageUrls.map((url, idx) => (
+        <div key={idx} style={{flex: "1 1 40%", maxHeight: "350px", display: "flex", maxWidth: "400px", overflow: "hidden", minWidth: "200px", justifyContent:"center", alignItems: "center"}}>
+            <Image width={"70%"} height="auto" style={{objectFit: "contain"}} src={"http://localhost:8000"+url} alt={`Image ${idx}`} preview />
+        </div>
+    ));
+    return (
+        <div style={{display: "flex", flexWrap: "wrap", gap: "10px", marginBottom: "10px"}}>
+            {images}
+        </div>
+    
+    );
 }
 
 function GradeBadge({ grade, totalAvailable }: { grade?: number, totalAvailable: number }) {

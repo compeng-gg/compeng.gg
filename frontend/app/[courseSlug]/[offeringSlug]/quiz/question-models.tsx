@@ -27,7 +27,10 @@ export interface BaseQuestionData {
     prompt: string;
     totalMarks: number;
     isMutable: boolean;
-    questionType: "CODE" | "SELECT" | "TEXT";
+    questionType: QuestionType;
+    serverQuestionType: ServerQuestionType;
+    imageUrls: string[];
+    idx?: number;
 }
 
 export type ProgrammingLanguages = 'C_PP' | 'C' | 'PYTHON';
