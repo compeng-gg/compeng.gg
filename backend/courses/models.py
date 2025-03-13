@@ -395,6 +395,7 @@ class QuizQuestionImage(models.Model):
 class QuizQuestionBaseModel(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
     prompt = models.TextField()
+    render_prompt_as_latex = models.BooleanField(default=False)
     points = models.PositiveIntegerField(default=1)
     order = models.PositiveIntegerField()
     images = models.ManyToManyField(QuizQuestionImage)
