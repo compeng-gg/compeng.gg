@@ -12,12 +12,14 @@
     "ace-builds": "^1.39.0",
     "date-fns": "^4.1.0",
     "inquirer": "^11.0.2",
+    "katex": "^0.16.21",
     "next": "^14.2.3",
     "primeicons": "^7.0.0",
     "primereact": "^10.8.3",
     "react": "^18",
     "react-ace": "^14.0.1",
     "react-dom": "^18",
+    "react-katex": "^3.0.1",
     "react-transition-group": "^4.4.5"
   },
   "devDependencies": {
