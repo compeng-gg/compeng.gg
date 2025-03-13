@@ -43,7 +43,7 @@ export default function Page({ params }: { params: { courseSlug: string, quizSlu
             };
             console.log('Quiz' + JSON.stringify(data, null, 2));
             setQuiz(retQuiz);
-            const qData = data.questions.map((rawData, idx) => getQuestionDataFromRaw(rawData,quizSlug, courseSlug, data.images[idx]));
+            const qData = data.questions.map((rawData, idx) => getQuestionDataFromRaw(rawData,quizSlug, courseSlug));
             setQuestionData(qData);
             const questionStates = qData.map((questionData, idx) => ({
                 value: getStartingStateValue(questionData, data.questions[idx]),

@@ -2,7 +2,7 @@ import { Badge } from 'primereact/badge';
 import { Button } from 'primereact/button';
 import { Card } from 'primereact/card';
 import CodeEditor from './components/code-editor';
-import { isAnswered, QuestionProps } from './question-models';
+import { isAnswered, QuestionImage, QuestionProps } from './question-models';
 import TextEditor from './components/text-editor';
 import SelectEditor from './components/select-editor';
 import { useContext, useEffect, useRef, useState } from 'react';
@@ -27,7 +27,7 @@ export function QuestionDisplay(props: QuestionProps){
     //   props.courseSlug
     //   props.quizSlug
     // from the question props
-    const { title, prompt, totalMarks, isMutable, questionType, idx, imageUrls } = props;
+    const { title, prompt, totalMarks, isMutable, questionType, idx, images } = props;
 
     const [debouncedAnswer, setDebouncedAnswer] = useState<any>(props.state.value);
 
@@ -148,7 +148,7 @@ export function QuestionDisplay(props: QuestionProps){
             header={header}
             footer={footer}
         >
-            <QuestionImageDisplay imageUrls={imageUrls} />
+            <QuestionImageDisplay images={images} />
             <QuestionContent props={props} save={save} />
         </Card>
     );
@@ -169,20 +169,75 @@ function QuestionContent({ props, save }: { props: QuestionProps, save: (newValu
     }
 }
 
-function QuestionImageDisplay({ imageUrls }: { imageUrls: string[] }) {
-    if(imageUrls.length == 0){
-        return null;
-    }
-    const images = imageUrls.map((url, idx) => (
-        <div key={idx} style={{flex: "1 1 40%", maxHeight: "350px", display: "flex", maxWidth: "400px", overflow: "hidden", minWidth: "200px", justifyContent:"center", alignItems: "center"}}>
-            <Image width={"70%"} height="auto" style={{objectFit: "contain"}} src={"http://localhost:8000"+url} alt={`Image ${idx}`} preview />
-        </div>
-    ));
+function QuestionImageDisplay({ images }: { images: QuestionImage[] }) {
+    if (images.length === 0) return null;
+
+    const [jwt, setAndStoreJwt] = useContext(JwtContext);
+    const [imageSrcs, setImageSrcs] = useState<string[]>([]);
+
+    useEffect(() => {
+        async function fetchImages() {
+            try {
+                const srcs = await Promise.all(
+                    images.map(async (image) => {
+                        const res = await fetchApi(
+                            jwt,
+                            setAndStoreJwt,
+                            `quizzes/ece344/quiz-slug/image/${image.id}`,
+                            'GET',
+                            null,
+                            true // Ensure responseType is handled as blob
+                        );
+
+                        const buffer = await res.arrayBuffer(); // Convert response to ArrayBuffer
+                        const base64String = btoa(
+                            new Uint8Array(buffer).reduce((data, byte) => data + String.fromCharCode(byte), '')
+                        );
+
+                        return `data:image/png;base64,${base64String}`; // Adjust MIME type if needed
+                    })
+                );
+
+                setImageSrcs(srcs);
+            } catch (error) {
+                console.error('Error fetching images:', error);
+            }
+        }
+
+        fetchImages();
+    }, [images, jwt, setAndStoreJwt]);
+
     return (
-        <div style={{display: "flex", flexWrap: "wrap", gap: "10px", marginBottom: "10px"}}>
-            {images}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginBottom: '10px' }}>
+            {images.map((image, idx) => (
+                <div
+                    key={image.id}
+                    style={{
+                        flex: '1 1 40%',
+                        maxHeight: '350px',
+                        display: 'flex',
+                        maxWidth: '400px',
+                        overflow: 'hidden',
+                        minWidth: '200px',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                    }}
+                >
+                    {imageSrcs[idx] ? (
+                        <Image
+                            width={'70%'}
+                            height="auto"
+                            style={{ objectFit: 'contain' }}
+                            src={imageSrcs[idx]}
+                            alt={image.caption}
+                            preview
+                        />
+                    ) : (
+                        <p>Loading...</p>
+                    )}
+                </div>
+            ))}
         </div>
-    
     );
 }
 

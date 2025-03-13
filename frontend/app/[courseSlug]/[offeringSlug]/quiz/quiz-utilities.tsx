@@ -1,7 +1,7 @@
 import { BaseQuestionData, ServerToLocal, QuestionType, CodeQuestionData, SelectQuestionData, TextQuestionData, StaffCodeQuestionData } from './question-models';
 
 
-export function getQuestionDataFromRaw(rawData: any, quizSlug: string, courseSlug: string, images: string, isStaff?: boolean): any {
+export function getQuestionDataFromRaw(rawData: any, quizSlug: string, courseSlug: string, isStaff?: boolean): any {
     const baseData: BaseQuestionData = {
         id: rawData.id,
         quizSlug: quizSlug,
@@ -10,8 +10,8 @@ export function getQuestionDataFromRaw(rawData: any, quizSlug: string, courseSlu
         serverQuestionType: rawData.question_type,
         questionType: ServerToLocal.get(rawData.question_type) as QuestionType ?? 'TEXT',
         isMutable: true,
+        images: rawData.images,
         totalMarks: rawData.points,
-        imageUrls: JSON.parse(images.replace(/'/g, '"'))
     };
     switch (baseData.questionType) {
     case 'CODE':

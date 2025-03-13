@@ -20,6 +20,11 @@ export const ID_SET_ON_SERVER = 'set_on_server';
 export type QuestionType = 'CODE' | 'SELECT' | 'TEXT' | 'MULTI_SELECT';
 export type ServerQuestionType = 'CODING' | 'MULTIPLE_CHOICE' | 'WRITTEN_RESPONSE' | 'CHECKBOX';
 
+export interface QuestionImage {
+    id: string;
+    caption: string;
+}
+
 export interface BaseQuestionData {
     id: string;
     quizSlug: string;
@@ -29,7 +34,7 @@ export interface BaseQuestionData {
     isMutable: boolean;
     questionType: QuestionType;
     serverQuestionType: ServerQuestionType;
-    imageUrls: string[];
+    images: QuestionImage[];
     idx?: number;
 }
 
