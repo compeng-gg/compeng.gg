@@ -151,7 +151,8 @@ class Command(BaseCommand):
         )
 
         python_coding_question = db.CodingQuestion.objects.create(
-            prompt="Write a Python function `add(num1, num2)` that adds two integers.",
+            prompt="\\text{Write a Python function } \\mathtt{add(num1, num2)} \\text{ that adds two integers.} \\int_0^\\infty e^{-x^2} dx = \\frac{\\sqrt{\\pi}}{2}",
+            render_prompt_as_latex=True,
             points=25,
             order=4,
             quiz=mock_quiz,
