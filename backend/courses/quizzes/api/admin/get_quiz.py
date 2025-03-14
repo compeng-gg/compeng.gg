@@ -41,6 +41,7 @@ def get_quiz(request, course_slug: str, quiz_slug: str):
             data["question_type"] = question_type_key
             data["id"] = question.id
             data.pop("quiz")
+            data.pop("images")
 
             questions.append(data)
 
