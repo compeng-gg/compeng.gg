@@ -289,6 +289,7 @@ function serializeQuestionData(questionData: StaffQuestionData, idx: number) {
     console.log(questionData);
     const base = {
         prompt: questionData.prompt,
+        render_prompt_as_latex: questionData.renderPromptAsLatex,
         points: questionData.totalMarks,
         order: idx+1,
         question_type: questionData.serverQuestionType.toLowerCase(),
