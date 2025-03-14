@@ -1,49 +1,24 @@
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework import permissions, status
+from rest_framework import status
 from courses.quizzes.api.admin.schema import CreateQuizRequestSerializer
 from rest_framework.response import Response
 import courses.models as db
-from django.db.models import Q
 from django.contrib.contenttypes.models import ContentType
 import requests
 from datetime import datetime
-
-
-class CustomException(Exception):
-    pass
-
-
-def validate_user_is_ta_or_instructor_in_course(user_id: int, course_slug: str) -> None:
-    try:
-        db.Enrollment.objects.get(
-            (Q(role__kind=db.Role.Kind.TA) | Q(role__kind=db.Role.Kind.INSTRUCTOR)),
-            role__offering__course__slug=course_slug,
-            user_id=user_id,
-        )
-    except db.Enrollment.DoesNotExist:
-        raise CustomException("User is not a TA or Instructor in this course")
+from courses.quizzes.api.admin.permissions import IsAuthenticatedCourseInstructorOrTA
 
 
 GITHUB_REPOS_API_BASE = "https://api.github.com/repos"
 
 
 @api_view(["POST"])
-@permission_classes([permissions.IsAuthenticated])
+@permission_classes([IsAuthenticatedCourseInstructorOrTA])
 def create_quiz(request, course_slug: str):
     serializer = CreateQuizRequestSerializer(data=request.data)
 
     if not serializer.is_valid():
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    user_id = request.user.id
-
-    try:
-        validate_user_is_ta_or_instructor_in_course(user_id, course_slug)
-    except CustomException as e:
-        return Response(
-            {"error": str(e)},
-            status=status.HTTP_403_FORBIDDEN,
-        )
 
     title = serializer.validated_data.get("title")
     slug = serializer.validated_data.get("slug")

@@ -3,7 +3,6 @@ import pytest
 from django.contrib.auth.models import User
 from datetime import datetime, timedelta
 from django.db import IntegrityError, transaction
-from django.utils import timezone
 
 
 def create_offering() -> db.Offering:

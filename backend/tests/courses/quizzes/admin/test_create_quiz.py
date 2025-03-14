@@ -150,7 +150,7 @@ class CreateQuizTests(TestCasesWithUserAuth):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
         data = response.json()
-        expected_data = {"error": "User is not a TA or Instructor in this course"}
+        expected_data = {"detail": "User is not a TA or Instructor in this course"}
 
         self.assertEqual(data, expected_data)
 

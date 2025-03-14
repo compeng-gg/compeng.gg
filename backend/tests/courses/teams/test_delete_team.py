@@ -7,7 +7,7 @@ from django.utils.text import slugify
 
 class DeleteTeamTests(TestCasesWithUserAuth):
     def get_api_endpoint(self) -> str:
-        return f"/api/v0/teams/delete/"
+        return "/api/v0/teams/delete/"
 
     def test_delete_team_success(self):
         offering = create_offering()

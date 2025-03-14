@@ -79,7 +79,7 @@ class GetQuizTests(TestCasesWithUserAuth):
 
         response = self.client.get(self.get_url(quiz.offering.course.slug, quiz.slug))
 
-        expected_body = {"error": "Quiz has not started yet"}
+        expected_body = {"detail": "Quiz has not started yet"}
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(response.json(), expected_body)
@@ -396,7 +396,5 @@ class GetQuizTests(TestCasesWithUserAuth):
                 },
             ],
         }
-        print(response.json())
-        print(expected_body)
 
         self.assertDictEqual(response.json(), expected_body)

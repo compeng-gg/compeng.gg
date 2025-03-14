@@ -137,13 +137,16 @@ def create_quiz(
     return quiz
 
 
-def create_quiz_submission(user_id: int, quiz: db.Quiz) -> db.QuizSubmission:
+def create_quiz_submission(
+        user_id: int, 
+        quiz: db.Quiz,
+    ) -> db.QuizSubmission:
     started_at = timezone.now()
     return db.QuizSubmission.objects.create(
         user_id=user_id,
         quiz=quiz,
         started_at=started_at,
-        completed_at=started_at + timedelta(hours=1),
+        completed_at=started_at + timedelta(minutes=30),
     )
 
 

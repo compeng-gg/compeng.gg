@@ -1,59 +1,21 @@
 import courses.models as db
 from rest_framework.response import Response
-from rest_framework.exceptions import ValidationError
 from django.db.models import Prefetch, prefetch_related_objects
 from django.db import transaction
-from rest_framework import permissions, status
+from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from courses.quizzes.schemas import QuizSerializer
 from django.utils import timezone
-from typing import Union
-
-
-def get_quiz_or_error_response(
-    user_id: int, course_slug: str, quiz_slug: str
-) -> Union[db.Quiz, Response]:
-    try:
-        quiz = db.Quiz.objects.get(slug=quiz_slug, offering__course__slug=course_slug)
-    except db.Quiz.DoesNotExist:
-        return Response({"error": "Quiz not found"}, status=status.HTTP_404_NOT_FOUND)
-
-    try:
-        db.Enrollment.objects.get(
-            role__kind=db.Role.Kind.STUDENT,
-            role__offering=quiz.offering,
-            user_id=user_id,
-        )
-    except db.Enrollment.DoesNotExist:
-        raise ValidationError("Student is not enrolled in this course")
-
-    if quiz.starts_at > timezone.now():
-        return Response(
-            {"error": "Quiz has not started yet"}, status=status.HTTP_403_FORBIDDEN
-        )
-
-    return quiz
+from courses.quizzes.api.permissions import StudentCanTakeQuiz
 
 
 @api_view(["GET"])
-@permission_classes([permissions.IsAuthenticated])
+@permission_classes([StudentCanTakeQuiz])
 def get_questions(request, course_slug: str, quiz_slug: str):
     request_at = timezone.now()
 
     user_id = request.user.id
-
-    quiz_or_error_response = get_quiz_or_error_response(user_id, course_slug, quiz_slug)
-
-    if isinstance(quiz_or_error_response, Response):
-        error_response = quiz_or_error_response
-        return error_response
-
-    quiz = quiz_or_error_response
-
-    if quiz is None:
-        return Response(
-            data={"error": "Quiz not found"}, status=status.HTTP_404_NOT_FOUND
-        )
+    quiz = request.quiz
 
     written_response_questions_prefetch = Prefetch(
         "written_response_questions",

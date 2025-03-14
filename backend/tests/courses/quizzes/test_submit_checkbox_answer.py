@@ -143,6 +143,8 @@ class SubmitCheckboxAnswerTests(TestCasesWithUserAuth):
 
         quiz = create_quiz(user_id=requesting_user_id)
 
+        create_quiz_submission(user_id=requesting_user_id, quiz=quiz)
+
         checkbox_question = db.CheckboxQuestion.objects.create(
             quiz=quiz,
             prompt="Choose all positive numbers",
@@ -290,7 +292,7 @@ class SubmitCheckboxAnswerTests(TestCasesWithUserAuth):
             data=data,
         )
 
-        expected_body = {"error": "Student is not enrolled in this course"}
+        expected_body = {"detail": "Student is not enrolled in this course"}
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertDictEqual(response.json(), expected_body)
@@ -332,7 +334,7 @@ class SubmitCheckboxAnswerTests(TestCasesWithUserAuth):
             data=data,
         )
 
-        expected_body = {"error": "The quiz has already been completed"}
+        expected_body = {"detail": "The quiz has already been completed"}
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertDictEqual(response.json(), expected_body)

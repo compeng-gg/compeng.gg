@@ -98,6 +98,8 @@ class SubmitMultipleChoiceAnswerTests(TestCasesWithUserAuth):
 
         quiz = create_quiz(user_id=requesting_user_id)
 
+        quiz_submission = create_quiz_submission(user_id=requesting_user_id, quiz=quiz)
+
         multiple_choice_question = db.MultipleChoiceQuestion.objects.create(
             quiz=quiz,
             prompt="Choose the animal that flies",
@@ -121,6 +123,8 @@ class SubmitMultipleChoiceAnswerTests(TestCasesWithUserAuth):
         expected_body = {
             "selected_answer_index": ["The selected answer index must not be negative"]
         }
+
+        print(response.json())
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.json(), expected_body)
@@ -209,7 +213,7 @@ class SubmitMultipleChoiceAnswerTests(TestCasesWithUserAuth):
             data=data,
         )
 
-        expected_body = {"error": "Student is not enrolled in this course"}
+        expected_body = {"detail": "Student is not enrolled in this course"}
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertDictEqual(response.json(), expected_body)
@@ -251,7 +255,7 @@ class SubmitMultipleChoiceAnswerTests(TestCasesWithUserAuth):
             data=data,
         )
 
-        expected_body = {"error": "The quiz has already been completed"}
+        expected_body = {"detail": "The quiz has already been completed"}
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertDictEqual(response.json(), expected_body)

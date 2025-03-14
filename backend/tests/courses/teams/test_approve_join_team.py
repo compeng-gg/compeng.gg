@@ -1,15 +1,12 @@
 from tests.utils import TestCasesWithUserAuth, create_offering, create_student_enrollment, create_user, create_student_role
 import courses.models as db
 from rest_framework import status
-from django.utils import timezone
-from django.contrib.auth.models import User
 from unittest.mock import patch
-from django.core.exceptions import ValidationError
 
 
 class ApproveJoinTeamRequestTests(TestCasesWithUserAuth):
     def get_api_endpoint(self) -> str:
-        return f"/api/v0/teams/join/manage/"
+        return "/api/v0/teams/join/manage/"
     
     @patch("courses.teams.api.add_student_to_github_team")
     def test_approve_join_request_success(self, mock_add_student):

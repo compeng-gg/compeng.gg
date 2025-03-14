@@ -3,42 +3,28 @@ from uuid import UUID
 from django.utils import timezone
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework import permissions
 from rest_framework.decorators import api_view, permission_classes
 from courses.quizzes.schemas import AnswerCodingQuestionRequestSerializer
 from courses.quizzes.api.utils import (
-    get_quiz_submission_or_error_response,
     get_existing_answer_object,
 )
 from typing import Optional
+from courses.quizzes.api.permissions import StudentCanAnswerQuiz
 
 
 @api_view(["POST"])
-@permission_classes([permissions.IsAuthenticated])
+@permission_classes([StudentCanAnswerQuiz])
 def submit_coding_answer(
     request, course_slug: str, quiz_slug: str, coding_question_id: UUID
 ):
-    request_at = timezone.now()
-
     serializer = AnswerCodingQuestionRequestSerializer(data=request.data)
     if not serializer.is_valid():
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    user_id = request.user.id
     solution = serializer.validated_data.get("solution")
 
-    quiz_submission_or_error_response = get_quiz_submission_or_error_response(
-        request_at=request_at,
-        user_id=user_id,
-        course_slug=course_slug,
-        quiz_slug=quiz_slug,
-    )
-
-    if isinstance(quiz_submission_or_error_response, Response):
-        error_response = quiz_submission_or_error_response
-        return error_response
-
-    quiz_submission = quiz_submission_or_error_response
+    user_id = request.user.id
+    quiz_submission = request.quiz_submission
 
     if not db.CodingQuestion.objects.filter(
         quiz__slug=quiz_slug, id=coding_question_id
