@@ -39,3 +39,4 @@ whitenoise==6.8.2
 yarl==1.18.3
 pydantic==2.10.5
 responses==0.25.6
+pillow==11.1.0
