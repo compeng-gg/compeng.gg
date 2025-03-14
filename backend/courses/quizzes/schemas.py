@@ -110,7 +110,6 @@ class QuizSerializer(serializers.ModelSerializer):
     questions = serializers.SerializerMethodField()
     end_unix_timestamp = serializers.SerializerMethodField()
     start_unix_timestamp = serializers.SerializerMethodField()
-    images = serializers.ListField(child=serializers.CharField(), required=False)
 
     class Meta:
         model = db.Quiz
@@ -119,7 +118,6 @@ class QuizSerializer(serializers.ModelSerializer):
             "end_unix_timestamp",
             "start_unix_timestamp",
             "questions",
-            "images",
         ]
 
     def get_questions(self, quiz: db.Quiz) -> List[Dict[str, Any]]:

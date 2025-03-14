@@ -391,6 +391,7 @@ class QuizQuestionImage(models.Model):
     order = models.PositiveIntegerField()
     image = models.ImageField(upload_to="quiz_question_images/")
     caption = models.TextField(null=True, blank=True)
+    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name='images')
 
 class QuizQuestionBaseModel(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid4, editable=False)

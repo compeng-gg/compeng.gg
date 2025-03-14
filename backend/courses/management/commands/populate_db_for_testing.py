@@ -165,7 +165,7 @@ class Command(BaseCommand):
 
         image_response = requests.get("https://img.freepik.com/free-vector/gradient-t-logo-template_23-2149372726.jpg")
 
-        quiz_question_image = db.QuizQuestionImage.objects.create(image=ContentFile(image_response.content, name="test.jpg"), order=1, caption="Here is an image")
+        quiz_question_image = db.QuizQuestionImage.objects.create(image=ContentFile(image_response.content, name="test.jpg"), order=1, caption="Here is an image", quiz=mock_quiz)
         python_coding_question.images.add(quiz_question_image)
 
         db.WrittenResponseQuestion.objects.create(
