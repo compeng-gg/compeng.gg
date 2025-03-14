@@ -2,11 +2,11 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from django.utils import timezone
-from courses.quizzes.api.permissions import StudentCanTakeQuiz
+from courses.quizzes.api.permissions import StudentCanAnswerQuiz
 
 
 @api_view(["POST"])
-@permission_classes([StudentCanTakeQuiz])
+@permission_classes([StudentCanAnswerQuiz])
 def complete_quiz(request, course_slug: str, quiz_slug: str):
     request_at = timezone.now()
 

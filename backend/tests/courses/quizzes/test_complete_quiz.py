@@ -73,7 +73,7 @@ class CompleteQuizTests(TestCasesWithUserAuth):
             )
         )
 
-        expected_body = {"error": "The quiz has already been completed"}
+        expected_body = {"detail": "Quiz has already been completed"}
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertDictEqual(response.json(), expected_body)
@@ -86,7 +86,7 @@ class CompleteQuizTests(TestCasesWithUserAuth):
             self.get_api_endpoint(course_slug=offering.course.slug, quiz_slug=uuid4())
         )
 
-        expected_body = {"error": "Quiz not found"}
+        expected_body = {"detail": "Quiz not found"}
 
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertDictEqual(response.json(), expected_body)

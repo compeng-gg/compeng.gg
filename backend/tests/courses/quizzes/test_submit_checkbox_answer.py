@@ -334,7 +334,7 @@ class SubmitCheckboxAnswerTests(TestCasesWithUserAuth):
             data=data,
         )
 
-        expected_body = {"detail": "The quiz has already been completed"}
+        expected_body = {"detail": "Quiz has already been completed"}
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertDictEqual(response.json(), expected_body)

@@ -1,7 +1,7 @@
 from tests.utils import TestCasesWithUserAuth
 import courses.models as db
 from django.utils import timezone
-from tests.utils import create_quiz, create_quiz_submission
+from tests.utils import create_quiz, create_quiz_submission, create_quiz_accommodation
 from rest_framework import status
 from datetime import timedelta
 
@@ -65,7 +65,7 @@ class GetQuizTests(TestCasesWithUserAuth):
 
         response = self.client.get(self.get_url(quiz.offering.course.slug, quiz.slug))
 
-        expected_body = {"error": "Quiz content cannot be viewed after submission"}
+        expected_body = {"detail": "Quiz has been completed and is not accessible"}
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(response.json(), expected_body)
@@ -398,3 +398,32 @@ class GetQuizTests(TestCasesWithUserAuth):
         }
 
         self.assertDictEqual(response.json(), expected_body)
+
+    def test_student_with_accommodation_can_access_quiz(self):
+        requesting_user_id = self.user.id
+
+        two_hours_ago = timezone.now() - timedelta(hours=2)
+        one_hour_ago = timezone.now() - timedelta(hours=1)
+
+        quiz = create_quiz(user_id=requesting_user_id, visible_at=two_hours_ago, starts_at=two_hours_ago, ends_at=one_hour_ago)
+
+        thirty_minutes_ago = timezone.now() - timedelta(minutes=30)
+        one_hour_in_future = timezone.now() + timedelta(hours=1)
+
+        response_1 = self.client.get(self.get_url(quiz.offering.course.slug, quiz.slug))
+
+        # Response should be forbidden before accommodation is created
+        self.assertEqual(response_1.status_code, status.HTTP_403_FORBIDDEN)
+
+        response_data_1 = response_1.json()
+        expected_data_1 = {"detail": "Quiz has already ended"}
+
+        self.assertDictEqual(response_data_1, expected_data_1)
+
+        # Create accommodation
+        create_quiz_accommodation(user=self.user, quiz=quiz, visible_at=thirty_minutes_ago, starts_at=thirty_minutes_ago, ends_at=one_hour_in_future)
+
+        response_2 = self.client.get(self.get_url(quiz.offering.course.slug, quiz.slug))
+
+        # Response should be successful after accommodation is created
+        self.assertEqual(response_2.status_code, status.HTTP_200_OK)

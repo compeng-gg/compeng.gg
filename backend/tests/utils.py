@@ -102,7 +102,9 @@ def create_quiz(
     user_id: Optional[int]=None,
     quiz_title: Optional[str] = "Final Quiz",
     course_slug: Optional[str] = "ECE454",
+    visible_at: Optional[datetime] = timezone.now(),
     starts_at: Optional[datetime] = timezone.now(),
+    ends_at: Optional[datetime] = timezone.now() + timedelta(hours=1),
     content_viewable_after_submission: Optional[bool] = True,
     repository_id: Optional[int] = 1,
     repository_name: Optional[str] = "repo_name",
@@ -229,9 +231,9 @@ def create_user(username):
 def create_quiz_accommodation(
     user: User, 
     quiz: db.Quiz,
-    visible_at: Optional[datetime]=datetime.now(),
-    starts_at: Optional[datetime]=datetime.now() + timedelta(days=1),
-    ends_at: Optional[datetime]=datetime.now() + timedelta(days=1, hours=1),
+    visible_at: Optional[datetime]=timezone.now(),
+    starts_at: Optional[datetime]=timezone.now() + timedelta(days=1),
+    ends_at: Optional[datetime]=timezone.now() + timedelta(days=1, hours=1),
 ):
     return db.QuizAccommodation.objects.create(
         user=user,
