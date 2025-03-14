@@ -1,18 +1,38 @@
+import React, { useState } from 'react';
+import { InlineMath } from 'react-katex';
+import 'katex/dist/katex.min.css';
 import { Card } from 'primereact/card';
-import { BaseQuestionData, ID_SET_ON_SERVER, LocalToServer, ProgrammingLanguages, QuestionData, QuestionType, ServerQuestionType, ServerToLocal, StaffCodeQuestionData, StaffMultiSelectQuestionData, StaffQuestionData, StaffSelectQuestionData } from '../../question-models';
+import { BaseQuestionData, ID_SET_ON_SERVER, LocalToServer, ProgrammingLanguages, QuestionType, ServerQuestionType, StaffCodeQuestionData, StaffMultiSelectQuestionData, StaffQuestionData, StaffSelectQuestionData } from '../../question-models';
 import { InputText } from 'primereact/inputtext';
 import { InputTextarea } from 'primereact/inputtextarea';
-import { KeyFilterType } from 'primereact/keyfilter';
-import { InputNumber } from 'primereact/inputnumber';
-import { ListBox } from 'primereact/listbox';
 import { MultiSelect } from 'primereact/multiselect';
+import { InputNumber } from 'primereact/inputnumber';
 import { Dropdown } from 'primereact/dropdown';
 import { Chips } from 'primereact/chips';
-import { FloatLabel } from 'primereact/floatlabel';
 import Ide from '../../components/ide';
 import { ButtonGroup } from 'primereact/buttongroup';
 import { Button } from 'primereact/button';
-import { register } from 'module';
+import { Checkbox } from 'primereact/checkbox';
+
+// Error boundary for catching LaTeX rendering errors
+class MathErrorBoundary extends React.Component<any, { hasError: boolean, errorMsg: string }> {
+    constructor(props: any) {
+        super(props);
+        this.state = { hasError: false, errorMsg: '' };
+    }
+    static getDerivedStateFromError(error: any) {
+        return { hasError: true, errorMsg: error.message };
+    }
+    componentDidCatch(error: any, errorInfo: any) {
+        // Optionally log the error information here
+    }
+    render() {
+        if (this.state.hasError) {
+            return <div style={{ color: 'red' }}>Error in LaTeX: {this.state.errorMsg}</div>;
+        }
+        return this.props.children;
+    }
+}
 
 export interface QuestionEditorProps {
     questionData: StaffQuestionData;
@@ -21,11 +41,9 @@ export interface QuestionEditorProps {
     registerDelete: (data: StaffQuestionData) => void;
     idx: number;
     numQuestions: number;
-
 }
 
 export default function QuestionEditor(props: QuestionEditorProps) {
-    
     const { questionData, setQuestionData, moveQuestion, numQuestions, idx } = props;
 
     const header = (
@@ -33,8 +51,8 @@ export default function QuestionEditor(props: QuestionEditorProps) {
             <span></span>
             <div style={{ position: 'absolute', top: '10px', right: '10px', display: 'flex', gap: '8px' }}>
                 <ButtonGroup>
-                    <Button icon="pi pi-arrow-up" severity="secondary" tooltip="Move Up" disabled={idx == 0} onClick={() => moveQuestion(-1)}/>
-                    <Button icon="pi pi-arrow-down" severity="secondary" tooltip="Move Down" disabled={idx == numQuestions-1} onClick={() => moveQuestion(1)}/>
+                    <Button icon="pi pi-arrow-up" severity="secondary" tooltip="Move Up" disabled={idx === 0} onClick={() => moveQuestion(-1)}/>
+                    <Button icon="pi pi-arrow-down" severity="secondary" tooltip="Move Down" disabled={idx === numQuestions-1} onClick={() => moveQuestion(1)}/>
                 </ButtonGroup>
                 <Button icon="pi pi-trash" severity="danger" onClick={() => setQuestionData(null)}/>
             </div>
@@ -54,21 +72,17 @@ export default function QuestionEditor(props: QuestionEditorProps) {
     );
 }
 
-function GenericQuestionEditor (props: QuestionEditorProps) {
-
-    const {questionData, setQuestionData, idx, registerDelete} = props;
+function GenericQuestionEditor(props: QuestionEditorProps) {
+    const { questionData, setQuestionData, registerDelete } = props;
+    const [renderPromptAsLatex, setRenderPromptAsLatex] = useState(false);
 
     const changeQuestionType = (newType: QuestionType) => {
-        //Convert old data to generic
-        console.log('Chaning type from ' + questionData.questionType + ' to ' + newType);
-        console.log(JSON.stringify(questionData, null,2));
+        console.log('Changing type from ' + questionData.questionType + ' to ' + newType);
         registerDelete(JSON.parse(JSON.stringify(questionData)));
         const tempData: BaseQuestionData = questionData as BaseQuestionData;
         tempData.questionType = newType;
         tempData.id = ID_SET_ON_SERVER;
-        console.log(newType);
         tempData.serverQuestionType = LocalToServer.get(newType.toString()) as ServerQuestionType;
-        console.log(tempData);
         switch(newType) {
         case 'CODE':
             setQuestionData({...tempData, programmingLanguage: 'C', starterCode: '', gradingDirectory: '', filesToPull: [], fileToReplace: ''} as StaffCodeQuestionData);
@@ -87,17 +101,37 @@ function GenericQuestionEditor (props: QuestionEditorProps) {
 
     return (
         <div style={{display: 'flex', flexDirection: 'column', gap: '10px'}}>
-            <TextBoxInput label="Prompt" value={questionData.prompt} setValue={(newValue) => setQuestionData({ ...questionData, prompt: newValue })} />
+            <TextBoxInput 
+                label="Prompt" 
+                value={questionData.prompt} 
+                setValue={(newValue) => setQuestionData({ ...questionData, prompt: newValue })}
+            />
+            {/* Checkbox for toggling LaTeX rendering */}
+            <BooleanInput 
+                label="Render Prompt as LaTeX" 
+                value={renderPromptAsLatex} 
+                setValue={setRenderPromptAsLatex} 
+            />
+            {/* LaTeX Preview Box */}
+            {renderPromptAsLatex && (
+                <div style={{ border: '1px solid #ccc', padding: '10px', marginTop: '10px'}}>
+                    <MathErrorBoundary>
+                        <InlineMath math={questionData.prompt}/>
+                    </MathErrorBoundary>
+                </div>
+            )}
             <LabelledField label="Total Marks" id="marks">
                 <InputNumber id="marks" value={questionData.totalMarks} showButtons onValueChange={(e) => setQuestionData({ ...questionData, totalMarks: e.value ?? 0 })} />
             </LabelledField>
             <LabelledField label="Question Type" id="questionType">
-                <Dropdown value={questionData.questionType} options={['CODE' as QuestionType, 'TEXT' as QuestionType, 'SELECT' as QuestionType, 'MULTI_SELECT' as QuestionType]} onChange={(e) => changeQuestionType(e.value)} />
+                <Dropdown 
+                    value={questionData.questionType} 
+                    options={['CODE' as QuestionType, 'TEXT' as QuestionType, 'SELECT' as QuestionType, 'MULTI_SELECT' as QuestionType]} 
+                    onChange={(e) => changeQuestionType(e.value)} 
+                />
             </LabelledField>
         </div>
     );
-
-
 }
 
 function TextBoxInput({label, value, setValue}: {label: string, value: string, setValue: (newValue: string) => void}) {
@@ -114,7 +148,15 @@ function TextBoxInput({label, value, setValue}: {label: string, value: string, s
     );
 }
 
-//Ensures consistent label styling
+function BooleanInput({ label, value, setValue }: { label: string; value: boolean; setValue: (newValue: boolean) => void }) {
+    return (
+        <LabelledField label={label} id={label}>
+            <Checkbox checked={value} onChange={(e) => setValue(e.target.checked ?? false)} />
+        </LabelledField>
+    );
+}
+
+// Ensures consistent label styling
 export function LabelledField({label, id, children}: {label: string, id: string, children: any}) {
     return (
         <div style={{display: 'flex', flexDirection: 'column', gap: '5px', width: '100%'}}>
@@ -128,7 +170,7 @@ function QuestionSpecificEditor(props: QuestionEditorProps) {
     switch (props.questionData.questionType) {
     case 'CODE':
         return <CodeQuestionEditor {...props}/>;
-    case 'TEXT': //No specific fields
+    case 'TEXT':
         return null;
     case 'SELECT':
         return <SelectQuestionEditor {...props} />;
