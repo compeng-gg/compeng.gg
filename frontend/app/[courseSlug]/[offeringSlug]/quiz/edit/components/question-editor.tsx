@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { InlineMath } from 'react-katex';
 import 'katex/dist/katex.min.css';
 import { Card } from 'primereact/card';
@@ -52,7 +52,7 @@ export default function QuestionEditor(props: QuestionEditorProps) {
             <div style={{ position: 'absolute', top: '10px', right: '10px', display: 'flex', gap: '8px' }}>
                 <ButtonGroup>
                     <Button icon="pi pi-arrow-up" severity="secondary" tooltip="Move Up" disabled={idx === 0} onClick={() => moveQuestion(-1)}/>
-                    <Button icon="pi pi-arrow-down" severity="secondary" tooltip="Move Down" disabled={idx === numQuestions-1} onClick={() => moveQuestion(1)}/>
+                    <Button icon="pi pi-arrow-down" severity="secondary" tooltip="Move Down" disabled={idx === numQuestions - 1} onClick={() => moveQuestion(1)}/>
                 </ButtonGroup>
                 <Button icon="pi pi-trash" severity="danger" onClick={() => setQuestionData(null)}/>
             </div>
@@ -64,9 +64,9 @@ export default function QuestionEditor(props: QuestionEditorProps) {
             key={idx}
             header={header}
         >   
-            <div style={{display: 'flex', flexDirection: 'column', gap: '10px'}}>
-                <GenericQuestionEditor {...props}/>
-                <QuestionSpecificEditor {...props}/>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <GenericQuestionEditor {...props} />
+                <QuestionSpecificEditor {...props} />
             </div>
         </Card>
     );
@@ -74,7 +74,6 @@ export default function QuestionEditor(props: QuestionEditorProps) {
 
 function GenericQuestionEditor(props: QuestionEditorProps) {
     const { questionData, setQuestionData, registerDelete } = props;
-    const [renderPromptAsLatex, setRenderPromptAsLatex] = useState(false);
 
     const changeQuestionType = (newType: QuestionType) => {
         console.log('Changing type from ' + questionData.questionType + ' to ' + newType);
@@ -83,24 +82,24 @@ function GenericQuestionEditor(props: QuestionEditorProps) {
         tempData.questionType = newType;
         tempData.id = ID_SET_ON_SERVER;
         tempData.serverQuestionType = LocalToServer.get(newType.toString()) as ServerQuestionType;
-        switch(newType) {
-        case 'CODE':
-            setQuestionData({...tempData, programmingLanguage: 'C', starterCode: '', gradingDirectory: '', filesToPull: [], fileToReplace: ''} as StaffCodeQuestionData);
-            break;
-        case 'TEXT':
-            setQuestionData({...tempData} as StaffQuestionData);
-            break;
-        case 'SELECT':
-            setQuestionData({...tempData, options: [], correctAnswerIdx: -1} as StaffSelectQuestionData);
-            break;
-        case 'MULTI_SELECT':
-            setQuestionData({...tempData, options: [], correctAnswerIdxs: []} as StaffMultiSelectQuestionData);
-            break;
-        }       
+        switch (newType) {
+            case 'CODE':
+                setQuestionData({ ...tempData, programmingLanguage: 'C', starterCode: '', gradingDirectory: '', filesToPull: [], fileToReplace: '' } as StaffCodeQuestionData);
+                break;
+            case 'TEXT':
+                setQuestionData({ ...tempData } as StaffQuestionData);
+                break;
+            case 'SELECT':
+                setQuestionData({ ...tempData, options: [], correctAnswerIdx: -1 } as StaffSelectQuestionData);
+                break;
+            case 'MULTI_SELECT':
+                setQuestionData({ ...tempData, options: [], correctAnswerIdxs: [] } as StaffMultiSelectQuestionData);
+                break;
+        }
     };
 
     return (
-        <div style={{display: 'flex', flexDirection: 'column', gap: '10px'}}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             <TextBoxInput 
                 label="Prompt" 
                 value={questionData.prompt} 
@@ -109,19 +108,24 @@ function GenericQuestionEditor(props: QuestionEditorProps) {
             {/* Checkbox for toggling LaTeX rendering */}
             <BooleanInput 
                 label="Render Prompt as LaTeX" 
-                value={renderPromptAsLatex} 
-                setValue={setRenderPromptAsLatex} 
+                value={questionData.renderPromptAsLatex} 
+                setValue={(newValue: boolean) => setQuestionData({ ...questionData, renderPromptAsLatex: newValue })}
             />
             {/* LaTeX Preview Box */}
-            {renderPromptAsLatex && (
-                <div style={{ border: '1px solid #ccc', padding: '10px', marginTop: '10px'}}>
+            {questionData.renderPromptAsLatex && (
+                <div style={{ border: '1px solid #ccc', padding: '10px', marginTop: '10px' }}>
                     <MathErrorBoundary>
-                        <InlineMath math={questionData.prompt}/>
+                        <InlineMath math={questionData.prompt} />
                     </MathErrorBoundary>
                 </div>
             )}
             <LabelledField label="Total Marks" id="marks">
-                <InputNumber id="marks" value={questionData.totalMarks} showButtons onValueChange={(e) => setQuestionData({ ...questionData, totalMarks: e.value ?? 0 })} />
+                <InputNumber 
+                    id="marks" 
+                    value={questionData.totalMarks} 
+                    showButtons 
+                    onValueChange={(e) => setQuestionData({ ...questionData, totalMarks: e.value ?? 0 })}
+                />
             </LabelledField>
             <LabelledField label="Question Type" id="questionType">
                 <Dropdown 
@@ -134,7 +138,7 @@ function GenericQuestionEditor(props: QuestionEditorProps) {
     );
 }
 
-function TextBoxInput({label, value, setValue}: {label: string, value: string, setValue: (newValue: string) => void}) {
+function TextBoxInput({ label, value, setValue }: { label: string, value: string, setValue: (newValue: string) => void }) {
     return (
         <LabelledField label={label} id={label}>
             <InputTextarea
@@ -142,7 +146,7 @@ function TextBoxInput({label, value, setValue}: {label: string, value: string, s
                 placeholder={label}
                 onChange={(e) => setValue(e.target.value)}
                 value={value}
-                style={{width: '100%'}}
+                style={{ width: '100%' }}
             />
         </LabelledField>
     );
@@ -157,9 +161,9 @@ function BooleanInput({ label, value, setValue }: { label: string; value: boolea
 }
 
 // Ensures consistent label styling
-export function LabelledField({label, id, children}: {label: string, id: string, children: any}) {
+export function LabelledField({ label, id, children }: { label: string, id: string, children: any }) {
     return (
-        <div style={{display: 'flex', flexDirection: 'column', gap: '5px', width: '100%'}}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', width: '100%' }}>
             <label htmlFor={id}>{label}</label>
             {children}
         </div>
@@ -168,67 +172,96 @@ export function LabelledField({label, id, children}: {label: string, id: string,
 
 function QuestionSpecificEditor(props: QuestionEditorProps) {
     switch (props.questionData.questionType) {
-    case 'CODE':
-        return <CodeQuestionEditor {...props}/>;
-    case 'TEXT':
-        return null;
-    case 'SELECT':
-        return <SelectQuestionEditor {...props} />;
-    case 'MULTI_SELECT':
-        return <MultiSelectQuestionEditor {...props} />;    
-    default:
-        return null;
+        case 'CODE':
+            return <CodeQuestionEditor {...props} />;
+        case 'TEXT':
+            return null;
+        case 'SELECT':
+            return <SelectQuestionEditor {...props} />;
+        case 'MULTI_SELECT':
+            return <MultiSelectQuestionEditor {...props} />;
+        default:
+            return null;
     }
 }
 
 function CodeQuestionEditor(props: QuestionEditorProps) {
-    const questionData : StaffCodeQuestionData = props.questionData as StaffCodeQuestionData;
+    const questionData: StaffCodeQuestionData = props.questionData as StaffCodeQuestionData;
     const setQuestionData = props.setQuestionData;
     return (
-        <div style={{display: 'flex', flexDirection: 'column', gap: '10px'}}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             <LabelledField label="Starter Code" id="starterCode">
-                <Ide value={questionData.starterCode} onChange={(newValue) => setQuestionData({ ...questionData, starterCode: newValue })} language={questionData.programmingLanguage}/>
+                <Ide 
+                    value={questionData.starterCode} 
+                    onChange={(newValue) => setQuestionData({ ...questionData, starterCode: newValue })} 
+                    language={questionData.programmingLanguage}
+                />
             </LabelledField>
             <LabelledField label="Programming Language" id="language">
-                <Dropdown value={questionData.programmingLanguage} options={['C' as ProgrammingLanguages, 'C_PP' as ProgrammingLanguages, 'PYTHON' as ProgrammingLanguages]} onChange={(e) => setQuestionData({ ...questionData, programmingLanguage: e.value })} />
+                <Dropdown 
+                    value={questionData.programmingLanguage} 
+                    options={['C' as ProgrammingLanguages, 'C_PP' as ProgrammingLanguages, 'PYTHON' as ProgrammingLanguages]} 
+                    onChange={(e) => setQuestionData({ ...questionData, programmingLanguage: e.value })} 
+                />
             </LabelledField>
             <LabelledField label="Grading Directory" id="gradingDirectory">
-                <InputText id="gradingDirectory" value={questionData.gradingDirectory} onChange={(e) => setQuestionData({ ...questionData, gradingDirectory: e.target.value })}
-                    tooltip="The directory containing grade.py within the quiz repository"/>
+                <InputText 
+                    id="gradingDirectory" 
+                    value={questionData.gradingDirectory} 
+                    onChange={(e) => setQuestionData({ ...questionData, gradingDirectory: e.target.value })}
+                    tooltip="The directory containing grade.py within the quiz repository"
+                />
             </LabelledField>
             <LabelledField label="Files To Pull (Full Paths)" id="toPull">
-                <Chips id="toPull" value={questionData.filesToPull} onChange={(e) => setQuestionData({ ...questionData, filesToPull: e.value ?? [] })}
-                    tooltip="These files are pulled into the runner from the repository"/>
+                <Chips 
+                    id="toPull" 
+                    value={questionData.filesToPull} 
+                    onChange={(e) => setQuestionData({ ...questionData, filesToPull: e.value ?? [] })}
+                    tooltip="These files are pulled into the runner from the repository"
+                />
             </LabelledField>
             <LabelledField label="File To Replace (Full Path)" id="toReplace">
-                <InputText id="toReplace" value={questionData.fileToReplace} onChange={(e) => setQuestionData({ ...questionData, fileToReplace: e.target.value })}
-                    tooltip="The file which will be overwritten by the students code"/>
+                <InputText 
+                    id="toReplace" 
+                    value={questionData.fileToReplace} 
+                    onChange={(e) => setQuestionData({ ...questionData, fileToReplace: e.target.value })}
+                    tooltip="The file which will be overwritten by the students code"
+                />
             </LabelledField>
         </div>
     );
 }
 
 function SelectQuestionEditor(props: QuestionEditorProps) {
-    const questionData : StaffSelectQuestionData = props.questionData as StaffSelectQuestionData;
+    const questionData: StaffSelectQuestionData = props.questionData as StaffSelectQuestionData;
     const setQuestionData = props.setQuestionData;
 
     const getAnswerIdx = (answer: string) => {
         return questionData.options.indexOf(answer);
     };
     return (
-        <div style={{display: 'flex', flexDirection: 'column', gap: '10px'}}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             <LabelledField label="Options" id="options">
-                <Chips id="options" value={questionData.options} onChange={(e) => setQuestionData({ ...questionData, options: e.value ?? [] })} />
+                <Chips 
+                    id="options" 
+                    value={questionData.options} 
+                    onChange={(e) => setQuestionData({ ...questionData, options: e.value ?? [] })} 
+                />
             </LabelledField>
             <LabelledField label="Correct Answer" id="answer">
-                <Dropdown id="answer" value={questionData.options[questionData.correctAnswerIdx]} options={questionData.options} onChange={(e) => setQuestionData({ ...questionData, correctAnswerIdx: getAnswerIdx(e.value)})} />
+                <Dropdown 
+                    id="answer" 
+                    value={questionData.options[questionData.correctAnswerIdx]} 
+                    options={questionData.options} 
+                    onChange={(e) => setQuestionData({ ...questionData, correctAnswerIdx: getAnswerIdx(e.value) })}
+                />
             </LabelledField>
         </div>
     );
 }
 
 function MultiSelectQuestionEditor(props: QuestionEditorProps) {
-    const questionData : StaffMultiSelectQuestionData = props.questionData as StaffMultiSelectQuestionData;
+    const questionData: StaffMultiSelectQuestionData = props.questionData as StaffMultiSelectQuestionData;
     const setQuestionData = props.setQuestionData;
 
     const getAnswerIdxs = (answers: string[]) => {
@@ -236,12 +269,21 @@ function MultiSelectQuestionEditor(props: QuestionEditorProps) {
     };
 
     return (
-        <div style={{display: 'flex', flexDirection: 'column', gap: '10px'}}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             <LabelledField label="Options" id="options">
-                <Chips id="options" value={questionData.options} onChange={(e) => setQuestionData({ ...questionData, options: e.value ?? [] })} />
+                <Chips 
+                    id="options" 
+                    value={questionData.options} 
+                    onChange={(e) => setQuestionData({ ...questionData, options: e.value ?? [] })}
+                />
             </LabelledField>
             <LabelledField label="Correct Answers" id="answers">
-                <MultiSelect id="answers" value={questionData.options.filter((_, idx) => questionData.correctAnswerIdxs.includes(idx))} options={questionData.options} onChange={(e) => setQuestionData({ ...questionData, correctAnswerIdxs: getAnswerIdxs(e.value ?? [])})} />
+                <MultiSelect 
+                    id="answers" 
+                    value={questionData.options.filter((_, idx) => questionData.correctAnswerIdxs.includes(idx))} 
+                    options={questionData.options} 
+                    onChange={(e) => setQuestionData({ ...questionData, correctAnswerIdxs: getAnswerIdxs(e.value ?? []) })}
+                />
             </LabelledField>
         </div>
     );
