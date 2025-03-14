@@ -111,7 +111,7 @@ class BaseQuestionSerializer(serializers.Serializer):
     order = serializers.IntegerField(required=True)
 
 
-BASE_QUESTION_FIELDS = ["prompt", "points", "order"]
+BASE_QUESTION_FIELDS = ["prompt", "render_prompt_as_latex", "points", "order"]
 
 
 class MultipleChoiceQuestionRequestSerializer(serializers.ModelSerializer):
