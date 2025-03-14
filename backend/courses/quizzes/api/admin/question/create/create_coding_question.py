@@ -22,9 +22,11 @@ def create_coding_question(request, course_slug: str, quiz_slug: str):
     files = serializer.validated_data.get("files")
     file_to_replace = serializer.validated_data.get("file_to_replace")
     grading_file_directory = serializer.validated_data.get("grading_file_directory")
+    render_prompt_as_latex = serializer.validated_data.get("render_prompt_as_latex")
 
     coding_question = db.CodingQuestion.objects.create(
         prompt=prompt,
+        render_prompt_as_latex=render_prompt_as_latex,
         points=points,
         order=order,
         starter_code=starter_code,

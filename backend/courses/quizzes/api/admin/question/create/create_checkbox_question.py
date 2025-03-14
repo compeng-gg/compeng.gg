@@ -19,9 +19,11 @@ def create_checkbox_question(request, course_slug: str, quiz_slug: str):
     order = serializer.validated_data.get("order")
     options = serializer.validated_data.get("options")
     correct_option_indices = serializer.validated_data.get("correct_option_indices")
+    render_prompt_as_latex = serializer.validated_data.get("render_prompt_as_latex")
 
     checkbox_question = db.CheckboxQuestion.objects.create(
         prompt=prompt,
+        render_prompt_as_latex=render_prompt_as_latex,
         points=points,
         order=order,
         options=options,

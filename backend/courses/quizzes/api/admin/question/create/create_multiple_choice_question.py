@@ -21,9 +21,11 @@ def create_multiple_choice_question(request, course_slug: str, quiz_slug: str):
     order = serializer.validated_data.get("order")
     options = serializer.validated_data.get("options")
     correct_option_index = serializer.validated_data.get("correct_option_index")
+    render_prompt_as_latex = serializer.validated_data.get("render_prompt_as_latex")
 
     multiple_choice_question = db.MultipleChoiceQuestion.objects.create(
         prompt=prompt,
+        render_prompt_as_latex=render_prompt_as_latex,
         points=points,
         order=order,
         options=options,

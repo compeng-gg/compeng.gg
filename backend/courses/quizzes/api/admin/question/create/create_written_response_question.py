@@ -20,9 +20,11 @@ def create_written_response_question(request, course_slug: str, quiz_slug: str):
     points = serializer.validated_data.get("points")
     order = serializer.validated_data.get("order")
     max_length = serializer.validated_data.get("max_length")
+    render_prompt_as_latex = serializer.validated_data.get("render_prompt_as_latex")
 
     written_response_question = db.WrittenResponseQuestion.objects.create(
         prompt=prompt,
+        render_prompt_as_latex=render_prompt_as_latex,
         points=points,
         order=order,
         max_length=max_length,
