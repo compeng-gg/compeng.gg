@@ -1,6 +1,7 @@
-from tests.utils import TestCasesWithUserAuth, create_quiz
+from tests.utils import TestCasesWithUserAuth, create_quiz, create_enrollment
 import responses
 from rest_framework import status
+import courses.models as db
 
 
 class EditQuizTests(TestCasesWithUserAuth):
@@ -10,6 +11,7 @@ class EditQuizTests(TestCasesWithUserAuth):
     @responses.activate
     def test_happy_path(self):
         mock_quiz = create_quiz(self.user.id, quiz_title="Quiz Title")
+        create_enrollment(self.user.id, mock_quiz.offering, db.Role.Kind.INSTRUCTOR)
 
         updated_quiz_title = "New Quiz Title"
         updated_quiz_slug = "new-quiz-slug"

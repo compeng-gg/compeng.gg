@@ -1,17 +1,14 @@
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework import permissions, status
+from rest_framework import status
 from rest_framework.response import Response
-import courses.models as db
 from courses.quizzes.api.admin.schema import EditQuizSerializer
+from courses.quizzes.api.admin.permissions import IsAuthenticatedCourseInstructorOrTA
 
 
 @api_view(["POST"])
-@permission_classes([permissions.IsAuthenticated])
+@permission_classes([IsAuthenticatedCourseInstructorOrTA])
 def edit_quiz(request, course_slug: str, quiz_slug: str):
-    # TODO: validations
-    quiz = db.Quiz.objects.get(slug=quiz_slug, offering__course__slug=course_slug)
-
-    serializer = EditQuizSerializer(quiz, data=request.data, partial=True)
+    serializer = EditQuizSerializer(request.quiz, data=request.data, partial=True)
 
     if not serializer.is_valid():
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

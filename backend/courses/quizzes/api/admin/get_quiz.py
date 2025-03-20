@@ -1,14 +1,15 @@
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework import permissions, status
+from rest_framework import status
 from rest_framework.response import Response
 import courses.models as db
 from django.forms.models import model_to_dict
+from courses.quizzes.api.admin.permissions import IsAuthenticatedCourseInstructorOrTA
 
 
 @api_view(["GET"])
-@permission_classes([permissions.IsAuthenticated])
+@permission_classes([IsAuthenticatedCourseInstructorOrTA])
 def get_quiz(request, course_slug: str, quiz_slug: str):
-    quiz = db.Quiz.objects.get(slug=quiz_slug, offering__course__slug=course_slug)
+    quiz = request.quiz
     quiz_data = model_to_dict(quiz)
 
     quiz_data["starts_at"] = int(quiz_data["starts_at"].timestamp())

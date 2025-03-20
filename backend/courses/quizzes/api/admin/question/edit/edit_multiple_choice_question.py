@@ -1,14 +1,15 @@
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework import permissions, status
+from rest_framework import status
 from courses.quizzes.api.admin.schema import (
     MultipleChoiceQuestionRequestSerializer,
 )
 from rest_framework.response import Response
 import courses.models as db
+from courses.quizzes.api.admin.permissions import IsAuthenticatedCourseInstructorOrTA
 
 
 @api_view(["POST"])
-@permission_classes([permissions.IsAuthenticated])
+@permission_classes([IsAuthenticatedCourseInstructorOrTA])
 def edit_multiple_choice_question(
     request, course_slug: str, quiz_slug: str, multiple_choice_question_id: str
 ):

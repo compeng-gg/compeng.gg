@@ -1,8 +1,6 @@
 import courses.models as db
-from rest_framework import permissions
 from rest_framework.decorators import api_view, permission_classes
 from uuid import UUID
-from django.shortcuts import get_object_or_404
 from django.http import FileResponse
 from courses.quizzes.api.permissions import StudentCanViewQuiz
 

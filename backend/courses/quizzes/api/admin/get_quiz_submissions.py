@@ -1,34 +1,20 @@
 import courses.models as db
 from rest_framework.response import Response
-from rest_framework import permissions, status
+from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
+from courses.quizzes.api.admin.permissions import IsAuthenticatedCourseInstructorOrTA
 
 
 @api_view(["GET"])
-@permission_classes([permissions.IsAuthenticated])
+@permission_classes([IsAuthenticatedCourseInstructorOrTA])
 def get_quiz_submissions(request, course_slug: str, quiz_slug: str):
     """
     Retrieve all quiz submissions for a given quiz.
     """
 
-    try:
-        quiz = db.Quiz.objects.get(slug=quiz_slug, offering__course__slug=course_slug)
-    except db.Quiz.DoesNotExist:
-        return Response({"error": "Quiz not found"}, status=status.HTTP_404_NOT_FOUND)
-
-    user_id = request.user.id
-    if not db.Enrollment.objects.filter(
-        user_id=user_id,
-        role__offering=quiz.offering,
-        role__kind__in=[db.Role.Kind.INSTRUCTOR, db.Role.Kind.TA],
-    ).exists():
-        return Response(
-            {"error": "Permission denied"}, status=status.HTTP_403_FORBIDDEN
-        )
-
-    quiz_submissions = db.QuizSubmission.objects.filter(quiz=quiz).select_related(
-        "user", "graded_by"
-    )
+    quiz_submissions = db.QuizSubmission.objects.filter(
+        quiz=request.quiz
+    ).select_related("user", "graded_by")
 
     submission_data = [
         {
@@ -46,30 +32,20 @@ def get_quiz_submissions(request, course_slug: str, quiz_slug: str):
     ]
 
     return Response(
-        data={"total_points": quiz.total_points, "submissions": submission_data},
+        data={
+            "total_points": request.quiz.total_points,
+            "submissions": submission_data,
+        },
         status=status.HTTP_200_OK,
     )
 
 
 @api_view(["GET"])
-@permission_classes([permissions.IsAuthenticated])
+@permission_classes([IsAuthenticatedCourseInstructorOrTA])
 def get_student_quiz_submission(
     request, course_slug: str, quiz_slug: str, student_id: int
 ):
-    try:
-        quiz = db.Quiz.objects.get(slug=quiz_slug, offering__course__slug=course_slug)
-    except db.Quiz.DoesNotExist:
-        return Response({"error": "Quiz not found"}, status=status.HTTP_404_NOT_FOUND)
-
-    user_id = request.user.id
-    if not db.Enrollment.objects.filter(
-        user_id=user_id,
-        role__offering=quiz.offering,
-        role__kind__in=[db.Role.Kind.INSTRUCTOR, db.Role.Kind.TA],
-    ).exists():
-        return Response(
-            {"error": "Permission denied"}, status=status.HTTP_403_FORBIDDEN
-        )
+    quiz = request.quiz
 
     try:
         submission = db.QuizSubmission.objects.get(quiz=quiz, user_id=student_id)

@@ -1,8 +1,9 @@
 import courses.models as db
 from rest_framework.response import Response
-from rest_framework import permissions, status
+from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from django.db.models import Sum
+from courses.quizzes.api.admin.permissions import IsAuthenticatedCourseInstructorOrTA
 
 
 def compute_total_grade(course_slug: str, quiz_slug: str, student_id: int):
@@ -42,7 +43,7 @@ import json  # Add this at the top
 
 
 @api_view(["POST"])
-@permission_classes([permissions.IsAuthenticated])
+@permission_classes([IsAuthenticatedCourseInstructorOrTA])
 def update_submission_question(request, course_slug, quiz_slug, student_id):
     """
     Update the grade and comment for a specific question answer in a submission.
