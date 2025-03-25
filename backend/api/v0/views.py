@@ -291,11 +291,11 @@ def _get_assignment_data(assignment, user):
             if not is_private_released:
                 # Filter out the tests
                 result["tests"] = list(filter(lambda test: not "kind" in test or test["kind"] == "public", result["tests"]))
-                grade = f"{assignment_task.public_grade:.0f}/{assignment.public_total:.0f} ({assignment.private_total:.0f} hidden)"
+                grade = f"{assignment_task.public_grade}/{assignment.public_total} ({assignment.private_total} hidden)"
                 if before_due_date and assignment_task.public_grade > assignment_grade:
                     assignment_grade = assignment_task.public_grade
             else:
-                grade = f"{assignment_task.overall_grade:.0f}/{assignment.overall_total:.0f}"
+                grade = f"{assignment_task.overall_grade}/{assignment.overall_total}"
                 if before_due_date and assignment_task.overall_grade > assignment_grade:
                     assignment_grade = assignment_task.overall_grade
 
@@ -337,9 +337,9 @@ def _get_assignment_data(assignment, user):
     #     pass
     if assignment.kind == Assignment.Kind.TESTS:
         if not is_private_released:
-            assignment_data["grade"] = f"{assignment_grade:.0f}/{assignment.public_total:.0f} ({assignment.private_total:.0f} hidden)"
+            assignment_data["grade"] = f"{assignment_grade:.1f}/{assignment.public_total:.1f} ({assignment.private_total:.1f} hidden)"
         else:
-            assignment_data["grade"] = f"{assignment_grade:.0f}/{assignment.overall_total:.0f}"
+            assignment_data["grade"] = f"{assignment_grade:.1f}/{assignment.overall_total:.1f}"
     elif assignment.kind == Assignment.Kind.LEADERBOARD:
         leaderboard = []
         for entry in AssignmentLeaderboardEntry.objects.filter(assignment=assignment).order_by('-speedup'):
