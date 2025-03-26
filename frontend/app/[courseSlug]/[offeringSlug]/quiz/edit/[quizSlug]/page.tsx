@@ -138,22 +138,24 @@ export default function Page({ params }: { params: { courseSlug: string, quizSlu
     return (
         <LoginRequired>
             <Navbar />
-            <QuizEditorTopbar quiz={quiz} fetchQuiz={fetchQuiz} deletedQuestions={deletedQuestions} setDeletedQuestions={setDeletedQuestions} questionData={questionData} modified={modified} setModified={setModified} />
-            <div style={{ display: 'flex', gap: '10px', width: '100%', flexDirection: 'column' }}>
-                <QuizSettingsEditor quizProps={quiz} setQuizProps={(newProps) => setQuizPropsCustom(newProps)} />
-                {questionData.map((data, idx) => (
-                    <QuestionEditor
-                        key={data.id || idx} // Use a unique id if available; otherwise, fallback to the index
-                        questionData={data}
-                        setQuestionData={(newData) => setQuestionDataAtIdx(idx, newData)}
-                        idx={idx}
-                        numQuestions={questionData.length}
-                        moveQuestion={(delta: number) => move(idx, delta)}
-                        registerDelete={registerDelete}
-                    />
-                ))}
-                <AddQuestionButton addQuestion={addQuestion}/>
-            </div> 
+            <div className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-16">
+                <QuizEditorTopbar quiz={quiz} fetchQuiz={fetchQuiz} deletedQuestions={deletedQuestions} setDeletedQuestions={setDeletedQuestions} questionData={questionData} modified={modified} setModified={setModified} />
+                <div style={{ display: 'flex', gap: '10px', width: '100%', flexDirection: 'column' }}>
+                    <QuizSettingsEditor quizProps={quiz} setQuizProps={(newProps) => setQuizPropsCustom(newProps)} />
+                    {questionData.map((data, idx) => (
+                        <QuestionEditor
+                            key={data.id || idx} // Use a unique id if available; otherwise, fallback to the index
+                            questionData={data}
+                            setQuestionData={(newData) => setQuestionDataAtIdx(idx, newData)}
+                            idx={idx}
+                            numQuestions={questionData.length}
+                            moveQuestion={(delta: number) => move(idx, delta)}
+                            registerDelete={registerDelete}
+                        />
+                    ))}
+                    <AddQuestionButton addQuestion={addQuestion}/>
+                </div> 
+            </div>
         </LoginRequired>
     );
 }

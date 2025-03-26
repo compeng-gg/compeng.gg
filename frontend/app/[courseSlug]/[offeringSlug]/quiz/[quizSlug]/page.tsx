@@ -127,18 +127,21 @@ export default function Page({ params }: { params: { courseSlug: string, quizSlu
     return (
         <LoginRequired>
             <Navbar />
+            <div className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-16">
             <QuizWritingHeader quiz={quiz} submitDialog={submitDialog} />
-            <ConfirmDialog />
-            <div style={{ display: 'flex', gap: '10px', width: '100%', flexDirection: 'column' }}>
-                {questionStates.map((state, idx) => (
-                    <QuestionDisplay
-                        key={questionData[idx].id || idx} // use unique id if available, otherwise fallback to index
-                        {...questionData[idx]}
-                        state={state}
-                        idx={idx}
-                    />
-                ))}
+                <ConfirmDialog />
+                <div style={{ display: 'flex', gap: '10px', width: '100%', flexDirection: 'column' }}>
+                    {questionStates.map((state, idx) => (
+                        <QuestionDisplay
+                            key={questionData[idx].id || idx} // use unique id if available, otherwise fallback to index
+                            {...questionData[idx]}
+                            state={state}
+                            idx={idx}
+                        />
+                    ))}
+                </div>
             </div>
+            
         </LoginRequired>
     );
 }

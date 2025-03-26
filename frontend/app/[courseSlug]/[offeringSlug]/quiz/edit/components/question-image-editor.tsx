@@ -38,11 +38,8 @@ export default function QuestionImageUploader(props: QuestionImageUploaderProps)
             setAllFiles(await fetchImagesAsFiles(images, courseSlug, quizSlug, jwt, setAndStoreJwt) ?? []);
             setLoaded(true);
         }
-        if(!loaded) {
-            setFiles();
-
-        }
-    }, [loaded]);
+        if(!loaded) setFiles()
+    }, [loaded, images]);
     
 
     const handleNewImages = (event: FileUploadHandlerEvent) => {
@@ -96,7 +93,7 @@ export default function QuestionImageUploader(props: QuestionImageUploaderProps)
         <div className="p-4 space-y-4">
             <div className="flex flex-wrap gap-3">
                 {allFiles.map((file, idx) => {
-                    if(file == undefined) return null; // Skip deleted images
+                    if(file == undefined || idx >= images.length || images[idx] == null) return null; // Skip deleted images
                     const previewUrl = URL.createObjectURL(file);
                     return (
                         <div key={idx} style={{ display: 'flex', flexDirection: 'row', gap: '20px', width: '100%', alignItems: 'center'}}>
