@@ -342,6 +342,7 @@ class Quiz(models.Model):
     content_viewable_after_submission = models.BooleanField(default=False)
     visible_at = models.DateTimeField()
     starts_at = models.DateTimeField() # TODO: validate ends_at > starts_at
+    release_answers_at = models.DateTimeField()
     ends_at = models.DateTimeField()
     repository = models.ForeignKey(Repository, on_delete=models.DO_NOTHING, related_name='quizzes')
     total_points = models.PositiveIntegerField(default=0)

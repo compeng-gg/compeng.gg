@@ -59,7 +59,7 @@ export default function QuizSubmissionsPage() {
                 throw new Error('Failed to fetch quiz details');
             }
             const data = await res.json();
-            setOfferingName(data.offering_name);
+            setOfferingName(data.offering_title);
             setQuizTitle(data.title);
             setTotalPoints(data.total_points); // Get total points from API
         } catch (error) {

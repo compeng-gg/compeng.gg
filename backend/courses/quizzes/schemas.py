@@ -210,10 +210,16 @@ class AnswerCheckboxQuestionRequestSerializer(serializers.Serializer):
 class CourseQuizzesListSerializer(serializers.ModelSerializer):
     start_unix_timestamp = serializers.SerializerMethodField()
     end_unix_timestamp = serializers.SerializerMethodField()
+    release_unix_timestamp = serializers.SerializerMethodField()
+    
+    
 
     class Meta:
         model = db.Quiz
-        fields = ["title", "slug", "start_unix_timestamp", "end_unix_timestamp"]
+        fields = ["title", "slug", "start_unix_timestamp", "end_unix_timestamp", "release_unix_timestamp"]
+        
+    def get_release_unix_timestamp(self, quiz: db.Quiz) -> int:
+        return int(quiz.release_answers_at.timestamp())
 
     def get_start_unix_timestamp(self, quiz: db.Quiz) -> int:
         return int(quiz.starts_at.timestamp())

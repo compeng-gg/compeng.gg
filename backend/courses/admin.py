@@ -79,15 +79,19 @@ class AssessmentAdmin(admin.ModelAdmin):
     pass
 
 @admin.register(models.WrittenResponseQuestion)
-class WrittenResponseQuestionAdmn(admin.ModelAdmin):
+class WrittenResponseQuestionAdmin(admin.ModelAdmin):
+    pass
+
+@admin.register(models.WrittenResponseAnswer)
+class WrittenResponseAnswerAdmin(admin.ModelAdmin):
     pass
 
 @admin.register(models.CodingQuestion)
-class CodingQuestionAdmn(admin.ModelAdmin):
+class CodingQuestionAdmin(admin.ModelAdmin):
     pass
 
 @admin.register(models.MultipleChoiceQuestion)
-class MultipleChoiceQuestionAdmn(admin.ModelAdmin):
+class MultipleChoiceQuestionAdmin(admin.ModelAdmin):
     pass
 
 @admin.register(models.CheckboxQuestion)

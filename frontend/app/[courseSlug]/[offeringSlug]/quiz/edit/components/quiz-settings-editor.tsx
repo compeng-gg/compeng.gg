@@ -11,6 +11,7 @@ export interface StaffQuizProps {
     startTime: Date;
     endTime: Date;
     visibleAt: Date;
+    releaseTime: Date;
     githubRepo: string;
     contentViewableAfterSubmission: boolean;
 }
@@ -36,6 +37,9 @@ export function QuizSettingsEditor(props: QuizSettingsEditorProps) {
             </LabelledField>
             <LabelledField label="Visible At" id="vis">
                 <Calendar value={quizProps.visibleAt} onChange={(e) => setQuizProps({ ...quizProps, visibleAt: e.value ?? new Date()})} showTime />
+            </LabelledField>
+            <LabelledField label="Release Scores At" id="vis">
+                <Calendar value={quizProps.releaseTime} onChange={(e) => setQuizProps({ ...quizProps, releaseTime: e.value ?? new Date()})} showTime />
             </LabelledField>
             <LabelledField label="Github Repository URL" id="ghurl">
                 <InputText id="ghurl" value={repoUrl} onChange={(e) => setRepoUrl(e.target.value)}

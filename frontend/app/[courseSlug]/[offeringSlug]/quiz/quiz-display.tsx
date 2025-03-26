@@ -13,19 +13,28 @@ export interface QuizProps {
     quizSlug: string;
     startTime: Date;
     endTime: Date;
-    grade: number;
+    releaseTime: Date;
+    grade?: number;
+    totalPoints?: number;
 }
 
-function QuizDisplayBadges(props: QuizProps){
-    const {grade} = props;
+function QuizDisplayBadges(props: QuizProps) {
+    const { grade, totalPoints, releaseTime } = props;
     const duration = Math.abs(differenceInMinutes(props.endTime, props.startTime));
+    const now = new Date();
 
-    const gradeString = (grade) ? `Grade: ${grade}%` : 'Ungraded';
+    const showGrade = now > releaseTime;
+    const gradeString = showGrade
+        ? (grade !== undefined && totalPoints !== undefined
+            ? `Grade: ${grade}/${totalPoints}`
+            : `Grade: Ungraded/${totalPoints ?? "?"}`)
+        : null;
+
     return (
-        <div style={{ position: 'relative'}}>
+        <div style={{ position: 'relative' }}>
             <span></span>
             <div style={{ position: 'absolute', top: '10px', right: '10px', display: 'flex', gap: '8px' }}>
-                <Badge value={gradeString} severity={'success'} />
+                {showGrade && <Badge value={gradeString} severity={'success'} />}
                 <Badge value={`${duration} mins`} severity="secondary" />
             </div>
         </div>

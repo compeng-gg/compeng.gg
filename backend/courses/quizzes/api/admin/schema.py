@@ -9,6 +9,9 @@ class CreateQuizRequestSerializer(serializers.Serializer):
     slug = serializers.SlugField(required=True)
 
     visible_at_timestamp = serializers.IntegerField(required=True)
+    releases_at_timestamp = serializers.IntegerField(
+        required=True
+    )
     starts_at_timestamp = serializers.IntegerField(
         required=True
     )  # TODO: validate ends_at > starts_at
@@ -92,13 +95,14 @@ class QuizAccommodationListItemSerializer(serializers.ModelSerializer):
 
 
 class EditQuizSerializer(serializers.ModelSerializer):
+    releases_at = UnixTimestampDateTimeField()
     visible_at = UnixTimestampDateTimeField()
     starts_at = UnixTimestampDateTimeField()
     ends_at = UnixTimestampDateTimeField()
 
     class Meta:
         model = db.Quiz
-        fields = ["slug", "title", "visible_at", "starts_at", "ends_at"]
+        fields = ["slug", "title", "visible_at", "starts_at", "ends_at", "releases_at"]
 
 
 class DeleteQuizAccommodationSerializer(serializers.Serializer):

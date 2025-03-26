@@ -48,8 +48,14 @@ from courses.quizzes.api.admin.question.delete import (
 from courses.quizzes.api.admin.delete_quiz import delete_quiz
 
 from courses.quizzes.api.admin.edit_quiz import edit_quiz
+from courses.quizzes.api.admin.edit_quiz import release_quiz_now
 
-from courses.quizzes.api.admin.get_quiz import get_quiz
+
+from courses.quizzes.api.admin.get_quiz import (
+    get_quiz,
+    get_quiz_info,
+)
+    
 
 from courses.quizzes.api.admin.admin_list_quizzes_for_course import (
     admin_list_quizzes_for_course,
@@ -57,10 +63,13 @@ from courses.quizzes.api.admin.admin_list_quizzes_for_course import (
 
 from courses.quizzes.api.admin.get_quiz_submissions import (
     get_quiz_submissions,
+    get_student_quiz_submission_staff,
     get_student_quiz_submission,
 )
 
 from courses.quizzes.api.admin.post_quiz_grades import update_submission_question
+from courses.quizzes.api.admin.post_quiz_grades import compute_total_grade
+
 from courses.quizzes.api.admin.create_accommodation import create_quiz_accommodation
 from courses.quizzes.api.admin.list_accommodations import list_quiz_accommodations
 from courses.quizzes.api.admin.delete_accommodation import delete_quiz_accommodation

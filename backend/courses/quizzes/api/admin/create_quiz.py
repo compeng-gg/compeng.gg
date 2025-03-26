@@ -26,6 +26,7 @@ def create_quiz(request, course_slug: str):
     starts_at_timestamp = serializer.validated_data.get("starts_at_timestamp")
     ends_at_timestamp = serializer.validated_data.get("ends_at_timestamp")
     github_repository = serializer.validated_data.get("github_repository")
+    releases_at_timestamp = serializer.validated_data.get("releases_at_timestamp")
 
     offering = db.Offering.objects.get(course__slug=course_slug, active=True)
 
@@ -40,6 +41,7 @@ def create_quiz(request, course_slug: str):
     visible_at = datetime.fromtimestamp(visible_at_timestamp, tz=local_tz)
     starts_at = datetime.fromtimestamp(starts_at_timestamp, tz=local_tz)
     ends_at = datetime.fromtimestamp(ends_at_timestamp, tz=local_tz)
+    releases_at = datetime.fromtimestamp(releases_at_timestamp, tz=local_tz)
 
     repo_api_url = f"{GITHUB_REPOS_API_BASE}/{github_repository}"
     github_repo_response = requests.get(repo_api_url)
@@ -81,8 +83,10 @@ def create_quiz(request, course_slug: str):
         visible_at=visible_at,
         starts_at=starts_at,
         ends_at=ends_at,
+        release_answers_at=releases_at,
         offering=offering,
         repository=repository,
     )
 
     return Response(status=status.HTTP_200_OK, data={})
+

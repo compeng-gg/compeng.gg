@@ -69,6 +69,22 @@ export default function StudentSubmissionPage() {
         }
     }
 
+    async function submitGrade() {
+        try {
+            const res = await fetchApi(
+                jwt,
+                setAndStoreJwt,
+                `quizzes/admin/${quizSlug}/submissions/${studentId}/submit-grade/`,
+                // `quizzes/admin/${courseSlug}/${quizSlug}/submissions/${studentId}/grade/`,
+                'POST',
+            );
+            if (!res.ok) throw new Error('Failed to submit grade');
+            setGradeSubmitted(true);
+        } catch (error) {
+            console.error('Failed to submit grade', error);
+        }
+    }
+
     useEffect(() => {
         fetchQuizAndSubmission();
     }, [courseSlug, quizSlug, studentId, jwt, setAndStoreJwt]);
@@ -124,6 +140,7 @@ export default function StudentSubmissionPage() {
 
             <button
                 onClick={() => {
+                    submitGrade();
                     setGradeSubmitted(true);
                     setTimeout(() => setGradeSubmitted(false), 3000);
                 }}

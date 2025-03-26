@@ -28,8 +28,8 @@ class Command(BaseCommand):
         mock_course = db.Course.objects.create(
             institution=mock_institution,
             slug="ece344",
-            name="ECE344",
-            title="Operating Systems"
+            title="ECE344",
+            name="Operating Systems"
         )
 
         now_datetime = timezone.now()
@@ -108,8 +108,10 @@ class Command(BaseCommand):
             title="Quiz Title",
             visible_at=now_datetime,
             starts_at=now_datetime,
-            ends_at=now_datetime + timedelta(days=365),
-            repository=mock_repository
+            ends_at=now_datetime + timedelta(days=1),
+            release_answers_at=now_datetime + timedelta(days=1),
+            repository=mock_repository,
+            total_points=100
         )
 
         db.QuizAccommodation.objects.create(

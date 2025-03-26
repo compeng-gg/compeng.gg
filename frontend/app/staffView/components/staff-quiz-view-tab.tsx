@@ -25,6 +25,7 @@ export default function StaffQuizViewTab(props: StaffQuizViewProps) {
     const [visibleAt, setVisibleAt] = useState('');
     const [startsAt, setStartsAt] = useState('');
     const [endsAt, setEndsAt] = useState('');
+    const [releaseAt, setReleaseAt] = useState('');
     const [githubRepository, setGithubRepository] = useState('');
     const [formError, setFormError] = useState('');
 
@@ -47,6 +48,9 @@ export default function StaffQuizViewTab(props: StaffQuizViewProps) {
                     endTime: quiz.end_unix_timestamp
                         ? new Date(quiz.end_unix_timestamp * 1000)
                         : null,
+                    releaseTime: quiz.releases_unix_timestamp
+                        ? new Date(quiz.release_unix_timestamp * 1000)
+                        : new Date(),
                 }));
                 setQuizzes(retQuizzes);
             }
@@ -69,6 +73,7 @@ export default function StaffQuizViewTab(props: StaffQuizViewProps) {
         const visibleTimestamp = Math.floor(new Date(visibleAt).getTime() / 1000);
         const startTimestamp = Math.floor(new Date(startsAt).getTime() / 1000);
         const endTimestamp = Math.floor(new Date(endsAt).getTime() / 1000);
+        const releaseTimestamp = Math.floor(new Date(releaseAt).getTime() / 1000);
 
         // Validate start < end
         if (startTimestamp >= endTimestamp) {
@@ -87,6 +92,7 @@ export default function StaffQuizViewTab(props: StaffQuizViewProps) {
             title,
             slug,
             visible_at_timestamp: visibleTimestamp,
+            releases_at_timestamp: releaseTimestamp,
             starts_at_timestamp: startTimestamp,
             ends_at_timestamp: endTimestamp,
             github_repository: githubRepository,
@@ -196,6 +202,17 @@ export default function StaffQuizViewTab(props: StaffQuizViewProps) {
                                     onChange={(e) => setEndsAt(e.target.value)}
                                     required
                                     title="Date and time when the quiz ends."
+                                />
+                            </div>
+                            <div>
+                                <label htmlFor="quiz-releaseAt">Release Scores At:</label>
+                                <input
+                                    id="quiz-releaseAt"
+                                    type="datetime-local"
+                                    value={releaseAt}
+                                    onChange={(e) => setReleaseAt(e.target.value)}
+                                    required
+                                    title="Date and time when the quiz score gets released."
                                 />
                             </div>
                             <div>

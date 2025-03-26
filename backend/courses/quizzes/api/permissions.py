@@ -11,15 +11,11 @@ class StudentCanViewQuiz(IsAuthenticated):
             return False
 
         user_id = request.user.id
-
         course_slug = view.kwargs.get("course_slug")
-
         quiz_slug = view.kwargs.get("quiz_slug")
 
         try:
-            quiz = db.Quiz.objects.get(
-                slug=quiz_slug, offering__course__slug=course_slug
-            )
+            quiz = db.Quiz.objects.get(slug=quiz_slug, offering__course__slug=course_slug)
             request.quiz = quiz
         except db.Quiz.DoesNotExist:
             raise PermissionDenied("Quiz not found")
@@ -33,49 +29,39 @@ class StudentCanViewQuiz(IsAuthenticated):
         except db.Enrollment.DoesNotExist:
             raise PermissionDenied("Student is not enrolled in this course")
 
-        # Check for quiz submission
         try:
-            # If there is a quiz submission, check if the quiz is viewable after submission
-            quiz_submission = db.QuizSubmission.objects.get(
-                quiz=quiz,
-                user_id=user_id,
-            )
-            if (
-                not quiz.content_viewable_after_submission
-                and quiz_submission.completed_at < timezone.now()
-            ):
-                raise PermissionDenied("Quiz has been completed and is not accessible")
+            quiz_submission = db.QuizSubmission.objects.get(quiz=quiz, user_id=user_id)
         except db.QuizSubmission.DoesNotExist:
             quiz_submission = None
 
         request.quiz_submission = quiz_submission
 
         try:
-            accommodation = db.QuizAccommodation.objects.get(
-                quiz=quiz,
-                user_id=user_id,
-            )
+            accommodation = db.QuizAccommodation.objects.get(quiz=quiz, user_id=user_id)
         except db.QuizAccommodation.DoesNotExist:
             accommodation = None
 
         request.accommodation = accommodation
 
-        if accommodation is not None:
-            if accommodation.starts_at > timezone.now():
+        now = timezone.now()
+
+        if accommodation:
+            if accommodation.starts_at > now:
                 raise PermissionDenied("Accommodation has not started yet")
-
-            if accommodation.ends_at < timezone.now():
+            if accommodation.ends_at < now:
                 raise PermissionDenied("Accommodation has already ended")
-
             return True
 
-        if quiz.starts_at > timezone.now():
-            raise PermissionDenied("Quiz has not started yet")
+        if quiz.starts_at <= now <= quiz.ends_at:
+            return True
 
-        if quiz.ends_at < timezone.now():
-            raise PermissionDenied("Quiz has already ended")
+        if quiz.content_viewable_after_submission and now >= quiz.visible_at:
+            return True
 
-        return True
+        if now >= quiz.release_answers_at:
+            return True
+
+        raise PermissionDenied("You do not have access to view this quiz at this time.")
 
 
 class StudentCanAnswerQuiz(StudentCanViewQuiz):

@@ -89,7 +89,7 @@ export default function GradingQuestionDisplay({
     /** ✅ **Function to update grade & comment in backend** */
     async function updateGradeOrComment(questionId: string, grade: number | null, comment: string) {
         await fetchApi(jwt, setAndStoreJwt, 
-            `quizzes/admin/${courseSlug}/${quizSlug}/submissions/${studentId}/update-question/`, 
+            `quizzes/admin/${quizSlug}/submissions/${studentId}/update-question/`, 
             'POST', {
                 question_id: questionId, // ✅ Use question_id instead of prompt
                 grade: grade,

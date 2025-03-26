@@ -5,6 +5,11 @@ from courses.quizzes.api.admin.schema import (
 )
 from rest_framework.response import Response
 import courses.models as db
+from courses.quizzes.api.admin.utils import (
+    validate_user_is_ta_or_instructor_in_course,
+    CustomException,
+)
+from courses.quizzes.api.admin.question.total_points import update_quiz_total_points
 from courses.quizzes.api.admin.permissions import IsAuthenticatedCourseInstructorOrTA
 
 
@@ -30,6 +35,7 @@ def create_written_response_question(request, course_slug: str, quiz_slug: str):
         max_length=max_length,
         quiz=request.quiz,
     )
+    update_quiz_total_points(course_slug, quiz_slug)
 
     return Response(
         status=status.HTTP_200_OK, data={"question_id": written_response_question.id}

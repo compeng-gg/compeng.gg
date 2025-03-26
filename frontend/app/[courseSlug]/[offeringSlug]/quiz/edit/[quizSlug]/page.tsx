@@ -20,6 +20,7 @@ export interface StaffQuizProps {
     startTime: Date;
     endTime: Date;
     visibleAt: Date;
+    releaseTime: Date;
     githubRepo: string;
     contentViewableAfterSubmission: boolean;
 }
@@ -43,6 +44,7 @@ export default function Page({ params }: { params: { courseSlug: string, quizSlu
                 startTime: new Date(data.starts_at * 1000),
                 endTime: new Date(data.ends_at * 1000),
                 visibleAt: new Date(data.visible_at * 1000),
+                releaseTime: new Date(data.release_at * 1000),
                 quizSlug: quizSlug,
                 name: data.title,
                 courseSlug: courseSlug,
@@ -67,6 +69,7 @@ export default function Page({ params }: { params: { courseSlug: string, quizSlu
             totalMarks: 0,
             isMutable: true,
             questionType: 'TEXT',
+            renderPromptAsLatex: false,
             serverQuestionType: 'WRITTEN_RESPONSE'
         } as StaffQuestionData;
         setQuestionData(prevData => [...prevData, newQuestion]);
@@ -283,9 +286,8 @@ function QuizEditorTopbar(props: QuizEditorTopbarProps) {
                 await saveQuestion(question, idx);
             }
             if(question.images.length > 0) await saveQuestionImages(question, idx);
+
         }));
-
-
 
         await updateQuiz();
         if(!error){
@@ -368,6 +370,7 @@ function serializeQuizData(quiz: StaffQuizProps) {
         visible_at: Math.floor(quiz.visibleAt.getTime() / 1000),
         starts_at: Math.floor(quiz.startTime.getTime() / 1000),
         ends_at: Math.floor(quiz.endTime.getTime() / 1000),
+        release_at: Math.floor(quiz.releaseTime.getTime() / 1000),
         title: quiz.name,
         slug: quiz.quizSlug,
     };

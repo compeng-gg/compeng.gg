@@ -3,6 +3,10 @@ import { Card } from 'primereact/card';
 import { differenceInMinutes } from 'date-fns';
 import { Button } from 'primereact/button';
 import Link from 'next/link';
+import { fetchApi } from '@/app/lib/api';
+import { JwtContext } from '@/app/lib/jwt-provider';
+import { useParams } from 'next/navigation';
+import { useContext, useEffect, useState } from 'react';
 
 export interface StaffQuizProps {
     name: string;
@@ -11,6 +15,7 @@ export interface StaffQuizProps {
     quizSlug: string;
     startTime: Date | null;
     endTime: Date | null;
+    releaseTime: Date;
 }
 
 function StaffQuizDisplayBadges(props: StaffQuizProps) {
@@ -35,6 +40,10 @@ function StaffQuizButton({ quizProps }: { quizProps: StaffQuizProps }) {
         </div>
     );
 }
+
+// function releaseNowButton({ quizProps }: { quizProps: StaffQuizProps }) {
+    
+// }
 
 function ManageStudentQuizAccommodationsButton({ quizProps }: { quizProps: StaffQuizProps }) {
     return (
@@ -110,11 +119,94 @@ function OngoingQuizDisplay(props: StaffQuizProps) {
     );
 }
 
-function PastQuizDisplay(props: StaffQuizProps) {
+async function ReleaseQuizNow(quizProps: StaffQuizProps) {
+    const [jwt, setAndStoreJwt] = useContext(JwtContext);
 
+    try {
+        const res = await fetchApi(
+            jwt,
+            setAndStoreJwt,
+            `quizzes/admin/${quizProps.courseSlug}/${quizProps.quizSlug}/release-now/`,
+            'POST'
+        );
+        if (!res.ok) throw new Error('Failed to Release Quiz');
+        console.log("Quiz released successfully!");
+    } catch (error) {
+        console.error('Failed to Release Quiz', error);
+    }
+}
+
+function ReleaseNowButton({ quizProps }: { quizProps: StaffQuizProps }) {
+    const [releaseConfirmed, setReleaseConfirmed] = useState(false);
+
+    async function handleReleaseQuiz() {
+        try {
+            await ReleaseQuizNow(quizProps);
+            setReleaseConfirmed(true);
+            setTimeout(() => setReleaseConfirmed(false), 3000); // Auto-close after 3 seconds
+        } catch (error) {
+            console.error("Failed to release quiz", error);
+        }
+    }
+
+    // const now = new Date();
+    // if (now >= quizProps.releaseTime) {
+    //     return null; // Don't show the button if releaseTime has already passed
+    // }
+
+    return (
+        <>
+            <Button
+                label="Release Now"
+                size="small"
+                severity="warning"
+                onClick={handleReleaseQuiz}
+            />
+            {releaseConfirmed && (
+                <div
+                    style={{
+                        position: "fixed",
+                        bottom: "70px",
+                        right: "100px",
+                        backgroundColor: "#28a745",
+                        color: "#fff",
+                        padding: "10px 15px",
+                        borderRadius: "5px",
+                        fontSize: "14px",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "10px",
+                        boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
+                    }}
+                >
+                    Quiz scores are now released!
+                    <button
+                        onClick={() => setReleaseConfirmed(false)}
+                        style={{
+                            background: "none",
+                            border: "none",
+                            color: "#fff",
+                            fontSize: "14px",
+                            cursor: "pointer",
+                        }}
+                    >
+                        ✖
+                    </button>
+                </div>
+            )}
+        </>
+    );
+}
+
+
+
+function PastQuizDisplay(props: StaffQuizProps) {
     const footer = () => {
+        console.log(props);
         return (
-            <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'flex-end'}}>
+            <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end', gap: '5px' }}>
+                {/* {new Date() < props.releaseTime && <ReleaseNowButton quizProps={props} />} */}
+                <ReleaseNowButton quizProps={props} />
                 <Link href={`/${props.courseSlug}/${props.offeringSlug}/quiz/edit/${props.quizSlug}/`}>
                     <Button label="Edit Quiz" size="small" />
                 </Link>
@@ -122,6 +214,7 @@ function PastQuizDisplay(props: StaffQuizProps) {
             </div>
         );
     };
+
     return (
         <Card
             header={<StaffQuizDisplayBadges {...props} />}

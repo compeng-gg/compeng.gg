@@ -6,7 +6,7 @@ from courses.quizzes.api.admin.schema import (
 from rest_framework.response import Response
 import courses.models as db
 from courses.quizzes.api.admin.permissions import IsAuthenticatedCourseInstructorOrTA
-
+from courses.quizzes.api.admin.question.total_points import update_quiz_total_points
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticatedCourseInstructorOrTA])
@@ -26,5 +26,6 @@ def edit_multiple_choice_question(
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     serializer.save()
-
+    update_quiz_total_points(course_slug, quiz_slug)
+    
     return Response(status=status.HTTP_204_NO_CONTENT)

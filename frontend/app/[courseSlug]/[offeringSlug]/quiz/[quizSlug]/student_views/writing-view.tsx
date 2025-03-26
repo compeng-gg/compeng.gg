@@ -1,0 +1,155 @@
+'use client';
+
+import Navbar from '@/app/components/navbar';
+import LoginRequired from '@/app/lib/login-required';
+import { useContext, useEffect, useState } from 'react';
+import { JwtContext } from '@/app/lib/jwt-provider';
+import { fetchApi } from '@/app/lib/api';
+import { getQuestionDataFromRaw } from '../../quiz-utilities';
+import { QuestionDisplay } from '../../question-display';
+import { Badge } from 'primereact/badge';
+import { Button } from 'primereact/button';
+import { confirmDialog, ConfirmDialog } from 'primereact/confirmdialog';
+
+import { QuestionData, QuestionState, CodeQuestionData } from '../../question-models';
+import { QuizProps } from '../../quiz-display';
+
+export default function WritingQuizView({ courseSlug, quizSlug }: { courseSlug: string; quizSlug: string }) {
+    
+    const [jwt, setAndStoreJwt] = useContext(JwtContext);
+    const [quiz, setQuiz] = useState<QuizProps | undefined>(undefined);
+    const [loaded, setLoaded] = useState(false);
+    const [questionData, setQuestionData] = useState<QuestionData[]>([]);
+    const [questionStates, setQuestionStates] = useState<QuestionState[]>([]);
+
+    async function fetchQuiz() {
+        try {
+            const res = await fetchApi(jwt, setAndStoreJwt, `${courseSlug}/quiz/${quizSlug}`, 'GET');
+            const data = await res.json();
+            const retQuiz: QuizProps = {
+                startTime: new Date(data.start_unix_timestamp * 1000),
+                endTime: new Date(data.end_unix_timestamp * 1000),
+                quizSlug: quizSlug,
+                name: data.title,
+                courseSlug: courseSlug,
+                releaseTime: new Date(data.release_unix_timestamp * 1000),
+                grade: data.grade
+            };
+            setQuiz(retQuiz);
+            const qData = data.questions.map((rawData, idx) =>
+                getQuestionDataFromRaw(rawData, quizSlug, courseSlug)
+            );
+            setQuestionData(qData);
+            const states = qData.map((q, idx) => ({
+                value: getStartingStateValue(q, data.questions[idx]),
+                setValue: (newValue) =>
+                    setQuestionStates((prev) =>
+                        prev.map((s, i) => (i === idx ? { ...s, value: newValue } : s))
+                    )
+            }));
+            setQuestionStates(states);
+        } catch (error) {
+            console.error('Failed to retrieve quiz', error);
+        }
+    }
+
+    async function submitQuiz() {
+        try {
+            const res = await fetchApi(jwt, setAndStoreJwt, `${courseSlug}/quiz/${quizSlug}/complete/`, 'POST', {});
+            if (!res.ok) throw new Error('Failed to submit quiz');
+            window.location.href += 'complete/';
+        } catch {
+            console.error('Failed to submit quiz');
+        }
+    }
+
+    useEffect(() => {
+        if (!loaded) {
+            fetchQuiz();
+            setLoaded(true);
+        }
+    }, [loaded]);
+
+    if (!loaded || !quiz) {
+        return (
+            <LoginRequired>
+                <Navbar />
+                <h3 style={{ color: 'yellow' }}>{`Loading quiz ${quizSlug}...`}</h3>
+            </LoginRequired>
+        );
+    }
+
+    return (
+        <>
+    <QuizWritingHeader quiz={quiz} submitDialog={() =>
+        confirmDialog({
+            message: 'Are you sure you want to submit your answers?',
+            header: 'Confirmation',
+            icon: 'pi pi-exclamation-triangle',
+            accept: submitQuiz,
+            reject: () => {}
+        })
+    } />
+    <ConfirmDialog />
+    <div style={{ display: 'flex', gap: '10px', width: '100%', flexDirection: 'column' }}>
+        {questionStates.map((state, idx) => (
+            <QuestionDisplay
+                key={questionData[idx].id || idx}
+                {...questionData[idx]}
+                state={state}
+                idx={idx}
+            />
+        ))}
+    </div>
+    </>
+    );
+}
+
+function getStartingStateValue(questionData: QuestionData, rawData: any): any {
+    switch (questionData.questionType) {
+        case 'CODE':
+            return rawData.solution ?? (questionData as CodeQuestionData).starterCode ?? '';
+        case 'SELECT':
+            return rawData.selected_answer_index ?? -1;
+        case 'TEXT':
+            return rawData.response ?? '';
+        case 'MULTI_SELECT':
+            return rawData.selected_answer_indices ?? [];
+        default:
+            throw new Error(`Unsupported question type: ${JSON.stringify(questionData)}`);
+    }
+}
+
+function QuizWritingHeader({ quiz, submitDialog }: { quiz: QuizProps; submitDialog: () => void }) {
+    return (
+        <div className="sticky_header">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h2>{quiz.name}</h2>
+                <div style={{ display: 'flex', flexDirection: 'row', gap: '10px', alignItems: 'center' }}>
+                    <CountdownClock endTime={quiz.endTime} />
+                    <Button label="Submit" onClick={submitDialog} />
+                </div>
+            </div>
+        </div>
+    );
+}
+
+function CountdownClock({ endTime }: { endTime: Date }) {
+    const [secondsLeft, setSecondsLeft] = useState((endTime.getTime() - Date.now()) / 1000);
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setSecondsLeft((endTime.getTime() - Date.now()) / 1000);
+        }, 1000);
+        return () => clearInterval(interval);
+    }, [endTime]);
+
+    const formatTimer = (s: number) => {
+        const days = Math.floor(s / 86400);
+        const hours = Math.floor((s % 86400) / 3600);
+        const minutes = Math.floor((s % 3600) / 60);
+        const seconds = Math.floor(s % 60);
+        return `${days > 0 ? `${days}d ` : ''}${hours > 0 ? `${hours}h ` : ''}${minutes}m ${seconds}s`;
+    };
+
+    return <Badge size="large" value={`Time Left: ${formatTimer(secondsLeft)}`} severity="secondary" />;
+}

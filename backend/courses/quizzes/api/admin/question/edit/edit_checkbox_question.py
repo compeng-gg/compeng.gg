@@ -3,6 +3,7 @@ from rest_framework import status
 from courses.quizzes.api.admin.schema import CheckboxQuestionRequestSerializer
 from rest_framework.response import Response
 import courses.models as db
+from courses.quizzes.api.admin.question.total_points import update_quiz_total_points
 from courses.quizzes.api.admin.permissions import IsAuthenticatedCourseInstructorOrTA
 
 
@@ -21,5 +22,8 @@ def edit_checkbox_question(
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     serializer.save()
+    update_quiz_total_points(course_slug, quiz_slug)
+    
+    print(serializer.validated_data)
 
     return Response(status=status.HTTP_204_NO_CONTENT)
