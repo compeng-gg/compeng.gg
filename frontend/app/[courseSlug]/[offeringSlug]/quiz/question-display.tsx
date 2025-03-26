@@ -13,6 +13,7 @@ import { InlineMath } from "react-katex";
 import MultiSelectEditor from './components/multiselect-editor';
 import { Image } from 'primereact/image';
 import 'katex/dist/katex.min.css';
+import { fetchImages } from './quiz-utilities';
 
 enum QuestionSaveStatus {
     NOT_ANSWERED = 'Not Answered',
@@ -171,39 +172,17 @@ function QuestionContent({ props, save }: { props: QuestionProps, save: (newValu
     }
 }
 
-function QuestionImageDisplay({ images, props}: { images: QuestionImage[], props: QuestionProps }) {
+export function QuestionImageDisplay({ images, props}: { images: QuestionImage[], props: QuestionProps }) {
 
     const [jwt, setAndStoreJwt] = useContext(JwtContext);
     const [imageSrcs, setImageSrcs] = useState<string[]>([]);
-
     useEffect(() => {
-        async function fetchImages() {
-            try {
-                const srcs = await Promise.all(
-                    images.map(async (image) => {
-                        const res = await fetchApi(
-                            jwt,
-                            setAndStoreJwt,
-                            `quizzes/${props.courseSlug}/${props.quizSlug}/image/${image.id}`,
-                            'GET',
-                        );
-
-                        const buffer = await res.arrayBuffer();
-                        const base64String = btoa(
-                            new Uint8Array(buffer).reduce((data, byte) => data + String.fromCharCode(byte), '')
-                        );
-
-                        return `data:image/png;base64,${base64String}`;
-                    })
-                );
-
-                setImageSrcs(srcs);
-            } catch (error) {
-                console.error('Error fetching images:', error);
-            }
+        async function setImageSources() {
+            setImageSrcs(await fetchImages(images, props.courseSlug, props.quizSlug, jwt, setAndStoreJwt) ?? []);
         }
+        if(images.length)
 
-        fetchImages();
+        setImageSources();
     }, [images, jwt, setAndStoreJwt]);
 
     if (images.length === 0) return null;

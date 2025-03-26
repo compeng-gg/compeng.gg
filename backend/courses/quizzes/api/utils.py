@@ -30,7 +30,8 @@ def get_existing_answer_object(
 
 
 def get_question_from_id_and_type(id: str, type: str):
-    if type == "multiple_choice":
+    type = type.lower()
+    if type == "multiple_choice" :
         return db.MultipleChoiceQuestion.objects.get(id=id)
     if type == "checkbox":
         return db.CheckboxQuestion.objects.get(id=id)

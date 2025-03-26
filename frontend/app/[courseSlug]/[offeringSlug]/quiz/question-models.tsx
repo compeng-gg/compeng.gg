@@ -20,10 +20,17 @@ export const ID_SET_ON_SERVER = 'set_on_server';
 export type QuestionType = 'CODE' | 'SELECT' | 'TEXT' | 'MULTI_SELECT';
 export type ServerQuestionType = 'CODING' | 'MULTIPLE_CHOICE' | 'WRITTEN_RESPONSE' | 'CHECKBOX';
 
+export type QuestionImageStatus = "IMMUTABLE" | "NEW" | "DELETED" | "MODIFIED" | "UNMODIFIED";
+
+
 export interface QuestionImage {
     id: string;
     caption: string;
+    status: QuestionImageStatus; 
+    file?: File;
 }
+
+
 
 export interface BaseQuestionData {
     id: string;
@@ -35,6 +42,7 @@ export interface BaseQuestionData {
     questionType: QuestionType;
     serverQuestionType: ServerQuestionType;
     images: QuestionImage[];
+    imageStatus?: QuestionImageStatus[]; 
     idx?: number;
     renderPromptAsLatex: boolean;
 }

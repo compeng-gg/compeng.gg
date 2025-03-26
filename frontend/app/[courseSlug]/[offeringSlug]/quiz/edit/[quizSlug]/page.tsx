@@ -1,7 +1,7 @@
 'use client';
 
 import { useContext, useEffect, useState } from 'react';
-import { ID_SET_ON_SERVER, QuestionData, StaffQuestionData } from '../../question-models';
+import { ID_SET_ON_SERVER, QuestionData, QuestionImage, StaffQuestionData } from '../../question-models';
 import { QuizProps } from '../../quiz-display';
 import { JwtContext } from '@/app/lib/jwt-provider';
 import { fetchApi } from '@/app/lib/api';
@@ -230,6 +230,41 @@ function QuizEditorTopbar(props: QuizEditorTopbarProps) {
             setError(true);
             console.error('Failed to update quiz', JSON.stringify(quiz, null, 2), e);
         }
+
+    }
+
+    async function saveQuestionImages(questionData: StaffQuestionData, idx: number) {
+        console.log("Saving question images:");
+        console.log(JSON.stringify(questionData.images, null, 2));
+        try {
+            questionData.images.map(async (image, imageIdx) => {
+                var res;
+                if(image.status == 'UNMODIFIED'){
+                    return;
+                }
+                if(image.status == 'NEW'){
+                    //creation flow
+                    res = await fetchApi(jwt, setAndStoreJwt, `quizzes/admin/${quiz.courseSlug}/${quiz.quizSlug}/images/add/`, 'POST',
+                        createImageBody(image, questionData, imageIdx) ?? {}
+                    );
+                } else if (image.status == 'DELETED'){
+                    //deletion flow
+                    res = await fetchApi(jwt, setAndStoreJwt, `quizzes/admin/${quiz.courseSlug}/${quiz.quizSlug}/images/delete/${image.id}/`, 'DELETE');
+                } else if (image.status == 'MODIFIED'){
+                    //update flow
+                    res = await fetchApi(jwt, setAndStoreJwt, `quizzes/admin/${quiz.courseSlug}/${quiz.quizSlug}/images/edit/${image.id}/`, 'POST', {
+                        caption: image.caption,
+                        order: imageIdx
+                });
+                }
+                if(!res?.ok){
+                    throw new Error('Failed to save question images');
+                }
+            })
+        } catch(e) {
+            setError(true);
+            console.error('Failed to save question images', JSON.stringify(questionData, null, 2), e);
+        }
     }
 
     async function saveQuiz() {
@@ -245,7 +280,10 @@ function QuizEditorTopbar(props: QuizEditorTopbarProps) {
             } else {
                 await saveQuestion(question, idx);
             }
+            if(question.images.length > 0) await saveQuestionImages(question, idx);
         }));
+
+
 
         await updateQuiz();
         if(!error){
@@ -331,4 +369,22 @@ function serializeQuizData(quiz: StaffQuizProps) {
         title: quiz.name,
         slug: quiz.quizSlug,
     };
+}
+
+function createImageBody(image: QuestionImage, questionData : StaffQuestionData, idx: number) {
+    if(!image.file){
+        console.log('No image file');
+        return null;
+    }
+    const body = new FormData();
+    body.append('question_id', questionData.id);
+    body.append('question_type', questionData.serverQuestionType);
+    body.append('caption', image.caption);
+    body.append('order', idx.toString());
+    body.append('image', image.file);
+    console.log("FLAG" + JSON.stringify(body, null, 2));
+    for (let pair of body.entries()) {
+        console.log(`${pair[0]}:`, pair[1]);
+      }
+    return body;
 }

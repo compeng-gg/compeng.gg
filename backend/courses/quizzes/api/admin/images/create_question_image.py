@@ -7,13 +7,10 @@ import courses.models as db
 from courses.quizzes.api.admin.permissions import IsAuthenticatedCourseInstructorOrTA
 
 
-class CustomException(Exception):
-    pass
-
-
 @api_view(["POST"])
 @permission_classes([IsAuthenticatedCourseInstructorOrTA])
 def create_question_image(request, course_slug: str, quiz_slug: str):
+    # Explicitly include request.FILES for file uploads
     serializer = CreateQuestionImageRequestSerializer(data=request.data)
 
     if not serializer.is_valid():
@@ -21,19 +18,25 @@ def create_question_image(request, course_slug: str, quiz_slug: str):
 
     question_id = serializer.validated_data.get("question_id")
     question_type = serializer.validated_data.get("question_type")
+    caption = serializer.validated_data.get("caption")
+    order = serializer.validated_data.get("order")
+    image = serializer.validated_data.get("image")  # This is where your file is
 
     # Validate that the question exists
     question = get_question_from_id_and_type(question_id, question_type)
-    if question == None:
+    if question is None:
         return Response(
             {"error": "Question not found"},
             status=status.HTTP_404_NOT_FOUND,
         )
 
-    image = serializer.image
-    order = serializer.order
-    caption = serializer.caption
-
-    db.QuizQuestionImage.objects.create(image=image, order=order, caption=caption)
+    image = db.QuizQuestionImage.objects.create(
+        image=image,
+        order=order,
+        caption=caption,
+        quiz=question.quiz  # you might want to associate this image with the question
+    )
+    
+    question.images.add(image)
 
     return Response(status=status.HTTP_201_CREATED)

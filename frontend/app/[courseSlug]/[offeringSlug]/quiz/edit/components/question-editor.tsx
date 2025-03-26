@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { InlineMath } from 'react-katex';
 import 'katex/dist/katex.min.css';
 import { Card } from 'primereact/card';
-import { BaseQuestionData, ID_SET_ON_SERVER, LocalToServer, ProgrammingLanguages, QuestionType, ServerQuestionType, StaffCodeQuestionData, StaffMultiSelectQuestionData, StaffQuestionData, StaffSelectQuestionData } from '../../question-models';
+import { BaseQuestionData, ID_SET_ON_SERVER, LocalToServer, ProgrammingLanguages, QuestionImage, QuestionImageStatus, QuestionProps, QuestionType, ServerQuestionType, StaffCodeQuestionData, StaffMultiSelectQuestionData, StaffQuestionData, StaffSelectQuestionData } from '../../question-models';
 import { InputText } from 'primereact/inputtext';
 import { InputTextarea } from 'primereact/inputtextarea';
 import { MultiSelect } from 'primereact/multiselect';
@@ -13,6 +13,10 @@ import Ide from '../../components/ide';
 import { ButtonGroup } from 'primereact/buttongroup';
 import { Button } from 'primereact/button';
 import { Checkbox } from 'primereact/checkbox';
+import { QuestionImageDisplay } from '../../question-display';
+import { fetchImages } from '../../quiz-utilities';
+import { JwtContext } from '@/app/lib/jwt-provider';
+import QuestionImageUploader from './question-image-editor';
 
 // Error boundary for catching LaTeX rendering errors
 class MathErrorBoundary extends React.Component<any, { hasError: boolean, errorMsg: string }> {
@@ -119,6 +123,9 @@ function GenericQuestionEditor(props: QuestionEditorProps) {
                     </MathErrorBoundary>
                 </div>
             )}
+            <LabelledField label="Images" id="images">
+                <QuestionImageUploader images={questionData.images} setImages={(images) => setQuestionData({ ...questionData, images })} courseSlug={questionData.courseSlug} quizSlug={questionData.quizSlug} />
+            </LabelledField>
             <LabelledField label="Total Marks" id="marks">
                 <InputNumber 
                     id="marks" 
@@ -195,6 +202,7 @@ function CodeQuestionEditor(props: QuestionEditorProps) {
                     value={questionData.starterCode} 
                     onChange={(newValue) => setQuestionData({ ...questionData, starterCode: newValue })} 
                     language={questionData.programmingLanguage}
+                    isMutable={true}
                 />
             </LabelledField>
             <LabelledField label="Programming Language" id="language">
@@ -288,3 +296,4 @@ function MultiSelectQuestionEditor(props: QuestionEditorProps) {
         </div>
     );
 }
+

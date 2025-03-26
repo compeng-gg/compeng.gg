@@ -9,8 +9,9 @@ export function fetchApiSingle(endpoint: string, method: string, data: object, t
 
 export function fetchApiSingle(endpoint: string, method: string, dataOrToken?: object | string, maybeToken?: string): Promise<Response> {
     const url = apiUrl + endpoint;
+    const isFormData = dataOrToken instanceof FormData;
 
-    const headers: HeadersInit = {
+    const headers: HeadersInit = isFormData ? {} : {
         'Content-Type': 'application/json',
     };
     let data: object | undefined;
@@ -26,12 +27,11 @@ export function fetchApiSingle(endpoint: string, method: string, dataOrToken?: o
             headers['Authorization'] = `Bearer ${maybeToken}`;
         }
     }
-
     if (data) {
         return fetch(url, {
             method: method,
             headers,
-            body: JSON.stringify(data),
+            body: isFormData ? data as FormData : JSON.stringify(data),
         });
     } else {
         return fetch(url, {

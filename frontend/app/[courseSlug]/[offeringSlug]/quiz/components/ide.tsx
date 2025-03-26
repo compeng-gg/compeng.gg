@@ -31,7 +31,7 @@ export interface IdeProps {
     language: ProgrammingLanguages;
     value: string;
     isMutable: boolean;
-    state: CodeState;
+    state?: CodeState;
     onChange: (value: string) => void;
 }
 
@@ -52,6 +52,7 @@ export default function Ide(props: IdeProps) {
     
         setLoaded(true);
         
+
     }, []);
     
 
@@ -62,7 +63,7 @@ export default function Ide(props: IdeProps) {
                 theme="monokai"
                 name="my_ace_editor"
                 value={props.value}
-                onChange={props.isMutable ? props.state.setValue : () => {}} 
+                onChange={props.isMutable ? props.onChange : undefined} 
                 fontSize={14}
                 showPrintMargin={false}
                 showGutter={true}

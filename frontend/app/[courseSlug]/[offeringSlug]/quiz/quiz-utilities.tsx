@@ -1,4 +1,7 @@
-import { BaseQuestionData, ServerToLocal, QuestionType, CodeQuestionData, SelectQuestionData, TextQuestionData, StaffCodeQuestionData } from './question-models';
+import { fetchApi } from '@/app/lib/api';
+import { JwtContext } from '@/app/lib/jwt-provider';
+import { useContext } from 'react';
+import { BaseQuestionData, ServerToLocal, QuestionType, CodeQuestionData, SelectQuestionData, TextQuestionData, StaffCodeQuestionData, QuestionImage } from './question-models';
 
 
 export function getQuestionDataFromRaw(rawData: any, quizSlug: string, courseSlug: string, isStaff?: boolean): any {
@@ -10,7 +13,7 @@ export function getQuestionDataFromRaw(rawData: any, quizSlug: string, courseSlu
         serverQuestionType: rawData.question_type,
         questionType: ServerToLocal.get(rawData.question_type) as QuestionType ?? 'TEXT',
         isMutable: true,
-        images: rawData.images,
+        images: getImagesFromRaw(rawData.images, isStaff),
         totalMarks: rawData.points,
         renderPromptAsLatex: rawData.render_prompt_as_latex
     };
@@ -58,3 +61,63 @@ export function getQuestionDataFromRaw(rawData: any, quizSlug: string, courseSlu
         throw new Error(`Unsupported question type: ${JSON.stringify(rawData)}`);
     }
 }
+
+function getImagesFromRaw(rawImages: any[], isStaff?: boolean): QuestionImage[] {
+    return rawImages.map((image) => {
+        return {
+            id: image.id,
+            caption: image.caption,
+            status: isStaff ? 'UNMODIFIED' : 'IMMUTABLE'
+        };
+    })
+}
+
+export async function fetchImagesAsFiles(images: QuestionImage[], courseSlug: string, quizSlug: string, jwt: string, setAndStoreJwt: (jwt: string) => void) {
+
+    try {
+        const files = await Promise.all(
+            images.map(async (image, index) => {
+                const res = await fetchApi(
+                    jwt,
+                    setAndStoreJwt,
+                    `quizzes/${courseSlug}/${quizSlug}/image/${image.id}`,
+                    'GET',
+                );
+                const blob = await res.blob();
+                return new File([blob], image.caption ?? `image-${index + 1}.png`, {
+                type: blob.type || 'image/png',
+                });
+            })
+        );
+
+        return files;
+    } catch (error) {
+        console.error('Error fetching images:', error);
+    }
+}
+
+export async function fetchImages(images: QuestionImage[], courseSlug: string, quizSlug: string, jwt: string, setAndStoreJwt: (jwt: string) => void, returnAsFile?: boolean) {
+
+        try {
+            const srcs = await Promise.all(
+                images.map(async (image, index) => {
+                    const res = await fetchApi(
+                        jwt,
+                        setAndStoreJwt,
+                        `quizzes/${courseSlug}/${quizSlug}/image/${image.id}`,
+                        'GET',
+                    );
+                    const buffer = await res.arrayBuffer();
+                    const base64String = btoa(
+                        new Uint8Array(buffer).reduce((data, byte) => data + String.fromCharCode(byte), '')
+                    );
+
+                    return `data:image/png;base64,${base64String}`;
+                })
+            );
+
+            return srcs;
+        } catch (error) {
+            console.error('Error fetching images:', error);
+        }
+    }
