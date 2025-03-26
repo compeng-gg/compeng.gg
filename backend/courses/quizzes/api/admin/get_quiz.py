@@ -44,7 +44,7 @@ def get_quiz(request, course_slug: str, quiz_slug: str):
             images = question.images.all()
             data.pop("images")
             data.pop("quiz")
-            data["images"] = [{"id": image.id, "caption": image.caption} for image in images]
+            data["images"] = [{"id": image.id, "caption": image.caption, "order": image.order} for image in images]
 
 
             questions.append(data)

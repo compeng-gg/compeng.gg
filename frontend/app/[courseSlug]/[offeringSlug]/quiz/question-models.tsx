@@ -27,6 +27,7 @@ export interface QuestionImage {
     id: string;
     caption: string;
     status: QuestionImageStatus; 
+    order: number;
     file?: File;
 }
 

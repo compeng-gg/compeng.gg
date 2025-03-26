@@ -22,7 +22,7 @@ class BaseQuestionSerializer(serializers.ModelSerializer):
         res = []
         print("images")
         for image in question.images.all().order_by("order"):
-            res.append({"caption": image.caption, "id": image.id})
+            res.append({"caption": image.caption, "id": image.id, "order": image.order})
         print(res)
         return res
 

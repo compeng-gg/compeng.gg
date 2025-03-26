@@ -13,7 +13,7 @@ export function getQuestionDataFromRaw(rawData: any, quizSlug: string, courseSlu
         serverQuestionType: rawData.question_type,
         questionType: ServerToLocal.get(rawData.question_type) as QuestionType ?? 'TEXT',
         isMutable: true,
-        images: getImagesFromRaw(rawData.images, isStaff),
+        images: getImagesFromRaw(rawData.images, isStaff).sort((a, b) => a.order - b.order),
         totalMarks: rawData.points,
         renderPromptAsLatex: rawData.render_prompt_as_latex
     };
@@ -67,7 +67,8 @@ function getImagesFromRaw(rawImages: any[], isStaff?: boolean): QuestionImage[] 
         return {
             id: image.id,
             caption: image.caption,
-            status: isStaff ? 'UNMODIFIED' : 'IMMUTABLE'
+            status: isStaff ? 'UNMODIFIED' : 'IMMUTABLE',
+            order: image.order
         };
     })
 }
