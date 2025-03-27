@@ -42,7 +42,7 @@ export default function Navbar() {
     }, [jwt, setAndStoreJwt]);
 
     //const router = useRouter();
-    const startingIcon = (<Image src='/favicon.ico' width='25px' />);
+    const startingIcon = (<Image src='/favicon.ico' width='25px' alt="favicon" />);
     const menuItems : MenuItem[] = [
         { //home menu button
             label: 'Home',
