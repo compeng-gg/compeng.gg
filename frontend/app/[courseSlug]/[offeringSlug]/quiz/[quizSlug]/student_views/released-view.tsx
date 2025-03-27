@@ -3,7 +3,7 @@
 import { useEffect, useState, useContext } from 'react';
 import { fetchApi } from '@/app/lib/api';
 import { JwtContext } from '@/app/lib/jwt-provider';
-import Navbar from '@/app/components/navbar';
+import Navbar from '@/app/ui/navbar';
 import { Badge } from 'primereact/badge';
 import CodeEditor from '../../components/code-editor';
 import TextEditor from '../../components/text-editor';

@@ -10,7 +10,7 @@ import LoginRequired from '@/app/lib/login-required';
 import H1 from '@/app/ui/h1';
 import H2 from '@/app/ui/h2';
 import Main from '@/app/ui/main';
-import Navbar from '@/app/components/navbar';
+import Navbar from '@/app/ui/navbar';
 import Table from '@/app/ui/table';
 
 const taskFields: [string, string][] = [

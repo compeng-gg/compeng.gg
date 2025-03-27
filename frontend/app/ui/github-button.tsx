@@ -6,7 +6,7 @@ import { JwtContext } from '@/app/lib/jwt-provider';
 import { usePathname } from 'next/navigation';
 
 import { Button } from 'primereact/button';
-import PrimeWrapper from '../components/primeWrapper';
+import PrimeWrapper from './primeWrapper';
 
 function generateState() {
     return Math.random().toString(36).substring(6);

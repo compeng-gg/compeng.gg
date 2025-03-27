@@ -1,7 +1,7 @@
 import { TabMenu } from 'primereact/tabmenu';
 import { Lab } from '../[courseSlug]/[offeringSlug]/page';
 import { useState } from 'react';
-import PrimeWrapper from '../components/primeWrapper';
+import PrimeWrapper from '../ui/primeWrapper';
 import 'primeicons/primeicons.css';
 import { Button } from 'primereact/button';
 import StudentTeamViewTab from '../studentView/components/student-team-view-tab';

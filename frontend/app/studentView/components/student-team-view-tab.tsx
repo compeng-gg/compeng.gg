@@ -2,7 +2,7 @@ import React, { ReactNode, useContext, useEffect, useState } from 'react';
 import { DataView, DataViewLayoutOptions } from 'primereact/dataview';
 import { Card } from 'primereact/card';
 import { Button } from 'primereact/button';
-import PrimeWrapper from '@/app/components/primeWrapper';
+import PrimeWrapper from '@/app/ui/primeWrapper';
 import { DataTable, DataTableFilterMeta } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Tag } from 'primereact/tag';

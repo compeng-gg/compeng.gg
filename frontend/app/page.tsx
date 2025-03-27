@@ -18,14 +18,14 @@ import GitHubButton from '@/app/ui/github-button';
 import H1 from '@/app/ui/h1';
 import H2 from '@/app/ui/h2';
 import Main from '@/app/ui/main';
-import Navbar from '@/app/components/navbar';
+import Navbar from '@/app/ui/navbar';
 import { Badge } from 'primereact/badge';
 import { Button } from 'primereact/button';
 import { Message, MessageProps } from 'primereact/message';
 import { Messages } from 'primereact/messages';
 import { useMountEffect } from 'primereact/hooks';
 import { log } from 'console';
-import PrimeWrapper from './components/primeWrapper';
+import PrimeWrapper from './ui/primeWrapper';
 import { routeModule } from 'next/dist/build/templates/app-page';
 
 export function getBadgeForRole(role: string, size?: 'xlarge' | 'large'){

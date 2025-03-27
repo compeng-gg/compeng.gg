@@ -1,6 +1,6 @@
 'use client';
 
-import Navbar from '@/app/components/navbar';
+import Navbar from '@/app/ui/navbar';
 import LoginRequired from '@/app/lib/login-required';
 import { useContext, useEffect, useState } from 'react';
 import { JwtContext } from '@/app/lib/jwt-provider';

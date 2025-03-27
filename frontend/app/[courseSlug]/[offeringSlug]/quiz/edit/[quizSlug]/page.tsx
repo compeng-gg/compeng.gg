@@ -7,7 +7,7 @@ import { JwtContext } from '@/app/lib/jwt-provider';
 import { fetchApi } from '@/app/lib/api';
 import { getQuestionDataFromRaw } from '../../quiz-utilities';
 import { id, se } from 'date-fns/locale';
-import Navbar from '@/app/components/navbar';
+import Navbar from '@/app/ui/navbar';
 import LoginRequired from '@/app/lib/login-required';
 import QuestionEditor from '../components/question-editor';
 import { QuizSettingsEditor } from '../components/quiz-settings-editor';

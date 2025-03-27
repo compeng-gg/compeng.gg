@@ -3,7 +3,7 @@
 import { useContext, useEffect, useState } from 'react';
 import { JwtContext } from '@/app/lib/jwt-provider';
 import { fetchApi } from '@/app/lib/api';
-import Navbar from '@/app/components/navbar';
+import Navbar from '@/app/ui/navbar';
 import LoginRequired from '@/app/lib/login-required';
 import { useParams } from 'next/navigation';
 import QuizWritingPage from './student_views/writing-view';
