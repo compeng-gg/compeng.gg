@@ -400,7 +400,8 @@ def course(request, slug):
 
     data = {
         'name': str(offering),
-        'role': str(enrollment.role)
+        'role': str(enrollment.role),
+        "is_staff": is_staff(user, offering),
     }
     assignments = []
     for assignment in offering.assignment_set.all():

@@ -64,6 +64,13 @@ urlpatterns = [
     path('offering/role/<slug:slug>/', teams_api.get_user_role),
     path('offering/students/<slug:slug>/', teams_api.get_enrolled_students),
     
+    path('courses/<slug:course_slug>/staff/', views.staff),
+    path('courses/<slug:course_slug>/staff/<slug:assignment_slug>/', views.staff_assignment),
+    path('courses/<slug:course_slug>/staff/<slug:assignment_slug>/accommodation/', views.staff_assignment_accommodation),
+    path('courses/<slug:course_slug>/staff/<slug:assignment_slug>/private-release/', views.staff_assignment_private_release),
+    path('courses/<slug:course_slug>/staff/<slug:assignment_slug>/<str:student_username>/', views.staff_assignment_student),
+    path('courses/<slug:slug>/students/', views.students),
+    path('courses/<slug:slug>/students/commits/', views.students_commits),
 
     path('quizzes/list/all/', quizzes_api.list_all),
     path('quizzes/list/<slug:course_slug>/', quizzes_api.list_for_course),
