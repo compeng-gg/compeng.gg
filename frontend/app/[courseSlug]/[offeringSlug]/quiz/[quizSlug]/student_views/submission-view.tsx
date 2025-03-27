@@ -90,29 +90,29 @@ export default function ViewOnlyQuizSubmission() {
                         >
                             <strong>Student Answer:</strong>
                             <div style={{ marginTop: '10px' }}>
-                                    {question.question_type === 'CHECKBOX' ? (
-                                        <CheckboxEditor
-                                            props={{
-                                                state: {
-                                                    value: matchingAnswer?.selected_answer_indices || [],
-                                                    setValue: () => {},
-                                                },
-                                                options: question.options || [],
-                                            }}
-                                            save={() => {}}
-                                        />
-                                    ) : question.question_type === 'MULTIPLE_CHOICE' ? (
-                                        <SelectEditor
-                                            props={{
-                                                state: {
-                                                    value: matchingAnswer?.selected_answer_index ?? -1,
-                                                    setValue: () => {},
-                                                },
-                                                options: question.options || [],
-                                            }}
-                                            save={() => {}}
-                                        />
-                                    ) : question.question_type === 'CODING' ? (
+                                {question.question_type === 'CHECKBOX' ? (
+                                    <CheckboxEditor
+                                        props={{
+                                            state: {
+                                                value: matchingAnswer?.selected_answer_indices || [],
+                                                setValue: () => {},
+                                            },
+                                            options: question.options || [],
+                                        }}
+                                        save={() => {}}
+                                    />
+                                ) : question.question_type === 'MULTIPLE_CHOICE' ? (
+                                    <SelectEditor
+                                        props={{
+                                            state: {
+                                                value: matchingAnswer?.selected_answer_index ?? -1,
+                                                setValue: () => {},
+                                            },
+                                            options: question.options || [],
+                                        }}
+                                        save={() => {}}
+                                    />
+                                ) : question.question_type === 'CODING' ? (
                                     <CodeEditor
                                         props={{
                                             id: `code-question-${idx}`,

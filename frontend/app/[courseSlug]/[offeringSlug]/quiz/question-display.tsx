@@ -9,7 +9,7 @@ import { useContext, useEffect, useRef, useState } from 'react';
 import { JwtContext } from '@/app/lib/jwt-provider';
 import { fetchApi } from '@/app/lib/api';
 import { QuizProps } from './quiz-display';
-import { InlineMath } from "react-katex";
+import { InlineMath } from 'react-katex';
 import MultiSelectEditor from './components/multiselect-editor';
 import { Image } from 'primereact/image';
 import 'katex/dist/katex.min.css';
@@ -182,7 +182,7 @@ export function QuestionImageDisplay({ images, props}: { images: QuestionImage[]
         }
         if(images.length)
 
-        setImageSources();
+            setImageSources();
     }, [images, jwt, setAndStoreJwt]);
 
     if (images.length === 0) return null;

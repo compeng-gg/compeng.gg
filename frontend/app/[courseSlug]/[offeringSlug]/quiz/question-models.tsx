@@ -20,7 +20,7 @@ export const ID_SET_ON_SERVER = 'set_on_server';
 export type QuestionType = 'CODE' | 'SELECT' | 'TEXT' | 'MULTI_SELECT';
 export type ServerQuestionType = 'CODING' | 'MULTIPLE_CHOICE' | 'WRITTEN_RESPONSE' | 'CHECKBOX';
 
-export type QuestionImageStatus = "IMMUTABLE" | "NEW" | "DELETED" | "MODIFIED" | "UNMODIFIED" | "FRESH_LOAD";
+export type QuestionImageStatus = 'IMMUTABLE' | 'NEW' | 'DELETED' | 'MODIFIED' | 'UNMODIFIED' | 'FRESH_LOAD';
 
 
 export interface QuestionImage {

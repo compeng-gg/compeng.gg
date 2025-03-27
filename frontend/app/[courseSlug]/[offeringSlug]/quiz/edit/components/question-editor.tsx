@@ -88,18 +88,18 @@ function GenericQuestionEditor(props: QuestionEditorProps) {
         tempData.id = ID_SET_ON_SERVER;
         tempData.serverQuestionType = LocalToServer.get(newType.toString()) as ServerQuestionType;
         switch (newType) {
-            case 'CODE':
-                setQuestionData({ ...tempData, programmingLanguage: 'C', starterCode: '', gradingDirectory: '', filesToPull: [], fileToReplace: '' } as StaffCodeQuestionData);
-                break;
-            case 'TEXT':
-                setQuestionData({ ...tempData } as StaffQuestionData);
-                break;
-            case 'SELECT':
-                setQuestionData({ ...tempData, options: [], correctAnswerIdx: -1 } as StaffSelectQuestionData);
-                break;
-            case 'MULTI_SELECT':
-                setQuestionData({ ...tempData, options: [], correctAnswerIdxs: [] } as StaffMultiSelectQuestionData);
-                break;
+        case 'CODE':
+            setQuestionData({ ...tempData, programmingLanguage: 'C', starterCode: '', gradingDirectory: '', filesToPull: [], fileToReplace: '' } as StaffCodeQuestionData);
+            break;
+        case 'TEXT':
+            setQuestionData({ ...tempData } as StaffQuestionData);
+            break;
+        case 'SELECT':
+            setQuestionData({ ...tempData, options: [], correctAnswerIdx: -1 } as StaffSelectQuestionData);
+            break;
+        case 'MULTI_SELECT':
+            setQuestionData({ ...tempData, options: [], correctAnswerIdxs: [] } as StaffMultiSelectQuestionData);
+            break;
         }
     };
 
@@ -180,16 +180,16 @@ export function LabelledField({ label, id, children }: { label: string, id: stri
 
 function QuestionSpecificEditor(props: QuestionEditorProps) {
     switch (props.questionData.questionType) {
-        case 'CODE':
-            return <CodeQuestionEditor {...props} />;
-        case 'TEXT':
-            return null;
-        case 'SELECT':
-            return <SelectQuestionEditor {...props} />;
-        case 'MULTI_SELECT':
-            return <MultiSelectQuestionEditor {...props} />;
-        default:
-            return null;
+    case 'CODE':
+        return <CodeQuestionEditor {...props} />;
+    case 'TEXT':
+        return null;
+    case 'SELECT':
+        return <SelectQuestionEditor {...props} />;
+    case 'MULTI_SELECT':
+        return <MultiSelectQuestionEditor {...props} />;
+    default:
+        return null;
     }
 }
 

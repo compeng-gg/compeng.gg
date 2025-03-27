@@ -77,7 +77,7 @@ export default function StudentQuizViewTab(props: StudentQuizViewProps){
             <div>
                 <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '8px' }}>Ongoing Quizzes</h2>
                 {quizzes.filter(q => now >= q.startTime && now <= q.endTime).map((quiz) => (
-                    <QuizDisplay {...quiz} key={quiz.quizSlug + "-ongoing"} />
+                    <QuizDisplay {...quiz} key={quiz.quizSlug + '-ongoing'} />
                 ))}
             </div>
     
@@ -85,7 +85,7 @@ export default function StudentQuizViewTab(props: StudentQuizViewProps){
             <div>
                 <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '8px' }}>Finished Quizzes</h2>
                 {quizzes.filter(q => now > q.endTime).map((quiz) => (
-                    <QuizDisplay {...quiz} key={quiz.quizSlug + "-finished"} />
+                    <QuizDisplay {...quiz} key={quiz.quizSlug + '-finished'} />
                 ))}
             </div>
     
@@ -93,7 +93,7 @@ export default function StudentQuizViewTab(props: StudentQuizViewProps){
             <div>
                 <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '8px' }}>Upcoming Quizzes</h2>
                 {quizzes.filter(q => now < q.startTime).map((quiz) => (
-                    <QuizDisplay {...quiz} key={quiz.quizSlug + "-upcoming"} />
+                    <QuizDisplay {...quiz} key={quiz.quizSlug + '-upcoming'} />
                 ))}
             </div>
         </div>

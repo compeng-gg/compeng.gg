@@ -81,42 +81,42 @@ export default function WritingQuizView({ courseSlug, quizSlug }: { courseSlug: 
 
     return (
         <>
-    <QuizWritingHeader quiz={quiz} submitDialog={() =>
-        confirmDialog({
-            message: 'Are you sure you want to submit your answers?',
-            header: 'Confirmation',
-            icon: 'pi pi-exclamation-triangle',
-            accept: submitQuiz,
-            reject: () => {}
-        })
-    } />
-    <ConfirmDialog />
-    <div style={{ display: 'flex', gap: '10px', width: '100%', flexDirection: 'column' }}>
-        {questionStates.map((state, idx) => (
-            <QuestionDisplay
-                key={questionData[idx].id || idx}
-                {...questionData[idx]}
-                state={state}
-                idx={idx}
-            />
-        ))}
-    </div>
-    </>
+            <QuizWritingHeader quiz={quiz} submitDialog={() =>
+                confirmDialog({
+                    message: 'Are you sure you want to submit your answers?',
+                    header: 'Confirmation',
+                    icon: 'pi pi-exclamation-triangle',
+                    accept: submitQuiz,
+                    reject: () => {}
+                })
+            } />
+            <ConfirmDialog />
+            <div style={{ display: 'flex', gap: '10px', width: '100%', flexDirection: 'column' }}>
+                {questionStates.map((state, idx) => (
+                    <QuestionDisplay
+                        key={questionData[idx].id || idx}
+                        {...questionData[idx]}
+                        state={state}
+                        idx={idx}
+                    />
+                ))}
+            </div>
+        </>
     );
 }
 
 function getStartingStateValue(questionData: QuestionData, rawData: any): any {
     switch (questionData.questionType) {
-        case 'CODE':
-            return rawData.solution ?? (questionData as CodeQuestionData).starterCode ?? '';
-        case 'SELECT':
-            return rawData.selected_answer_index ?? -1;
-        case 'TEXT':
-            return rawData.response ?? '';
-        case 'MULTI_SELECT':
-            return rawData.selected_answer_indices ?? [];
-        default:
-            throw new Error(`Unsupported question type: ${JSON.stringify(questionData)}`);
+    case 'CODE':
+        return rawData.solution ?? (questionData as CodeQuestionData).starterCode ?? '';
+    case 'SELECT':
+        return rawData.selected_answer_index ?? -1;
+    case 'TEXT':
+        return rawData.response ?? '';
+    case 'MULTI_SELECT':
+        return rawData.selected_answer_indices ?? [];
+    default:
+        throw new Error(`Unsupported question type: ${JSON.stringify(questionData)}`);
     }
 }
 

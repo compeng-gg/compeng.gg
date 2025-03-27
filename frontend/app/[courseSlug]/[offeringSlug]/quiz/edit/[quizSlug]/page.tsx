@@ -239,7 +239,7 @@ function QuizEditorTopbar(props: QuizEditorTopbarProps) {
     }
 
     async function saveQuestionImages(questionData: StaffQuestionData, idx: number) {
-        console.log("Saving question images:");
+        console.log('Saving question images:');
         console.log(JSON.stringify(questionData.images, null, 2));
         try {
             questionData.images.map(async (image, imageIdx) => {
@@ -260,12 +260,12 @@ function QuizEditorTopbar(props: QuizEditorTopbarProps) {
                     res = await fetchApi(jwt, setAndStoreJwt, `quizzes/admin/${quiz.courseSlug}/${quiz.quizSlug}/images/edit/${image.id}/`, 'POST', {
                         caption: image.caption,
                         order: imageIdx
-                });
+                    });
                 }
                 if(!res?.ok){
                     throw new Error('Failed to save question images');
                 }
-            })
+            });
         } catch(e) {
             setError(true);
             console.error('Failed to save question images', JSON.stringify(questionData, null, 2), e);
@@ -387,9 +387,9 @@ function createImageBody(image: QuestionImage, questionData : StaffQuestionData,
     body.append('caption', image.caption);
     body.append('order', idx.toString());
     body.append('image', image.file);
-    console.log("FLAG" + JSON.stringify(body, null, 2));
+    console.log('FLAG' + JSON.stringify(body, null, 2));
     for (let pair of body.entries()) {
         console.log(`${pair[0]}:`, pair[1]);
-      }
+    }
     return body;
 }

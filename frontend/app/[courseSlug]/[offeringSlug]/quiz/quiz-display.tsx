@@ -27,7 +27,7 @@ function QuizDisplayBadges(props: QuizProps) {
     const gradeString = showGrade
         ? (grade !== undefined && totalPoints !== undefined
             ? `Grade: ${grade}/${totalPoints}`
-            : `Grade: Ungraded/${totalPoints ?? "?"}`)
+            : `Grade: Ungraded/${totalPoints ?? '?'}`)
         : null;
 
     return (

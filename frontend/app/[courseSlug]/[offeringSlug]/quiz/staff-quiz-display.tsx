@@ -130,7 +130,7 @@ async function ReleaseQuizNow(quizProps: StaffQuizProps) {
             'POST'
         );
         if (!res.ok) throw new Error('Failed to Release Quiz');
-        console.log("Quiz released successfully!");
+        console.log('Quiz released successfully!');
     } catch (error) {
         console.error('Failed to Release Quiz', error);
     }
@@ -145,7 +145,7 @@ function ReleaseNowButton({ quizProps }: { quizProps: StaffQuizProps }) {
             setReleaseConfirmed(true);
             setTimeout(() => setReleaseConfirmed(false), 3000); // Auto-close after 3 seconds
         } catch (error) {
-            console.error("Failed to release quiz", error);
+            console.error('Failed to release quiz', error);
         }
     }
 
@@ -165,29 +165,29 @@ function ReleaseNowButton({ quizProps }: { quizProps: StaffQuizProps }) {
             {releaseConfirmed && (
                 <div
                     style={{
-                        position: "fixed",
-                        bottom: "70px",
-                        right: "100px",
-                        backgroundColor: "#28a745",
-                        color: "#fff",
-                        padding: "10px 15px",
-                        borderRadius: "5px",
-                        fontSize: "14px",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "10px",
-                        boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
+                        position: 'fixed',
+                        bottom: '70px',
+                        right: '100px',
+                        backgroundColor: '#28a745',
+                        color: '#fff',
+                        padding: '10px 15px',
+                        borderRadius: '5px',
+                        fontSize: '14px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px',
+                        boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
                     }}
                 >
                     Quiz scores are now released!
                     <button
                         onClick={() => setReleaseConfirmed(false)}
                         style={{
-                            background: "none",
-                            border: "none",
-                            color: "#fff",
-                            fontSize: "14px",
-                            cursor: "pointer",
+                            background: 'none',
+                            border: 'none',
+                            color: '#fff',
+                            fontSize: '14px',
+                            cursor: 'pointer',
                         }}
                     >
                         ✖

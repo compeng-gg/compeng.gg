@@ -9,8 +9,8 @@ import { Tag } from 'primereact/tag';
 import { ID_SET_ON_SERVER, QuestionImage } from '../../question-models';
 import { fetchImages, fetchImagesAsFiles } from '../../quiz-utilities';
 import { JwtContext } from '@/app/lib/jwt-provider';
-import { FileUpload as FileUploadRefType } from "primereact/fileupload";
-import { Image } from "primereact/image";
+import { FileUpload as FileUploadRefType } from 'primereact/fileupload';
+import { Image } from 'primereact/image';
 import { de, id } from 'date-fns/locale';
 import { TextInput } from 'primereact/textinput';
 import { InputText } from 'primereact/inputtext';
@@ -30,15 +30,15 @@ export default function QuestionImageUploader(props: QuestionImageUploaderProps)
     const [jwt, setAndStoreJwt] = useContext(JwtContext);
     const { images, courseSlug, quizSlug, setImages } = props;
 
-    const [loaded, setLoaded]   = useState<boolean>(false);
+    const [loaded, setLoaded] = useState<boolean>(false);
 
     //Load files from server that already exist -> do this on reload
     useEffect(() => {
         const setFiles = async () => {
             setAllFiles(await fetchImagesAsFiles(images, courseSlug, quizSlug, jwt, setAndStoreJwt) ?? []);
             setLoaded(true);
-        }
-        if(!loaded) setFiles()
+        };
+        if(!loaded) setFiles();
     }, [loaded, images]);
     
 
@@ -55,7 +55,7 @@ export default function QuestionImageUploader(props: QuestionImageUploaderProps)
         if(newImages[index].status == 'UNMODIFIED') newImages[index].status = 'MODIFIED';
         setImages(newImages);
         console.log(JSON.stringify(images, null, 2));
-    }
+    };
 
     const moveImage = (index: number, offset: number) => {
         const newImages = [...images];
@@ -70,7 +70,7 @@ export default function QuestionImageUploader(props: QuestionImageUploaderProps)
         newRender[index] = allFiles[index + offset];
         newRender[index + offset] = allFiles[index];
         setAllFiles(allFiles);
-    }
+    };
 
     const deleteImage = (index: number) => {
         const newImages = [...images];
@@ -84,7 +84,7 @@ export default function QuestionImageUploader(props: QuestionImageUploaderProps)
         }
         setImages(newImages);
         setAllFiles(newRender);
-    }
+    };
 
 
 
@@ -104,13 +104,13 @@ export default function QuestionImageUploader(props: QuestionImageUploaderProps)
                                 width="150"
                                 preview
                             />
-                            <InputText value={images[idx].caption} onChange={(e) => setCaption(idx, e.target.value)} style={{width: "100%", height: "min-content"}}/>
+                            <InputText value={images[idx].caption} onChange={(e) => setCaption(idx, e.target.value)} style={{width: '100%', height: 'min-content'}}/>
                             <div style={{ display: 'flex', gap: '8px', width: '30%' }}>
-                            <ButtonGroup>
-                                <Button size="small" icon="pi pi-arrow-up" severity="secondary" tooltip="Move Up" disabled={idx === 0} onClick={() => moveImage(idx, -1)}/>
-                                <Button size="small" icon="pi pi-arrow-down" severity="secondary" tooltip="Move Down" disabled={idx === images.length - 1} onClick={() => moveImage(idx,  1)}/>
-                            </ButtonGroup>
-                            <Button size="small" icon="pi pi-trash" severity="danger" onClick={() => deleteImage(idx)}/>
+                                <ButtonGroup>
+                                    <Button size="small" icon="pi pi-arrow-up" severity="secondary" tooltip="Move Up" disabled={idx === 0} onClick={() => moveImage(idx, -1)}/>
+                                    <Button size="small" icon="pi pi-arrow-down" severity="secondary" tooltip="Move Down" disabled={idx === images.length - 1} onClick={() => moveImage(idx, 1)}/>
+                                </ButtonGroup>
+                                <Button size="small" icon="pi pi-trash" severity="danger" onClick={() => deleteImage(idx)}/>
                             </div>
                         </div>
                     );

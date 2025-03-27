@@ -70,7 +70,7 @@ function getImagesFromRaw(rawImages: any[], isStaff?: boolean): QuestionImage[] 
             status: isStaff ? 'UNMODIFIED' : 'IMMUTABLE',
             order: image.order
         };
-    })
+    });
 }
 
 export async function fetchImagesAsFiles(images: QuestionImage[], courseSlug: string, quizSlug: string, jwt: string, setAndStoreJwt: (jwt: string) => void) {
@@ -86,7 +86,7 @@ export async function fetchImagesAsFiles(images: QuestionImage[], courseSlug: st
                 );
                 const blob = await res.blob();
                 return new File([blob], image.caption ?? `image-${index + 1}.png`, {
-                type: blob.type || 'image/png',
+                    type: blob.type || 'image/png',
                 });
             })
         );
@@ -99,26 +99,26 @@ export async function fetchImagesAsFiles(images: QuestionImage[], courseSlug: st
 
 export async function fetchImages(images: QuestionImage[], courseSlug: string, quizSlug: string, jwt: string, setAndStoreJwt: (jwt: string) => void, returnAsFile?: boolean) {
 
-        try {
-            const srcs = await Promise.all(
-                images.map(async (image, index) => {
-                    const res = await fetchApi(
-                        jwt,
-                        setAndStoreJwt,
-                        `quizzes/${courseSlug}/${quizSlug}/image/${image.id}`,
-                        'GET',
-                    );
-                    const buffer = await res.arrayBuffer();
-                    const base64String = btoa(
-                        new Uint8Array(buffer).reduce((data, byte) => data + String.fromCharCode(byte), '')
-                    );
+    try {
+        const srcs = await Promise.all(
+            images.map(async (image, index) => {
+                const res = await fetchApi(
+                    jwt,
+                    setAndStoreJwt,
+                    `quizzes/${courseSlug}/${quizSlug}/image/${image.id}`,
+                    'GET',
+                );
+                const buffer = await res.arrayBuffer();
+                const base64String = btoa(
+                    new Uint8Array(buffer).reduce((data, byte) => data + String.fromCharCode(byte), '')
+                );
 
-                    return `data:image/png;base64,${base64String}`;
-                })
-            );
+                return `data:image/png;base64,${base64String}`;
+            })
+        );
 
-            return srcs;
-        } catch (error) {
-            console.error('Error fetching images:', error);
-        }
+        return srcs;
+    } catch (error) {
+        console.error('Error fetching images:', error);
     }
+}
