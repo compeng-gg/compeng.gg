@@ -3,12 +3,9 @@ from rest_framework import status
 from courses.quizzes.api.admin.schema import CodingQuestionRequestSerializer
 from rest_framework.response import Response
 import courses.models as db
-from courses.quizzes.api.admin.utils import (
-    validate_user_is_ta_or_instructor_in_course,
-    CustomException,
-)
 from courses.quizzes.api.admin.question.total_points import update_quiz_total_points
 from courses.quizzes.api.admin.permissions import IsAuthenticatedCourseInstructorOrTA
+
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticatedCourseInstructorOrTA])

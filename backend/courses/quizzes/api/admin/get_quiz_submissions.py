@@ -149,10 +149,8 @@ def get_student_quiz_submission_staff(
         "total_points": quiz.total_points,
         "answers": answer_data,
     }
-    
-    print(
-        "Submission Data:", submission
-    )
+
+    print("Submission Data:", submission)
 
     return Response(data=submission_data, status=status.HTTP_200_OK)
 
@@ -160,7 +158,9 @@ def get_student_quiz_submission_staff(
 @api_view(["GET"])
 @permission_classes([permissions.IsAuthenticated])
 def get_student_quiz_submission(
-    request, course_slug: str, quiz_slug: str, 
+    request,
+    course_slug: str,
+    quiz_slug: str,
 ):
     try:
         quiz = db.Quiz.objects.get(slug=quiz_slug, offering__course__slug=course_slug)
@@ -245,9 +245,7 @@ def get_student_quiz_submission(
         "total_points": quiz.total_points,
         "answers": answer_data,
     }
-    
-    print(
-        "Submission Data:", submission_data
-    )
+
+    print("Submission Data:", submission_data)
 
     return Response(data=submission_data, status=status.HTTP_200_OK)

@@ -34,9 +34,9 @@ def create_question_image(request, course_slug: str, quiz_slug: str):
         image=image,
         order=order,
         caption=caption,
-        quiz=question.quiz  # you might want to associate this image with the question
+        quiz=question.quiz,  # you might want to associate this image with the question
     )
-    
+
     question.images.add(image)
 
     return Response(status=status.HTTP_201_CREATED)

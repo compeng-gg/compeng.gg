@@ -15,7 +15,9 @@ class StudentCanViewQuiz(IsAuthenticated):
         quiz_slug = view.kwargs.get("quiz_slug")
 
         try:
-            quiz = db.Quiz.objects.get(slug=quiz_slug, offering__course__slug=course_slug)
+            quiz = db.Quiz.objects.get(
+                slug=quiz_slug, offering__course__slug=course_slug
+            )
             request.quiz = quiz
         except db.Quiz.DoesNotExist:
             raise PermissionDenied("Quiz not found")
@@ -78,6 +80,7 @@ class StudentCanAnswerQuiz(StudentCanViewQuiz):
             raise PermissionDenied("Quiz has already been completed")
 
         return True
+
 
 class StudentCanViewQuizOrInstructor(StudentCanViewQuiz):
     def has_permission(self, request, view):

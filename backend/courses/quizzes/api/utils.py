@@ -41,6 +41,7 @@ def get_question_from_id_and_type(id: str, type: str):
         return db.WrittenResponseQuestion.objects.get(id=id)
     return None
 
+
 def get_quiz_questions(quiz):
     checkbox_questions = db.CheckboxQuestion.objects.filter(quiz=quiz).all()
     coding_questions = db.CodingQuestion.objects.filter(quiz=quiz).all()
@@ -73,11 +74,15 @@ def get_quiz_questions(quiz):
 
     return questions
 
-def get_question_images(question):
-    return db.QuestionImage.objects.filter(question_id=question.get("id"), question_type = question.get("question_type")).all()
 
-#returns image urls for questions
-#Returns a list of images for a quiz
+def get_question_images(question):
+    return db.QuestionImage.objects.filter(
+        question_id=question.get("id"), question_type=question.get("question_type")
+    ).all()
+
+
+# returns image urls for questions
+# Returns a list of images for a quiz
 def get_quiz_images_from_question_list(questions):
     images = []
     for question in questions:
@@ -87,4 +92,3 @@ def get_quiz_images_from_question_list(questions):
             ret_val.append(image.image.url)
         images.append(ret_val)
     return images
-    

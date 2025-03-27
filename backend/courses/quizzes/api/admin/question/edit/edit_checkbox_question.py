@@ -23,7 +23,7 @@ def edit_checkbox_question(
 
     serializer.save()
     update_quiz_total_points(course_slug, quiz_slug)
-    
+
     print(serializer.validated_data)
 
     return Response(status=status.HTTP_204_NO_CONTENT)

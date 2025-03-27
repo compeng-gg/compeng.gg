@@ -3,14 +3,12 @@ from rest_framework import permissions, status
 from rest_framework.response import Response
 import courses.models as db
 from django.forms.models import model_to_dict
-from courses.quizzes.api.admin.question.total_points import update_quiz_total_points
 from courses.quizzes.api.admin.permissions import IsAuthenticatedCourseInstructorOrTA
 
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticatedCourseInstructorOrTA])
 def get_quiz(request, course_slug: str, quiz_slug: str):
-    
     quiz = db.Quiz.objects.get(slug=quiz_slug, offering__course__slug=course_slug)
     quiz_data = model_to_dict(quiz)
 
@@ -18,7 +16,7 @@ def get_quiz(request, course_slug: str, quiz_slug: str):
     quiz_data["ends_at"] = int(quiz_data["ends_at"].timestamp())
     quiz_data["visible_at"] = int(quiz_data["visible_at"].timestamp())
     quiz_data["release_at"] = int(quiz_data["release_answers_at"].timestamp())
-    
+
     quiz_data["offering_title"] = f"{quiz.offering.course.title} - {quiz.offering.name}"
 
     quiz_data.pop("repository")
@@ -49,8 +47,10 @@ def get_quiz(request, course_slug: str, quiz_slug: str):
             images = question.images.all()
             data.pop("images")
             data.pop("quiz")
-            data["images"] = [{"id": image.id, "caption": image.caption, "order": image.order} for image in images]
-
+            data["images"] = [
+                {"id": image.id, "caption": image.caption, "order": image.order}
+                for image in images
+            ]
 
             questions.append(data)
 

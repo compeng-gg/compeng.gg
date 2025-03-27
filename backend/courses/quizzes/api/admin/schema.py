@@ -9,9 +9,7 @@ class CreateQuizRequestSerializer(serializers.Serializer):
     slug = serializers.SlugField(required=True)
 
     visible_at_timestamp = serializers.IntegerField(required=True)
-    releases_at_timestamp = serializers.IntegerField(
-        required=True
-    )
+    releases_at_timestamp = serializers.IntegerField(required=True)
     starts_at_timestamp = serializers.IntegerField(
         required=True
     )  # TODO: validate ends_at > starts_at

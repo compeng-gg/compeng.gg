@@ -3,12 +3,9 @@ from rest_framework import status
 from courses.quizzes.api.admin.schema import CheckboxQuestionRequestSerializer
 from rest_framework.response import Response
 import courses.models as db
-from courses.quizzes.api.admin.utils import (
-    validate_user_is_ta_or_instructor_in_course,
-    CustomException,
-)
 from courses.quizzes.api.admin.question.total_points import update_quiz_total_points
 from courses.quizzes.api.admin.permissions import IsAuthenticatedCourseInstructorOrTA
+
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticatedCourseInstructorOrTA])
@@ -34,7 +31,7 @@ def create_checkbox_question(request, course_slug: str, quiz_slug: str):
         correct_option_indices=correct_option_indices,
         quiz=request.quiz,
     )
-    
+
     update_quiz_total_points(course_slug, quiz_slug)
 
     return Response(

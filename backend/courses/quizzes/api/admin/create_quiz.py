@@ -89,4 +89,3 @@ def create_quiz(request, course_slug: str):
     )
 
     return Response(status=status.HTTP_200_OK, data={})
-

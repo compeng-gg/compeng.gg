@@ -5,6 +5,7 @@ from courses.quizzes.api.admin.schema import EditQuizSerializer
 from datetime import timezone
 from courses.quizzes.api.admin.permissions import IsAuthenticatedCourseInstructorOrTA
 
+
 @api_view(["POST"])
 @permission_classes([IsAuthenticatedCourseInstructorOrTA])
 def edit_quiz(request, course_slug: str, quiz_slug: str):
@@ -24,5 +25,3 @@ def release_quiz_now(request, course_slug: str, quiz_slug: str):
     quiz = db.Quiz.objects.get(slug=quiz_slug, offering__course__slug=course_slug)
     quiz.release_answers_at = timezone.now()
     return Response(status=status.HTTP_204_NO_CONTENT)
-
-    

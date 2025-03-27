@@ -1,14 +1,19 @@
 from datetime import datetime
 import courses.models as db
 from rest_framework.response import Response
-from rest_framework import permissions, status
+from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from django.db.models import Sum
 from courses.quizzes.api.admin.permissions import IsAuthenticatedCourseInstructorOrTA
 
+
 @api_view(["POST"])
 @permission_classes([IsAuthenticatedCourseInstructorOrTA])
-def compute_total_grade(request, quiz_slug, student_id,):
+def compute_total_grade(
+    request,
+    quiz_slug,
+    student_id,
+):
     """
     Compute the total grade for a student's quiz submission by summing up all question grades.
     """
@@ -17,8 +22,7 @@ def compute_total_grade(request, quiz_slug, student_id,):
             quiz__slug=quiz_slug, user_id=student_id
         )
     except db.QuizSubmission.DoesNotExist:
-        return 
-
+        return
 
     answer_models = [
         db.MultipleChoiceAnswer,
@@ -36,16 +40,17 @@ def compute_total_grade(request, quiz_slug, student_id,):
             or 0
         )
 
-
     submission.grade = total_grade
     submission.graded_by = request.user
     submission.graded_at = datetime.now()
     submission.save()
-    
-    return Response({"message": "Total grade computed successfully"}, status=status.HTTP_200_OK)
+
+    return Response(
+        {"message": "Total grade computed successfully"}, status=status.HTTP_200_OK
+    )
 
 
-import json 
+import json
 
 
 @api_view(["POST"])
@@ -55,9 +60,7 @@ def update_submission_question(request, quiz_slug, student_id):
     Update the grade and comment for a specific question answer in a submission.
     """
 
-    print(
-        "Incoming Request Data:", json.dumps(request.data, indent=4)
-    ) 
+    print("Incoming Request Data:", json.dumps(request.data, indent=4))
 
     try:
         submission = db.QuizSubmission.objects.get(
@@ -69,7 +72,7 @@ def update_submission_question(request, quiz_slug, student_id):
         )
 
     data = request.data
-    question_id = data.get("question_id") 
+    question_id = data.get("question_id")
     grade = data.get("grade")
     comment = data.get("comment", "")
 
@@ -77,7 +80,6 @@ def update_submission_question(request, quiz_slug, student_id):
         return Response(
             {"error": "question_id is required"}, status=status.HTTP_400_BAD_REQUEST
         )
-
 
     answer_models = [
         db.MultipleChoiceAnswer,
@@ -92,13 +94,12 @@ def update_submission_question(request, quiz_slug, student_id):
             answer = model.objects.get(
                 question_id=question_id, quiz_submission=submission
             )
-            break 
+            break
         except model.DoesNotExist:
-            continue 
+            continue
 
     if answer is None:
         return Response({"error": "Answer not found"}, status=status.HTTP_404_NOT_FOUND)
-
 
     if grade is not None:
         try:
@@ -107,7 +108,6 @@ def update_submission_question(request, quiz_slug, student_id):
             return Response(
                 {"error": "Invalid grade format"}, status=status.HTTP_400_BAD_REQUEST
             )
-
 
     answer.grade = grade
     answer.comment = comment

@@ -6,6 +6,7 @@ import courses.models as db
 from courses.quizzes.api.admin.question.total_points import update_quiz_total_points
 from courses.quizzes.api.admin.permissions import IsAuthenticatedCourseInstructorOrTA
 
+
 @api_view(["POST"])
 @permission_classes([IsAuthenticatedCourseInstructorOrTA])
 def edit_coding_question(

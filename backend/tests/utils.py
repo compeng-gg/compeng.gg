@@ -110,7 +110,8 @@ def create_quiz(
     repository_name: Optional[str] = "repo_name",
     repository_full_name: Optional[str] = "user/repo_name",
     offering: Optional[db.Offering]=None,
-    quiz_slug: Optional[str]="quiz_slug"
+    quiz_slug: Optional[str]="quiz_slug",
+    release_answers_at: Optional[datetime] = timezone.now() + timedelta(days=1),
 ) -> db.Quiz:
     if offering is None:
         offering = create_offering(course_slug=course_slug)
@@ -134,6 +135,7 @@ def create_quiz(
         offering=offering,
         content_viewable_after_submission=content_viewable_after_submission,
         repository=repository,
+        release_answers_at=release_answers_at
     )
 
     return quiz

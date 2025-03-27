@@ -8,6 +8,7 @@ class CreateQuestionImageRequestSerializer(serializers.Serializer):
     caption = serializers.CharField(allow_blank=True)
     order = serializers.IntegerField(required=True)
     image = serializers.ImageField()
+
     def validate_image(self, value):
         max_size = 5 * 1024 * 1024  # 5MB limit
 
@@ -30,7 +31,6 @@ class DeleteQuestionImageRequestSerializer(serializers.Serializer):
 class UpdateQuestionImageRequestSerializer(serializers.ModelSerializer):
     caption = serializers.CharField()
     order = serializers.IntegerField(required=True)
-
 
     class Meta:
         model = db.QuizQuestionImage

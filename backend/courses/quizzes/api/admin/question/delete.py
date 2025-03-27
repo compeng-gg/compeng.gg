@@ -6,6 +6,7 @@ import courses.models as db
 from courses.quizzes.api.admin.question.total_points import update_quiz_total_points
 from courses.quizzes.api.admin.permissions import IsAuthenticatedCourseInstructorOrTA
 
+
 @api_view(["DELETE"])
 @permission_classes([IsAuthenticatedCourseInstructorOrTA])
 def delete_checkbox_question(
@@ -32,7 +33,6 @@ def delete_multiple_choice_question(
     multiple_choice_question.delete()
     update_quiz_total_points(course_slug, quiz_slug)
 
-
     return Response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -45,7 +45,6 @@ def delete_coding_question(
     coding_question = db.CodingQuestion.objects.get(id=coding_question_id)
     coding_question.delete()
     update_quiz_total_points(course_slug, quiz_slug)
-
 
     return Response(status=status.HTTP_204_NO_CONTENT)
 

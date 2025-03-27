@@ -49,6 +49,7 @@ class CreateQuizTests(TestCasesWithUserAuth):
         visible_at_timestamp = 1740248155
         starts_at_timestamp = 1740248155
         ends_at_timestamp = 1740248155
+        releases_at_timestamp = 1740248155
 
         request_data = {
             "title": quiz_title,
@@ -57,6 +58,7 @@ class CreateQuizTests(TestCasesWithUserAuth):
             "starts_at_timestamp": starts_at_timestamp,
             "ends_at_timestamp": ends_at_timestamp,
             "github_repository": github_repository,
+            "releases_at_timestamp": releases_at_timestamp,
         }
 
         response = self.client.post(
@@ -114,6 +116,7 @@ class CreateQuizTests(TestCasesWithUserAuth):
             "starts_at_timestamp": 1740248155,
             "ends_at_timestamp": 1740248155,
             "github_repository": mock_repository.full_name,
+            "releases_at_timestamp": 1740248155,
         }
 
         self.assertEqual(db.Repository.objects.count(), 1)
@@ -141,6 +144,7 @@ class CreateQuizTests(TestCasesWithUserAuth):
             "starts_at_timestamp": 1740248155,
             "ends_at_timestamp": 1740248155,
             "github_repository": mock_repository.full_name,
+            "releases_at_timestamp": 1740248155,
         }
 
         response = self.client.post(
@@ -177,6 +181,7 @@ class CreateQuizTests(TestCasesWithUserAuth):
             "starts_at_timestamp": 1740248155,
             "ends_at_timestamp": 1740248155,
             "github_repository": mock_repository.full_name,
+            "releases_at_timestamp": 1740248155,
         }
 
         response = self.client.post(
@@ -213,6 +218,7 @@ class CreateQuizTests(TestCasesWithUserAuth):
             "starts_at_timestamp": 1740248155,
             "ends_at_timestamp": 1740248155,
             "github_repository": mock_repository.full_name,
+            "releases_at_timestamp": 1740248155,
         }
 
         response = self.client.post(
@@ -242,6 +248,7 @@ class CreateQuizTests(TestCasesWithUserAuth):
             "starts_at_timestamp": 1740248155,
             "ends_at_timestamp": 1740248155,
             "github_repository": mock_quiz.repository.full_name,
+            "releases_at_timestamp": 1740248155,
         }
 
         response = self.client.post(

@@ -1,11 +1,12 @@
-from courses.quizzes.api.admin.permissions import IsAuthenticatedCourseInstructorOrTA
 import courses.models as db
 from rest_framework.decorators import api_view, permission_classes
 from uuid import UUID
 from django.http import FileResponse
-from courses.quizzes.api.permissions import StudentCanViewQuiz, StudentCanViewQuizOrInstructor
-from rest_framework.permissions import BasePermission
-    
+from courses.quizzes.api.permissions import (
+    StudentCanViewQuizOrInstructor,
+)
+
+
 @api_view(["GET"])
 @permission_classes([StudentCanViewQuizOrInstructor])
 def get_quiz_question_image(
@@ -16,4 +17,3 @@ def get_quiz_question_image(
     quiz_image = db.QuizQuestionImage.objects.get(id=question_image_id, quiz=quiz)
 
     return FileResponse(quiz_image.image.open(), content_type="image/jpeg")
-
