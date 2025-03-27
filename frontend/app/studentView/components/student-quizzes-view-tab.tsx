@@ -70,7 +70,7 @@ export default function StudentQuizViewTab(props: StudentQuizViewProps){
 
     useEffect(() => {
         fetchQuizs();
-    }, [props.courseSlug]);
+    }, [props.courseSlug, fetchQuizs]);
     return (
         <div style={{ display: 'flex', gap: '20px', width: '100%', flexDirection: 'column' }}>
             {/* Ongoing Quizzes */}

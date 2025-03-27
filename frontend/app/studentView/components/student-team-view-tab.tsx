@@ -64,26 +64,19 @@ export default function StudentTeamViewTab(props: StudentTeamViewTabProps) {
             .catch((error) => console.error('Failed to fetch username:', error));
     }, [jwt, setAndStoreJwt]);
 
-    // Fetch teams whenever userName is set
-    useEffect(() => {
-        if (userName) {
-            fetchTeams();
-        }
-    }, [userName]);
-
-	// Fetch teams function, accessible to all parts of the file
-	const fetchTeams = async () => {
-		try {
-			setLoading(true);
-			const res = await fetchApi(
-				jwt,
-				setAndStoreJwt,
-				`teams/get/${courseSlug}/${offeringSlug}`,
-				"GET"
-			);
-			const data = await res.json();
-			const returnedTeams = [];
-			let foundMembership = false;
+    // Fetch teams function, accessible to all parts of the file
+    const fetchTeams = async () => {
+        try {
+            setLoading(true);
+            const res = await fetchApi(
+                jwt,
+                setAndStoreJwt,
+                `teams/get/${courseSlug}/${offeringSlug}`,
+                'GET'
+            );
+            const data = await res.json();
+            const returnedTeams = [];
+            let foundMembership = false;
 
             data.forEach((team) => {
                 const userMember = team.members.find((m) => m.name === userName);
@@ -103,6 +96,13 @@ export default function StudentTeamViewTab(props: StudentTeamViewTabProps) {
             setLoading(false);
         }
     };
+
+    // Fetch teams whenever userName is set
+    useEffect(() => {
+        if (userName) {
+            fetchTeams();
+        }
+    }, [userName, fetchTeams]);
 
     const joinTeam = ({ team }: { team: Team }) => {
         fetchApi(jwt, setAndStoreJwt, 'teams/join/request/', 'PATCH', {
