@@ -1,7 +1,7 @@
 import QuizDisplay, { QuizProps } from '@/app/[courseSlug]/[offeringSlug]/quiz/quiz-display';
 import { fetchApi } from '@/app/lib/api';
 import { JwtContext } from '@/app/lib/jwt-provider';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState, useCallback } from 'react';
 
 const now = new Date();
 const oneHourBefore = new Date(now.getTime() - 1*60*60*1000);
@@ -16,20 +16,20 @@ export default function StudentQuizViewTab(props: StudentQuizViewProps){
     const [jwt, setAndStoreJwt] = useContext(JwtContext);
 
     const [quizzes, setQuizs] = useState<QuizProps[]>([]);
-    async function fetchQuizs() {
+    const fetchQuizs = useCallback(async () => {
         try {
             const res = await fetchApi(jwt, setAndStoreJwt, `quizzes/list/${props.courseSlug}`, 'GET');
             const data = await res.json();
-
+    
             const retQuizs: QuizProps[] = await Promise.all(
                 data.map(async (quiz: any) => {
                     const startTime = new Date(quiz.start_unix_timestamp * 1000);
                     const endTime = new Date(quiz.end_unix_timestamp * 1000);
                     const releaseTime = new Date(quiz.release_unix_timestamp * 1000);
-
+    
                     let grade = undefined;
                     let totalPoints = undefined;
-
+    
                     if (new Date() > releaseTime) {
                         try {
                             const submissionRes = await fetchApi(
@@ -40,14 +40,14 @@ export default function StudentQuizViewTab(props: StudentQuizViewProps){
                             );
                             if (submissionRes.ok) {
                                 const submissionData = await submissionRes.json();
-                                grade = submissionData.grade; // Assuming API returns this field
+                                grade = submissionData.grade;
                                 totalPoints = submissionData.total_points;
                             }
                         } catch (err) {
                             console.error(`Failed to fetch student grade for ${quiz.slug}`, err);
                         }
                     }
-
+    
                     return {
                         name: quiz.title,
                         grade,
@@ -61,12 +61,13 @@ export default function StudentQuizViewTab(props: StudentQuizViewProps){
                     };
                 })
             );
-
+    
             setQuizs(retQuizs);
         } catch (error) {
             console.error('Failed to retrieve quizzes', error);
         }
-    }
+    }, [jwt, setAndStoreJwt, props.courseSlug, props.offeringSlug, setQuizs]);
+    
 
     useEffect(() => {
         fetchQuizs();

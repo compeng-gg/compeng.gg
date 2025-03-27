@@ -1,6 +1,6 @@
 'use client';
 
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState, useCallback } from 'react';
 
 import { fetchApi } from '@/app/lib/api';
 import { JwtContext } from '@/app/lib/jwt-provider';
@@ -26,7 +26,7 @@ function AdminPage() {
     const [jwt, setAndStoreJwt] = useContext(JwtContext);
     const [tasks, setTasks] = useState<any[]>([]);
 
-    const fetchData = async () => {
+    const fetchData = useCallback(async () => {
         try {
             const response = await fetchApi(jwt, setAndStoreJwt, 'tasks/', 'GET');
             const data = await response.json();
@@ -37,15 +37,16 @@ function AdminPage() {
                     grade: item.grade,
                     repo: item.repo,
                     commit: item.commit,
+                    received: new Date(item.received).toString(),
                 };
-                newItem['received'] = new Date(item.received).toString();
                 return newItem;
             });
             setTasks(transformedData);
         } catch (error) {
             console.error('Error fetching data:', error);
         }
-    };
+    }, [jwt, setAndStoreJwt, setTasks]);
+    
 
     useEffect(() => {
         fetchData();

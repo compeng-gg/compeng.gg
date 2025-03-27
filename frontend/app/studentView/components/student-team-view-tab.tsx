@@ -17,6 +17,7 @@ import { fetchApi } from '@/app/lib/api';
 import { JwtContext } from '@/app/lib/jwt-provider';
 import { fetchUserName } from '@/app/lib/getUser';
 import { Dialog } from 'primereact/dialog';
+import { useCallback } from 'react';
 
 export interface StudentTeamViewTabProps {
     courseSlug: string;
@@ -65,7 +66,7 @@ export default function StudentTeamViewTab(props: StudentTeamViewTabProps) {
     }, [jwt, setAndStoreJwt]);
 
     // Fetch teams function, accessible to all parts of the file
-    const fetchTeams = async () => {
+    const fetchTeams = useCallback(async () => {
         try {
             setLoading(true);
             const res = await fetchApi(
@@ -77,7 +78,7 @@ export default function StudentTeamViewTab(props: StudentTeamViewTabProps) {
             const data = await res.json();
             const returnedTeams = [];
             let foundMembership = false;
-
+    
             data.forEach((team) => {
                 const userMember = team.members.find((m) => m.name === userName);
                 if (userMember) {
@@ -86,16 +87,16 @@ export default function StudentTeamViewTab(props: StudentTeamViewTabProps) {
                 }
                 returnedTeams.push(team);
             });
-
+    
             if (!foundMembership) setUserMembership(undefined); // Reset membership if none found
-
+    
             setTeams(returnedTeams);
         } catch (error) {
             console.error('Failed to retrieve teams', error);
         } finally {
             setLoading(false);
         }
-    };
+    }, [jwt, setAndStoreJwt, courseSlug, offeringSlug, userName, setLoading, setUserMembership, setTeams]);    
 
     // Fetch teams whenever userName is set
     useEffect(() => {
