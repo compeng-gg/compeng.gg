@@ -5,7 +5,7 @@ import CodeEditor from './components/code-editor';
 import { isAnswered, QuestionImage, QuestionProps } from './question-models';
 import TextEditor from './components/text-editor';
 import SelectEditor from './components/select-editor';
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState, useCallback } from 'react';
 import { JwtContext } from '@/app/lib/jwt-provider';
 import { fetchApi } from '@/app/lib/api';
 import { QuizProps } from './quiz-display';
@@ -66,7 +66,7 @@ export function QuestionDisplay(props: QuestionProps){
         }, MS_TO_DEBOUNCE_SAVE);
 
         return () => clearTimeout(timer);
-    }, [props.questionType, props.state.value]);
+    }, [props.questionType, props.state.value, props]);
 
     useEffect(() => {
         // Only run this effect if the question type is TEXT or CODE.
@@ -76,7 +76,7 @@ export function QuestionDisplay(props: QuestionProps){
             save(debouncedAnswer);
             lastSavedRef.current = props.state.value;
         }
-    }, [props.questionType, debouncedAnswer, props.state.value]);
+    }, [props.questionType, debouncedAnswer, props.state.value, props, save]);
 
     useEffect(() => {
         // Only run this effect if the question type is TEXT or CODE.
@@ -89,16 +89,16 @@ export function QuestionDisplay(props: QuestionProps){
         }, MS_TO_AUTO_SAVE);
 
         return () => clearInterval(interval);
-    }, [props.questionType, MS_TO_AUTO_SAVE, /* include isAnswered and save if they are not stable */]);
+    }, [props.questionType, MS_TO_AUTO_SAVE, props, save]);
 
     /**
      * Modified `save` function to use the courseSlug in the request
      * and print it whenever a question is saved.
      */
-    async function save(newValue: any) {
+    const save = useCallback(async (newValue: any) => {
         try {
             setStatus(QuestionSaveStatus.AUTOSAVING);
-
+    
             // If it's a string, ensure it's not empty
             if (typeof newValue === 'string') {
                 const trimmed = newValue.trim();
@@ -107,13 +107,11 @@ export function QuestionDisplay(props: QuestionProps){
                     return;
                 }
             }
-
-            // Print the course slug each time we save
+    
             console.log('Course slug is:', props.courseSlug);
-
-            // Quizple: Construct an API URL using courseSlug
+    
             const apiUrl = `${props.courseSlug}/quiz/${props.quizSlug}/answer/${props.serverQuestionType.toLowerCase()}/${props.id}/?courseSlug=${props.courseSlug}`;
-
+    
             const res = await fetchApi(
                 jwt,
                 setAndStoreJwt,
@@ -121,7 +119,7 @@ export function QuestionDisplay(props: QuestionProps){
                 'POST',
                 getAnswerBody(props, newValue)
             );
-
+    
             if (res.ok) {
                 lastSavedRef.current = newValue;
                 setStatus(QuestionSaveStatus.AUTOSAVED);
@@ -132,7 +130,13 @@ export function QuestionDisplay(props: QuestionProps){
             console.error('Error submitting question', error);
             setStatus(QuestionSaveStatus.ERROR);
         }
-    }
+    }, [
+        jwt,
+        props,
+        setAndStoreJwt,
+        setStatus,
+        lastSavedRef
+    ]);    
 
     const header = (
         <div style={{position: 'relative'}}>
@@ -183,7 +187,7 @@ export function QuestionImageDisplay({ images, props}: { images: QuestionImage[]
         if(images.length)
 
             setImageSources();
-    }, [images, jwt, setAndStoreJwt]);
+    }, [images, jwt, setAndStoreJwt, props.courseSlug, props.quizSlug]);
 
     if (images.length === 0) return null;
 

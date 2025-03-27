@@ -5,7 +5,7 @@ import { JwtContext } from '@/app/lib/jwt-provider';
 import { Button } from 'primereact/button';
 import { Calendar } from 'primereact/calendar';
 import { InputText } from 'primereact/inputtext';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState, useCallback } from 'react';
 
 export interface StaffQuizViewProps {
     courseSlug: string;
@@ -29,11 +29,11 @@ export default function StaffQuizViewTab(props: StaffQuizViewProps) {
     const [githubRepository, setGithubRepository] = useState('');
     const [formError, setFormError] = useState('');
 
-    async function fetchQuizzes() {
+    const fetchQuizzes = useCallback(async () => {
         try {
             const res = await fetchApi(jwt, setAndStoreJwt, `quizzes/list/${props.courseSlug}`, 'GET');
             const data = await res.json();
-
+    
             if (!Array.isArray(data) || data.length === 0) {
                 setQuizzes([]);
             } else {
@@ -48,7 +48,7 @@ export default function StaffQuizViewTab(props: StaffQuizViewProps) {
                     endTime: quiz.end_unix_timestamp
                         ? new Date(quiz.end_unix_timestamp * 1000)
                         : null,
-                    releaseTime: quiz.releases_unix_timestamp
+                    releaseTime: quiz.release_unix_timestamp // 🔧 fixed typo here
                         ? new Date(quiz.release_unix_timestamp * 1000)
                         : new Date(),
                 }));
@@ -59,11 +59,11 @@ export default function StaffQuizViewTab(props: StaffQuizViewProps) {
         } finally {
             setLoading(false);
         }
-    }
+    }, [jwt, setAndStoreJwt, props.courseSlug, props.offeringSlug, setQuizzes, setLoading]);    
 
     useEffect(() => {
         fetchQuizzes();
-    }, [props.courseSlug]);
+    }, [props.courseSlug, fetchQuizzes]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();

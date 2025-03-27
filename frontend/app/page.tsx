@@ -28,13 +28,13 @@ import { log } from 'console';
 import PrimeWrapper from './ui/primeWrapper';
 import { routeModule } from 'next/dist/build/templates/app-page';
 
-export function getBadgeForRole(role: string, size?: 'xlarge' | 'large'){
+function getBadgeForRole(role: string, size?: 'xlarge' | 'large') {
 
     const severity : string = (role == 'Student') ? 'info':'admin';
     return <Badge value={role} severity={severity} size={size}/>;
 }
 
-export function getRoleFromOffering(offering) {
+function getRoleFromOffering(offering) {
     const spIdx = offering.role.lastIndexOf(' ');
     return offering.role.substring(spIdx+1);
 }
@@ -82,7 +82,7 @@ function Dashboard() {
         return () => {
             ignore = true;
         };
-    }, []);
+    }, [setAndStoreJwt, jwt]);
 
     if (!isInitialized) {
         return (<></>);

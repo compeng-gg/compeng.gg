@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useContext } from 'react';
+import { useEffect, useState, useContext, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import { fetchApi } from '@/app/lib/api';
 import { JwtContext } from '@/app/lib/jwt-provider';
@@ -33,7 +33,7 @@ export default function QuizAccommodationsPage() {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [usernameToDelete, setUsernameToDelete] = useState('');
 
-    async function fetchAccommodations() {
+    const fetchAccommodations = useCallback(async () => {
         try {
             const res = await fetchApi(
                 jwt,
@@ -41,9 +41,11 @@ export default function QuizAccommodationsPage() {
                 `quizzes/admin/${courseSlug}/${quizSlug}/accommodations/`,
                 'GET'
             );
+    
             if (!res.ok) {
                 throw new Error('Failed to fetch accommodations');
             }
+    
             const data = await res.json();
             setAccommodations(data.quiz_accommodations || []);
         } catch (error) {
@@ -52,9 +54,16 @@ export default function QuizAccommodationsPage() {
         } finally {
             setLoading(false);
         }
-    }
+    }, [
+        jwt,
+        setAndStoreJwt,
+        courseSlug,
+        quizSlug,
+        setAccommodations,
+        setLoading
+    ]);    
 
-    async function fetchQuizInfo() {
+    const fetchQuizInfo = useCallback(async () => {
         try {
             const res = await fetchApi(
                 jwt,
@@ -62,17 +71,26 @@ export default function QuizAccommodationsPage() {
                 `quizzes/admin/${courseSlug}/${quizSlug}/`,
                 'GET'
             );
+    
             if (!res.ok) {
                 throw new Error('Failed to fetch quiz details');
             }
+    
             const data = await res.json();
             setOfferingName(data.offering_name);
             setQuizTitle(data.title);
         } catch (error) {
             console.error('Failed to retrieve quiz info', error);
         }
-    }
-
+    }, [
+        jwt,
+        setAndStoreJwt,
+        courseSlug,
+        quizSlug,
+        setOfferingName,
+        setQuizTitle
+    ]);
+    
     async function handleCreate() {
         if (!username || !visibleAt || !startsAt || !endsAt) {
             alert('Please fill in all fields before creating an accommodation.');
@@ -148,7 +166,7 @@ export default function QuizAccommodationsPage() {
     useEffect(() => {
         fetchAccommodations();
         fetchQuizInfo();
-    }, [courseSlug, quizSlug, jwt, setAndStoreJwt]);
+    }, [courseSlug, quizSlug, jwt, setAndStoreJwt, fetchAccommodations, fetchQuizInfo]);
 
     if (loading) {
         return (

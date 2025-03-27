@@ -29,7 +29,7 @@ function StaffAssignmentStudent() {
         }
 
         fetchAssignment();
-    }, [params.course_slug, jwt, setAndStoreJwt]);
+    }, [params.course_slug, jwt, setAndStoreJwt, params.assignment_slug, params.student_username]);
 
     if (!data) {
         return (

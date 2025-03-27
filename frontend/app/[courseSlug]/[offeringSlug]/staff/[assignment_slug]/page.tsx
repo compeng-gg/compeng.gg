@@ -34,7 +34,7 @@ function StaffAssignment() {
         }
 
         fetchLabs();
-    }, [params.course_slug, jwt, setAndStoreJwt]);
+    }, [params.course_slug, jwt, setAndStoreJwt, params.assignment_slug]);
 
     const handleTogglePrivateRelease = async () => {
         try {

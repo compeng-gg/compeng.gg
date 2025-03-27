@@ -1,6 +1,6 @@
 'use client';
 
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState, useCallback } from 'react';
 
 import { fetchApi } from '@/app/lib/api';
 import { JwtContext } from '@/app/lib/jwt-provider';
@@ -27,10 +27,11 @@ function AdminPage() {
     const [jwt, setAndStoreJwt] = useContext(JwtContext);
     const [users, setUsers] = useState<any[]>([]);
 
-    const fetchData = async () => {
+    const fetchData = useCallback(async () => {
         try {
             const response = await fetchApi(jwt, setAndStoreJwt, 'users/', 'GET');
             const data = await response.json();
+    
             const transformedData = data.map((item: any) => {
                 const newItem: any = {
                     id: item.id,
@@ -39,20 +40,23 @@ function AdminPage() {
                     first_name: item.first_name,
                     last_name: item.last_name,
                 };
+    
                 item.social_auth.forEach((auth: any) => {
                     newItem[auth.provider] = auth.uid;
                 });
+    
                 return newItem;
             });
+    
             setUsers(transformedData);
         } catch (error) {
             console.error('Error fetching data:', error);
         }
-    };
+    }, [jwt, setAndStoreJwt, setUsers]);    
 
     useEffect(() => {
         fetchData();
-    }, []);
+    }, [fetchData]);
 
     return (
         <>

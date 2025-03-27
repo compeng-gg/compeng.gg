@@ -119,22 +119,30 @@ function OngoingQuizDisplay(props: StaffQuizProps) {
     );
 }
 
-async function ReleaseQuizNow(quizProps: StaffQuizProps) {
+const ReleaseQuizNow = ({ quizProps }: { quizProps: StaffQuizProps }) => {
     const [jwt, setAndStoreJwt] = useContext(JwtContext);
 
-    try {
-        const res = await fetchApi(
-            jwt,
-            setAndStoreJwt,
-            `quizzes/admin/${quizProps.courseSlug}/${quizProps.quizSlug}/release-now/`,
-            'POST'
-        );
-        if (!res.ok) throw new Error('Failed to Release Quiz');
-        console.log('Quiz released successfully!');
-    } catch (error) {
-        console.error('Failed to Release Quiz', error);
-    }
-}
+    const handleReleaseQuiz = async () => {
+        try {
+            const res = await fetchApi(
+                jwt,
+                setAndStoreJwt,
+                `quizzes/admin/${quizProps.courseSlug}/${quizProps.quizSlug}/release-now/`,
+                'POST'
+            );
+            if (!res.ok) throw new Error('Failed to Release Quiz');
+            console.log('Quiz released successfully!');
+        } catch (error) {
+            console.error('Failed to Release Quiz', error);
+        }
+    };
+
+    return (
+        <button onClick={handleReleaseQuiz}>
+            Release Quiz Now
+        </button>
+    );
+};
 
 function ReleaseNowButton({ quizProps }: { quizProps: StaffQuizProps }) {
     const [releaseConfirmed, setReleaseConfirmed] = useState(false);

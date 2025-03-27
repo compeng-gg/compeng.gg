@@ -85,7 +85,7 @@ export default function CodeEditor({ props, includeTests }: { props: CodeQuestio
         ws.onerror = (error) => console.error('WebSocket error:', error);
 
         return () => ws.close();
-    }, [props.isMutable]);
+    }, [props.isMutable, jwt.access, props.courseSlug, props.quizSlug, props.id]);
 
     async function runTests() {
         if (socket) {

@@ -1,4 +1,4 @@
-import React, { ReactNode, useContext, useEffect, useState } from 'react';
+import React, { ReactNode, useContext, useEffect, useState, useCallback } from 'react';
 import { Button } from 'primereact/button';
 import { Message } from 'primereact/message';
 import { fetchApi } from '@/app/lib/api';
@@ -42,15 +42,8 @@ export default function StaffCourseSettingsTab(props: StaffCourseSettingsTabProp
             }).catch((error) => console.error('Failed to fetch username:', error));
     }, [jwt, setAndStoreJwt]);
 
-    // Fetch teams whenever userName is set
-    useEffect(() => {
-        if (userName) {
-            fetchOfferingTeamsSettings();
-        }
-    }, [userName]);
-
     // Fetch teams function, accessible to all parts of the file
-    const fetchOfferingTeamsSettings = async () => {
+    const fetchOfferingTeamsSettings = useCallback(async () => {
         try {
             setLoading(true);
             const res = await fetchApi(jwt, setAndStoreJwt, `teams/settings/get/${courseSlug}/${offeringSlug}`, 'GET');
@@ -63,7 +56,16 @@ export default function StaffCourseSettingsTab(props: StaffCourseSettingsTabProp
         } finally {
             setLoading(false);
         }
-    };
+    }, [jwt, setAndStoreJwt, courseSlug, offeringSlug, setLoading, setOfferingTeamsSettings, setFormData]);
+
+    // Fetch teams whenever userName is set
+    useEffect(() => {
+        if (userName) {
+            fetchOfferingTeamsSettings();
+        }
+    }, [userName, fetchOfferingTeamsSettings]);
+
+    
 
     const createOfferingTeamsSettings = async () => {
         try {

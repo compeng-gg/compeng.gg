@@ -41,12 +41,12 @@ export default function ViewOnlyQuizSubmission() {
     const [submission, setSubmission] = useState<Submission | null>(null);
     const [loading, setLoading] = useState(true);
 
-    async function fetchData() {
+    const fetchData = useCallback(async () => {
         try {
             const quizRes = await fetchApi(jwt, setAndStoreJwt, `quizzes/admin/${courseSlug}/${quizSlug}/`, 'GET');
             const quizData = await quizRes.json();
             setQuestions(quizData.questions || []);
-
+    
             const subRes = await fetchApi(jwt, setAndStoreJwt, `quizzes/${courseSlug}/${quizSlug}/submission/`, 'GET');
             const subData = await subRes.json();
             setSubmission(subData);
@@ -55,11 +55,19 @@ export default function ViewOnlyQuizSubmission() {
         } finally {
             setLoading(false);
         }
-    }
+    }, [
+        jwt,
+        setAndStoreJwt,
+        courseSlug,
+        quizSlug,
+        setQuestions,
+        setSubmission,
+        setLoading
+    ]);    
 
     useEffect(() => {
         fetchData();
-    }, [courseSlug, quizSlug]);
+    }, [courseSlug, quizSlug, fetchData]);
 
     if (loading) {
         return <p>Loading submission...</p>;

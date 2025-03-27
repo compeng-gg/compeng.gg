@@ -39,7 +39,7 @@ export default function QuestionImageUploader(props: QuestionImageUploaderProps)
             setLoaded(true);
         };
         if(!loaded) setFiles();
-    }, [loaded, images]);
+    }, [loaded, images, courseSlug, quizSlug, jwt, setAndStoreJwt]);
     
 
     const handleNewImages = (event: FileUploadHandlerEvent) => {

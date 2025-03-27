@@ -40,34 +40,44 @@ export default function StudentSubmissionPage() {
     const [loading, setLoading] = useState(true);
     const [gradeSubmitted, setGradeSubmitted] = useState(false);
 
-    async function fetchQuizAndSubmission() {
+    const fetchQuizAndSubmission = useCallback(async () => {
         try {
-            
             const quizRes = await fetchApi(
                 jwt,
                 setAndStoreJwt,
                 `quizzes/admin/${courseSlug}/${quizSlug}/`,
                 'GET'
             );
+    
             if (!quizRes.ok) throw new Error('Failed to fetch quiz details');
             const quizData = await quizRes.json();
             setQuestions(quizData.questions);
-
-            
+    
             const subRes = await fetchApi(
                 jwt,
                 setAndStoreJwt,
                 `quizzes/admin/${courseSlug}/${quizSlug}/submissions/${studentId}/`,
                 'GET'
             );
+    
             if (!subRes.ok) throw new Error('Failed to fetch submission');
-            setSubmission(await subRes.json());
+            const submissionData = await subRes.json();
+            setSubmission(submissionData);
         } catch (error) {
             console.error('Failed to retrieve data', error);
         } finally {
             setLoading(false);
         }
-    }
+    }, [
+        jwt,
+        setAndStoreJwt,
+        courseSlug,
+        quizSlug,
+        studentId,
+        setQuestions,
+        setSubmission,
+        setLoading
+    ]);    
 
     async function submitGrade() {
         try {
@@ -87,7 +97,7 @@ export default function StudentSubmissionPage() {
 
     useEffect(() => {
         fetchQuizAndSubmission();
-    }, [courseSlug, quizSlug, studentId, jwt, setAndStoreJwt]);
+    }, [courseSlug, quizSlug, studentId, jwt, setAndStoreJwt, fetchQuizAndSubmission]);
 
     if (loading) {
         return (

@@ -93,7 +93,7 @@ export default function Page() {
                 });
             }
         };
-    }, []);
+    }, [jwt, router, searchParams, setAndStoreJwt]);
     if (error === null) {
         return (
             <></>

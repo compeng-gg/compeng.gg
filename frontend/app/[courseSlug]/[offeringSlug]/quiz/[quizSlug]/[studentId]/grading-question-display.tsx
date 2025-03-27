@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext, useCallback } from 'react';
 import { Card } from 'primereact/card';
 import { Badge } from 'primereact/badge';
 import CodeEditor from '../../components/code-editor';
@@ -87,16 +87,24 @@ export default function GradingQuestionDisplay({
     
 
     /** ✅ **Function to update grade & comment in backend** */
-    async function updateGradeOrComment(questionId: string, grade: number | null, comment: string) {
-        await fetchApi(jwt, setAndStoreJwt, 
-            `quizzes/admin/${quizSlug}/submissions/${studentId}/update-question/`, 
-            'POST', {
-                question_id: questionId, // ✅ Use question_id instead of prompt
-                grade: grade,
-                comment: comment
+    const updateGradeOrComment = useCallback(async (
+        questionId: string,
+        grade: number | null,
+        comment: string
+    ) => {
+        await fetchApi(
+            jwt,
+            setAndStoreJwt,
+            `quizzes/admin/${quizSlug}/submissions/${studentId}/update-question/`,
+            'POST',
+            {
+                question_id: questionId,
+                grade,
+                comment,
             }
         );
-    }
+    }, [jwt, setAndStoreJwt, quizSlug, studentId]);
+    
 
     /** ✅ **Trigger backend update on grade/comment change** */
     useEffect(() => {
@@ -105,7 +113,7 @@ export default function GradingQuestionDisplay({
         }, 500); 
 
         return () => clearTimeout(timeout);
-    }, [grade, comment]);
+    }, [grade, comment, question.id, updateGradeOrComment]);
 
     return (
         <Card

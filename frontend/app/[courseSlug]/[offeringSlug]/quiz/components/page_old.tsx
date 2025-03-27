@@ -30,37 +30,54 @@ export default function Page({ params }: { params: { courseSlug: string, quizSlu
     const [questionData, setQuestionData] = useState<QuestionData[]>([]);
     const [questionStates, setQuestionStates] = useState<QuestionState[]>([]);
 
-    async function fetchQuiz() {
+    const fetchQuiz = useCallback(async () => {
         try {
             const res = await fetchApi(jwt, setAndStoreJwt, `${courseSlug}/quiz/${quizSlug}`, 'GET');
             const data = await res.json();
+    
             const retQuiz: QuizProps = {
                 startTime: new Date(data.start_unix_timestamp * 1000),
                 endTime: new Date(data.end_unix_timestamp * 1000),
-                quizSlug: quizSlug,
+                quizSlug,
                 name: data.title,
-                courseSlug: courseSlug,
+                courseSlug,
                 releaseTime: new Date(data.release_unix_timestamp * 1000),
                 grade: data.grade
             };
-            console.log('Quiz' + JSON.stringify(data, null, 2));
+    
+            console.log('Quiz', JSON.stringify(data, null, 2));
             setQuiz(retQuiz);
-            const qData = data.questions.map((rawData, idx) => getQuestionDataFromRaw(rawData,quizSlug, courseSlug));
+    
+            const qData = data.questions.map((rawData: any, idx: number) =>
+                getQuestionDataFromRaw(rawData, quizSlug, courseSlug)
+            );
             setQuestionData(qData);
+    
             const questionStates = qData.map((questionData, idx) => ({
                 value: getStartingStateValue(questionData, data.questions[idx]),
-                setValue: (newValue) => {
-                    setQuestionStates((questionStates) => 
-                        questionStates.map((state, currIdx) => currIdx == idx ? {...state, value: newValue} : state)
+                setValue: (newValue: any) => {
+                    setQuestionStates((prevStates) =>
+                        prevStates.map((state, currIdx) =>
+                            currIdx === idx ? { ...state, value: newValue } : state
+                        )
                     );
                 }
             }));
+    
             setQuestionStates(questionStates);
-
         } catch (error) {
             console.error('Failed to retrieve quiz', error);
         }
-    }
+    }, [
+        jwt,
+        setAndStoreJwt,
+        courseSlug,
+        quizSlug,
+        setQuiz,
+        setQuestionData,
+        setQuestionStates,
+    ]);
+    
 
     async function submitQuiz() {
         try {
@@ -79,7 +96,7 @@ export default function Page({ params }: { params: { courseSlug: string, quizSlu
             fetchQuiz();
             setLoaded(true);
         }
-    }, [loaded]);
+    }, [loaded, fetchQuiz]);
     //If quiz not found
     if(!loaded){
         return (

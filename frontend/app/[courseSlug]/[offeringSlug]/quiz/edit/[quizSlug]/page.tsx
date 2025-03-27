@@ -36,10 +36,11 @@ export default function Page({ params }: { params: { courseSlug: string, quizSlu
     const [loaded, setLoaded] = useState<boolean>(false);
     const [modified, setModified] = useState<boolean>(false);
     
-    async function fetchQuiz() {
+    const fetchQuiz = useCallback(async () => {
         try {
             const res = await fetchApi(jwt, setAndStoreJwt, `quizzes/admin/${courseSlug}/${quizSlug}/`, 'GET');
             const data = await res.json();
+    
             const retQuiz: StaffQuizProps = {
                 startTime: new Date(data.starts_at * 1000),
                 endTime: new Date(data.ends_at * 1000),
@@ -51,13 +52,27 @@ export default function Page({ params }: { params: { courseSlug: string, quizSlu
                 githubRepo: data.github_repository,
                 contentViewableAfterSubmission: data.content_viewable_after_submission
             };
+    
             setQuiz(retQuiz);
-            console.log('Quiz' + JSON.stringify(data, null, 2));
-            setQuestionData((data.questions.map((rawData: any) => getQuestionDataFromRaw(rawData, quizSlug, courseSlug, true))));
+    
+            console.log('Quiz', JSON.stringify(data, null, 2));
+    
+            const parsedQuestions = data.questions.map((rawData: any) =>
+                getQuestionDataFromRaw(rawData, quizSlug, courseSlug, true)
+            );
+    
+            setQuestionData(parsedQuestions);
         } catch (error) {
             console.error('Failed to retrieve quiz', error);
         }
-    }
+    }, [
+        jwt,
+        setAndStoreJwt,
+        courseSlug,
+        quizSlug,
+        setQuiz,
+        setQuestionData,
+    ]);    
 
     const addQuestion= () => {
         setModified(true);
@@ -93,7 +108,7 @@ export default function Page({ params }: { params: { courseSlug: string, quizSlu
             fetchQuiz();
             setLoaded(true);
         }
-    }, [loaded]);
+    }, [loaded, fetchQuiz]);
 
     const setQuestionDataAtIdx = (idx: number, data: StaffQuestionData | null) => {
         setModified(true);

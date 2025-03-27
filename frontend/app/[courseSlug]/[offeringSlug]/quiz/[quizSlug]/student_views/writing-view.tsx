@@ -22,24 +22,28 @@ export default function WritingQuizView({ courseSlug, quizSlug }: { courseSlug: 
     const [questionData, setQuestionData] = useState<QuestionData[]>([]);
     const [questionStates, setQuestionStates] = useState<QuestionState[]>([]);
 
-    async function fetchQuiz() {
+    const fetchQuiz = useCallback(async () => {
         try {
             const res = await fetchApi(jwt, setAndStoreJwt, `${courseSlug}/quiz/${quizSlug}`, 'GET');
             const data = await res.json();
+    
             const retQuiz: QuizProps = {
                 startTime: new Date(data.start_unix_timestamp * 1000),
                 endTime: new Date(data.end_unix_timestamp * 1000),
-                quizSlug: quizSlug,
+                quizSlug,
                 name: data.title,
-                courseSlug: courseSlug,
+                courseSlug,
                 releaseTime: new Date(data.release_unix_timestamp * 1000),
                 grade: data.grade
             };
+    
             setQuiz(retQuiz);
+    
             const qData = data.questions.map((rawData, idx) =>
                 getQuestionDataFromRaw(rawData, quizSlug, courseSlug)
             );
             setQuestionData(qData);
+    
             const states = qData.map((q, idx) => ({
                 value: getStartingStateValue(q, data.questions[idx]),
                 setValue: (newValue) =>
@@ -51,7 +55,15 @@ export default function WritingQuizView({ courseSlug, quizSlug }: { courseSlug: 
         } catch (error) {
             console.error('Failed to retrieve quiz', error);
         }
-    }
+    }, [
+        jwt,
+        setAndStoreJwt,
+        courseSlug,
+        quizSlug,
+        setQuiz,
+        setQuestionData,
+        setQuestionStates,
+    ]);    
 
     async function submitQuiz() {
         try {
@@ -68,7 +80,7 @@ export default function WritingQuizView({ courseSlug, quizSlug }: { courseSlug: 
             fetchQuiz();
             setLoaded(true);
         }
-    }, [loaded]);
+    }, [loaded, fetchQuiz]);
 
     if (!loaded || !quiz) {
         return (

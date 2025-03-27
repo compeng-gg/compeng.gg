@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { fetchApi } from '@/app/lib/api';
 import { JwtContext } from '@/app/lib/jwt-provider';
 import { Button } from 'primereact/button';
@@ -34,24 +34,24 @@ export default function StaffTeamViewTab({ courseSlug }: { courseSlug: string })
     const [selectedMemberToRemove, setSelectedMemberToRemove] = useState<string | null>(null); // For removing team members
 
     // Fetch teams and students
-    const fetchTeamsAndStudents = async () => {
+    const fetchTeamsAndStudents = useCallback(async () => {
         try {
             const teamResponse = await fetchApi(jwt, setAndStoreJwt, `teams/get/${courseSlug}`, 'GET');
             const teamData = await teamResponse.json();
             setTeams(teamData);
-
+    
             const studentResponse = await fetchApi(jwt, setAndStoreJwt, `offering/students/${courseSlug}`, 'GET');
             const studentData = await studentResponse.json();
             setStudents(studentData);
         } catch (error) {
             console.error('Error fetching teams or students:', error);
         }
-    };
+    }, [jwt, setAndStoreJwt, courseSlug, setTeams, setStudents]);    
 
     // Call the fetch function inside useEffect
     useEffect(() => {
         fetchTeamsAndStudents();
-    }, [courseSlug, jwt, setAndStoreJwt]);
+    }, [courseSlug, jwt, setAndStoreJwt, fetchTeamsAndStudents]);
 
     // Create a new team with a selected leader
     const createTeam = async () => {

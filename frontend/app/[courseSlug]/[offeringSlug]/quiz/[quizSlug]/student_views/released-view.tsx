@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useContext } from 'react';
+import { useEffect, useState, useContext, useCallback } from 'react';
 import { fetchApi } from '@/app/lib/api';
 import { JwtContext } from '@/app/lib/jwt-provider';
 import Navbar from '@/app/ui/navbar';
@@ -43,12 +43,12 @@ export default function ReleasedQuizView() {
     const [submission, setSubmission] = useState<Submission | null>(null);
     const [loading, setLoading] = useState(true);
 
-    async function fetchData() {
+    const fetchData = useCallback(async () => {
         try {
             const quizRes = await fetchApi(jwt, setAndStoreJwt, `${courseSlug}/quiz/${quizSlug}`, 'GET');
             const quizData = await quizRes.json();
             setQuestions(quizData.questions);
-
+    
             const subRes = await fetchApi(jwt, setAndStoreJwt, `quizzes/${courseSlug}/${quizSlug}/submission/`, 'GET');
             const subData = await subRes.json();
             setSubmission(subData);
@@ -57,11 +57,19 @@ export default function ReleasedQuizView() {
         } finally {
             setLoading(false);
         }
-    }
+    }, [
+        jwt,
+        setAndStoreJwt,
+        courseSlug,
+        quizSlug,
+        setQuestions,
+        setSubmission,
+        setLoading
+    ]);    
 
     useEffect(() => {
         fetchData();
-    }, [courseSlug, quizSlug]);
+    }, [courseSlug, quizSlug, fetchData]);
 
     if (loading) {
         return (

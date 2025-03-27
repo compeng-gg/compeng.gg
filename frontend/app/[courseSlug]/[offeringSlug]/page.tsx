@@ -24,7 +24,7 @@ export interface Lab {
   tasks: any;
 }
 
-function getRoleEnum(role) {
+function getRoleEnum(role: string) {
     const spIdx = role.lastIndexOf(' ');
     return role.substring(spIdx+1);
 }
@@ -38,7 +38,7 @@ function Course({ params }: { params: { courseSlug: string, offeringSlug: string
     const [jwt, setAndStoreJwt] = useContext(JwtContext);
     const [name, setName] = useState('');
     const [labs, setLabs] = useState([] as Lab[]);
-    const [role, setRole] = useState();
+    const [role, setRole] = useState<string | undefined>(undefined);
 
     useEffect(() => {
         async function fetchLabs() {
@@ -69,7 +69,7 @@ function Course({ params }: { params: { courseSlug: string, offeringSlug: string
     );
 }
 
-export default function Page({ params }: { params: { courseSlug: string } }) {
+export default function Page({ params }: { params: { courseSlug: string, offeringSlug: string } }) {
     return (
         <LoginRequired>
             <Course params={params} />

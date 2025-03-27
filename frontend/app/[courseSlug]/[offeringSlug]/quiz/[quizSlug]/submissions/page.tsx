@@ -26,7 +26,7 @@ export default function QuizSubmissionsPage() {
     const [quizTitle, setQuizTitle] = useState('');
     const [totalPoints, setTotalPoints] = useState<number>(0); // Store total points
 
-    async function fetchSubmissions() {
+    const fetchSubmissions = useCallback(async () => {
         try {
             const res = await fetchApi(
                 jwt,
@@ -34,9 +34,11 @@ export default function QuizSubmissionsPage() {
                 `quizzes/admin/${courseSlug}/${quizSlug}/submissions/`,
                 'GET'
             );
+    
             if (!res.ok) {
                 throw new Error('Failed to fetch submissions');
             }
+    
             const data = await res.json();
             setSubmissions(data.submissions);
         } catch (error) {
@@ -45,19 +47,29 @@ export default function QuizSubmissionsPage() {
         } finally {
             setLoading(false);
         }
-    }
+    }, [
+        jwt,
+        setAndStoreJwt,
+        courseSlug,
+        quizSlug,
+        setSubmissions,
+        setLoading
+    ]);
+    
 
-    async function fetchQuizInfo() {
+    const fetchQuizInfo = useCallback(async () => {
         try {
             const res = await fetchApi(
                 jwt,
                 setAndStoreJwt,
-                `quizzes/admin/${courseSlug}/${quizSlug}/`, 
+                `quizzes/admin/${courseSlug}/${quizSlug}/`,
                 'GET'
             );
+    
             if (!res.ok) {
                 throw new Error('Failed to fetch quiz details');
             }
+    
             const data = await res.json();
             setOfferingName(data.offering_title);
             setQuizTitle(data.title);
@@ -65,12 +77,20 @@ export default function QuizSubmissionsPage() {
         } catch (error) {
             console.error('Failed to retrieve quiz info', error);
         }
-    }
+    }, [
+        jwt,
+        setAndStoreJwt,
+        courseSlug,
+        quizSlug,
+        setOfferingName,
+        setQuizTitle,
+        setTotalPoints
+    ]);    
 
     useEffect(() => {
         fetchSubmissions();
         fetchQuizInfo();
-    }, [courseSlug, quizSlug, jwt, setAndStoreJwt]);
+    }, [courseSlug, quizSlug, jwt, setAndStoreJwt, fetchQuizInfo, fetchSubmissions]);
 
     if (loading) {
         return (
