@@ -1,6 +1,7 @@
 import courses.models as db
 from uuid import UUID
 from typing import Optional, Union, Type
+from django.forms.models import model_to_dict
 
 
 def get_existing_answer_object(

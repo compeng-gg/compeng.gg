@@ -2,8 +2,9 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework import status
 from rest_framework.response import Response
 from courses.quizzes.api.admin.schema import EditQuizSerializer
-from datetime import timezone
+from django.utils import timezone
 from courses.quizzes.api.admin.permissions import IsAuthenticatedCourseInstructorOrTA
+import courses.models as db
 
 
 @api_view(["POST"])

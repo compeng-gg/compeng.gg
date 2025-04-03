@@ -62,22 +62,6 @@ class AccommodationAdmin(admin.ModelAdmin):
 class QuizAdmin(admin.ModelAdmin):
     pass
 
-@admin.register(models.TeamMember)
-class TeamMemberAdmin(admin.ModelAdmin):
-    list_display = ('enrollment', 'team')
-    list_display_links = ('enrollment', 'team')
-    
-    pass
-
-@admin.register(models.OfferingTeamsSettings)
-class OfferingTeamsSettingsAdmin(admin.ModelAdmin):
-    list_display = ('offering', 'max_team_size', 'formation_deadline')
-    list_display_links = ('offering', 'max_team_size', 'formation_deadline')
-
-@admin.register(models.Assessment)
-class AssessmentAdmin(admin.ModelAdmin):
-    pass
-
 @admin.register(models.WrittenResponseQuestion)
 class WrittenResponseQuestionAdmin(admin.ModelAdmin):
     pass

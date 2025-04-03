@@ -5,10 +5,6 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from courses.quizzes.schemas import AnswerWrittenResponseQuestionRequestSerializer
-from courses.quizzes.api.utils import (
-    get_existing_answer_object,
-)
-from typing import Optional
 from courses.quizzes.api.permissions import StudentCanAnswerQuiz
 
 
@@ -23,22 +19,13 @@ def submit_written_response_answer(
     if not serializer.is_valid():
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    user_id = request.user.id
     quiz_submission = request.quiz_submission
+    quiz = request.quiz
     response = serializer.validated_data.get("response")
 
-    written_response_answer: Optional[db.WrittenResponseAnswer] = (
-        get_existing_answer_object(
-            answer_model=db.WrittenResponseAnswer,
-            question_id=written_response_question_id,
-            user_id=user_id,
-        )
-    )
-
-    ### Validate selected checkbox indices are valid
     try:
         written_response_question = db.WrittenResponseQuestion.objects.get(
-            quiz__slug=quiz_slug, id=written_response_question_id
+            quiz=quiz, id=written_response_question_id
         )
     except db.WrittenResponseQuestion.DoesNotExist:
         return Response(
@@ -56,14 +43,16 @@ def submit_written_response_answer(
             status=status.HTTP_400_BAD_REQUEST,
         )
 
-    if written_response_answer is None:
-        db.WrittenResponseAnswer.objects.create(
-            quiz_submission=quiz_submission,
-            question_id=written_response_question_id,
-            response=response,
-            last_updated_at=timezone.now(),
-        )
-    else:
+    written_response_answer, created = db.WrittenResponseAnswer.objects.get_or_create(
+        quiz_submission=quiz_submission,
+        question_id=written_response_question_id,
+        defaults={
+            "response": response,
+            "last_updated_at": request_at,
+        },
+    )
+
+    if not created:
         written_response_answer.response = response
         written_response_answer.last_updated_at = timezone.now()
         written_response_answer.save()

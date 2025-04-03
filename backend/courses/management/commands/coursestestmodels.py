@@ -236,7 +236,17 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        # create_utoronto_roles()
+        create_utoronto_roles()
+
+        aps105 = create_utoronto_course('APS105', 'Computer Fundamentals')
+        aps105_offering = create_2025_winter_offering(aps105)
+        create_default_roles(aps105_offering)
+        create_discord_roles(
+            aps105_offering,
+            student_color=DiscordRestAPI.COLOR_MAGENTA
+        )
+        create_github_teams(aps105_offering)
+
         ece353 = create_utoronto_course('ECE353', 'Systems Software')
         ece353_offering = create_2025_winter_offering(ece353)
         create_default_roles(ece353_offering)

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useContext } from 'react';
+import { useEffect, useState, useContext, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import { fetchApi } from '@/app/lib/api';
 import { JwtContext } from '@/app/lib/jwt-provider';
@@ -10,6 +10,7 @@ import CodeEditor from '../../components/code-editor';
 import TextEditor from '../../components/text-editor';
 import SelectEditor from '../../components/select-editor';
 import CheckboxEditor from '../../components/checkbox-editor-VA';
+import { ProgrammingLanguages } from '../../question-models';
 
 interface Question {
     id: string;
@@ -131,14 +132,16 @@ export default function ViewOnlyQuizSubmission() {
                                             isMutable: false,
                                             questionType: 'CODE',
                                             serverQuestionType: 'CODING',
-                                            programmingLanguage: question.programming_language ?? 'PYTHON',
+                                            programmingLanguage: question.programming_language as ProgrammingLanguages ?? 'PYTHON',
                                             state: {
                                                 value: matchingAnswer?.solution ?? 'No answer provided',
                                                 setValue: () => {},
                                             },
                                             executions: executions,
+                                            starterCode: "",
+                                            images: [],
+                                            renderPromptAsLatex: false, // TODO_nick - pull from question data
                                         }}
-                                        save={() => {}}
                                     />
                                 ) : (
                                     <TextEditor

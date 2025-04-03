@@ -6,7 +6,7 @@ export interface SelectEditorProps {
     options: string[];
 }
 
-export default function SelectEditor(props: SelectEditorProps){
+export default function SelectEditor({props, save} : {props: SelectEditorProps, save: (newValue: any) => void}){
     const {state, options} = props;
 
     const onChange = (e : RadioButtonChangeEvent) => {
@@ -16,7 +16,7 @@ export default function SelectEditor(props: SelectEditorProps){
     const toDisplay = options.map((option, idx) => {
         return (
             <div key={idx} className="flex align-items-center">
-                <RadioButton inputId={idx.toString()} name="questionBox" value={idx} onChange={(e) => state.setValue(e.value)} checked={state.value == idx} />
+                <RadioButton inputId={idx.toString()} name="questionBox" value={idx} onChange={onChange} checked={state.value == idx} />
                 <label className="ml-2">{options[idx]}</label>
             </div>
         );

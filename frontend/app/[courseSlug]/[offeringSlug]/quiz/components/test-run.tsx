@@ -6,6 +6,8 @@ import { Badge } from 'primereact/badge';
 export enum TestRunStatus {
     SUCCESS = 'SUCCESS',
     FAILURE = 'FAILURE',
+    NOT_RUN = 'NOT_RUN',
+    ERROR = 'ERROR',
 }
 
 export interface TestRunProps {

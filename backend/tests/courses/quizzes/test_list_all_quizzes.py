@@ -58,6 +58,7 @@ class ListAllQuizzesTests(TestCasesWithUserAuth):
                 "title": "final quiz",
                 "start_unix_timestamp": int(quiz_1.starts_at.timestamp()),
                 "end_unix_timestamp": int(quiz_1.ends_at.timestamp()),
+                "release_unix_timestamp": int(quiz_1.release_answers_at.timestamp()),
                 "course_slug": "ece344",
                 "slug": quiz_1.slug,
             },
@@ -65,10 +66,14 @@ class ListAllQuizzesTests(TestCasesWithUserAuth):
                 "title": "midterm",
                 "start_unix_timestamp": int(quiz_2.starts_at.timestamp()),
                 "end_unix_timestamp": int(quiz_2.ends_at.timestamp()),
+                "release_unix_timestamp": int(quiz_2.release_answers_at.timestamp()),
                 "course_slug": "ece454",
                 "slug": quiz_2.slug,
             },
         ]
+
+        print(response.json())
+        print(expected_body)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json(), expected_body)

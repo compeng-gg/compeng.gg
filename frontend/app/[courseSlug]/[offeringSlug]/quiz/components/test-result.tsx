@@ -23,16 +23,16 @@ enum TestCaseType {
 
 export interface TestResult {
     kind: TestCaseType,
-    isOk: boolean,
-    actualResult: string,
-    expectedResult: string,
+    result: string,
+    actual_result: string,
+    expected_result: string,
 }
 
 export function TestResultHeader({test, index} : {test : TestResult, index: number}) {
     return (
         <span style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
             <span>{`Test ${index}`}</span>
-            <Badge value={test.isOk ? 'Passed' : 'Failed'} severity={test.isOk ? 'success' : 'danger'}/>
+            <Badge value={test.result == 'OK' ? 'Passed' : 'Failed'} severity={test.result == 'OK' ? 'success' : 'danger'}/>
         </span>
     );
 }
@@ -41,8 +41,8 @@ export function TestResultDisplay(test: TestResult) {
     if(test.kind == TestCaseType.PUBLIC){
         return (
             <div>
-                <div>Actual Result: {test.actualResult}</div>
-                <div>Expected Result: {test.expectedResult}</div>
+                <div>Actual Result: {test.actual_result}</div>
+                <div>Expected Result: {test.expected_result}</div>
             </div>
         );
     } else {
@@ -59,8 +59,8 @@ export function RawToTestResult(raw: string): TestResult {
 
     return {
         kind: parsed.kind as TestCaseType,
-        isOk: parsed.result === 'OK',
-        actualResult: parsed.actual_result,
-        expectedResult: parsed.expected_result,
+        result: parsed.result,
+        actual_result: parsed.actual_result,
+        expected_result: parsed.expected_result,
     } as TestResult;
 }

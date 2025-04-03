@@ -45,10 +45,10 @@ function StaffQuizButton({ quizProps }: { quizProps: StaffQuizProps }) {
     
 // }
 
-function ManageStudentQuizAccommodationsButton({ quizProps }: { quizProps: StaffQuizProps }) {
+function ManageStudentQuizAccommodationsButton(props: StaffQuizProps) {
     return (
         <div style={{ position: 'relative', display: 'flex', flexDirection: 'row-reverse' }}>
-            <Link href={`/${quizProps.courseSlug}/${quizProps.offeringSlug}/quiz/${quizProps.quizSlug}/accommodations/`}>
+            <Link href={`/${props.courseSlug}/${props.offeringSlug}/quiz/${props.quizSlug}/accommodations/`}>
                 <Button label="Manage Student Accommodations" size="small" />
             </Link>
         </div>
@@ -102,7 +102,7 @@ function OngoingQuizDisplay(props: StaffQuizProps) {
                 <Link href={`/${props.courseSlug}/${props.offeringSlug}/quiz/edit/${props.quizSlug}/`}>
                     <Button label="Edit Quiz" size="small" />
                 </Link>
-                <ManageStudentQuizAccommodationsButton quizProps={props} />
+                <ManageStudentQuizAccommodationsButton {...props} />
                 <StaffQuizButton quizProps={props} />
             </div>
         );
@@ -149,7 +149,7 @@ function ReleaseNowButton({ quizProps }: { quizProps: StaffQuizProps }) {
 
     async function handleReleaseQuiz() {
         try {
-            await ReleaseQuizNow(quizProps);
+            await ReleaseQuizNow({quizProps: quizProps});
             setReleaseConfirmed(true);
             setTimeout(() => setReleaseConfirmed(false), 3000); // Auto-close after 3 seconds
         } catch (error) {

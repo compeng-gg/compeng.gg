@@ -8,21 +8,21 @@ import { Column } from 'primereact/column';
 import { Message } from 'primereact/message';
 
 export interface Team {
-  id: string;
-  name: string;
-  members: TeamMember[];
+	id: string;
+	name: string;
+	members: TeamMember[];
 }
 
 export interface Student {
-  id: string;
-  name: string;
-  email: string; // Include email if needed
+	id: string;
+	name: string;
+	email: string; // Include email if needed
 }
 
 export interface TeamMember {
-  id: string;
-  name: string;
-  role: string; // Leader or Member
+	id: string;
+	name: string;
+	role: string; // Leader or Member
 }
 
 export default function StaffTeamViewTab({ courseSlug }: { courseSlug: string }) {

@@ -11,7 +11,9 @@ import SelectEditor from '../../components/select-editor';
 import CheckboxEditor from '../../components/checkbox-editor-VA';
 import { Card } from 'primereact/card';
 import { useParams } from 'next/navigation';
+import { ProgrammingLanguages } from '../../question-models';
 
+// TODO_nick fix this, seems scuffed
 interface Question {
     id: string;
     prompt: string;
@@ -20,8 +22,9 @@ interface Question {
     correct_option_index?: number;
     correct_option_indices?: number[];
     starter_code?: string;
-    programming_language?: string;
+    programming_language?: ProgrammingLanguages;
     question_type: string;
+    render_prompt_as_latex: boolean;
 }
 
 interface Submission {
@@ -37,7 +40,7 @@ interface Submission {
 }
 
 export default function ReleasedQuizView() {
-    const { courseSlug, quizSlug } = useParams();
+    const { courseSlug, quizSlug } = useParams<{ courseSlug: string, quizSlug: string }>();
     const [jwt, setAndStoreJwt] = useContext(JwtContext);
     const [questions, setQuestions] = useState<Question[]>([]);
     const [submission, setSubmission] = useState<Submission | null>(null);
@@ -153,8 +156,10 @@ export default function ReleasedQuizView() {
                                                     setValue: () => {},
                                                 },
                                                 executions: executions,
+                                                starterCode: "",
+                                                images: [],
+                                                renderPromptAsLatex: question.render_prompt_as_latex,
                                             }}
-                                            save={() => {}}
                                         />
                                     ) : (
                                         <TextEditor

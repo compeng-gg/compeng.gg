@@ -1,1 +1,3 @@
-from courses.quizzes.api.websockets.code_run_consumer import CodeRunConsumer
+from courses.quizzes.api.websockets.code_run_consumer import (
+    CodeRunConsumer as CodeRunConsumer,
+)

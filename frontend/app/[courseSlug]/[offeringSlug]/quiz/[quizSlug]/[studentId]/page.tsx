@@ -1,11 +1,12 @@
 'use client';
 
-import { useEffect, useState, useContext } from 'react';
+import { useEffect, useState, useContext, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import { fetchApi } from '@/app/lib/api';
 import { JwtContext } from '@/app/lib/jwt-provider';
 import Navbar from '@/app/ui/navbar';
 import GradingQuestionDisplay from './grading-question-display';
+import { ProgrammingLanguages } from '../../question-models';
 
 interface Question {
     id: string;  
@@ -16,7 +17,8 @@ interface Question {
     correct_option_index?: number;
     correct_option_indices?: number[];
     starter_code?: string;
-    programming_language?: string;
+    programming_language?: ProgrammingLanguages;
+    question_type: string;
 }
 
 interface Submission {
@@ -137,6 +139,7 @@ export default function StudentSubmissionPage() {
                                     id: question.id,
                                     correct_option_index: question.correct_option_index,
                                     correct_option_indices: question.correct_option_indices,
+                                    question_type: question.question_type,
                                 }}
                                 studentAnswer={matchingAnswer}
                                 executions={executions}

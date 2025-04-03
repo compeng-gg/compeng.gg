@@ -6,12 +6,12 @@ import { fetchApi } from '@/app/lib/api';
 import Navbar from '@/app/ui/navbar';
 import LoginRequired from '@/app/lib/login-required';
 import { useParams } from 'next/navigation';
-import QuizWritingPage from './student_views/writing-view';
+import WritingQuizView from './student_views/writing-view';
 import ReleasedQuizView from './student_views/released-view';
 import ViewOnlyQuizSubmission from './student_views/submission-view';
 
 export default function Page() {
-    const { courseSlug, quizSlug } = useParams<{ courseSlug: string; quizSlug: string }>();
+    const { courseSlug, offeringSlug, quizSlug } = useParams<{ courseSlug: string; offeringSlug: string; quizSlug: string }>();
     const [jwt, setAndStoreJwt] = useContext(JwtContext);
     const [quizInfo, setQuizInfo] = useState<any>(null);
     const [loading, setLoading] = useState(true);
@@ -80,7 +80,7 @@ export default function Page() {
         return (
             <LoginRequired>
                 <Navbar />
-                <QuizWritingPage courseSlug={courseSlug} quizSlug={quizSlug} />
+                <WritingQuizView offeringSlug={offeringSlug} courseSlug={courseSlug} quizSlug={quizSlug} />
 
             </LoginRequired>
         );

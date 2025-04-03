@@ -47,23 +47,32 @@ class StudentCanViewQuiz(IsAuthenticated):
 
         now = timezone.now()
 
-        if accommodation:
-            if accommodation.starts_at > now:
-                raise PermissionDenied("Accommodation has not started yet")
-            if accommodation.ends_at < now:
-                raise PermissionDenied("Accommodation has already ended")
+        quiz_starts_at = (
+            quiz.starts_at if accommodation is None else accommodation.starts_at
+        )
+        quiz_ends_at = quiz.ends_at if accommodation is None else accommodation.ends_at
+
+        is_quiz_submitted = (
+            quiz_submission is not None and quiz_submission.completed_at <= now
+        )
+
+        # There are 3 cases where a student can view the quiz:
+
+        # 1. The quiz is currently active (between starts_at and ends_at), and they have not submitted it yet.
+
+        if quiz_starts_at <= now <= quiz_ends_at and not is_quiz_submitted:
             return True
 
-        if quiz.starts_at <= now <= quiz.ends_at:
+        # 2. The quiz content is viewable immediately after submission
+        if quiz.content_viewable_after_submission:
             return True
 
-        if quiz.content_viewable_after_submission and now >= quiz.visible_at:
-            return True
-
+        # 3. Answers/solutions are released after the quiz ends
         if now >= quiz.release_answers_at:
             return True
 
-        raise PermissionDenied("You do not have access to view this quiz at this time.")
+        # Deny access if none of the above conditions are met
+        raise PermissionDenied("Student is not allowed to view this quiz")
 
 
 class StudentCanAnswerQuiz(StudentCanViewQuiz):
@@ -102,6 +111,6 @@ class StudentCanViewQuizOrInstructor(StudentCanViewQuiz):
             request.quiz = quiz
             return True
 
-        except:
+        except Exception:
             pass
         return super().has_permission(request, view)

@@ -63,8 +63,13 @@ def create_coding_answer_execution(
 
     quiz_submission = db.QuizSubmission.objects.get(quiz=quiz, user_id=user_id)
 
-    coding_answer = db.CodingAnswer.objects.get(
-        quiz_submission=quiz_submission, question_id=coding_question_id
+    coding_answer, _ = db.CodingAnswer.objects.get_or_create(
+        quiz_submission=quiz_submission,
+        question_id=coding_question_id,
+        defaults={
+            "solution": solution,
+            "last_updated_at": timezone.now(),
+        },
     )
 
     coding_answer_execution = db.CodingAnswerExecution.objects.create(

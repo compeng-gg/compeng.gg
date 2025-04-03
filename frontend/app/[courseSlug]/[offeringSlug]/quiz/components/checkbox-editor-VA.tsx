@@ -1,8 +1,8 @@
 import { Checkbox, CheckboxChangeEvent } from 'primereact/checkbox';
-import { SelectState } from '../question-models';
+import { MultiSelectState, SelectState } from '../question-models';
 
 export interface CheckboxEditorProps {
-    state: SelectState;
+    state: MultiSelectState;
     options: string[];
 }
 

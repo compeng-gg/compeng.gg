@@ -95,8 +95,8 @@ class Command(BaseCommand):
 
         mock_repository = db.Repository.objects.create(
             id=1,
-            name="reimagined-parakeet",
-            full_name="nickwood5/reimagined-parakeet",
+            name="design-demo",
+            full_name="sebastianlievano/design-demo",
             owner_content_type=mock_content_type,
             owner_id=1,
         )
@@ -124,7 +124,7 @@ class Command(BaseCommand):
 
         db.CheckboxQuestion.objects.create(
             prompt="Answer the checkbox question",
-            points=20,
+            points=15,
             order=1,
             quiz=mock_quiz,
             options=['1', '2', '3'],

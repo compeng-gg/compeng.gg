@@ -2,7 +2,7 @@
 
 import Navbar from '@/app/ui/navbar';
 import LoginRequired from '@/app/lib/login-required';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState, useCallback } from 'react';
 import { JwtContext } from '@/app/lib/jwt-provider';
 import { fetchApi } from '@/app/lib/api';
 import { getQuestionDataFromRaw } from '../../quiz-utilities';
@@ -11,10 +11,10 @@ import { Badge } from 'primereact/badge';
 import { Button } from 'primereact/button';
 import { confirmDialog, ConfirmDialog } from 'primereact/confirmdialog';
 
-import { QuestionData, QuestionState, CodeQuestionData } from '../../question-models';
+import { QuestionData, QuestionState, CodeQuestionData, QuestionProps } from '../../question-models';
 import { QuizProps } from '../../quiz-display';
 
-export default function WritingQuizView({ courseSlug, quizSlug }: { courseSlug: string; quizSlug: string }) {
+export default function WritingQuizView({ offeringSlug, courseSlug, quizSlug }: { offeringSlug: string; courseSlug: string; quizSlug: string }) {
     
     const [jwt, setAndStoreJwt] = useContext(JwtContext);
     const [quiz, setQuiz] = useState<QuizProps | undefined>(undefined);
@@ -34,19 +34,20 @@ export default function WritingQuizView({ courseSlug, quizSlug }: { courseSlug: 
                 name: data.title,
                 courseSlug,
                 releaseTime: new Date(data.release_unix_timestamp * 1000),
-                grade: data.grade
+                grade: data.grade,
+                offeringSlug: offeringSlug
             };
     
             setQuiz(retQuiz);
     
-            const qData = data.questions.map((rawData, idx) =>
+            const qData = data.questions.map((rawData: any, idx: number) =>
                 getQuestionDataFromRaw(rawData, quizSlug, courseSlug)
             );
             setQuestionData(qData);
     
-            const states = qData.map((q, idx) => ({
-                value: getStartingStateValue(q, data.questions[idx]),
-                setValue: (newValue) =>
+            const states = qData.map((q : QuestionData,  idx: number) => ({
+                value: getStartingStateValue(q, data.questions[idx]) as string | number | string[] | undefined,
+                setValue: (newValue : any) =>
                     setQuestionStates((prev) =>
                         prev.map((s, i) => (i === idx ? { ...s, value: newValue } : s))
                     )
@@ -63,6 +64,7 @@ export default function WritingQuizView({ courseSlug, quizSlug }: { courseSlug: 
         setQuiz,
         setQuestionData,
         setQuestionStates,
+        offeringSlug,
     ]);    
 
     async function submitQuiz() {
@@ -104,14 +106,19 @@ export default function WritingQuizView({ courseSlug, quizSlug }: { courseSlug: 
             } />
             <ConfirmDialog />
             <div style={{ display: 'flex', gap: '10px', width: '100%', flexDirection: 'column' }}>
-                {questionStates.map((state, idx) => (
-                    <QuestionDisplay
-                        key={questionData[idx].id || idx}
-                        {...questionData[idx]}
-                        state={state}
-                        idx={idx}
-                    />
-                ))}
+                {questionStates.map((state, idx) => {
+                    const validatedQuestionData = {
+                        ...questionData[idx],
+                        state,
+                        idx,
+                    } as QuestionProps;
+                    return (
+                        <QuestionDisplay
+                            key = {idx}
+                            {...validatedQuestionData}
+                        />
+                    )
+                })}
             </div>
         </>
     );

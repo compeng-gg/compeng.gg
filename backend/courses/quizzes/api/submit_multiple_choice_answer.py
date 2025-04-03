@@ -5,9 +5,6 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from courses.quizzes.schemas import AnswerMultipleChoiceQuestionRequestSerializer
-from courses.quizzes.api.utils import (
-    get_existing_answer_object,
-)
 from courses.quizzes.api.permissions import StudentCanAnswerQuiz
 
 
@@ -21,15 +18,8 @@ def submit_multiple_choice_answer(
     if not serializer.is_valid():
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    user_id = request.user.id
     quiz_submission = request.quiz_submission
     selected_answer_index = serializer.validated_data.get("selected_answer_index")
-
-    multiple_choice_answer: db.MultipleChoiceAnswer = get_existing_answer_object(
-        answer_model=db.MultipleChoiceAnswer,
-        question_id=multiple_choice_question_id,
-        user_id=user_id,
-    )
 
     ### Validate selected multiple choice index is valid
     try:
@@ -51,14 +41,16 @@ def submit_multiple_choice_answer(
             status=status.HTTP_400_BAD_REQUEST,
         )
 
-    if multiple_choice_answer is None:
-        db.MultipleChoiceAnswer.objects.create(
-            quiz_submission=quiz_submission,
-            question_id=multiple_choice_question_id,
-            selected_answer_index=selected_answer_index,
-            last_updated_at=timezone.now(),
-        )
-    else:
+    multiple_choice_answer, created = db.MultipleChoiceAnswer.objects.get_or_create(
+        quiz_submission=quiz_submission,
+        question_id=multiple_choice_question_id,
+        defaults={
+            "selected_answer_index": selected_answer_index,
+            "last_updated_at": timezone.now(),
+        },
+    )
+
+    if not created:
         multiple_choice_answer.selected_answer_index = selected_answer_index
         multiple_choice_answer.last_updated_at = timezone.now()
         multiple_choice_answer.save()

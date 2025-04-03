@@ -21,6 +21,9 @@ channels = "*"
 daphne = "*"
 django-stubs = "*"
 django-cors-headers = "*"
+social-auth-app-django = "*"
+aiohappyeyeballs = "==2.4.6"
+djangorestframework-simplejwt = "*"
 
 [dev-packages]
 

@@ -45,7 +45,6 @@ export interface QuestionEditorProps {
     registerDelete: (data: StaffQuestionData) => void;
     idx: number;
     numQuestions: number;
-    reloadFromServer: boolean;
 }
 
 export default function QuestionEditor(props: QuestionEditorProps) {

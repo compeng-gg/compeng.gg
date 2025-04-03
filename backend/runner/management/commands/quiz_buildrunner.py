@@ -33,7 +33,7 @@ class Command(BaseCommand):
         os.mkdir(tmp_dir)
 
         repo_dir = tmp_dir / repository.name
-
+        print(repo_dir)
         subprocess.run(
             ["git", "clone", "--depth", "1", f"https://github.com/{repository.full_name}"], 
             cwd=tmp_dir, 

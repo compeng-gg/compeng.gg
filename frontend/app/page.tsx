@@ -30,16 +30,16 @@ import { routeModule } from 'next/dist/build/templates/app-page';
 
 function getBadgeForRole(role: string, size?: 'xlarge' | 'large') {
 
-    const severity : string = (role == 'Student') ? 'info':'admin';
+    const severity : 'info' | 'secondary' = (role == 'Student') ? 'info':'secondary';
     return <Badge value={role} severity={severity} size={size}/>;
 }
 
-function getRoleFromOffering(offering) {
+function getRoleFromOffering(offering : any) {
     const spIdx = offering.role.lastIndexOf(' ');
     return offering.role.substring(spIdx+1);
 }
 
-function getCourseCard(offering){
+function getCourseCard(offering : any){
   
     console.log(offering.role);
     return (

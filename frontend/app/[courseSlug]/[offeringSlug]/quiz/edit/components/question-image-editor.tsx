@@ -12,7 +12,6 @@ import { JwtContext } from '@/app/lib/jwt-provider';
 import { FileUpload as FileUploadRefType } from 'primereact/fileupload';
 import { Image } from 'primereact/image';
 import { de, id } from 'date-fns/locale';
-import { TextInput } from 'primereact/textinput';
 import { InputText } from 'primereact/inputtext';
 import { ButtonGroup } from 'primereact/buttongroup';
 

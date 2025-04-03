@@ -43,7 +43,7 @@ export default function StudentView(props: StudentViewProps){
     );
 }
 
-function DisplayCourseTab({idx, labs, courseSlug, offeringSlug}){
+function DisplayCourseTab({idx, labs, courseSlug, offeringSlug} :{idx: number, labs: Lab[], courseSlug: string, offeringSlug: string}){
 
     if(idx == 0){
         return <StudentAssignmentTab labs={labs}/>;
@@ -52,7 +52,7 @@ function DisplayCourseTab({idx, labs, courseSlug, offeringSlug}){
         return <StudentQuizViewTab courseSlug={courseSlug} offeringSlug={offeringSlug} />;
     }
     if(idx == 3){
-        return <StudentTeamViewTab  courseSlug={courseSlug} offeringSlug={offeringSlug}/>
+        return <StudentTeamViewTab courseSlug={courseSlug} offeringSlug={offeringSlug}/>;
     }
 
     return (

@@ -176,8 +176,8 @@ def create_forks(user):
         create_fork_for_enrollment(enrollment)
 
 def create_fork(course_slug, user):
-    # Confirm student role and enrollment exists
-    role = Role.objects.get(kind=Role.Kind.STUDENT, offering__course__slug=course_slug)
+    offering = Offering.objects.get(course__slug=course_slug, active=True)
+    role = Role.objects.get(kind=Role.Kind.STUDENT, offering=offering)
     try:
         enrollment = Enrollment.objects.get(user=user, role=role)
     except Enrollment.DoesNotExist:

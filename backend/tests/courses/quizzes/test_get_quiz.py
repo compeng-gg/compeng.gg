@@ -65,7 +65,7 @@ class GetQuizTests(TestCasesWithUserAuth):
 
         response = self.client.get(self.get_url(quiz.offering.course.slug, quiz.slug))
 
-        expected_body = {"detail": "Quiz has been completed and is not accessible"}
+        expected_body = {"detail": "Student is not allowed to view this quiz"}
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(response.json(), expected_body)
@@ -74,12 +74,13 @@ class GetQuizTests(TestCasesWithUserAuth):
         requesting_user_id = self.user.id
 
         quiz = create_quiz(
-            user_id=requesting_user_id, starts_at=timezone.now() + timedelta(days=1)
+            user_id=requesting_user_id, starts_at=timezone.now() + timedelta(days=1),
+            content_viewable_after_submission=False
         )
 
         response = self.client.get(self.get_url(quiz.offering.course.slug, quiz.slug))
 
-        expected_body = {"detail": "Quiz has not started yet"}
+        expected_body = {"detail": "Student is not allowed to view this quiz"}
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(response.json(), expected_body)
@@ -405,7 +406,7 @@ class GetQuizTests(TestCasesWithUserAuth):
         two_hours_ago = timezone.now() - timedelta(hours=2)
         one_hour_ago = timezone.now() - timedelta(hours=1)
 
-        quiz = create_quiz(user_id=requesting_user_id, visible_at=two_hours_ago, starts_at=two_hours_ago, ends_at=one_hour_ago)
+        quiz = create_quiz(user_id=requesting_user_id, visible_at=two_hours_ago, starts_at=two_hours_ago, ends_at=one_hour_ago, content_viewable_after_submission=False)
 
         thirty_minutes_ago = timezone.now() - timedelta(minutes=30)
         one_hour_in_future = timezone.now() + timedelta(hours=1)
@@ -416,7 +417,7 @@ class GetQuizTests(TestCasesWithUserAuth):
         self.assertEqual(response_1.status_code, status.HTTP_403_FORBIDDEN)
 
         response_data_1 = response_1.json()
-        expected_data_1 = {"detail": "Quiz has already ended"}
+        expected_data_1 = {"detail": "Student is not allowed to view this quiz"}
 
         self.assertDictEqual(response_data_1, expected_data_1)
 

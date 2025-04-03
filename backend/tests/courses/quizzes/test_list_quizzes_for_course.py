@@ -45,6 +45,7 @@ class ListQuizzesForCourse(TestCasesWithUserAuth):
                 "title": "ece454 midterm",
                 "start_unix_timestamp": int(quiz_2.starts_at.timestamp()),
                 "end_unix_timestamp": int(quiz_2.ends_at.timestamp()),
+                "release_unix_timestamp": int(quiz_2.release_answers_at.timestamp()),
                 "slug": quiz_2.slug,
             }
         ]

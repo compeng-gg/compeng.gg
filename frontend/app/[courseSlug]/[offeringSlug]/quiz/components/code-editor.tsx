@@ -1,16 +1,17 @@
 import dynamic from 'next/dynamic';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import ace from 'ace-builds/src-noconflict/ace';
 import AceEditor from 'react-ace';
 import 'ace-builds/src-noconflict/ext-language_tools';
 import Head from 'next/head';
-import { CodeQuestionProps, CodeState } from '../question-models';
+import { CodeExecution, CodeQuestionProps, CodeState, executionStatusToTestRunStatus } from '../question-models';
 import { Button } from 'primereact/button';
 import { fetchApi, jwtObtainPairEndpoint, apiUrl} from '@/app/lib/api';
 import { JwtContext } from '@/app/lib/jwt-provider';
 import TestRun, { RawToTestRunProps, TestRunHeader, TestRunProps } from './test-run';
 import { Accordion, AccordionTab } from 'primereact/accordion';
 import Ide from './ide';
+import { TestResult } from './test-result';
 
 // Set base path for other Ace dependencies
 ace.config.set('basePath', '/ace');
@@ -27,7 +28,7 @@ enum TestRunStatus {
   COMPLETE = 'Complete'
 }
 
-export default function CodeEditor({ props, includeTests }: { props: CodeQuestionProps, includeTests: boolean}) {
+export default function CodeEditor({ props }: { props: CodeQuestionProps }) {
     const [loaded, setLoaded] = useState<boolean>(false);
     const [socket, setSocket] = useState<WebSocket | undefined>(undefined);
     const [message, setMessage] = useState<string>('');
@@ -35,12 +36,12 @@ export default function CodeEditor({ props, includeTests }: { props: CodeQuestio
     const [testStatus, setTestStatus] = useState<TestRunStatus>(TestRunStatus.NOT_RUN);
 
     // ✅ Convert executions to TestRunProps format
-    const [testRuns, setTestRuns] = useState<TestRunProps[]>(props.executions?.map(exec => ({
+    const [testRuns, setTestRuns] = useState<TestRunProps[]>(props.executions?.map((exec : CodeExecution)=> ({
         testResults: exec.result?.tests ?? [],
-        numPassed: exec.result?.tests?.filter(test => test.result === 'OK').length ?? 0,
-        numFailed: exec.result?.tests?.filter(test => test.result !== 'OK').length ?? 0,
+        numPassed: exec.result?.tests?.filter((test : TestResult) => test.result === 'OK').length ?? 0,
+        numFailed: exec.result?.tests?.filter((test : TestResult) => test.result !== 'OK').length ?? 0,
         stderr: exec.stderr ?? '',
-        status: exec.status ?? 'ERROR',
+        status: executionStatusToTestRunStatus(exec.status ?? "ERROR"),
         time: new Date() // No timestamp provided, so defaulting to now
     })) ?? []);
 
@@ -71,8 +72,8 @@ export default function CodeEditor({ props, includeTests }: { props: CodeQuestio
 
             const newResult: TestRunProps = {
                 testResults: data.tests ?? [],
-                numPassed: data.tests?.filter(test => test.result === 'OK').length ?? 0,
-                numFailed: data.tests?.filter(test => test.result !== 'OK').length ?? 0,
+                numPassed: data.tests?.filter((test : TestResult)  => test.result === 'OK').length ?? 0,
+                numFailed: data.tests?.filter((test : TestResult) => test.result !== 'OK').length ?? 0,
                 stderr: data.stderr ?? '',
                 status: data.status ?? 'ERROR',
                 time: new Date()
@@ -98,7 +99,7 @@ export default function CodeEditor({ props, includeTests }: { props: CodeQuestio
         <div style={{ display: 'flex', 'flexDirection': 'column', gap: '10px' }}>
             <Ide language={props.programmingLanguage} value={props.state.value} onChange={props.state.setValue} isMutable={props.isMutable} state={props.state} />
             <Accordion>
-                {testRuns.map((testRun: TestRunProps, index) => (
+                {testRuns.toReversed().map((testRun: TestRunProps, index) => (
                     <AccordionTab header={TestRunHeader(testRun)} key={index}>
                         <TestRun {...testRun} />
                     </AccordionTab>

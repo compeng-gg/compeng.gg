@@ -27,41 +27,81 @@ class BaseQuestionSerializer(serializers.ModelSerializer):
         return res
 
 
-class MultipleChoiceQuestionSerializer(BaseQuestionSerializer):
+class BaseMultipleChoiceQuestionSerializer(BaseQuestionSerializer):
     question_type = serializers.CharField(default="MULTIPLE_CHOICE", read_only=True)
-    selected_answer_index = serializers.SerializerMethodField()
 
     class Meta:
         model = db.MultipleChoiceQuestion
         fields = DEFAULT_QUIZ_QUESTION_FIELDS + [
             "options",
+        ]
+
+
+class StaffMultipleChoiceQuestionSerializer(BaseMultipleChoiceQuestionSerializer):
+    class Meta:
+        model = BaseMultipleChoiceQuestionSerializer.Meta.model
+        fields = BaseMultipleChoiceQuestionSerializer.Meta.fields + [
+            "correct_option_index",
+        ]
+
+
+class StudentMultipleChoiceQuestionSerializer(BaseMultipleChoiceQuestionSerializer):
+    selected_answer_index = serializers.SerializerMethodField()
+
+    class Meta:
+        model = BaseMultipleChoiceQuestionSerializer.Meta.model
+        fields = BaseMultipleChoiceQuestionSerializer.Meta.fields + [
             "selected_answer_index",
         ]
 
     def get_selected_answer_index(
         self, multiple_choice_question: db.MultipleChoiceQuestion
     ) -> Optional[int]:
-        if (answer := multiple_choice_question.answers.first()) is None:
+        try:
+            answer = multiple_choice_question.answers.get(
+                quiz_submission=self.context["quiz_submission"]
+            )
+        except db.MultipleChoiceAnswer.DoesNotExist:
             return None
 
         return answer.selected_answer_index
 
 
-class CheckboxQuestionSerializer(BaseQuestionSerializer):
+class BaseCheckboxQuestionSerializer(BaseQuestionSerializer):
     question_type = serializers.CharField(default="CHECKBOX", read_only=True)
-    selected_answer_indices = serializers.SerializerMethodField()
 
     class Meta:
         model = db.CheckboxQuestion
         fields = DEFAULT_QUIZ_QUESTION_FIELDS + [
             "options",
+        ]
+
+
+class StaffCheckboxQuestionSerializer(BaseCheckboxQuestionSerializer):
+    class Meta:
+        model = BaseCheckboxQuestionSerializer.Meta.model
+        fields = BaseCheckboxQuestionSerializer.Meta.fields + [
+            "correct_answer_indices",
+        ]
+
+
+class StudentCheckboxQuestionSerializer(BaseCheckboxQuestionSerializer):
+    selected_answer_indices = serializers.SerializerMethodField()
+
+    class Meta:
+        model = BaseCheckboxQuestionSerializer.Meta.model
+        fields = BaseCheckboxQuestionSerializer.Meta.fields + [
             "selected_answer_indices",
         ]
 
     def get_selected_answer_indices(
         self, checkbox_question: db.CheckboxQuestion
     ) -> Optional[List[int]]:
-        if (answer := checkbox_question.answers.first()) is None:
+        try:
+            answer = checkbox_question.answers.get(
+                quiz_submission=self.context["quiz_submission"]
+            )
+        except db.CheckboxAnswer.DoesNotExist:
             return None
 
         return answer.selected_answer_indices
@@ -87,15 +127,27 @@ class WrittenResponseQuestionSerializer(BaseQuestionSerializer):
         return answer.response
 
 
-class CodingQuestionSerializer(BaseQuestionSerializer):
+class BaseCodingQuestionSerializer(BaseQuestionSerializer):
     question_type = serializers.CharField(default="CODING", read_only=True)
-    solution = serializers.SerializerMethodField()
 
     class Meta:
         model = db.CodingQuestion
         fields = DEFAULT_QUIZ_QUESTION_FIELDS + [
             "starter_code",
             "programming_language",
+        ]
+
+
+class StaffCodingQuestionSerializer(BaseCodingQuestionSerializer):
+    pass
+
+
+class StudentCodingQuestionSerializer(BaseCodingQuestionSerializer):
+    solution = serializers.SerializerMethodField()
+
+    class Meta:
+        model = BaseCodingQuestionSerializer.Meta.model
+        fields = BaseCodingQuestionSerializer.Meta.fields + [
             "solution",
         ]
 
@@ -104,6 +156,22 @@ class CodingQuestionSerializer(BaseQuestionSerializer):
             return None
 
         return answer.solution
+
+
+MODE_TO_QUESTION_TYPE_TO_SERIALIZER = {
+    "STUDENT": {
+        "multiple_choice": StudentMultipleChoiceQuestionSerializer,
+        "checkbox": StudentCheckboxQuestionSerializer,
+        "written_response": WrittenResponseQuestionSerializer,
+        "coding": StudentCodingQuestionSerializer,
+    },
+    "STAFF": {
+        "multiple_choice": StaffMultipleChoiceQuestionSerializer,
+        "checkbox": StaffCheckboxQuestionSerializer,
+        "written_response": WrittenResponseQuestionSerializer,
+        "coding": StaffCodingQuestionSerializer,
+    },
+}
 
 
 class QuizSerializer(serializers.ModelSerializer):
@@ -121,32 +189,28 @@ class QuizSerializer(serializers.ModelSerializer):
         ]
 
     def get_questions(self, quiz: db.Quiz) -> List[Dict[str, Any]]:
-        checkbox_questions = quiz.checkbox_questions
-        multiple_choice_questions = quiz.multiple_choice_questions
-        written_response_questions = quiz.written_response_questions
-        coding_questions = quiz.coding_questions
+        checkbox_questions = quiz.checkboxquestions
+        multiple_choice_questions = quiz.multiplechoicequestions
+        written_response_questions = quiz.writtenresponsequestions
+        coding_questions = quiz.codingquestions
 
-        serialized_multiple_choice_questions = MultipleChoiceQuestionSerializer(
-            multiple_choice_questions,
-            many=True,
+        serialized_multiple_choice_questions = StudentMultipleChoiceQuestionSerializer(
+            multiple_choice_questions, many=True, context=self.context
         ).data
 
-        serialized_checkbox_questions = CheckboxQuestionSerializer(
-            checkbox_questions,
-            many=True,
+        serialized_checkbox_questions = StudentCheckboxQuestionSerializer(
+            checkbox_questions, many=True, context=self.context
         ).data
 
         serialized_written_response_questions = WrittenResponseQuestionSerializer(
-            written_response_questions,
-            many=True,
+            written_response_questions, many=True, context=self.context
         ).data
 
-        serialized_coding_questions = CodingQuestionSerializer(
-            coding_questions,
-            many=True,
+        serialized_coding_questions = StudentCodingQuestionSerializer(
+            coding_questions, many=True, context=self.context
         ).data
 
-        all_questions = (
+        all_questions = list(
             serialized_multiple_choice_questions
             + serialized_checkbox_questions
             + serialized_written_response_questions

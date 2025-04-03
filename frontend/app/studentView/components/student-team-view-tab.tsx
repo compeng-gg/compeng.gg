@@ -76,11 +76,11 @@ export default function StudentTeamViewTab(props: StudentTeamViewTabProps) {
                 'GET'
             );
             const data = await res.json();
-            const returnedTeams = [];
+            const returnedTeams : Team[] = [];
             let foundMembership = false;
     
-            data.forEach((team) => {
-                const userMember = team.members.find((m) => m.name === userName);
+            data.forEach((team : Team) => {
+                const userMember = team.members.find((m : TeamMembership) => m.name === userName);
                 if (userMember) {
                     setUserMembership({ team, role: userMember.role });
                     foundMembership = true;
@@ -317,7 +317,7 @@ const UserTeamStatus = (props: UserTeamStatusProps) => {
         );
     };
 
-    const manageJoinRequest = ({ team, name, approved }) => {
+    const manageJoinRequest = ({ team, name, approved } : {team: Team, name: string, approved: boolean}) => {
         fetchApi(jwt, setAndStoreJwt, 'teams/join/manage/', 'PATCH', {
             team_id: team.id,
             joiner_name: name,

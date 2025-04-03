@@ -1,6 +1,6 @@
 'use client';
 
-import { useContext, useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import { ID_SET_ON_SERVER, QuestionData, QuestionImage, StaffQuestionData } from '../../question-models';
 import { QuizProps } from '../../quiz-display';
 import { JwtContext } from '@/app/lib/jwt-provider';

@@ -1,5 +1,8 @@
 // Base Data Classes
 
+import { TestResult } from "./components/test-result";
+import { TestRunStatus } from "./components/test-run";
+
 //To-do: align question types
 export const ServerToLocal = new Map([
     ['CODING', 'CODE'],
@@ -50,11 +53,34 @@ export interface BaseQuestionData {
 
 export type ProgrammingLanguages = 'C_PP' | 'C' | 'PYTHON';
 
+  
+export interface CodeExecution {
+result?: {
+    tests?: TestResult[];
+};
+stderr?: string;
+status?: 'OK' | 'FAIL' | 'ERROR' | string; // Adjust status types as needed
+}
+
+export function executionStatusToTestRunStatus(status: string): TestRunStatus {
+    switch (status) {
+        case 'OK':
+            return TestRunStatus.SUCCESS;
+        case 'FAIL':
+            return TestRunStatus.FAILURE;
+        case 'ERROR':
+            return TestRunStatus.ERROR;
+        default:
+            return TestRunStatus.NOT_RUN;
+    }
+}
+
 // Question Data
 export interface CodeQuestionData extends BaseQuestionData {
     questionType: 'CODE';
     starterCode: string;
     programmingLanguage: ProgrammingLanguages;   
+    executions?: CodeExecution[];
 }
 
 export interface StaffCodeQuestionData extends CodeQuestionData {
@@ -100,7 +126,7 @@ export type SelectState = BaseState<number>; // For selectedIdx
 export type TextState = BaseState<string>; // For currentText
 export type MultiSelectState = BaseState<number[]>; // For selectedIdxs
 
-export type QuestionState = CodeState | SelectState | TextState;
+export type QuestionState = CodeState | SelectState | TextState | MultiSelectState;
 
 // Utility Type to Map QuestionData to State
 type QuestionTypeToStateMap = {

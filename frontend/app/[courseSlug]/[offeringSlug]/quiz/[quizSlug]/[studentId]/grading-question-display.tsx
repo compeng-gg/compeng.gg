@@ -10,7 +10,10 @@ import CheckboxEditor from '../../components/checkbox-editor-VA';
 import { fetchApi } from '@/app/lib/api';
 import { JwtContext } from '@/app/lib/jwt-provider';
 import { useParams } from 'next/navigation';
+import { ProgrammingLanguages } from '../../question-models';
 
+
+// TODO_nick This is scuffed, need to refactor
 interface GradingQuestionDisplayProps {
     idx?: number;
     question: {
@@ -18,7 +21,7 @@ interface GradingQuestionDisplayProps {
         prompt: string;
         points: number;
         options?: string[];
-        programming_language?: string;
+        programming_language?: ProgrammingLanguages;
         correct_option_index?: number;
         correct_option_indices?: number[];
         question_type: string;  
@@ -56,17 +59,15 @@ export default function GradingQuestionDisplay({
     
         if (question.correct_option_index !== undefined) {
             autoGradedScore = studentAnswer?.selected_answer_index === question.correct_option_index ? question.points : 0;
-        } 
-        else if (question.correct_option_indices !== undefined) {
-            const studentSelection = new Set(studentAnswer?.selected_answer_indices || []);
+        } else if (question.correct_option_indices !== undefined) {
+            const studentSelection = new Set<number>(studentAnswer?.selected_answer_indices || []);
             const correctSelection = new Set(question.correct_option_indices);
     
-            const correctCount = [...studentSelection].filter((idx) => correctSelection.has(idx)).length;
-            const incorrectCount = [...studentSelection].filter((idx) => !correctSelection.has(idx)).length;
+            const correctCount = [...studentSelection].filter((idx: number) => correctSelection.has(idx)).length;
+            const incorrectCount = [...studentSelection].filter((idx: number) => !correctSelection.has(idx)).length;
             const totalCorrect = correctSelection.size;
             autoGradedScore = Math.round(Math.max(0, (correctCount / totalCorrect) * question.points - incorrectCount));
-        } 
-        else if (question.programming_language) {
+        } else if (question.programming_language) {
             if (executions && executions.length > 0) {
                 const highestGrade = Math.max(...executions.map(exec => exec.result?.grade ?? 0));
                 autoGradedScore = Math.round(highestGrade * question.points);
@@ -76,17 +77,13 @@ export default function GradingQuestionDisplay({
         }
     
         if (autoGradedScore !== null) {
-            // ✅ Use `autoGradedScore` instead of `grade`
             updateGradeOrComment(question.id, autoGradedScore, comment ?? '');
         }
     
         return autoGradedScore ?? null;
     });
     
-    
-    
-
-    /** ✅ **Function to update grade & comment in backend** */
+    // Function to update grade & comment in backend
     const updateGradeOrComment = useCallback(async (
         questionId: string,
         grade: number | null,
@@ -105,8 +102,7 @@ export default function GradingQuestionDisplay({
         );
     }, [jwt, setAndStoreJwt, quizSlug, studentId]);
     
-
-    /** ✅ **Trigger backend update on grade/comment change** */
+    // Trigger backend update on grade/comment change
     useEffect(() => {
         const timeout = setTimeout(() => {
             updateGradeOrComment(question.id, grade ?? null, comment ?? '');
@@ -131,7 +127,6 @@ export default function GradingQuestionDisplay({
         >
             <div style={{ marginBottom: '15px' }}>
                 <strong>Student Answer:</strong>
-
                 {question.options ? (
                     question.correct_option_indices ? (
                         <CheckboxEditor
@@ -162,19 +157,21 @@ export default function GradingQuestionDisplay({
                             id: `code-question-${idx}`,
                             quizSlug: '',
                             courseSlug: '',
+                            renderPromptAsLatex: question.question_type === 'latex',
                             prompt: question.prompt,
                             totalMarks: question.points,
                             isMutable: false,
                             questionType: 'CODE',
                             serverQuestionType: 'CODING',
-                            programmingLanguage: question.programming_language ?? 'PYTHON',
+                            programmingLanguage: question.programming_language,
                             state: {
                                 value: studentAnswer?.solution ?? 'No answer provided',
                                 setValue: () => {},
                             },
                             executions: executions,
+                            starterCode: "",
+                            images: [],
                         }}
-                        save={() => {}}
                     />
                 ) : (
                     <TextEditor
@@ -187,7 +184,6 @@ export default function GradingQuestionDisplay({
                 )}
             </div>
 
-            {/* 🔥 Grading Section */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '15px' }}>
                 <div style={{ flex: '2', marginRight: '20px' }}>
                     <label><strong>Comments:</strong></label>
@@ -236,7 +232,6 @@ export default function GradingQuestionDisplay({
     );
 }
 
-/** ✅ **Grade Badge at Top-Right of Each Card** */
 function GradeBadge({ totalAvailable }: { totalAvailable: number }) {
     return (
         <Badge

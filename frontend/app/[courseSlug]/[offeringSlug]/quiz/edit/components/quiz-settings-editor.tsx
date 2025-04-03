@@ -46,7 +46,7 @@ export function QuizSettingsEditor(props: QuizSettingsEditorProps) {
                     tooltip="Github repository that contains the grading scripts"/>
             </LabelledField>
             <LabelledField label="Content Viewable After Submission" id="content-viewable">
-                <Checkbox id="content-viewable" checked={quizProps.contentViewableAfterSubmission} onChange={(e) => setQuizProps({ ...quizProps, contentViewableAfterSubmission: e.checked })} />
+                <Checkbox id="content-viewable" checked={quizProps.contentViewableAfterSubmission} onChange={(e) => setQuizProps({ ...quizProps, contentViewableAfterSubmission: e.checked ?? false})} />
             </LabelledField>
         </div>
     );

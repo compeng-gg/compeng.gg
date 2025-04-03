@@ -5,6 +5,7 @@ from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from django.db.models import Sum
 from courses.quizzes.api.admin.permissions import IsAuthenticatedCourseInstructorOrTA
+import json
 
 
 @api_view(["POST"])
@@ -48,9 +49,6 @@ def compute_total_grade(
     return Response(
         {"message": "Total grade computed successfully"}, status=status.HTTP_200_OK
     )
-
-
-import json
 
 
 @api_view(["POST"])

@@ -13,10 +13,11 @@ export interface StaffViewProps {
     courseName: string;
     labs: Lab[];
     courseSlug: string;
+    offeringSlug: string;
 }
 
 export default function StaffView(props: StaffViewProps){
-    const {courseName, labs, courseSlug} = props;
+    const {courseName, labs, courseSlug, offeringSlug} = props;
 
     const [idx, setIdx] = useState<number>(0);
 
@@ -40,13 +41,13 @@ export default function StaffView(props: StaffViewProps){
                     activeIndex={idx}
                     onTabChange={(e) => setIdx(e.index)}
                 />
-                <DisplayCourseTab idx={idx} labs={labs} courseSlug={courseSlug}/>
+                <DisplayCourseTab idx={idx} courseSlug={courseSlug} offeringSlug={offeringSlug}/>
             </PrimeWrapper>
         </>
     );
 }
 
-function DisplayCourseTab({idx, courseSlug, offeringSlug}){
+function DisplayCourseTab({idx, courseSlug, offeringSlug} : {idx: number, courseSlug: string, offeringSlug: string}){
     if(idx == 0){
         return <StaffCourseSettingsTab courseSlug={courseSlug} offeringSlug={offeringSlug}/>;
     }
