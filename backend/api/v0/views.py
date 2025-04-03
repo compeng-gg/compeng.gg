@@ -30,6 +30,7 @@ from courses.models import (
     AssignmentTask,
     Enrollment,
     Offering,
+    OfferingTeamsSettings,
     Role,
 )
 from courses.utils import is_staff, sync_before_due_date
@@ -408,6 +409,12 @@ def course(request, slug):
         assignment_data = _get_assignment_data(assignment, user)
         assignments.append(assignment_data)
     data['assignments'] = assignments
+    try:
+        _ = OfferingTeamsSettings.objects.get(offering=offering)
+        data['teams_enabled'] = True
+    except OfferingTeamsSettings.DoesNotExist:
+        data['teams_enabled'] = False
+
     print(data)
     return Response(data)
 

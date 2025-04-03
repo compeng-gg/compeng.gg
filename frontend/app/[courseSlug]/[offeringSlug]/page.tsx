@@ -39,6 +39,7 @@ function Course({ params }: { params: { courseSlug: string, offeringSlug: string
     const [name, setName] = useState('');
     const [labs, setLabs] = useState([] as Lab[]);
     const [role, setRole] = useState<string | undefined>(undefined);
+    const [teamsEnabled, setTeamsEnabled] = useState<boolean>(false);
 
     useEffect(() => {
         async function fetchLabs() {
@@ -49,6 +50,7 @@ function Course({ params }: { params: { courseSlug: string, offeringSlug: string
                 setName(data.name);
                 setLabs(data.assignments);
                 setRole(getRoleEnum(data.role));
+                setTeamsEnabled(data.teams_enabled);
             } catch (error) {
                 console.error('Error fetching labs:', error);
             }
@@ -62,7 +64,7 @@ function Course({ params }: { params: { courseSlug: string, offeringSlug: string
             <Navbar />
             <Card>
                 {(role == 'Student')
-                    ? <StudentView courseName={name} labs={labs} courseSlug={params.courseSlug} offeringSlug={params.offeringSlug}/>
+                    ? <StudentView courseName={name} labs={labs} courseSlug={params.courseSlug} offeringSlug={params.offeringSlug} teamsEnabled={teamsEnabled}/>
                     : <StaffView courseName={name} labs={labs} courseSlug={params.courseSlug} offeringSlug={params.offeringSlug}/>}
             </Card>
         </>
