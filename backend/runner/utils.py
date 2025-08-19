@@ -7,7 +7,7 @@ def create_k8s_task(task):
     if not settings.RUNNER_USE_K8S:
         return
 
-    image = "gitea.eyl.io/jon/compeng-backend:latest"
+    image = settings.RUNNER_IMAGE_BACKEND
     task_id = task.id
 
     pod_name = f"{task.head_commit.repository.name}-task-{task_id}"
@@ -46,18 +46,14 @@ def create_k8s_task(task):
                     "envFrom": [
                         {
                             "secretRef": {
-                                "name": "backend",
+                                "name": "compeng-backend",
                             },
                         }
                     ],
                 },
             ],
             "restartPolicy": "Never",
-            "imagePullSecrets": [
-                {
-                    "name": "docker",
-                },
-            ],
+            "imagePullSecrets": settings.RUNNER_IMAGE_PULL_SECRETS,
         },
     }
 
@@ -72,7 +68,7 @@ def create_build_runner(push):
     if not repository.offering_runner.exists():
         return
 
-    image = "gitea.eyl.io/jon/compeng-backend:latest"
+    image = settings.RUNNER_IMAGE_BACKEND
     push_id = push.id
 
     pod_name = f"{repository.name}-push-{push_id}"
@@ -132,18 +128,14 @@ def create_build_runner(push):
                     "envFrom": [
                         {
                             "secretRef": {
-                                "name": "backend",
+                                "name": "compeng-backend",
                             },
                         }
                     ],
                 },
             ],
             "restartPolicy": "Never",
-            "imagePullSecrets": [
-                {
-                    "name": "docker",
-                },
-            ],
+            "imagePullSecrets": settings.RUNNER_IMAGE_PULL_SECRETS,
         },
     }
 

@@ -28,7 +28,7 @@ class Command(BaseCommand):
 
         head_commit = task.head_commit
         repository = head_commit.repository
-        image = f"gitea.eyl.io/jon/{task.runner.image}"
+        image = f"{settings.RUNNER_IMAGE_REPO}/{task.runner.image}"
         namespace = "compeng"
         command = shlex.split(task.runner.command)
         pod_name = f"{repository.name}-task-{task_id}-runner"
@@ -85,11 +85,7 @@ class Command(BaseCommand):
                         },
                     },
                 ],
-                "imagePullSecrets": [
-                    {
-                        "name": "docker",
-                    },
-                ],
+                "imagePullSecrets": settings.RUNNER_IMAGE_PULL_SECRETS,
                 "restartPolicy": "Never",
                 "volumes": [
                     {
@@ -101,6 +97,12 @@ class Command(BaseCommand):
                 ],
             },
         }
+
+        # TODO: remove
+        # if task.runner.image == "2025-winter-ece353-runner:latest" and task.runner.command == "/workspace/lab6/grade.py":
+        #    data["spec"]["containers"][0]["securityContext"] = {
+        #        "privileged": True,
+        #    }
 
         p = subprocess.run(
             ["kubectl", "create", "-f", "-"],

@@ -337,8 +337,10 @@ def _get_assignment_data(assignment, user):
     #     pass
     if assignment.kind == Assignment.Kind.TESTS:
         if not is_private_released:
+            assignment_data["raw_grade"] = assignment_grade
             assignment_data["grade"] = f"{assignment_grade:.1f}/{assignment.public_total:.1f} ({assignment.private_total:.1f} hidden)"
         else:
+            assignment_data["raw_grade"] = assignment_grade
             assignment_data["grade"] = f"{assignment_grade:.1f}/{assignment.overall_total:.1f}"
     elif assignment.kind == Assignment.Kind.LEADERBOARD:
         leaderboard = []

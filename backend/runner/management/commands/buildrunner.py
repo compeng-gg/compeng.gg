@@ -2,6 +2,7 @@ import pathlib
 import subprocess
 
 from compeng_gg.django.github.models import Push
+from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 
 class Command(BaseCommand):
@@ -25,6 +26,6 @@ class Command(BaseCommand):
         )
 
         repo_dir = tmp_dir / repository.name
-        tag = f"gitea.eyl.io/jon/{repository.name}:latest"
+        tag = f"{settings.RUNNER_IMAGE_REPO}/{repository.name}:latest"
         subprocess.run(["podman", "build", "-t", tag, "."], cwd=repo_dir)
         subprocess.run(["podman", "push", tag])

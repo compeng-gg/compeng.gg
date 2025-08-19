@@ -65,6 +65,7 @@ INSTALLED_APPS = [
     'api',
 
     'courses',
+    # 'courses.aps105.y2025_winter',
 
     'discord_app',
     'github_app',
@@ -243,6 +244,14 @@ GITHUB_API_URL = "https://api.github.com"
 
 # Runner
 
+RUNNER_IMAGE_REPO = os.environ.setdefault("RUNNER_IMAGE_REPO", "code.ece.gg/compeng-gg")
+RUNNER_IMAGE_BACKEND_NAME = os.environ.setdefault("RUNNER_IMAGE_BACKEND", "compeng-backend:latest")
+RUNNER_IMAGE_BACKEND = f"{RUNNER_IMAGE_REPO}/{RUNNER_IMAGE_BACKEND_NAME}"
+RUNNER_IMAGE_PULL_SECRETS = [
+    {
+        "name": "docker",
+    },
+]
 RUNNER_QUEUE_HOST = os.environ.setdefault('RUNNER_QUEUE_HOST', 'localhost')
 RUNNER_QUEUE_PORT = int(os.environ.setdefault('RUNNER_QUEUE_PORT', '8002'))
 RUNNER_HOSTS = json.loads(os.getenv('RUNNER_HOSTS', '["localhost"]'))
