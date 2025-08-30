@@ -64,7 +64,7 @@ class Semester(models.Model):
     end = models.DateField()
 
     def __str__(self):
-        return f'{self.name} {self.course}'
+        return f'{self.name}'
 
     class Meta:
         ordering = ['-start', 'slug']
