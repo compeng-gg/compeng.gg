@@ -56,6 +56,19 @@ class Course(models.Model):
     class Meta:
         ordering = ['slug']
 
+class Semester(models.Model):
+
+    slug = models.SlugField(max_length=50)
+    name = models.CharField(max_length=50)
+    start = models.DateField()
+    end = models.DateField()
+
+    def __str__(self):
+        return f'{self.name} {self.course}'
+
+    class Meta:
+        ordering = ['-start', 'slug']
+
 class Offering(models.Model):
 
     course = models.ForeignKey(

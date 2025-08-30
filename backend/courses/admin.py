@@ -9,6 +9,10 @@ class CourseAdmin(admin.ModelAdmin):
 class InstitutionAdmin(admin.ModelAdmin):
     pass
 
+@admin.register(models.Semester)
+class SemesterAdmin(admin.ModelAdmin):
+    pass
+
 @admin.register(models.Offering)
 class OfferingAdmin(admin.ModelAdmin):
     pass
