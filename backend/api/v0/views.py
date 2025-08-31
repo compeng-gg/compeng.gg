@@ -758,6 +758,7 @@ def create_offering_repos(offering):
     student_role = Role.objects.get(offering=offering, kind=Role.Kind.STUDENT)
 
     student_repo_name = f"{offering.slug}-{offering.course.slug}-student"
+    api.create_org_repo_for_org(student_repo_name)
     api.add_team_repository_permissions_for_org(
         instructor_role.github_team_slug,
         student_repo_name,
