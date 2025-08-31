@@ -39,6 +39,7 @@ urlpatterns = [
 
     path('semesters/', views.semesters),
     path('create-offering/', views.create_offering),
+    path('create-assignment/', views.create_assignment),
 
     path('courses/offerings/', views.offerings),
     path('courses/<slug:slug>/', views.course),

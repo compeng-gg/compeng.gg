@@ -395,6 +395,8 @@ def staff(request, course_slug):
     student_role = Role.objects.get(offering=offering, kind=Role.Kind.STUDENT)
     data = {
         "offering": str(offering),
+        "course_slug": course_slug,
+        "semester_slug": offering.slug,
     }
     assignments = []
     for assignment in offering.assignment_set.all():
@@ -866,6 +868,54 @@ def create_offering(request):
     Enrollment.objects.create(role=instructor_role, user=user)
 
     create_offering_repos(offering)
+
+    return Response(status=status.HTTP_201_CREATED)
+
+class CreateAssignmentSerializer(serializers.Serializer):
+    course_slug = serializers.CharField()
+    semester_slug = serializers.CharField()
+    slug = serializers.CharField()
+    name = serializers.CharField()
+    due_date = serializers.DateTimeField()
+    files = serializers.JSONField()
+    public_total = serializers.FloatField()
+    private_total = serializers.FloatField()
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def create_assignment(request):
+
+    serializer = CreateAssignmentSerializer(data=request.data)
+    if not serializer.is_valid():
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+    validated_data = serializer.validated_data
+
+    course_slug = validated_data["course_slug"]
+
+    try:
+        offering = Offering.objects.get(active=True, course__slug=course_slug)
+    except Offering.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    user = request.user
+    if not is_staff(user, offering):
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
+
+    public_total = validated_data["public_total"]
+    private_total = validated_data["private_total"]
+    overall_total = public_total + private_total
+
+    assignment = Assignment.objects.create(
+        offering=offering,
+        kind=Assignment.Kind.TESTS,
+        slug=validated_data["slug"],
+        name=validated_data["name"],
+        due_date=validated_data["due_date"],
+        files=validated_data["files"],
+        public_total=public_total,
+        private_total=private_total,
+        overall_total=overall_total,
+    )
 
     return Response(status=status.HTTP_201_CREATED)
 
