@@ -28,9 +28,11 @@ from courses.models import (
     Assignment,
     AssignmentResult,
     AssignmentTask,
+    Course,
     Enrollment,
     Offering,
     Role,
+    Semester,
 )
 from courses.utils import is_staff, sync_before_due_date
 
@@ -177,6 +179,8 @@ def dashboard(request):
     offerings = []
     for enrollment in user.enrollment_set.all():
         offering = enrollment.role.offering
+        if not offering.active:
+            continue
         offerings.append({
             'name': str(offering),
             'slug': offering.course.slug,
@@ -358,11 +362,12 @@ def course(request, slug):
     from courses.models import Assignment, AssignmentLeaderboardEntry, AssignmentGrade
     user = request.user
     try:
-        offering = Offering.objects.get(course__slug=slug)
+        offering = Offering.objects.get(course__slug=slug, active=True)
     except Offering.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
-    except Offering.MultipleObjectsReturned:
-        offering = Offering.objects.get(course__slug=slug, active=True)
+    # TODO: archive offerings
+    #except Offering.MultipleObjectsReturned:
+    #    offering = Offering.objects.get(course__slug=slug, active=True)
 
     data = {
         'name': str(offering),
@@ -679,12 +684,188 @@ def offerings(request):
     offerings = []
     for enrollment in user.enrollment_set.all():
         offering = enrollment.role.offering
+        if not offering.active:
+            continue
         offerings.append({
             'name': str(offering),
             'slug': offering.course.slug,
             'role': str(enrollment.role),
         })
     return Response(offerings)
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAdminUser])
+def semesters(request):
+    semesters = []
+    for semester in Semester.objects.all():
+        courses = []
+        for course in Course.objects.all():
+            if Offering.objects.filter(course__slug=course.slug, slug=semester.slug).exists():
+                continue
+            courses.append({
+                'name': course.name,
+                'slug': course.slug,
+            })
+        semesters.append({
+            'name': semester.name,
+            'slug': semester.slug,
+            'courses': courses,
+
+        })
+    return Response(semesters)
+
+def generate_ssh_key():
+    import subprocess
+    import tempfile
+
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        id_ed25519_path = f"{tmp_dir}/id_ed25519"
+        id_ed25519_pub_path = f"{tmp_dir}/id_ed25519.pub"
+        p = subprocess.run(
+            ["ssh-keygen", "-t", "ed25519", "-f", id_ed25519_path, "-N", "", "-C", ""],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        with open(id_ed25519_path) as f:
+            id_ed25519 = f.read()
+        with open(id_ed25519_pub_path) as f:
+            id_ed25519_pub = f.read()
+    return id_ed25519, id_ed25519_pub
+
+def create_staff_only_repo(api, name, instructor_role, ta_role):
+    api.create_org_repo_for_org(name)
+    api.add_team_repository_permissions_for_org(
+        instructor_role.github_team_slug,
+        name,
+        permission='push'
+    )
+    api.add_team_repository_permissions_for_org(
+        ta_role.github_team_slug,
+        name,
+        permission='push'
+    )
+
+def create_offering_repos(offering):
+    import json
+    import subprocess
+
+    from github_app.rest_api import GitHubRestAPI
+    api = GitHubRestAPI()
+
+    instructor_role = Role.objects.get(offering=offering, kind=Role.Kind.INSTRUCTOR)
+    ta_role = Role.objects.get(offering=offering, kind=Role.Kind.TA)
+    student_role = Role.objects.get(offering=offering, kind=Role.Kind.STUDENT)
+
+    student_repo_name = f"{offering.slug}-{offering.course.slug}-student"
+    api.add_team_repository_permissions_for_org(
+        instructor_role.github_team_slug,
+        student_repo_name,
+        permission='push'
+    )
+    api.add_team_repository_permissions_for_org(
+        ta_role.github_team_slug,
+        student_repo_name,
+        permission='push'
+    )
+    api.add_team_repository_permissions_for_org(
+        student_role.github_team_slug,
+        student_repo_name,
+        permission='pull'
+    )
+
+    docs_repo_name = f"{offering.slug}-{offering.course.slug}-docs"
+    create_staff_only_repo(api, docs_repo_name, instructor_role, ta_role)
+
+    staff_repo_name = f"{offering.slug}-{offering.course.slug}-staff"
+    create_staff_only_repo(api, staff_repo_name, instructor_role, ta_role)
+
+    runner_repo_name = f"{offering.slug}-{offering.course.slug}-runner"
+    create_staff_only_repo(api, runner_repo_name, instructor_role, ta_role)
+
+    id_ed25519, id_ed25519_pub = generate_ssh_key()
+
+    secret_name = f"{runner_repo_name}-deploy"
+    namespace = "compeng"
+
+    secret_data = {
+        "apiVersion": "v1",
+        "kind": "Secret",
+        "type": "Opaque",
+        "metadata": {
+            "name": secret_name,
+            "namespace": namespace,
+        },
+        "stringData": {
+            "config": "Host github.com\n  StrictHostKeyChecking no\n  UserKnownHostsFile=/dev/null\n",
+            "id_ed25519": id_ed25519,
+            "id_ed25519.pub": id_ed25519_pub,
+        },
+    }
+    p = subprocess.run(
+        ["kubectl", "create", "-f", "-"],
+        check=True, input=json.dumps(secret_data), text=True
+    )
+
+    api.create_deploy_key_for_org(runner_repo_name, id_ed25519_pub)
+
+class CreateOfferingSerializer(serializers.Serializer):
+    course_slug = serializers.CharField()
+    semester_slug = serializers.CharField()
+    instructor = serializers.CharField()
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAdminUser])
+def create_offering(request):
+    serializer = CreateOfferingSerializer(data=request.data)
+    if not serializer.is_valid():
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+    validated_data = serializer.validated_data
+
+    semester_slug = validated_data['semester_slug']
+    course_slug = validated_data['course_slug']
+    instructor = validated_data['instructor']
+
+    try:
+        semester = Semester.objects.get(slug=semester_slug)
+    except:
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        course = Course.objects.get(slug=course_slug)
+    except:
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        user = User.objects.get(username=instructor)
+    except User.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    offering = Offering.objects.create(
+        course=course,
+        slug=semester.slug,
+        name=semester.name,
+        start=semester.start,
+        end=semester.end,
+        active=True,
+    )
+
+    from courses.management.commands.coursestestmodels import create_default_roles, create_discord_roles, create_github_teams
+    from discord_app.rest_api import DiscordRestAPI
+
+    create_default_roles(offering)
+    create_discord_roles(
+        offering,
+        student_color=DiscordRestAPI.COLOR_BLUE
+    )
+    create_github_teams(offering)
+
+    instructor_role = Role.objects.get(offering=offering, kind=Role.Kind.INSTRUCTOR)
+    Enrollment.objects.create(role=instructor_role, user=user)
+
+    create_offering_repos(offering)
+
+    return Response(status=status.HTTP_201_CREATED)
 
 @api_view(['GET'])
 @permission_classes([permissions.AllowAny])

@@ -257,9 +257,9 @@ class GitHubRestAPI(RestAPI):
     def create_org_repo(self, org, name):
         data = {
             "name": name,
-            "description": "This is your first repository",
-            "homepage": "https://github.com",
-            "private": False,
+            "description": "",
+            "homepage": "",
+            "private": True,
             "has_issues": True,
             "has_projects": True,
             "has_wiki": False,
@@ -268,6 +268,16 @@ class GitHubRestAPI(RestAPI):
 
     def create_org_repo_for_org(self, name):
         return self.create_org_repo(self.ORGANIZATION, name)
+
+    def create_deploy_key(self, owner, repo, key):
+        data = {
+            "key": key,
+            "read_only": True,
+        }
+        return self.post_with_ghs(f'/repos/{owner}/{repo}/keys', data)
+
+    def create_deploy_key_for_org(self, repo, key):
+        return self.create_deploy_key(self.ORGANIZATION, repo, key)
 
     def add_team_membership(self, org, team_slug, username):
         return self.put_with_ghs(f'/orgs/{org}/teams/{team_slug}/memberships/{username}')
