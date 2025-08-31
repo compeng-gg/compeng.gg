@@ -777,6 +777,7 @@ def create_offering_repos(offering):
 
     docs_repo_name = f"{offering.slug}-{offering.course.slug}-docs"
     create_staff_only_repo(api, docs_repo_name, instructor_role, ta_role)
+    api.create_github_pages_for_org(docs_repo_name)
 
     staff_repo_name = f"{offering.slug}-{offering.course.slug}-staff"
     create_staff_only_repo(api, staff_repo_name, instructor_role, ta_role)

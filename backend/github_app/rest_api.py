@@ -279,6 +279,15 @@ class GitHubRestAPI(RestAPI):
     def create_deploy_key_for_org(self, repo, key):
         return self.create_deploy_key(self.ORGANIZATION, repo, key)
 
+    def create_github_pages(self, owner, repo):
+        data = {
+            "build_type": "workflow",
+        }
+        return self.post_with_ghs(f'/repos/{owner}/{repo}/pages', data)
+
+    def create_github_pages_for_org(self, repo):
+        return self.create_github_pages(self.ORGANIZATION, repo)
+
     def add_team_membership(self, org, team_slug, username):
         return self.put_with_ghs(f'/orgs/{org}/teams/{team_slug}/memberships/{username}')
 
