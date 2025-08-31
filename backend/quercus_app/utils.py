@@ -157,16 +157,20 @@ def sync_assignment_to_quercus(assignment):
         data["grade_data"][str(quercus_user_id)]["posted_grade"] = grade
     api.update_grades(quercus_course_id, assignment.external_id, data)
 
+def update_offering_from_quercus(offering):
+    if offering.external_id is None:
+        return
+    if not offering.active:
+        return
+    instructor = _get_instructor_with_token(offering)
+    api = QuercusRestAPI(instructor)
+    quercus_course_id = offering.external_id
+    students = api.list_students(quercus_course_id)
+    _update(offering, students, Role.Kind.STUDENT)
+    tas = api.list_tas(quercus_course_id)
+    _update(offering, tas, Role.Kind.TA)
+
+
 def update_courses_from_quercus():
     for offering in Offering.objects.all():
-        if offering.external_id is None:
-            continue
-        if not offering.active:
-            continue
-        instructor = _get_instructor_with_token(offering)
-        api = QuercusRestAPI(instructor)
-        quercus_course_id = offering.external_id
-        students = api.list_students(quercus_course_id)
-        _update(offering, students, Role.Kind.STUDENT)
-        tas = api.list_tas(quercus_course_id)
-        _update(offering, tas, Role.Kind.TA)
+        update_offering_from_quercus(offering)

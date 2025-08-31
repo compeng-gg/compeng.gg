@@ -161,13 +161,41 @@ function Staff() {
   const params = useParams<{ course_slug: string }>();
   const [jwt, setAndStoreJwt] = useContext(JwtContext);
   const [data, setData] = useState<any>({});
+  const [quercusId, setQuercusId] = useState('');
+  const [syncing, setSyncing] = useState(false);
 
   const [openAssignmentForm, setOpenAssignmentForm] = useState<{
     course: string;
     semester: string;
   } | null>(null);
 
-  const fetchLabs = async () => {
+  const submitQuercusId = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await fetchApi(jwt, setAndStoreJwt, 'add-quercus-id/', 'POST', {
+        quercus_id: quercusId,
+        course_slug: data.course_slug,
+        semester_slug: data.semester_slug,
+      });
+      await fetchStaff();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const syncQuercus = async () => {
+    try {
+      await fetchApi(jwt, setAndStoreJwt, 'sync-quercus/', 'POST', {
+        course_slug: data.course_slug,
+        semester_slug: data.semester_slug,
+      });
+      setSyncing(true);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const fetchStaff = async () => {
     try {
       const response = await fetchApi(jwt, setAndStoreJwt, `courses/${params.course_slug}/staff/`, "GET");
       const data = await response.json();
@@ -178,18 +206,7 @@ function Staff() {
   }
 
   useEffect(() => {
-    /*
-    async function fetchLabs() {
-      try {
-        const response = await fetchApi(jwt, setAndStoreJwt, `courses/${params.course_slug}/staff/`, "GET");
-        const data = await response.json();
-        setData(data);
-      } catch (error) {
-        console.error('Error fetching labs:', error);
-      }
-    }*/
-
-    fetchLabs();
+    fetchStaff();
   }, [params.course_slug, jwt, setAndStoreJwt]);
 
   if (Object.keys(data).length === 0) {
@@ -245,9 +262,46 @@ function Staff() {
               courseSlug={openAssignmentForm.course}
               semesterSlug={openAssignmentForm.semester}
               onClose={() => setOpenAssignmentForm(null)}
-              refreshData={fetchLabs}
+              refreshData={fetchStaff}
             />
           )}
+
+      {!data.is_quercus_added ? (
+        <form onSubmit={submitQuercusId} className="space-y-4">
+          <p className="text-yellow-600 font-semibold">
+            Only add the Quercus ID after setting up the student repository.
+          </p>
+          <label className="block">
+            Quercus course ID:
+            <input
+              type="text"
+              value={quercusId}
+              onChange={(e) => setQuercusId(e.target.value)}
+              className="border text-black rounded p-2 ml-2"
+            />
+          </label>
+          <button
+            type="submit"
+            className="bg-blue-600 text-white px-4 py-2 rounded disabled:opacity-50"
+          >
+            Submit
+          </button>
+        </form>
+      ) : (
+        <div>
+          <button
+            onClick={syncQuercus}
+            disabled={syncing}
+            className={`px-4 py-2 rounded ${
+              syncing
+                ? 'bg-gray-400 text-gray-700 cursor-not-allowed'
+                : 'bg-green-600 text-white hover:bg-green-700'
+            }`}
+          >
+            {syncing ? 'Syncing...' : 'Sync with Quercus'}
+          </button>
+        </div>
+      )}
       </Main>
     </>
   );

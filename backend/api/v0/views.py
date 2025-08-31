@@ -23,6 +23,8 @@ from compeng_gg.auth.serializers import CodeSerializer
 
 from .serializers import UserSerializer
 
+from threading import Thread
+
 from courses.models import (
     Accommodation,
     Assignment,
@@ -397,6 +399,7 @@ def staff(request, course_slug):
         "offering": str(offering),
         "course_slug": course_slug,
         "semester_slug": offering.slug,
+        "is_quercus_added": offering.external_id is not None
     }
     assignments = []
     for assignment in offering.assignment_set.all():
@@ -891,9 +894,10 @@ def create_assignment(request):
     validated_data = serializer.validated_data
 
     course_slug = validated_data["course_slug"]
+    semester_slug = validated_data["semester_slug"]
 
     try:
-        offering = Offering.objects.get(active=True, course__slug=course_slug)
+        offering = Offering.objects.get(slug=semester_slug, course__slug=course_slug)
     except Offering.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -916,6 +920,73 @@ def create_assignment(request):
         private_total=private_total,
         overall_total=overall_total,
     )
+
+    return Response(status=status.HTTP_201_CREATED)
+
+class AdddQuercusIdSerializer(serializers.Serializer):
+    course_slug = serializers.CharField()
+    semester_slug = serializers.CharField()
+    quercus_id = serializers.IntegerField()
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def add_quercus_id(request):
+
+    serializer = AdddQuercusIdSerializer(data=request.data)
+    if not serializer.is_valid():
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+    validated_data = serializer.validated_data
+
+    course_slug = validated_data["course_slug"]
+    semester_slug = validated_data["semester_slug"]
+
+    try:
+        offering = Offering.objects.get(slug=semester_slug, course__slug=course_slug)
+    except Offering.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    user = request.user
+    if not is_staff(user, offering):
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
+
+    offering.external_id = validated_data["quercus_id"]
+    offering.save()
+
+    return Response(status=status.HTTP_201_CREATED)
+
+class SyncQuercusSerializer(serializers.Serializer):
+    course_slug = serializers.CharField()
+    semester_slug = serializers.CharField()
+
+def sync_quercus_run(offering):
+    from quercus_app.utils import update_offering_from_quercus
+    update_offering_from_quercus(offering)
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def sync_quercus(request):
+
+    serializer = SyncQuercusSerializer(data=request.data)
+    if not serializer.is_valid():
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+    validated_data = serializer.validated_data
+
+    course_slug = validated_data["course_slug"]
+    semester_slug = validated_data["semester_slug"]
+
+    try:
+        offering = Offering.objects.get(slug=semester_slug, course__slug=course_slug)
+    except Offering.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    user = request.user
+    if not is_staff(user, offering):
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
+
+    if offering.external_id is None:
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
+    Thread(target=sync_quercus_run, args=(offering,)).start()
 
     return Response(status=status.HTTP_201_CREATED)
 

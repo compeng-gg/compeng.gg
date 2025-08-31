@@ -40,6 +40,8 @@ urlpatterns = [
     path('semesters/', views.semesters),
     path('create-offering/', views.create_offering),
     path('create-assignment/', views.create_assignment),
+    path('add-quercus-id/', views.add_quercus_id),
+    path('sync-quercus/', views.sync_quercus),
 
     path('courses/offerings/', views.offerings),
     path('courses/<slug:slug>/', views.course),
