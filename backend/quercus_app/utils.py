@@ -167,7 +167,7 @@ def update_offering_from_quercus(offering):
     quercus_course_id = offering.external_id
 
     instructors = api.list_instructors(quercus_course_id)
-    _update(offering, students, Role.Kind.INSTRUCTOR)
+    _update(offering, instructors, Role.Kind.INSTRUCTOR)
 
     tas = api.list_tas(quercus_course_id)
     _update(offering, tas, Role.Kind.TA)
