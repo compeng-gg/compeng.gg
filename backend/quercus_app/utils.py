@@ -165,11 +165,15 @@ def update_offering_from_quercus(offering):
     instructor = _get_instructor_with_token(offering)
     api = QuercusRestAPI(instructor)
     quercus_course_id = offering.external_id
-    students = api.list_students(quercus_course_id)
-    _update(offering, students, Role.Kind.STUDENT)
+
+    instructors = api.list_instructors(quercus_course_id)
+    _update(offering, students, Role.Kind.INSTRUCTOR)
+
     tas = api.list_tas(quercus_course_id)
     _update(offering, tas, Role.Kind.TA)
 
+    students = api.list_students(quercus_course_id)
+    _update(offering, students, Role.Kind.STUDENT)
 
 def update_courses_from_quercus():
     for offering in Offering.objects.all():

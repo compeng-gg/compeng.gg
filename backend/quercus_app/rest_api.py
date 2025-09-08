@@ -72,6 +72,9 @@ class QuercusRestAPI(RestAPI):
                 return data
             page += 1
 
+    def list_instructors(self, course_id):
+        return self.list_users(course_id, "teacher")
+
     def list_tas(self, course_id):
         return self.list_users(course_id, "ta")
 
