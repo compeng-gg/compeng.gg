@@ -7,6 +7,7 @@ import { JwtContext } from '@/app/lib/jwt-provider';
 
 import LoginRequired from '@/app/lib/login-required';
 import DiscordButton from '@/app/ui/discord-button';
+import DiscordJoinButton from '@/app/ui/discord-join-button';
 import DiscordDisconnectButton from '@/app/ui/discord-disconnect-button';
 import GitHubButton from '@/app/ui/github-button';
 import GoogleButton from '@/app/ui/google-button';
@@ -36,6 +37,7 @@ function SettingsPage() {
   const discordElement = settings.discord ? (
     <>
       <p>Discord: {settings.discord}</p>
+      <DiscordJoinButton />
     </>
   ) : (
     <div>

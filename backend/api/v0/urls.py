@@ -42,6 +42,7 @@ urlpatterns = [
     path('create-assignment/', views.create_assignment),
     path('add-quercus-id/', views.add_quercus_id),
     path('sync-quercus/', views.sync_quercus),
+    path('join-discord/', views.join_discord),
 
     path('courses/offerings/', views.offerings),
     path('courses/<slug:slug>/', views.course),

@@ -991,6 +991,20 @@ def sync_quercus(request):
     return Response(status=status.HTTP_201_CREATED)
 
 @api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def join_discord(request):
+    from discord_app.utils import add_to_discord_server
+    user = request.user
+    from compeng_gg.auth import get_uid
+    from django.core.exceptions import ObjectDoesNotExist
+    try:
+        get_uid('discord', user)
+    except ObjectDoesNotExist:
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+    add_to_discord_server(user)
+    return Response(status=status.HTTP_200_OK)
+
+@api_view(['GET'])
 @permission_classes([permissions.AllowAny])
 def api_root(request, format=None):
     return Response({
