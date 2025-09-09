@@ -16,8 +16,7 @@ logger = logging.getLogger(__name__)
 class GitHubRestAPI(RestAPI):
 
     API_URL = 'https://api.github.com'
-    CLIENT_ID = settings.SOCIAL_AUTH_GITHUB_KEY
-    CLIENT_SECRET = settings.SOCIAL_AUTH_GITHUB_SECRET
+    CLIENT_ID = settings.GITHUB_APP_ID
     ORGANIZATION = settings.GITHUB_ORGANIZATION
     try:
         PRIVATE_KEY = load_pem_private_key(

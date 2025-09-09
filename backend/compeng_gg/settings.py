@@ -237,6 +237,7 @@ GITHUB_CONTENT_DIR = BASE_DIR / 'github_content'
 GITHUB_ORGANIZATION = os.environ.setdefault('GITHUB_ORGANIZATION', '')
 GITHUB_PRIVATE_KEY_B64 = os.environ.setdefault('GITHUB_PRIVATE_KEY_B64', '')
 GITHUB_WEBHOOK_TOKEN = os.environ.setdefault('GITHUB_WEBHOOK_TOKEN', '')
+GITHUB_APP_ID = os.environ.setdefault('GITHUB_APP_ID', '')
 
 ## New GitHub module
 GITHUB_WEBHOOK_SECRET = GITHUB_WEBHOOK_TOKEN # New name
